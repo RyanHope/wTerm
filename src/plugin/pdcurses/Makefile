@@ -1,4 +1,4 @@
-include ../../Makefile.inc
+include ../../../Makefile.inc
 
 O = o
 
@@ -19,9 +19,7 @@ LINK		= $(CC)
 LDFLAGS		= $(LIBCURSES) $(SLIBS)
 LIBCURSES	= libpdcurses.a
 
-.PHONY: all libs clean
-
-all:	libs
+.PHONY: libs clean
 
 libs:	$(LIBCURSES)
 
@@ -30,6 +28,7 @@ clean:
 
 $(LIBCURSES) : $(LIBOBJS) $(PDCOBJS)
 	$(AR) rv $@ $?
+	$(RANLIB) $@
 
 $(LIBOBJS) $(PDCOBJS) : $(PDCURSES_HEADERS)
 $(PDCOBJS) : $(PDCURSES_SDL_H)

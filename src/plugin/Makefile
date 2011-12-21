@@ -1,4 +1,4 @@
-include ../Makefile.inc
+include ../../Makefile.inc
 
 PLUGIN		:=	wterm
 
@@ -12,7 +12,7 @@ CFLAGS		:=	$(MARCH_TUNE) -I. -Ilibpdl -Ilibvterm -Ipdcurses \
 								
 LIBDIRS		:=	-L$(ROOT)${PREFIX}/lib -L$(ROOT)${PREFIX}/lib/pulse -Llibpdl -Llibnapp
 
-LIBS		:=	-Wl,--allow-shlib-undefined -lgdbm -lpulse -lpulse-simple -lasound -lutil -lglib-2.0 -lpdl -lSDL
+LIBS		:=	-Wl,--allow-shlib-undefined -lutil -lglib-2.0 -lpdl -lSDL
 
 .PHONY		:	clean clobber
 
