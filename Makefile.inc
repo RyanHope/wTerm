@@ -1,4 +1,5 @@
 ifdef DEVICE
+	ARCH=armv7
 	MARCH_TUNE=-O2 -march=armv7-a -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp
 	ifeq ($(shell uname -s),Darwin)
 		CC=/opt/PalmPDK/arm-gcc/bin/arm-none-linux-gnueabi-gcc
@@ -10,6 +11,7 @@ ifdef DEVICE
 		PREFIX=/usr
 	endif
 else
+	ARCH=i686
 	ifeq ($(shell uname -s),Darwin)
 		export CC=/opt/PalmPDK/i686-gcc/bin/i686-nptl-linux-gnu-gcc --sysroot=/opt/PalmPDK/i686-gcc/sys-root
 	else

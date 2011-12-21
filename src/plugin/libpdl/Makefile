@@ -1,4 +1,4 @@
-include ../Makefile.inc
+include ../../Makefile.inc
 
 INCLUDES	=	-I. -I$(ROOT)${PREFIX}/include/SDL
 					

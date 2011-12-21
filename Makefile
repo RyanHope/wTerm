@@ -1,8 +1,13 @@
-APPID = us.ryanhope.wterm
+APP			:= wterm
+VENDOR		:= us.ryanhope
+APPID 		:= ${VENDOR}.${APP}
 
-.PHONY: package install clean
+VERSION		:= $(shell cat appinfo.json | grep version | cut -f 2 -d ":" | cut -f 2 -d "\"")
+IPK			:= ${APPID}_${VERSION}_all.ipk
 
-package: wterm
+.PHONY: install clean
+
+${IPK}: wterm
 	palm-package -X excludes.txt .
 	ar q ${APPID}_*.ipk pmPostInstall.script
 	ar q ${APPID}_*.ipk pmPreRemove.script

@@ -1,4 +1,4 @@
-include ../Makefile.inc
+include ../../Makefile.inc
 
 
 DEFS = -D_REENTRANT -DFIONREAD
