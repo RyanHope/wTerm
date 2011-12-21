@@ -11,3 +11,7 @@ OBJECTS		:=	sdl/sdlcore.cpp sdl/sdlterminal.cpp \
 
 wterm: 
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
+
+
+clean:
+	- rm -rf wterm

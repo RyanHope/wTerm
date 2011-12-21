@@ -52,48 +52,48 @@ enyo.kind({
   		]},
 		{layoutKind: 'HFlexLayout', pack: 'end', components: [
   			{kind: 'vkbKey', content: 'Tab', flex: 1, ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'q', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'w', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'e', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'r', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 't', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'y', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'u', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'i', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'o', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'p', ontouchstart: 'btnClick'},
+  			{kind: 'vkbKey', content: 'q', sym: 113, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'w', sym: 119, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'e', sym: 101, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'r', sym: 114, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 't', sym: 116, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'y', sym: 121, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'u', sym: 117, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'i', sym: 105, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'o', sym: 111, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'p', sym: 112, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
   			{kind: 'vkbKey', content: '{<br>[', ontouchstart: 'btnClick'},
   			{kind: 'vkbKey', content: '}<br>]', ontouchstart: 'btnClick'},
   			{kind: 'vkbKey', content: '|<br>\\', ontouchstart: 'btnClick'},
   		]},
 		{layoutKind: 'HFlexLayout', pack: 'end', components: [
 			{kind: 'vkbKey', content: 'Caps Lock', flex: 1, toggling: true, ontouchstart: 'toggleCaps'},
-  			{kind: 'vkbKey', content: 'a', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 's', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'd', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'f', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'g', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'h', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'j', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'k', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'l', ontouchstart: 'btnClick'},
+  			{kind: 'vkbKey', content: 'a', sym: 97, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 's', sym: 115, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'd', sym: 100, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'f', sym: 102, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'g', sym: 103, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'h', sym: 104, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'j', sym: 106, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'k', sym: 107, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'l', sym: 108, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
   			{kind: 'vkbKey', content: ':<br>;', ontouchstart: 'btnClick'},
   			{kind: 'vkbKey', content: '\"<br>\'', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'Enter', flex: 1, ontouchstart: 'btnClick'},
+  			{kind: 'vkbKey', content: 'Enter', flex: 1, sym: 13, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
   		]},
 		{layoutKind: 'HFlexLayout', pack: 'end', components: [
-  			{kind: 'vkbKey', content: 'Shift', flex: 1, ontouchstart: 'shiftDown', ontouchend: 'shiftUp'},
-  			{kind: 'vkbKey', content: 'z', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'x', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'c', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'v', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'b', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'n', ontouchstart: 'btnClick'},
-  			{kind: 'vkbKey', content: 'm', ontouchstart: 'btnClick'},
+  			{kind: 'vkbKey', content: 'Shift', flex: 1, sym: 304, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'z', sym: 122, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'x', sym: 120, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'c', sym: 99, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'v', sym: 118, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'b', sym: 98, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'n', sym: 110, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'm', sym: 109, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
   			{kind: 'vkbKey', content: '<<br>,', ontouchstart: 'btnClick'},
   			{kind: 'vkbKey', content: 'Up', ontouchstart: 'btnClick'},
 			{kind: 'vkbKey', content: '><br>.', ontouchstart: 'btnClick'},
-			{kind: 'vkbKey', content: 'Shift', style: 'min-width: 120px;', ontouchstart: 'shiftDown', ontouchend: 'shiftUp'},
+			{kind: 'vkbKey', content: 'Shift', style: 'min-width: 120px;', sym: 303, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
   		]},
 		{layoutKind: 'HFlexLayout', pack: 'end', components: [
 			{kind: 'vkbKey', content: 'Ctrl', flex: .6, ontouchstart: 'ctrlDown', ontouchend: 'ctrlUp'},
@@ -107,6 +107,28 @@ enyo.kind({
 			{kind: 'vkbKey', content: '?<br>/', ontouchstart: 'btnClick'},
   		]},
   	],
+  	
+  	keyUp: function(inSender) {
+  		this.keyPress(0, inSender.sym, inSender.content)
+  	},
+  	
+  	keyDown: function(inSender) {
+  		this.keyPress(1, inSender.sym, inSender.content)
+  	},
+  	
+  	keyPress: function(state,sym,content) {
+  		var key = content.split('<br>').reverse()
+  		var unicode = key[0]
+  		switch (key[0]) {
+  			case 'Enter':
+  				unicode = '\x0d'
+  				break
+  		}
+  		if (state)
+  			this.terminal.keyDown(sym, unicode)
+  		else
+  			this.terminal.keyUp(sym, unicode)
+  	},
   	
 	btnClick: function(inSender, inEvent) {
 		var key = inSender.content.split('<br>').reverse()

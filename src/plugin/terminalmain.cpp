@@ -19,7 +19,8 @@
 #include "sdl/sdlterminal.hpp"
 #include "terminal/terminal.hpp"
 #include "terminal/vtterminalstate.hpp"
-#include "util/logger.hpp"
+
+#include <syslog.h>
 
 #include <PDL.h>
 
@@ -27,11 +28,18 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 
 	SDL_Event event;
 
-	event.type=SDL_USEREVENT;
-	event.user.code=2;
-	event.user.data1=NULL;
-	event.user.data2=NULL;
-	SDL_PushEvent(&event);
+	int type = PDL_GetJSParamInt(params, 0);
+
+	event.type = type ? SDL_KEYDOWN : SDL_KEYUP;
+	event.key.type = type ? SDL_KEYDOWN : SDL_KEYUP;
+	event.key.state = type ? SDL_PRESSED : SDL_RELEASED;
+	event.key.keysym.mod = SDL_GetModState();
+	event.key.keysym.sym = (SDLKey)PDL_GetJSParamInt(params, 1);
+	event.key.keysym.unicode = PDL_GetJSParamString(params, 2)[0];
+
+	int ret = SDL_PushEvent(&event);
+
+	syslog(LOG_WARNING, "%d %d %d %d", event.type, event.key.state, event.key.keysym.sym, ret);
 
 	return PDL_TRUE;
 }
@@ -39,17 +47,19 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 int main()
 {
 
+	openlog("us.ryanhope.wterm.plugin", LOG_PID, LOG_USER);
+
+	SDLTerminal *sdlTerminal = new SDLTerminal();
+	Terminal *terminal = new Terminal();
+
+	sdlTerminal->start();
+
 	PDL_Init(0);
 
 	PDL_RegisterJSHandler("pushKeyEvent", pushKeyEvent);
 
 	PDL_JSRegistrationComplete();
 	PDL_CallJS("ready", NULL, 0);
-
-	SDLTerminal *sdlTerminal = new SDLTerminal();
-	Terminal *terminal = new Terminal();
-
-	sdlTerminal->start();
 
 	if (sdlTerminal->isReady())
 	{
@@ -68,12 +78,12 @@ int main()
 		}
 		else
 		{
-			Logger::getInstance()->fatal("TTY Terminal not started.");
+			syslog(LOG_CRIT, "TTY Terminal not started.");
 		}
 	}
 	else
 	{
-		Logger::getInstance()->fatal("SDLTerminal not started.");
+		syslog(LOG_CRIT, "SDLTerminal not started.");
 	}
 
 	sdlTerminal->setExtTerminal(NULL);

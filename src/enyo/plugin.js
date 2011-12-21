@@ -51,12 +51,18 @@ enyo.kind({
   	pluginDisconnected: function(inSender, inResponse, inRequest) {
   		this.log('~~~~~ Terminal Plugin Disconnected ~~~~~')
   	},
-  	
-  	write: function(buffer) {
-  		this.$.plugin.callPluginMethod('write', buffer)
+
+  	pushKeyEvent: function(type,state,sym,unicode) {
+  		this.log(type,state,sym)
+  		this.$.plugin.callPluginMethod('pushKeyEvent',type,state,sym,unicode)
   	},
-  	writeKeycode: function(keycode) {
-  		this.$.plugin.callPluginMethod('write_keycode', keycode)
+  	
+  	keyDown: function(sym,unicode) {
+  		this.pushKeyEvent(1,sym,unicode)
+  	},
+  	
+  	keyUp: function(sym,unicode) {
+  		this.pushKeyEvent(0,sym,unicode)
   	}
   	
 })
