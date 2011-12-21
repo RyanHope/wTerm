@@ -65,7 +65,7 @@ ssize_t vterm_read_pipe(vterm_t *vterm)
    fd_array.events=POLLIN;
 
    // wait 10 millisecond for data on pty file descriptor.
-   retval=poll(&fd_array,1,1);
+   retval=poll(&fd_array,1,10);
 
    // no data or poll() error.
    if(retval <= 0)
