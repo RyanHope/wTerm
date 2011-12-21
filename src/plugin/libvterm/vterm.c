@@ -40,8 +40,6 @@ This library is based on ROTE written by Bruno Takahashi C. de Oliveira
 vterm_t* vterm_create(guint width,guint height,guint flags)
 {
    vterm_t        *vterm;
-   struct passwd  *user_profile;
-   char           *user_shell=NULL;
    pid_t          child_pid, sid;
    int            master_fd;
    struct winsize ws={.ws_xpixel=0,.ws_ypixel=0};
@@ -113,15 +111,7 @@ vterm_t* vterm_create(guint width,guint height,guint flags)
       {
          setenv("TERM","vt100",1);
       }
-
-      user_profile=getpwuid(getuid());
-      if(user_profile==NULL) user_shell="/bin/sh";
-      else if(user_profile->pw_shell==NULL) user_shell="/bin/sh";
-      else user_shell=user_profile->pw_shell;
-
-      if(user_shell==NULL) user_shell="/bin/sh";
-
-      // start the shell
+      // login
       if(execl("/bin/login","/bin/login","-f","root",NULL)==-1)
       {
          exit(EXIT_FAILURE);

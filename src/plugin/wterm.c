@@ -41,14 +41,12 @@ WINDOW *term_win;
 vterm_t *vterm;
 
 PDL_bool plugin_write(PDL_JSParameters *params) {
+	vterm_write_string(vterm,PDL_GetJSParamString(params, 0));
+	return PDL_TRUE;
+}
 
-	const char *buffer = PDL_GetJSParamString(params, 0);
-	syslog(LOG_ALERT, "%s", buffer);
-	int i = 0;
-
-	for (;buffer[i];i++)
-		vterm_write_pipe(vterm,buffer[i]);
-
+PDL_bool plugin_write_keycode(PDL_JSParameters *params) {
+	vterm_write_pipe(vterm,PDL_GetJSParamInt(params, 0));
 	return PDL_TRUE;
 }
 
@@ -73,6 +71,7 @@ int main() {
 	PDL_Init(0);
 
 	PDL_RegisterJSHandler("write", plugin_write);
+	PDL_RegisterJSHandler("write_keycode", plugin_write_keycode);
 
 	PDL_JSRegistrationComplete();
 	PDL_CallJS("ready", NULL, 0);
@@ -109,16 +108,12 @@ int main() {
 		if (i != 7 || j != 0)
 			init_pair(j*8+7-i, i, j);
 
-	/* paint the screen blue */
-	for (i = 0; i < screen_h; i++) for (j = 0; j < screen_w; j++) addch(' ');
-	refresh();
-
 	/* create a window with a frame */
 	term_win = newwin(screen_h,screen_w,0,0);
 	wattrset(term_win, COLOR_PAIR(0*8+7-7)); /* black over white */
 	wrefresh(term_win);
 
-	/* create the terminal and have it run bash */
+	/* create the terminal and have it run login -f root */
 
 	vterm=vterm_create(screen_w,screen_h,0);
 

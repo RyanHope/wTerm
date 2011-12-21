@@ -53,7 +53,10 @@ enyo.kind({
   	},
   	
   	write: function(buffer) {
-  		this.$.plugin.callPluginMethodDeferred(null, 'write', buffer)
+  		this.$.plugin.callPluginMethod('write', buffer)
+  	},
+  	writeKeycode: function(keycode) {
+  		this.$.plugin.callPluginMethod('write_keycode', keycode)
   	}
   	
 })
