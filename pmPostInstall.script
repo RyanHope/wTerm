@@ -1,0 +1,20 @@
+#!/bin/sh
+
+APPID=us.ryanhope.wterm
+
+APPS=/media/cryptofs/apps
+
+[ -d ${APPS} ] || { echo "Requires webOS 1.3.5 or later" ; exit 1 ; }
+
+APPDIR=${APPS}/usr/palm/applications/${APPID}
+
+sed -i -e "/:${APPID}:/d" /var/palm/data/jailusers
+
+JUID=5200
+while [ `cat /var/palm/data/jailusers | cut -f 1 -d ':' | grep -c $JUID` -gt 0 ]; do
+	JUID=`expr $JUID + 1`
+done
+
+echo "${JUID}:5000:${APPID}:/dev/null:${APPDIR}/jail.conf" >> /var/palm/data/jailusers
+
+exit 0

@@ -1,0 +1,13 @@
+{
+	"title": "wTerm",
+	"id": "us.ryanhope.wterm",
+	"version": "0.1.0",
+	"vendor": "Ryan Hope",
+	"type": "web",
+	"noDeprecatedStyles": true,
+	"main": "index.html",
+	"icon": "images/icon-64.png",
+	"splashicon": "images/icon-128.png",
+	"uiRevision": 2,
+	"plug-ins": true
+}

@@ -1,0 +1,17 @@
+.enyo-button.key {
+	font-size: 18px;
+	font-weight: bold;
+	min-height: 42px;
+	min-width: 48px;
+	margin: 0px;
+}
+
+.enyo-button.key-small {
+	font-size: 18px;
+	font-weight: bold;
+	max-height: 22px;
+	min-height: 22px;
+	min-width: 48px;
+	margin: 0px;
+	margin-bottom: 6px;
+}

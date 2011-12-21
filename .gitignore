@@ -1,0 +1,7 @@
+*.ipk
+.DS_Store
+.project
+wterm
+*.o
+*.so
+*.la
