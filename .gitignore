@@ -5,3 +5,4 @@ wterm
 *.o
 *.so
 *.la
+*.a
