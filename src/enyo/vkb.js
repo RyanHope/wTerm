@@ -127,7 +127,7 @@ enyo.kind({
   		if (state)
   			this.terminal.keyDown(sym, unicode)
   		else
-  			this.terminal.keyUp(sym, unicode)
+  			this.terminal.keyUp(sym, 0)
   	},
   	
 	btnClick: function(inSender, inEvent) {
