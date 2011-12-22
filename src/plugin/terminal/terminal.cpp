@@ -25,8 +25,8 @@
 #include <stropts.h>
 #include <termios.h>
 #include <unistd.h>
+#include <syslog.h>
 
-#include "util/logger.hpp"
 #include "terminal.hpp"
 
 struct termios terminal_global_state;
@@ -38,7 +38,7 @@ void terminal_restore_settings()
 	{
 		if (tcsetattr(terminal_global_slave_fd, TCSAFLUSH, &terminal_global_state) < 0)
 		{
-			Logger::getInstance()->error("Cannot restore initial terminal settings.");
+			syslog(LOG_ERR, "Cannot restore initial terminal settings.");
 		}
 	}
 }
@@ -52,7 +52,7 @@ void terminal_save_settings(int slaveFD)
 		if (tcgetattr(terminal_global_slave_fd, &terminal_global_state) < 0)
 		{
 			terminal_global_slave_fd = -1;
-			Logger::getInstance()->error("Cannot save initial terminal settings.");
+			syslog(LOG_ERR, "Cannot save initial terminal settings.");
 		}
 	}
 }
@@ -104,19 +104,19 @@ Terminal::~Terminal()
 
 int Terminal::openPTYMaster()
 {
-	Logger::getInstance()->info("Initializing master.");
+	syslog(LOG_INFO, "Initializing master.");
 
 	m_masterFD = posix_openpt(O_RDWR | O_NOCTTY);
 
 	if (m_masterFD < 0)
 	{
-		Logger::getInstance()->error("Cannot get master pseudo-terminal.");
+		syslog(LOG_ERR, "Cannot get master pseudo-terminal.");
 		return -1;
 	}
 
 	if (grantpt(m_masterFD) < 0 || unlockpt(m_masterFD) < 0)
 	{
-		Logger::getInstance()->error("Cannot grant access permission for master pseudo-terminal.");
+		syslog(LOG_ERR, "Cannot grant access permission for master pseudo-terminal.");
 		return -2;
 	}
 
@@ -124,24 +124,24 @@ int Terminal::openPTYMaster()
 
 	if (m_slaveName == NULL)
 	{
-		Logger::getInstance()->error("Cannot get name of slave pseudo-terminal.");
+		syslog(LOG_ERR, "Cannot get name of slave pseudo-terminal.");
 		return -3;
 	}
 
-	Logger::getInstance()->info("Initialized master with FD %d.", m_masterFD);
+	syslog(LOG_INFO, "Initialized master with FD %d.", m_masterFD);
 
 	return 0;
 }
 
 int Terminal::openPTYSlave()
 {
-	Logger::getInstance()->info("Initializing slave with name '%s'.", m_slaveName);
+	syslog(LOG_INFO, "Initializing slave with name '%s'.", m_slaveName);
 
 	m_slaveFD = open(m_slaveName, O_RDWR);
 
 	if (m_slaveFD == -1)
 	{
-		Logger::getInstance()->error("Cannot open slave pseudo-terminal.");
+		syslog(LOG_ERR, "Cannot open slave pseudo-terminal.");
 		return -1;
 	}
 
@@ -149,12 +149,12 @@ int Terminal::openPTYSlave()
 	{
 		if (ioctl(m_slaveFD, I_PUSH, "ptem") < 0 || ioctl(m_slaveFD, I_PUSH, "ldterm") < 0 || ioctl(m_slaveFD, I_PUSH, "ttcompat") < 0)
 		{
-			Logger::getInstance()->error("Cannot push modules for slave pseudo-terminal.");
+			syslog(LOG_ERR, "Cannot push modules for slave pseudo-terminal.");
 			return -2;
 		}
 	}
 
-	Logger::getInstance()->info("Initialized slave with name '%s' with FD %d.", m_slaveName, m_slaveFD);
+	syslog(LOG_INFO, "Initialized slave with name '%s' with FD %d.", m_slaveName, m_slaveFD);
 
 	return 0;
 }
@@ -163,13 +163,13 @@ int Terminal::forkPTY()
 {
 	if (openPTYMaster() != 0)
 	{
-		Logger::getInstance()->error("Cannot open master PTY.");
+		syslog(LOG_ERR, "Cannot open master PTY.");
 		return -1;
 	}
 
 	if (openPTYSlave() != 0)
 	{
-		Logger::getInstance()->error("Cannot open slave PTY.");
+		syslog(LOG_ERR, "Cannot open slave PTY.");
 		return -2;
 	}
 
@@ -180,18 +180,18 @@ int Terminal::forkPTY()
 
 	if (m_pid < 0)
 	{
-		Logger::getInstance()->error("Cannot fork process.");
+		syslog(LOG_ERR, "Cannot fork process.");
 		return -3;
 	}
 
 	if (m_pid == 0)
 	{
-		Logger::getInstance()->info("Initializing child terminal process.");
+		syslog(LOG_INFO, "Initializing child terminal process.");
 
 		//Child process.
 		if (setsid() < 0)
 		{
-			Logger::getInstance()->error("Cannot set child session.");
+			syslog(LOG_ERR, "Cannot set child session.");
 			return -4;
 		}
 
@@ -211,46 +211,39 @@ int Terminal::forkPTY()
 		//Acquire controlling of terminal.
 		if (openPTYSlave() != 0)
 		{
-			Logger::getInstance()->error("Cannot acquire slave as controlling terminal.");
+			syslog(LOG_ERR, "Cannot acquire slave as controlling terminal.");
 			return -5;
 		}
 
-#ifdef TIOCSCTTY //For BSD compatibility.
-		if (ioctl(m_slaveFD, TIOCSCTTY, NULL) < 0)
-		{
-			Logger::getInstance()->error("Cannot set slave as controlling terminal in BSD.");
-			return -6;
-		}
-#endif
-
 		if (dup2(m_slaveFD, STDIN_FILENO) != STDIN_FILENO)
 		{
-			Logger::getInstance()->error("Cannot duplicate slave into stdin.");
+			syslog(LOG_ERR, "Cannot duplicate slave into stdin.");
 			return -7;
 		}
 
 		if (dup2(m_slaveFD, STDOUT_FILENO) != STDOUT_FILENO)
 		{
-			Logger::getInstance()->error("Cannot duplicate slave into stdout.");
+			syslog(LOG_ERR, "Cannot duplicate slave into stdout.");
 			return -8;
 		}
 
 		if (dup2(m_slaveFD, STDERR_FILENO) != STDERR_FILENO)
 		{
-			Logger::getInstance()->error("Cannot duplicate slave into stderr.");
+			syslog(LOG_ERR, "Cannot duplicate slave into stderr.");
 			return -9;
 		}
 
-		Logger::getInstance()->info("Initialized child terminal process.");
+		// THIS BREAK WHEN SYSLOG IS USED ~ PTM
+		//Logger::getInstance()->info("Initialized child terminal process.");
 	}
 	else
 	{
-		Logger::getInstance()->info("Created child terminal process with PID %d.", m_pid);
+		syslog(LOG_INFO, "Created child terminal process with PID %d.", m_pid);
 	}
 
 	if (atexit(terminal_restore_settings) != 0)
 	{
-		Logger::getInstance()->info("Cannot set terminal restore state function at exit.");
+		syslog(LOG_INFO, "Cannot set terminal restore state function at exit.");
 		return -10;
 	}
 
@@ -263,7 +256,7 @@ int Terminal::setFlag(int fileDesc, int flags)
 
 	if (val < 0)
 	{
-		Logger::getInstance()->error("Cannot get flags from file descriptor.");
+		syslog(LOG_ERR, "Cannot get flags from file descriptor.");
 		return -1;
 	}
 
@@ -271,7 +264,7 @@ int Terminal::setFlag(int fileDesc, int flags)
 
 	if (fcntl(fileDesc, F_SETFL, val) < 0)
 	{
-		Logger::getInstance()->error("Cannot set flags on file descriptor.");
+		syslog(LOG_ERR, "Cannot set flags on file descriptor.");
 		return -1;
 	}
 
@@ -286,7 +279,7 @@ int Terminal::sendCommand(const char *command)
 	fd_set writeFDSet;
 	bool bDone = false;
 
-	Logger::getInstance()->dump("Sending command '%s' to FD %d.", command, m_masterFD);
+	syslog(LOG_DEBUG, "Sending command '%s' to FD %d.", command, m_masterFD);
 	++m_nWritePriority;
 
 	//Write input command.
@@ -316,14 +309,14 @@ int Terminal::sendCommand(const char *command)
 				}
 				else
 				{
-					Logger::getInstance()->warn("Cannot write to master.");
+			syslog(LOG_WARNING, "Cannot write to master.");
 				}
 			}
 
 			if (command[cmdCharIndex] == 0)
 			{
 				//Nothing more to write.
-				Logger::getInstance()->dump("Sent pseudo terminal command '%s'.", command);
+				syslog(LOG_DEBUG, "Sent pseudo terminal command '%s'.", command);
 				bDone = true;
 			}
 		}
@@ -343,7 +336,7 @@ bool Terminal::isChild()
 
 int Terminal::start()
 {
-	Logger::getInstance()->info("Starting pseudo terminal.");
+	syslog(LOG_INFO, "Starting pseudo terminal.");
 
 	int result = forkPTY();
 
@@ -364,7 +357,7 @@ int Terminal::start()
 
 			if (execvp(((char **)argv)[0], ((char **)argv)) < 0)
 			{
-				Logger::getInstance()->error("Cannot execute child shell.");
+				syslog(LOG_ERR, "Cannot execute child shell.");
 			}
 
 			_exit(0);
@@ -374,12 +367,12 @@ int Terminal::start()
 
 		if (startReaderThread() == 0)
 		{
-			Logger::getInstance()->info("Started pseudo terminal.");
+			syslog(LOG_INFO, "Started pseudo terminal.");
 			setReady(true);
 		}
 		else
 		{
-			Logger::getInstance()->error("Cannot create reader thread.");
+			syslog(LOG_ERR, "Cannot create reader thread.");
 			result = -1;
 		}
 	}
@@ -426,7 +419,7 @@ int Terminal::runReader()
 
 				if (readResult < 0)
 				{
-					Logger::getInstance()->error("Cannot read pseudo terminal.");
+					syslog(LOG_ERR, "Cannot read pseudo terminal.");
 					result = -1;
 					m_bDone = true;
 				}
@@ -535,13 +528,13 @@ int Terminal::setWindowSize()
 
 	if (m_winSize.ws_col <= 0 || m_winSize.ws_row <= 0)
 	{
-		Logger::getInstance()->warn("Invalid window size.");
+syslog(LOG_WARNING, "Invalid window size.");
 		return -1;
 	}
 
 	if (ioctl(m_slaveFD, TIOCSWINSZ, &m_winSize) < 0)
 	{
-		Logger::getInstance()->error("Cannot set window size.");
+		syslog(LOG_ERR, "Cannot set window size.");
 		return -1;
 	}
 
@@ -554,7 +547,7 @@ int Terminal::setCBreak()
 
 	if (tcgetattr(m_slaveFD, &settings) < 0)
 	{
-		Logger::getInstance()->error("Cannot read terminal settings.");
+		syslog(LOG_ERR, "Cannot read terminal settings.");
 		return -1;
 	}
 
@@ -564,7 +557,7 @@ int Terminal::setCBreak()
 
 	if (tcsetattr(m_slaveFD, TCSANOW, &settings) < 0)
 	{
-		Logger::getInstance()->error("Cannot write CBreak terminal settings.");
+		syslog(LOG_ERR, "Cannot write CBreak terminal settings.");
 		return -2;
 	}
 
@@ -577,7 +570,7 @@ int Terminal::setTermMode()
 
 	if (tcgetattr(m_slaveFD, &settings) < 0)
 	{
-		Logger::getInstance()->error("Cannot read terminal settings.");
+		syslog(LOG_ERR, "Cannot read terminal settings.");
 		return -1;
 	}
 
@@ -609,7 +602,7 @@ int Terminal::setTermMode()
 
 	if (tcsetattr(m_slaveFD, TCSANOW, &settings) < 0)
 	{
-		Logger::getInstance()->error("Cannot write default terminal settings.");
+		syslog(LOG_ERR, "Cannot write default terminal settings.");
 		return -2;
 	}
 
@@ -622,7 +615,7 @@ int Terminal::setRaw()
 
 	if (tcgetattr(m_slaveFD, &settings) < 0)
 	{
-		Logger::getInstance()->error("Cannot read terminal settings.");
+		syslog(LOG_ERR, "Cannot read terminal settings.");
 		return -1;
 	}
 
@@ -636,7 +629,7 @@ int Terminal::setRaw()
 
 	if (tcsetattr(m_slaveFD, TCSANOW, &settings) < 0)
 	{
-		Logger::getInstance()->error("Cannot write Raw terminal settings.");
+		syslog(LOG_ERR, "Cannot write Raw terminal settings.");
 		return -2;
 	}
 

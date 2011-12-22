@@ -18,8 +18,6 @@
 
 #include "terminalstate.hpp"
 
-#include "util/logger.hpp"
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
