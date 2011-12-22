@@ -39,11 +39,11 @@ SDLTerminal::SDLTerminal()
 	m_keyModShiftSurface = NULL;
 	m_keyModCtrlSurface = NULL;
 	m_keyModAltSurface = NULL;
-	m_keyModSymSurface = NULL;
+	m_keyModFnSurface = NULL;
 	m_keyModShiftLockedSurface = NULL;
 	m_keyModCtrlLockedSurface = NULL;
 	m_keyModAltLockedSurface = NULL;
-	m_keyModSymLockedSurface = NULL;
+	m_keyModFnLockedSurface = NULL;
 
 	m_config->parse("./terminal.config");
 }
@@ -70,9 +70,9 @@ SDLTerminal::~SDLTerminal()
 		SDL_FreeSurface(m_keyModAltSurface);
 	}
 
-	if (m_keyModSymSurface != NULL)
+	if (m_keyModFnSurface != NULL)
 	{
-		SDL_FreeSurface(m_keyModSymSurface);
+		SDL_FreeSurface(m_keyModFnSurface);
 	}
 
 	if (m_keyModShiftLockedSurface != NULL)
@@ -90,9 +90,9 @@ SDLTerminal::~SDLTerminal()
 		SDL_FreeSurface(m_keyModAltLockedSurface);
 	}
 
-	if (m_keyModSymLockedSurface != NULL)
+	if (m_keyModFnLockedSurface != NULL)
 	{
-		SDL_FreeSurface(m_keyModSymLockedSurface);
+		SDL_FreeSurface(m_keyModFnLockedSurface);
 	}
 
 	if (m_config != NULL)
@@ -118,21 +118,21 @@ int SDLTerminal::initCustom()
 	m_keyModShiftSurface = IMG_Load("shkey.png");
 	m_keyModCtrlSurface = IMG_Load("ctrlkey.png");
 	m_keyModAltSurface = IMG_Load("altkey.png");
-	m_keyModSymSurface = IMG_Load("symkey.png");
+	m_keyModFnSurface = IMG_Load("fnkey.png");
 	m_keyModShiftLockedSurface = IMG_Load("shkeylocked.png");
 	m_keyModCtrlLockedSurface = IMG_Load("ctrlkeylocked.png");
 	m_keyModAltLockedSurface = IMG_Load("altkeylocked.png");
-	m_keyModSymLockedSurface = IMG_Load("symkeylocked.png");
+	m_keyModFnLockedSurface = IMG_Load("fnkeylocked.png");
 
 	if (m_keyModShiftSurface == NULL || m_keyModCtrlSurface == NULL
-		|| m_keyModAltSurface == NULL || m_keyModSymSurface == NULL)
+		|| m_keyModAltSurface == NULL || m_keyModFnSurface == NULL)
 	{
 		Logger::getInstance()->error("Cannot create keyboard modifier image.");
 		return -1;
 	}
 
 	if (m_keyModShiftLockedSurface == NULL || m_keyModCtrlLockedSurface == NULL
-		|| m_keyModAltLockedSurface == NULL || m_keyModSymLockedSurface == NULL)
+		|| m_keyModAltLockedSurface == NULL || m_keyModFnLockedSurface == NULL)
 	{
 		Logger::getInstance()->error("Cannot create keyboard modifier locked image.");
 		return -1;
@@ -141,11 +141,11 @@ int SDLTerminal::initCustom()
 	SDL_SetAlpha(m_keyModShiftSurface, 0, 0);
 	SDL_SetAlpha(m_keyModCtrlSurface, 0, 0);
 	SDL_SetAlpha(m_keyModAltSurface, 0, 0);
-	SDL_SetAlpha(m_keyModSymSurface, 0, 0);
+	SDL_SetAlpha(m_keyModFnSurface, 0, 0);
 	SDL_SetAlpha(m_keyModShiftLockedSurface, 0, 0);
 	SDL_SetAlpha(m_keyModCtrlLockedSurface, 0, 0);
 	SDL_SetAlpha(m_keyModAltLockedSurface, 0, 0);
-	SDL_SetAlpha(m_keyModSymLockedSurface, 0, 0);
+	SDL_SetAlpha(m_keyModFnLockedSurface, 0, 0);
 
 	setReady(true);
 
@@ -224,12 +224,17 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			}
 			else if (sym == SDLK_RCTRL || sym == SDLK_LCTRL)
 			{
-				toggleKeyMod(TERM_KEYMOD_SYM);
+				toggleKeyMod(TERM_KEYMOD_CTRL);
 				redraw();
 			}
 			else if (sym == SDLK_RALT || sym == SDLK_LALT)
 			{
 				toggleKeyMod(TERM_KEYMOD_ALT);
+				redraw();
+			}
+			else if (sym == SDLK_RMETA || sym == SDLK_LMETA)
+			{
+				toggleKeyMod(TERM_KEYMOD_FN);
 				redraw();
 			}
 			break;
@@ -261,11 +266,11 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 				{
 					nKey = m_config->getKeyBinding(TERM_KEYMOD_CTRL, c[0]);
 				}
-				else if ((mod & KMOD_CTRL) || m_keyMod == TERM_KEYMOD_SYM) //Sym Key.
+				else if ((mod & KMOD_META) || m_keyMod == TERM_KEYMOD_FN)
 				{
-					nKey = m_config->getKeyBinding(TERM_KEYMOD_SYM, c[0]);
+					nKey = m_config->getKeyBinding(TERM_KEYMOD_FN, c[0]);
 				}
-				else if ((mod & KMOD_ALT) == 0 && m_keyMod == TERM_KEYMOD_ALT) //Orange Key.
+				else if ((mod & KMOD_ALT) == 0 && m_keyMod == TERM_KEYMOD_ALT)
 				{
 					nKey = m_config->getKeyBinding(TERM_KEYMOD_ALT, c[0]);
 				}
@@ -491,15 +496,15 @@ void SDLTerminal::redraw()
 				drawSurface(0, nY, m_keyModCtrlSurface);
 			}
 		}
-		else if (m_keyMod == TERM_KEYMOD_SYM)
+		else if (m_keyMod == TERM_KEYMOD_FN)
 		{
 			if (m_bKeyModLocked)
 			{
-				drawSurface(0, nY, m_keyModSymLockedSurface);
+				drawSurface(0, nY, m_keyModFnLockedSurface);
 			}
 			else
 			{
-				drawSurface(0, nY, m_keyModSymSurface);
+				drawSurface(0, nY, m_keyModFnSurface);
 			}
 		}
 		else if (m_keyMod == TERM_KEYMOD_ALT)

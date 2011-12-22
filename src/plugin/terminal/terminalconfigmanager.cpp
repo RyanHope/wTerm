@@ -230,39 +230,7 @@ int TerminalConfigManager::generateDefaultKeyBindings()
 	(*m_keyBindings[TERM_KEYMOD_SHIFT])['\x20'] = '\x20'; //Space
 	(*m_keyBindings[TERM_KEYMOD_SHIFT])['\x0D'] = '\x0D'; //Return
 
-	//SYM key.
-	(*m_keyBindings[TERM_KEYMOD_SYM])['a'] = 276;
-	(*m_keyBindings[TERM_KEYMOD_SYM])['b'] = '<';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['c'] = 'c';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['d'] = 275;
-	(*m_keyBindings[TERM_KEYMOD_SYM])['e'] = 'e';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['f'] = 'f';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['g'] = 'g';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['h'] = '[';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['i'] = '\x09';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['j'] = ']';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['k'] = 'k';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['l'] = '`';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['m'] = 'm';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['n'] = '>';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['o'] = '~';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['p'] = '^';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['q'] = '\x1B';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['r'] = 'r';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['s'] = 274;
-	(*m_keyBindings[TERM_KEYMOD_SYM])['t'] = '\x09';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['u'] = '}';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['v'] = 'v';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['w'] = 273;
-	(*m_keyBindings[TERM_KEYMOD_SYM])['x'] = '|';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['y'] = '{';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['z'] = '\\';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['\x08'] = '\x08'; //Backspace
-	(*m_keyBindings[TERM_KEYMOD_SYM])[','] = ',';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['.'] = '.';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['@'] = '@';
-	(*m_keyBindings[TERM_KEYMOD_SYM])['\x20'] = '\x20'; //Space
-	(*m_keyBindings[TERM_KEYMOD_SYM])['\x0D'] = '\x0D'; //Return
+	//FN key.
 
 	//Alt key.
 	(*m_keyBindings[TERM_KEYMOD_ALT])['a'] = '&';

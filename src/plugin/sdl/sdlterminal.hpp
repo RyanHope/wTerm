@@ -40,11 +40,11 @@ protected:
 	SDL_Surface *m_keyModShiftSurface;
 	SDL_Surface *m_keyModCtrlSurface;
 	SDL_Surface *m_keyModAltSurface;
-	SDL_Surface *m_keyModSymSurface;
+	SDL_Surface *m_keyModFnSurface;
 	SDL_Surface *m_keyModShiftLockedSurface;
 	SDL_Surface *m_keyModCtrlLockedSurface;
 	SDL_Surface *m_keyModAltLockedSurface;
-	SDL_Surface *m_keyModSymLockedSurface;
+	SDL_Surface *m_keyModFnLockedSurface;
 
 	void handleKeyboardEvent(SDL_Event &event);
 	void handleMouseEvent(SDL_Event &event);
