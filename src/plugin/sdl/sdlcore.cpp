@@ -48,18 +48,6 @@ const int SDLCore::FONT_DIRTY_BIT = 2;
 const int SDLCore::FOREGROUND_COLOR_DIRTY_BIT = 4;
 const int SDLCore::BACKGROUND_COLOR_DIRTY_BIT = 8;
 
-#ifdef WIN32
-extern "C"
-
-GL_API int GL_APIENTRY _dgles_load_library(void *, void *(*)(void *, const char *));
-
-static void *proc_loader(void *h, const char *name)
-{
-	(void) h;
-	return SDL_GL_GetProcAddress(name);
-}
-#endif
-
 SDLCore::SDLCore()
 {
 	m_bRunning = false;
@@ -148,11 +136,6 @@ int SDLCore::init()
 
 int SDLCore::initOpenGL()
 {
-#if WIN32
-	// Load the desktop OpenGL-ES emulation library
-	_dgles_load_library(NULL, proc_loader);
-#endif
-
 	const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
 
 	clearScreen();
@@ -575,17 +558,10 @@ void SDLCore::drawSurface(int nX, int nY, SDL_Surface *surface)
 		nMode = GL_RGBA;
 	}
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	Uint32 rmask = 0xff000000;
 	Uint32 gmask = 0x00ff0000;
 	Uint32 bmask = 0x0000ff00;
 	Uint32 amask = 0x000000ff;
-#else
-	Uint32 rmask = 0x000000ff;
-	Uint32 gmask = 0x0000ff00;
-	Uint32 bmask = 0x00ff0000;
-	Uint32 amask = 0xff000000;
-#endif
 
 	SDL_Surface* mainSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, getNextPowerOfTwo(surface->w), getNextPowerOfTwo(surface->h), m_surface->format->BitsPerPixel, rmask, gmask, bmask, amask);
 	GLuint texture = 0;
