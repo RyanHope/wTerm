@@ -6,4 +6,5 @@ wTerm is a Enyo PDK/Hybrid Terminal Emulator for the webOS platform.
 Features
 --------
 
-* Jack shit so far!
+* Hardware accelerated with OpenGL
+* Custom 74 key virtual keyboard 
