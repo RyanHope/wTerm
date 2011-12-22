@@ -51,7 +51,7 @@ enyo.kind({
   			{kind: 'vkbKey', content: 'Bksp', flex: 1, sym: 8, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
   		]},
 		{layoutKind: 'HFlexLayout', pack: 'end', components: [
-  			{kind: 'vkbKey', content: 'Tab', flex: 1, ontouchstart: 'btnClick'},
+  			{kind: 'vkbKey', content: 'Tab', flex: 1, sym: 9, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
   			{kind: 'vkbKey', content: 'q', sym: 113, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
   			{kind: 'vkbKey', content: 'w', sym: 119, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
   			{kind: 'vkbKey', content: 'e', sym: 101, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
@@ -125,6 +125,9 @@ enyo.kind({
   				break
   			case 'Bksp':
   				unicode = '\x08'
+  				break
+  			case 'Tab':
+  				unicode = '\x09'
   				break
   			case 'Space':
   				unicode = ' '
