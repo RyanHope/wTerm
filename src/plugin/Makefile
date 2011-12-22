@@ -5,7 +5,7 @@ LDFLAGS		:=	-L/opt/PalmPDK/device/lib -lpthread -lpdl -lGLES_CM -lGLESv2 -lSDL -
 
 
 OBJECTS		:=	sdl/sdlcore.cpp sdl/sdlterminal.cpp \
-				util/configmanager.cpp util/databuffer.cpp util/point.cpp \
+				util/configmanager.cpp util/databuffer.cpp util/logger.cpp util/point.cpp \
 				terminal/seqparser.cpp terminal/terminal.cpp terminal/terminalconfigmanager.cpp \
 				terminal/terminalstate.cpp terminal/vtterminalstate.cpp terminalmain.cpp
 

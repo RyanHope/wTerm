@@ -17,6 +17,7 @@
  */
 
 #include "sdlcore.hpp"
+#include "util/logger.hpp"
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -24,7 +25,6 @@
 
 #include <math.h>
 #include <stdio.h>
-#include <syslog.h>
 
 const SDL_Color SDLCore::COLOR_BLACK = { 0, 0, 0 };
 const SDL_Color SDLCore::COLOR_RED = { 194, 54, 33 };
@@ -100,19 +100,19 @@ int SDLCore::init()
 	// Initialize the SDL library with the Video subsystem
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
-		syslog(LOG_ERR, "Cannot initialize SDL: %s", SDL_GetError());
+		Logger::getInstance()->error("Cannot initialize SDL: %s", SDL_GetError());
 		return -1;
 	}
 
 	if (TTF_Init() != 0)
 	{
-		syslog(LOG_ERR, "Cannot initialize SDL TTF: %s", TTF_GetError());
+		Logger::getInstance()->error("Cannot initialize SDL TTF: %s", TTF_GetError());
 		return -1;
 	}
 
 	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1) != 0)
 	{
-		syslog(LOG_ERR, "Cannot set OpenGL version: %s", SDL_GetError());
+		Logger::getInstance()->error("Cannot set OpenGL version: %s", SDL_GetError());
 		return -1;
 	}
 
@@ -121,25 +121,25 @@ int SDLCore::init()
 
 	if (m_surface == NULL)
 	{
-		syslog(LOG_ERR, "Cannot create SDL framebuffer: %s", SDL_GetError());
+		Logger::getInstance()->error("Cannot create SDL framebuffer: %s", SDL_GetError());
 		return -1;
 	}
 
 	if (createFonts(m_nFontSize) != 0)
 	{
-		syslog(LOG_ERR, "Cannot create default fonts.");
+		Logger::getInstance()->error("Cannot create default fonts.");
 		return -1;
 	}
 
 	if (initOpenGL() != 0)
 	{
-		syslog(LOG_ERR, "Cannot initialize OpenGL.");
+		Logger::getInstance()->error("Cannot initialize OpenGL.");
 		return -1;
 	}
 
 	if (initCustom() != 0)
 	{
-		syslog(LOG_ERR, "Cannot initialize customizations.");
+		Logger::getInstance()->error("Cannot initialize customizations.");
 		return -1;
 	}
 
@@ -148,6 +148,10 @@ int SDLCore::init()
 
 int SDLCore::initOpenGL()
 {
+#if WIN32
+	// Load the desktop OpenGL-ES emulation library
+	_dgles_load_library(NULL, proc_loader);
+#endif
 
 	const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
 
@@ -223,7 +227,7 @@ int SDLCore::createFonts(int nSize)
 
 	if (TTF_SizeText(font, "O", &nWidth, &nHeight) != 0)
 	{
-		syslog(LOG_ERR, "Cannot calculate font size: %s", TTF_GetError());
+		Logger::getInstance()->error("Cannot calculate font size: %s", TTF_GetError());
 		TTF_CloseFont(font);
 		TTF_CloseFont(fontBold);
 		TTF_CloseFont(fontItal);
@@ -483,7 +487,7 @@ int SDLCore::setFontSize(int nSize)
 
 	if (createFonts(nSize) != 0)
 	{
-		syslog(LOG_ERR, "Cannot set new font size.");
+		Logger::getInstance()->error("Cannot set new font size.");
 		return -1;
 	}
 
@@ -588,7 +592,7 @@ void SDLCore::drawSurface(int nX, int nY, SDL_Surface *surface)
 
 	if (mainSurface == NULL)
 	{
-		syslog(LOG_ERR, "Cannot create rendering surface.");
+		Logger::getInstance()->error("Cannot create rendering surface.");
 		return;
 	}
 
@@ -634,7 +638,7 @@ void SDLCore::drawImage(int nX, int nY, const char *sImage)
 
 	if (surface == NULL)
 	{
-		syslog(LOG_ERR, "Cannot load image.");
+		Logger::getInstance()->error("Cannot load image.");
 		return;
 	}
 
@@ -683,7 +687,7 @@ void SDLCore::drawText(int nX, int nY, const char *sText, bool bBold, bool bItal
 
 	if (textSurface == NULL)
 	{
-		syslog(LOG_ERR, "Cannot render text.");
+		Logger::getInstance()->error("Cannot render text.");
 		return;
 	}
 

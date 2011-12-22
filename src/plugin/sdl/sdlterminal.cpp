@@ -18,6 +18,7 @@
 
 #include "sdl/sdlterminal.hpp"
 #include "util/databuffer.hpp"
+#include "util/logger.hpp"
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -25,7 +26,6 @@
 #include <PDL.h>
 #include <string.h>
 #include <time.h>
-#include <syslog.h>
 
 SDLTerminal::SDLTerminal()
 {
@@ -111,7 +111,7 @@ int SDLTerminal::initCustom()
 
 	if (SDL_EnableKeyRepeat(500, 35) != 0)
 	{
-		syslog(LOG_ERR, "Cannot enable keyboard repeat.");
+		Logger::getInstance()->error("Cannot enable keyboard repeat.");
 		return -1;
 	}
 
@@ -127,14 +127,14 @@ int SDLTerminal::initCustom()
 	if (m_keyModShiftSurface == NULL || m_keyModCtrlSurface == NULL
 		|| m_keyModAltSurface == NULL || m_keyModFnSurface == NULL)
 	{
-		syslog(LOG_ERR, "Cannot create keyboard modifier image.");
+		Logger::getInstance()->error("Cannot create keyboard modifier image.");
 		return -1;
 	}
 
 	if (m_keyModShiftLockedSurface == NULL || m_keyModCtrlLockedSurface == NULL
 		|| m_keyModAltLockedSurface == NULL || m_keyModFnLockedSurface == NULL)
 	{
-		syslog(LOG_ERR, "Cannot create keyboard modifier locked image.");
+		Logger::getInstance()->error("Cannot create keyboard modifier locked image.");
 		return -1;
 	}
 

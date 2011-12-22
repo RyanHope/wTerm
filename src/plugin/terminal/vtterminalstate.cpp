@@ -19,9 +19,10 @@
 #include "vtterminalstate.hpp"
 #include "seqparser.hpp"
 
+#include "util/logger.hpp"
+
 #include <stdlib.h>
 #include <string.h>
-#include <syslog.h>
 
 VTTerminalState::VTTerminalState()
 {
@@ -303,7 +304,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_KEYPAD_APP_MODE: //ESC=
 	case CS_KEYPAD_NUM_MODE: //ESC>
 		//FIXME Not implemented.
-		syslog(LOG_ERR, "VT100 Control Sequence: KEYPAD not implemented.");
+		Logger::getInstance()->error("VT100 Control Sequence: KEYPAD not implemented.");
 		break;
 	case CS_CHARSET_UK_G0_SET: //ESC(A
 		setCharset(TS_CS_G0_UK);
@@ -355,14 +356,14 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		break;
 	case CS_TAB_CLEAR: //ESC[<Value>;...;<Value>g
 		//FIXME Not implemented.
-		syslog(LOG_ERR, "VT100 Control Sequence: CLEAR TAB not implemented.", nToken);
+		Logger::getInstance()->error("VT100 Control Sequence: CLEAR TAB not implemented.", nToken);
 		break;
 	case CS_DOUBLE_HEIGHT_LINE_TOP: //ESC#3
 	case CS_DOUBLE_HEIGHT_LINE_BOTTOM: //ESC#4
 	case CS_SINGLE_WIDTH_LINE: //ESC#5
 	case CS_DOUBLE_WIDTH_LINE: //ESC#6
 		//FIXME Not implemented.
-		syslog(LOG_ERR, "VT100 Control Sequence: DOUBLE CELL not implemented.", nToken);
+		Logger::getInstance()->error("VT100 Control Sequence: DOUBLE CELL not implemented.", nToken);
 		break;
 	case CS_DEVICE_STATUS_REPORT: //ESC[<Value>;...;<Value>n
 		if (extTerminal != NULL && extTerminal->isReady())
@@ -386,19 +387,19 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_DEVICE_ATTR_REQUEST: //ESC[<Value>c
 	case CS_DEVICE_ATTR_RESPONSE: //ESC[?1;<Value>c
 		//FIXME Not implemented.
-		syslog(LOG_ERR, "VT100 Control Sequence: DEVICE not implemented.", nToken);
+		Logger::getInstance()->error("VT100 Control Sequence: DEVICE not implemented.", nToken);
 		break;
 	case CS_TERM_IDENTIFY: //ESCZ
 		//FIXME Not implemented.
-		syslog(LOG_ERR, "VT100 Control Sequence: TERM IDENTIFY not implemented.", nToken);
+		Logger::getInstance()->error("VT100 Control Sequence: TERM IDENTIFY not implemented.", nToken);
 		break;
 	case CS_TERM_PARAM: //ESC[<Value>;...;<Value>x
 	case CS_TERM_RESET: //ESCc
 		//FIXME Not implemented
-		syslog(LOG_ERR, "VT100 Control Sequence: TERM PARAM not implemented.", nToken);
+		Logger::getInstance()->error("VT100 Control Sequence: TERM PARAM not implemented.", nToken);
 		break;
 	default:
-		syslog(LOG_ERR, "VT100 Control Sequence: %d not implemented.", nToken);
+		Logger::getInstance()->error("VT100 Control Sequence: %d not implemented.", nToken);
 		break;
 	}
 
