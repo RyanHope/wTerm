@@ -17,12 +17,12 @@
  */
 
 #include "configmanager.hpp"
-#include "logger.hpp"
 
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <syslog.h>
 
 ConfigManager::ConfigManager()
 {
@@ -111,13 +111,13 @@ int ConfigManager::parse(const char *sFileName)
 	int nIndex, nEndIndex;
 	int nResult = 0;
 
-	Logger::getInstance()->dump("Reading configuration file: '%s'", sFileName);
+	syslog(LOG_INFO, "Reading configuration file: '%s'", sFileName);
 
 	file = fopen(sFileName, "r");
 
 	if (file == NULL)
 	{
-		Logger::getInstance()->error("Cannot read configuration file: '%s'", sFileName);
+		syslog(LOG_ERR, "Cannot read configuration file: '%s'", sFileName);
 		return -1;
 	}
 
@@ -126,7 +126,7 @@ int ConfigManager::parse(const char *sFileName)
 
 	while (fgets(buffer, sizeof(buffer), file) != NULL)
 	{
-		Logger::getInstance()->dump("Processing configuration line: '%s'", buffer);
+		syslog(LOG_INFO, "Processing configuration line: '%s'", buffer);
 
 		nIndex = 0;
 
@@ -155,7 +155,7 @@ int ConfigManager::parse(const char *sFileName)
 
 			if (buffer[nEndIndex] != ']')
 			{
-				Logger::getInstance()->error("Reading configuration section.");
+				syslog(LOG_ERR, "Reading configuration section.");
 				nResult = -1;
 				break;
 			}
@@ -171,7 +171,7 @@ int ConfigManager::parse(const char *sFileName)
 				memset(lastSection, 0, sizeof(lastSection));
 			}
 
-			Logger::getInstance()->dump("Setting current Section: '%s'", lastSection);
+			syslog(LOG_INFO, "Setting current Section: '%s'", lastSection);
 		}
 		else
 		{
@@ -185,7 +185,7 @@ int ConfigManager::parse(const char *sFileName)
 
 			if (buffer[nEndIndex] != '=' || nIndex >= nEndIndex)
 			{
-				Logger::getInstance()->error("Reading configuration entry.");
+				syslog(LOG_ERR, "Reading configuration entry.");
 				continue;
 			}
 
@@ -207,7 +207,7 @@ int ConfigManager::parse(const char *sFileName)
 				memcpy(value, buffer + nIndex, (nEndIndex - nIndex + 1) * sizeof(char));
 			}
 
-			Logger::getInstance()->dump("Adding configuration entry: Section '%s', Key '%s', Value '%s'", lastSection, key, value);
+			syslog(LOG_INFO, "Adding configuration entry: Section '%s', Key '%s', Value '%s'", lastSection, key, value);
 
 			addValue(lastSection, key, value);
 		}

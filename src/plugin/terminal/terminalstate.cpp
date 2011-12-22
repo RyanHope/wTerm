@@ -18,11 +18,10 @@
 
 #include "terminalstate.hpp"
 
-#include "util/logger.hpp"
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <syslog.h>
 
 const char TerminalState::BLANK = '\x20';
 

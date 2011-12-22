@@ -21,7 +21,6 @@
 #include <string.h>
 
 #include "seqparser.hpp"
-#include "util/logger.hpp"
 
 const char ControlSeqParser::ESC_CHAR = 27;
 const char ControlSeqParser::DELIMITER_CHAR = ';';
@@ -240,7 +239,6 @@ int ControlSeqParser::parsePositiveInt(int *values, int maxNumValues)
 
 int ControlSeqParser::match(char *prefix, char suffix, int *values, int numValues)
 {
-	//Logger::getInstance()->dump("Parsing prefix '%s', suffix '%c', num %d", prefix, suffix, numValues);
 
 	std::map<const char *, std::list<CSEntry_t *> *, cmp_str>::iterator locator = m_csLookup.find(prefix);
 	std::list<CSEntry_t *> *list;
