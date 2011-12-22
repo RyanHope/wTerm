@@ -1,7 +1,7 @@
 ifdef DEVICE
 	ARCH=armv7
 	ifeq ($(shell uname -s),Darwin)
-		MARCH_TUNE=-O2 -march=armv7-a -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp
+		MARCH_TUNE=-O2 -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=softfp
 		CC=/opt/PalmPDK/arm-gcc/bin/arm-none-linux-gnueabi-gcc
 		CXX=/opt/PalmPDK/arm-gcc/bin/arm-none-linux-gnueabi-g++
 		RANLIB=/opt/PalmPDK/arm-gcc/bin/arm-none-linux-gnueabi-ranlib

@@ -1,8 +1,12 @@
 include ../../Makefile.inc
 
-CXXFLAGS	:=	$(MARCH_TUNE) -I. -I$(ROOT)/include -I$(ROOT)/include/SDL
-LDFLAGS		:=	-L$(ROOT)/lib -lpthread -lpdl -lGLES_CM -lGLESv2 -lSDL -lSDL_ttf -lSDL_image
-
+CXXFLAGS	:=	$(MARCH_TUNE)
+ifeq ($(shell uname -s),Darwin)
+CXXFLAGS	+=	-I. -I/opt/PalmPDK/include -I/opt/PalmPDK/include/SDL -L/opt/PalmPDK/device/lib
+else
+CXXFLAGS	:=	-I. -I$(ROOT)/include -I$(ROOT)/include/SDL -L$(ROOT)/lib
+endif
+LDFLAGS		:=	-Wl,--allow-shlib-undefined -lSDL -lSDL_ttf -lSDL_image -lGLES_CM -lpdl -lpthread
 
 OBJECTS		:=	sdl/sdlcore.cpp sdl/sdlterminal.cpp \
 				util/configmanager.cpp util/databuffer.cpp util/point.cpp \
