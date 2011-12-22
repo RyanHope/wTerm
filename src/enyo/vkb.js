@@ -126,6 +126,9 @@ enyo.kind({
   			case 'Bksp':
   				unicode = '\x08'
   				break
+  			case 'Esc':
+  				unicode = '\x1B'
+  				break
   			case 'Tab':
   				unicode = '\x09'
   				break
@@ -133,7 +136,7 @@ enyo.kind({
   				unicode = ' '
   				break
   			case 'Shift': case 'Ctrl': case 'Fn': case 'Alt': case 'Up': case 'Down':
-  			case 'Left': case 'Right': case 'Esc': case 'F1': case 'F2': case 'F3':
+  			case 'Left': case 'Right': case 'F1': case 'F2': case 'F3':
   			case 'F4': case 'F5': case 'F6': case 'F7': case 'F8':
   			case 'F9': case 'F10': case 'F11': case 'F12':
   				unicode = null
