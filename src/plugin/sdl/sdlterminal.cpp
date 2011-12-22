@@ -115,14 +115,14 @@ int SDLTerminal::initCustom()
 		return -1;
 	}
 
-	m_keyModShiftSurface = IMG_Load("shkey.png");
-	m_keyModCtrlSurface = IMG_Load("ctrlkey.png");
-	m_keyModAltSurface = IMG_Load("altkey.png");
-	m_keyModFnSurface = IMG_Load("fnkey.png");
-	m_keyModShiftLockedSurface = IMG_Load("shkeylocked.png");
-	m_keyModCtrlLockedSurface = IMG_Load("ctrlkeylocked.png");
-	m_keyModAltLockedSurface = IMG_Load("altkeylocked.png");
-	m_keyModFnLockedSurface = IMG_Load("fnkeylocked.png");
+	m_keyModShiftSurface = IMG_Load("images/shkey.png");
+	m_keyModCtrlSurface = IMG_Load("images/ctrlkey.png");
+	m_keyModAltSurface = IMG_Load("images/altkey.png");
+	m_keyModFnSurface = IMG_Load("images/fnkey.png");
+	m_keyModShiftLockedSurface = IMG_Load("images/shkeylocked.png");
+	m_keyModCtrlLockedSurface = IMG_Load("images/ctrlkeylocked.png");
+	m_keyModAltLockedSurface = IMG_Load("images/altkeylocked.png");
+	m_keyModFnLockedSurface = IMG_Load("images/fnkeylocked.png");
 
 	if (m_keyModShiftSurface == NULL || m_keyModCtrlSurface == NULL
 		|| m_keyModAltSurface == NULL || m_keyModFnSurface == NULL)

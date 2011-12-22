@@ -6,3 +6,4 @@ wterm
 *.so
 *.la
 *.a
+.directory
