@@ -16,9 +16,9 @@ enyo.kind({
 			name: 'about',
 			scrim: true,
 			components: [
-				{style: 'text-align: center; padding-bottom: 8px;', content: 'wTerm v'+enyo.fetchAppInfo().version},
-				{name: 'dimensions', style: 'font-size: 80%;'},
-				{name: 'fontsize', style: 'font-size: 80%;'},
+				{style: 'text-align: center; padding-bottom: 12px;', allowHtml: true, content: '<b><u>wTerm v'+enyo.fetchAppInfo().version+'</u></b>'},
+				{name: 'fontsize', allowHtml: true, style: 'font-size: 80%;'},
+				{name: 'dimensions', allowHtml: true, style: 'font-size: 80%;'},
 			]
 		}
 	],
@@ -39,8 +39,8 @@ enyo.kind({
 	openAbout: function() {
 		this.$.about.openAtTopCenter()
 		d = this.$.terminal.getDimensions()
-		this.$.dimensions.setContent('Rows x Cols: '+d[0]+'x'+d[1])
-		this.$.fontsize.setContent('Font Size: '+this.$.terminal.getFontSize())
+		this.$.dimensions.setContent('<b>Rows x Cols:</b>  '+d[0]+' x '+d[1])
+		this.$.fontsize.setContent('<b>Font Size:</b>  '+this.$.terminal.getFontSize())
 	},
 
 	openPrefs: function() {
