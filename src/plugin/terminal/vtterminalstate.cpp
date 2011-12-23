@@ -399,8 +399,8 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		break;
 	case CS_TERM_PARAM: //ESC[<Value>;...;<Value>x
 	case CS_TERM_RESET: //ESCc
-		//FIXME Not implemented
-		syslog(LOG_ERR, "VT100 Control Sequence: TERM PARAM not implemented.", nToken);
+		syslog(LOG_WARNING, "VT100 Control Sequence: TERM RESET partially implemented.", nToken);
+		cursorHome();
 		break;
 	default:
 		syslog(LOG_ERR, "VT100 Control Sequence: %d not implemented.", nToken);

@@ -205,6 +205,7 @@ public:
 	virtual ~TerminalState();
 
 	void setCursorLocation(int nX, int nY);
+	void cursorHome();
 	Point getCursorLocation();
 	Point getDisplayCursorLocation();
 

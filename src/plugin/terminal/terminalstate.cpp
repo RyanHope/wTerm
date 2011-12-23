@@ -662,6 +662,13 @@ void TerminalState::setNumBufferLines(int nNumLines)
 	pthread_mutex_unlock(&m_rwLock);
 }
 
+void TerminalState::cursorHome() {
+	if ((m_nTermModeFlags & TS_TM_ORIGIN) > 0)
+		setCursorLocation(1,m_nTopMargin);
+	else
+		setCursorLocation(1,1);
+}
+
 /**
  * Minimum cursor position is (1, 1).
  * Maximum cursor position will always be limited by the visible screen size.
