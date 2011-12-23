@@ -180,7 +180,7 @@ void SDLTerminal::disableKeyMod()
 
 void SDLTerminal::handleMouseEvent(SDL_Event &event)
 {
-	switch (event.type)
+	/*switch (event.type)
 	{
 		case SDL_MOUSEBUTTONDOWN:
 			m_bCtrlKeyModHeld = true;
@@ -193,7 +193,7 @@ void SDLTerminal::handleMouseEvent(SDL_Event &event)
 			toggleKeyMod(TERM_KEYMOD_CTRL);
 			redraw();
 			break;
-	}
+	}*/
 }
 
 void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
