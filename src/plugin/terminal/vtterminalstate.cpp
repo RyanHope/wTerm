@@ -383,10 +383,15 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			}
 		}
 		break;
-	case CS_DEVICE_ATTR_REQUEST: //ESC[<Value>c
-	case CS_DEVICE_ATTR_RESPONSE: //ESC[?6c
+	case CS_DEVICE_ATTR_PRIMARY_REQUEST: //ESC[<Value>c
+	case CS_DEVICE_ATTR_PRIMARY_RESPONSE: //ESC[?6c
 		if (extTerminal != NULL && extTerminal->isReady())
 			extTerminal->insertData("\x1B[?6c", 1);
+		break;
+	case CS_DEVICE_ATTR_SECONDARY_REQUEST: //ESC[><Value>c
+	case CS_DEVICE_ATTR_SECONDARY_RESPONSE: //ESC[>0;115;0c
+		if (extTerminal != NULL && extTerminal->isReady())
+			extTerminal->insertData("\x1B[>0;115;0c", 1);
 		break;
 	case CS_TERM_IDENTIFY: //ESCZ
 		//FIXME Not implemented.

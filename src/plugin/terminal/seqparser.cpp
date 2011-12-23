@@ -139,8 +139,12 @@ void ControlSeqParser::buildLookup()
 	addLookupEntry("#", CS_DOUBLE_WIDTH_LINE, 0, 0, 1, '6');
 
 	addLookupEntry("[", CS_DEVICE_STATUS_REPORT, 0, -1, 1, 'n');
-	addLookupEntry("[", CS_DEVICE_ATTR_REQUEST, 0, 1, 1, 'c');
-	addLookupEntry("[?", CS_DEVICE_ATTR_RESPONSE, 0, 2, 1, 'c');
+
+	addLookupEntry("[", CS_DEVICE_ATTR_PRIMARY_REQUEST, 0, 1, 0, 'c');
+	addLookupEntry("[?", CS_DEVICE_ATTR_PRIMARY_RESPONSE, 0, -1, 0, 'c');
+
+	addLookupEntry("[>", CS_DEVICE_ATTR_SECONDARY_REQUEST, 0, 1, 0, 'c');
+	addLookupEntry("[>", CS_DEVICE_ATTR_SECONDARY_RESPONSE, 0, -1, 0, 'c');
 
 	addLookupEntry("", CS_TERM_IDENTIFY, 0, 0, 1, 'Z');
 	addLookupEntry("[", CS_TERM_PARAM, 0, -1, 1, 'x');
