@@ -19,7 +19,6 @@
 #include "sdlcore.hpp"
 
 #include <GLES/gl.h>
-#include <GLES/glext.h>
 #include <SDL/SDL_image.h>
 
 #include <math.h>
@@ -558,10 +557,17 @@ void SDLCore::drawSurface(int nX, int nY, SDL_Surface *surface)
 		nMode = GL_RGBA;
 	}
 
-	Uint32 rmask = 0xff000000;
-	Uint32 gmask = 0x00ff0000;
-	Uint32 bmask = 0x0000ff00;
-	Uint32 amask = 0x000000ff;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	   Uint32 rmask = 0xff000000;
+	   Uint32 gmask = 0x00ff0000;
+	   Uint32 bmask = 0x0000ff00;
+	   Uint32 amask = 0x000000ff;
+#else
+	   Uint32 rmask = 0x000000ff;
+	   Uint32 gmask = 0x0000ff00;
+	   Uint32 bmask = 0x00ff0000;
+	   Uint32 amask = 0xff000000;
+#endif
 
 	SDL_Surface* mainSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, getNextPowerOfTwo(surface->w), getNextPowerOfTwo(surface->h), m_surface->format->BitsPerPixel, rmask, gmask, bmask, amask);
 	GLuint texture = 0;

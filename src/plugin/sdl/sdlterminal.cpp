@@ -20,7 +20,6 @@
 #include "util/databuffer.hpp"
 
 #include <GLES/gl.h>
-#include <GLES/glext.h>
 #include <SDL/SDL_image.h>
 #include <PDL.h>
 #include <string.h>
