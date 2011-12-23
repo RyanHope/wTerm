@@ -56,13 +56,19 @@ enyo.kind({
   		this.log(type,state,sym)
   		this.$.plugin.callPluginMethod('pushKeyEvent',type,state,sym,unicode)
   	},
-  	
   	keyDown: function(sym,unicode) {
   		this.pushKeyEvent(1,sym,unicode)
   	},
-  	
   	keyUp: function(sym,unicode) {
   		this.pushKeyEvent(0,sym,unicode)
+  	},
+  	
+  	getDimensions: function() {
+  		return enyo.json.parse(this.$.plugin.callPluginMethod('getDimensions'))
+  	},
+  	
+  	getFontSize: function() {
+  		return parseInt(this.$.plugin.callPluginMethod('getFontSize'),10)
   	}
   	
 })

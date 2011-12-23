@@ -16,13 +16,31 @@
  * along with SDLTerminal.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "sdl/sdlcore.hpp"
 #include "sdl/sdlterminal.hpp"
 #include "terminal/terminal.hpp"
 #include "terminal/vtterminalstate.hpp"
 
 #include <syslog.h>
-
 #include <PDL.h>
+
+SDLTerminal *sdlTerminal;
+
+PDL_bool getFontSize(PDL_JSParameters *params) {
+	char *reply = 0;
+	asprintf(&reply, "%d", sdlTerminal->getFontSize());
+	PDL_JSReply(params, reply);
+	free(reply);
+	return PDL_TRUE;
+}
+
+PDL_bool getDimensions(PDL_JSParameters *params) {
+	char *reply = 0;
+	asprintf(&reply, "[%d,%d]", sdlTerminal->getMaximumLinesOfText(), sdlTerminal->getMaximumColumnsOfText());
+	PDL_JSReply(params, reply);
+	free(reply);
+	return PDL_TRUE;
+}
 
 PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 
@@ -49,7 +67,7 @@ int main()
 
 	openlog("us.ryanhope.wterm.plugin", LOG_PID, LOG_USER);
 
-	SDLTerminal *sdlTerminal = new SDLTerminal();
+	sdlTerminal = new SDLTerminal();
 	Terminal *terminal = new Terminal();
 
 	sdlTerminal->start();
@@ -57,6 +75,8 @@ int main()
 	PDL_Init(0);
 
 	PDL_RegisterJSHandler("pushKeyEvent", pushKeyEvent);
+	PDL_RegisterJSHandler("getDimensions", getDimensions);
+	PDL_RegisterJSHandler("getFontSize", getFontSize);
 
 	PDL_JSRegistrationComplete();
 	PDL_CallJS("ready", NULL, 0);
