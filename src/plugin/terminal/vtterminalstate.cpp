@@ -384,9 +384,9 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		}
 		break;
 	case CS_DEVICE_ATTR_REQUEST: //ESC[<Value>c
-	case CS_DEVICE_ATTR_RESPONSE: //ESC[?1;<Value>c
-		//FIXME Not implemented.
-		syslog(LOG_ERR, "VT100 Control Sequence: DEVICE not implemented.", nToken);
+	case CS_DEVICE_ATTR_RESPONSE: //ESC[?6c
+		if (extTerminal != NULL && extTerminal->isReady())
+			extTerminal->insertData("\x1B[?6c", 1);
 		break;
 	case CS_TERM_IDENTIFY: //ESCZ
 		//FIXME Not implemented.
