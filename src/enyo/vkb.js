@@ -97,7 +97,7 @@ enyo.kind({
   		]},
 		{layoutKind: 'HFlexLayout', pack: 'end', components: [
 			{kind: 'vkbKey', content: 'Ctrl', flex: .6, sym: 306, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
-  			{kind: 'vkbKey', content: 'Fn', sym: 310, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+  			{kind: 'vkbKey', content: 'Fn', sym: 313, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
   			{kind: 'vkbKey', content: 'Alt', sym: 308, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
   			{kind: 'vkbKey', content: 'Space', flex: 4, sym: 32, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
   			{kind: 'vkbKey', content: 'Left', sym: 276, ontouchstart: 'keyDown', ontouchend: 'keyUp'},

@@ -231,8 +231,9 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 				toggleKeyMod(TERM_KEYMOD_ALT);
 				redraw();
 			}
-			else if (sym == SDLK_RMETA || sym == SDLK_LMETA)
+			else if (sym == SDLK_MODE)
 			{
+				syslog(LOG_WARNING, "FN KEY PRESSED!");
 				toggleKeyMod(TERM_KEYMOD_FN);
 				redraw();
 			}
@@ -265,7 +266,7 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 				{
 					nKey = m_config->getKeyBinding(TERM_KEYMOD_CTRL, c[0]);
 				}
-				else if ((mod & KMOD_META) || m_keyMod == TERM_KEYMOD_FN)
+				else if ((mod & KMOD_MODE) || m_keyMod == TERM_KEYMOD_FN)
 				{
 					nKey = m_config->getKeyBinding(TERM_KEYMOD_FN, c[0]);
 				}
@@ -313,10 +314,10 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			}
 			
 			if (sym == SDLK_RSHIFT || sym == SDLK_LSHIFT || sym == SDLK_RCTRL || sym == SDLK_LCTRL
-				|| sym == SDLK_RALT || sym == SDLK_LALT)
+				|| sym == SDLK_RALT || sym == SDLK_LALT || sym == SDLK_MODE)
 			{
 				//Holding a key modifier while pressing a key modifier nullifies the current key modifier.
-				if ((mod & KMOD_ALT) || (mod & KMOD_CTRL) || (mod & KMOD_SHIFT) || m_bCtrlKeyModHeld)
+				if ((mod & KMOD_ALT) || (mod & KMOD_CTRL) || (mod & KMOD_SHIFT) || (mod & KMOD_MODE) || m_bCtrlKeyModHeld)
 				{
 					if (m_keyMod != TERM_KEYMOD_NONE)
 					{

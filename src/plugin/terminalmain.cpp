@@ -57,8 +57,6 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 
 	int ret = SDL_PushEvent(&event);
 
-	syslog(LOG_WARNING, "%d %d %d %d", event.type, event.key.state, event.key.keysym.sym, ret);
-
 	return PDL_TRUE;
 }
 
