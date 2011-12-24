@@ -768,7 +768,7 @@ void TerminalState::setDisplayScreenSize(int nWidth, int nHeight)
 
 	//Reset affected attributes to fix cases where location is out of bounds after setting the display.
 	setCursorLocation(m_cursorLoc.getX(), m_cursorLoc.getY());
-	setNumBufferLines(m_nNumBufferLines);
+	setNumBufferLines(nHeight);
 	setMargin(m_nTopMargin, m_nBottomMargin);
 
 	pthread_mutex_unlock(&m_rwLock);

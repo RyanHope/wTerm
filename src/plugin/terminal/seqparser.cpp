@@ -114,6 +114,8 @@ void ControlSeqParser::buildLookup()
 	addLookupEntry("", CS_KEYPAD_APP_MODE, 0, 0, 1, '=');
 	addLookupEntry("", CS_KEYPAD_NUM_MODE, 0, 0, 1, '>');
 
+	addLookupEntry("(", CS_USER_MAPPING, 0, 0, 0, 'K');
+
 	addLookupEntry("(", CS_CHARSET_UK_G0_SET, 0, 0, 1, 'A');
 	addLookupEntry("(", CS_CHARSET_US_G0_SET, 0, 0, 1, 'B');
 	addLookupEntry("(", CS_CHARSET_SPEC_G0_SET, 0, 0, 1, '0');

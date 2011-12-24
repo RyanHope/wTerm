@@ -54,7 +54,7 @@ typedef enum
 	TS_TM_CURSOR_KEYS = 8,
 
 	/**
-	 * Set to have the max number of columns to be 132.
+	 * Set to have the max number of columns (should really be 132).
 	 * Otherwise, the max number of columns is 80.
 	 */
 	TS_TM_COLUMN = 16,
