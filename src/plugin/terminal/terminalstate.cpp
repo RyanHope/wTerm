@@ -789,6 +789,7 @@ void TerminalState::displayScreenAlignmentPattern() {
 			insertChar(69, false);
 		}
 	}
+	cursorHome();
 }
 
 /**
