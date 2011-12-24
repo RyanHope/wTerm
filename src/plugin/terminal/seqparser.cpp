@@ -139,6 +139,7 @@ void ControlSeqParser::buildLookup()
 	addLookupEntry("#", CS_DOUBLE_HEIGHT_LINE_BOTTOM, 0, 0, 1, '4');
 	addLookupEntry("#", CS_SINGLE_WIDTH_LINE, 0, 0, 1, '5');
 	addLookupEntry("#", CS_DOUBLE_WIDTH_LINE, 0, 0, 1, '6');
+	addLookupEntry("#", CS_SCREEN_ALIGNMENT_DISPLAY, 0, 0, 0, '8');
 
 	addLookupEntry("[", CS_DEVICE_STATUS_REPORT, 0, -1, 1, 'n');
 

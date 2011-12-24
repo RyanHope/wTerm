@@ -364,6 +364,9 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		//FIXME Not implemented.
 		syslog(LOG_ERR, "VT100 Control Sequence: DOUBLE CELL not implemented.", nToken);
 		break;
+	case CS_SCREEN_ALIGNMENT_DISPLAY: //ESC#8
+		displayScreenAlignmentPattern();
+		break;
 	case CS_DEVICE_STATUS_REPORT: //ESC[<Value>;...;<Value>n
 		if (extTerminal != NULL && extTerminal->isReady())
 		{

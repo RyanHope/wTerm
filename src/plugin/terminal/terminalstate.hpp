@@ -239,6 +239,8 @@ public:
 	void setDisplayScreenSize(int nWidth, int nHeight);
 	Point getDisplayScreenSize();
 
+	void displayScreenAlignmentPattern();
+
 	void setMargin(int nTop, int nBottom);
 	int getTopMargin();
 	int getBottomMargin();

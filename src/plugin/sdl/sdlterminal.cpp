@@ -233,7 +233,6 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			}
 			else if (sym == SDLK_MODE)
 			{
-				syslog(LOG_WARNING, "FN KEY PRESSED!");
 				toggleKeyMod(TERM_KEYMOD_FN);
 				redraw();
 			}
