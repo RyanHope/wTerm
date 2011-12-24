@@ -403,7 +403,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_TERM_PARAM: //ESC[<Value>;...;<Value>x
 	case CS_TERM_RESET: //ESCc
 		syslog(LOG_WARNING, "VT100 Control Sequence: TERM RESET partially implemented.", nToken);
-		cursorHome();
+		resetTerminalState();
 		break;
 	default:
 		syslog(LOG_ERR, "VT100 Control Sequence: %d not implemented.", nToken);

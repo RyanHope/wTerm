@@ -277,6 +277,8 @@ public:
 
 	void getLineGraphicsState(int nLine, TSLineGraphicsState_t **states, int &nNumStates, int nMaxStates);
 	void addGraphicsState(int nColumn, int nLine, TSColor_t foregroundColor, TSColor_t backgroundColor, int nGraphicsMode, TSGraphicsModeOp_t op, bool bTrim);
+
+	void resetTerminalState();
 };
 
 #endif
