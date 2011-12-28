@@ -9,15 +9,22 @@ IPK			:= ${APPID}_${VERSION}_${ARCH}.ipk
 
 .PHONY: install clean
 
-${IPK}: wterm
+${IPK}: clean wterm bin/vttest 
 	palm-package -X excludes.txt .
-	mv ${APPID}_*.ipk ${IPK}
+	- mv ${APPID}_*.ipk ${IPK}
 	ar q ${IPK} pmPostInstall.script
 	ar q ${IPK} pmPreRemove.script
-	
-wterm:
-	cd src/plugin; ${MAKE}
-	mv src/plugin/wterm .
+
+bin:
+	- mkdir -p bin
+
+wterm: bin
+	- cd src/plugin; ${MAKE}
+	- cp src/plugin/wterm wterm
+
+bin/vttest: bin
+	cd src/vttest; CC=${CC} ./configure --host=${HOST}; ${MAKE}
+	cp src/vttest/vttest bin/vttest
 
 uninstall:
 	- palm-install -r ${APPID}
@@ -27,6 +34,8 @@ install: ${IPK}
 	palm-launch ${APPID}
 
 clean:
-	rm -rf *.ipk
-	rm -rf wterm
-	cd src/plugin; make clean
+	- rm -rf *.ipk
+	- rm -rf bin
+	- rm -rf wterm
+	- cd src/plugin; make clean
+	- cd src/vttest; make clean

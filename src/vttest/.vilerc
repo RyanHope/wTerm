@@ -1,0 +1,11 @@
+; Maintain the C/H code w/o tabs
+source ~tom/.vilerc
+store-procedure my_read_hook
+	~if &loc cmode
+	setl sw=2
+	setl ts=2
+	setl notabinsert
+	~endif
+	HighlightFilter
+~endm
+setv $read-hook "my_read_hook"

@@ -10,4 +10,6 @@ APPDIR=${APPS}/usr/palm/applications/${APPID}
 
 sed -i -e "/${APPID}/d" /var/palm/data/jailusers
 
+rm -rf /etc/profile.d/${APPID}
+
 exit 0
