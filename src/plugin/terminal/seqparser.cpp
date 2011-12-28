@@ -94,7 +94,7 @@ void ControlSeqParser::buildLookup()
 
 	addLookupEntry("[", CS_CURSOR_POSITION_REPORT, 0, 2, 1, 'R');
 	addLookupEntry("[", CS_CURSOR_POSITION, 0, 2, 1, 'H');
-	addLookupEntry("[", CS_CURSOR_POSITION, 0, 1, 1, 'f');
+	addLookupEntry("[", CS_CURSOR_POSITION, 0, 2, 1, 'f');
 	addLookupEntry("[", CS_CURSOR_UP, 0, 1, 1, 'A');
 	addLookupEntry("[", CS_CURSOR_DOWN, 0, 1, 1, 'B');
 	addLookupEntry("[", CS_CURSOR_FORWARD, 0, 1, 1, 'C');
@@ -113,6 +113,9 @@ void ControlSeqParser::buildLookup()
 
 	addLookupEntry("", CS_KEYPAD_APP_MODE, 0, 0, 1, '=');
 	addLookupEntry("", CS_KEYPAD_NUM_MODE, 0, 0, 1, '>');
+
+	addLookupEntry("", CS_INDEX, 0, 0, 0, 'D');
+	addLookupEntry("", CS_REVERSE_INDEX, 0, 0, 0, 'M');
 
 	addLookupEntry("(", CS_USER_MAPPING, 0, 0, 0, 'K');
 

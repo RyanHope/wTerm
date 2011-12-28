@@ -65,6 +65,12 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 
 	switch (nToken)
 	{
+	case CS_INDEX: //ESCD
+		moveCursorDown(1, true);
+		break;
+	case CS_REVERSE_INDEX: //ESCM
+		moveCursorUp(1, true);
+		break;
 	case CS_CURSOR_POSITION: //ESC[<Line>;<Column>H or ESC[<Line>;<Column>f
 		values[0] = (values[0] <= 0) ? 1 : values[0];
 		values[1] = (values[1] <= 0) ? 1 : values[1];

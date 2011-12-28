@@ -109,6 +109,9 @@ typedef enum
 	CS_MODE_SET, //ESC[<?><Value>;...;<Value>h
 	CS_MODE_RESET, //ESC[<?><Value>;...;<Value>l
 
+	CS_INDEX, //ESCD INDEX
+	CS_REVERSE_INDEX, //ESCM REVERSE INDEX
+
 	CS_KEYPAD_APP_MODE, //ESC=
 	CS_KEYPAD_NUM_MODE, //ESC>
 
