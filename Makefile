@@ -7,15 +7,19 @@ APPID 		:= $(VENDOR).$(APP)
 VERSION		:= $(shell cat appinfo.json | grep version | cut -f 2 -d ":" | cut -f 2 -d "\"")
 IPK			:= $(APPID)_$(VERSION)_$(ARCH).ipk
 
-.PHONY: install clean
+.PHONY: package install clean
 
-ipk/$(IPK): wterm bin/vttest
-	- rm -rf ipk
+package: clean-package ipk/$(IPK)
+
+ipk/$(IPK): wterm bin/vttest clean-package
 	- mkdir -p ipk
 	- palm-package -X excludes.txt .
 	- mv $(APPID)_*.ipk ipk/$(IPK)
 	- ar q ipk/$(IPK) pmPostInstall.script
 	- ar q ipk/$(IPK) pmPreRemove.script
+
+clean-package:
+	- rm -rf ipk
 
 bin:
 	- mkdir -p bin
@@ -31,7 +35,7 @@ bin/vttest: bin
 uninstall:
 	- palm-install -r $(APPID)
 
-install: ipk/$(IPK)
+install: package
 	- palm-install ipk/$(IPK)
 	
 test: install
