@@ -828,7 +828,7 @@ void TerminalState::setMargin(int nTop, int nBottom)
 	m_nTopMargin = nTop;
 	m_nBottomMargin = nBottom;
 
-	setCursorLocation(1, 1);
+	cursorHome();
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -1648,5 +1648,5 @@ void TerminalState::getLineGraphicsState(int nLine, TSLineGraphicsState_t **stat
 
 void TerminalState::resetTerminal() {
 	setTerminalModeFlags(TS_TM_AUTO_REPEAT|TS_TM_AUTO_WRAP|TS_TM_COLUMN);
-	cursorHome();
+	setMargin(1,getDisplayScreenSize().getY());
 }
