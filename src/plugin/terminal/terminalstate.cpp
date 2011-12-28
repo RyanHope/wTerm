@@ -1058,6 +1058,8 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 	DataBuffer *line, *nextLine;
 	bool bPrint = true;
 
+	int nCols = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+
 	if (!bIgnoreNonPrintable && !isPrintable(c))
 	{
 		bPrint = processNonPrintableChar(c);
@@ -1065,7 +1067,7 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 
 	if (isPrintable(c) || bPrint)
 	{
-		if (displayLoc.getX() > getDisplayScreenSize().getX())
+		if (displayLoc.getX() > nCols)
 		{
 			if ((getTerminalModeFlags() & TS_TM_AUTO_WRAP) > 0)
 			{
@@ -1145,7 +1147,7 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 
 		if (bAdvanceCursor)
 		{
-			if (displayLoc.getX() >= getDisplayScreenSize().getX())
+			if (displayLoc.getX() >= nCols)
 			{
 				if ((getTerminalModeFlags() & TS_TM_AUTO_WRAP) > 0)
 				{
@@ -1642,4 +1644,9 @@ void TerminalState::getLineGraphicsState(int nLine, TSLineGraphicsState_t **stat
 	}
 
 	pthread_mutex_unlock(&m_rwLock);
+}
+
+void TerminalState::resetTerminal() {
+	setTerminalModeFlags(TS_TM_AUTO_REPEAT|TS_TM_AUTO_WRAP|TS_TM_COLUMN);
+	cursorHome();
 }

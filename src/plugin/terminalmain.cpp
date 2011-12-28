@@ -87,7 +87,7 @@ int main()
 		if (terminal->start() == 0) //Non-blocking, creates a thread to read and a child process for slave device.
 		{
 			//Enable autowrap
-			sdlTerminal->getTerminalState()->addTerminalModeFlags(TS_TM_AUTO_WRAP);
+			sdlTerminal->getTerminalState()->resetTerminal();
 
 			sdlTerminal->setExtTerminal(terminal);
 			terminal->setExtTerminal(sdlTerminal);
