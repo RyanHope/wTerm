@@ -3,11 +3,12 @@ ifdef DEVICE
 	ifeq ($(shell uname -s),Darwin)
 		MARCH_TUNE=-O2 -march=armv7-a -mtune=cortex-a8 -mfpu=neon -mfloat-abi=softfp
 		CXX=/opt/PalmPDK/arm-gcc/bin/arm-none-linux-gnueabi-g++
+		ROOT=/opt/PalmPDK/device
 	else
 		MARCH_TUNE=-O2 -march=armv7-a -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp
 		CXX=/srv/preware/build/toolchain/cs07q3armel/build/arm-2007q3/bin/arm-none-linux-gnueabi-g++
+		ROOT=/srv/preware/build/staging/armv7/usr
 	endif
-	ROOT=/srv/preware/build/staging/armv7/usr
 else
 	ARCH=i686
 	ifeq ($(shell uname -s),Darwin)
