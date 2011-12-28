@@ -29,7 +29,7 @@ enyo.kind({
         	name: 'terminal',
 			kind: 'Terminal',
 			bgcolor: '000000',
-			width: 1020, height: 400 // 30x145
+			width: 1020, height: 390 // 30x145
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal})
 		this.$.terminal.vkb = this.$.vkb
