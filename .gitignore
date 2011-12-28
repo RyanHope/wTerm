@@ -7,3 +7,5 @@ wterm
 *.la
 *.a
 .directory
+bin
+ipk

@@ -2,39 +2,43 @@ include Makefile.inc
 
 APP			:= wterm
 VENDOR		:= us.ryanhope
-APPID 		:= ${VENDOR}.${APP}
+APPID 		:= $(VENDOR).$(APP)
 
 VERSION		:= $(shell cat appinfo.json | grep version | cut -f 2 -d ":" | cut -f 2 -d "\"")
-IPK			:= ${APPID}_${VERSION}_${ARCH}.ipk
+IPK			:= $(APPID)_$(VERSION)_$(ARCH).ipk
 
 .PHONY: install clean
 
-${IPK}: clean wterm bin/vttest 
-	palm-package -X excludes.txt .
-	- mv ${APPID}_*.ipk ${IPK}
-	ar q ${IPK} pmPostInstall.script
-	ar q ${IPK} pmPreRemove.script
+ipk/$(IPK): wterm bin/vttest
+	- rm -rf ipk
+	- mkdir -p ipk
+	- palm-package -X excludes.txt .
+	- mv $(APPID)_*.ipk ipk/$(IPK)
+	- ar q ipk/$(IPK) pmPostInstall.script
+	- ar q ipk/$(IPK) pmPreRemove.script
 
 bin:
 	- mkdir -p bin
 
 wterm: bin
-	- cd src/plugin; ${MAKE}
-	- cp src/plugin/wterm wterm
+	- cd src/plugin; $(MAKE)
+	- mv src/plugin/wterm wterm
 
 bin/vttest: bin
-	cd src/vttest; CC=${CC} ./configure --host=${HOST}; ${MAKE}
-	cp src/vttest/vttest bin/vttest
+	- cd src/vttest; $(MAKE)
+	- mv src/vttest/vttest bin/vttest
 
 uninstall:
-	- palm-install -r ${APPID}
+	- palm-install -r $(APPID)
 
-install: ${IPK}
-	palm-install ${IPK}
-	palm-launch ${APPID}
+install: ipk/$(IPK)
+	- palm-install ipk/$(IPK)
+	
+test: install
+	- palm-launch $(APPID)
 
 clean:
-	- rm -rf *.ipk
+	- rm -rf ipk
 	- rm -rf bin
 	- rm -rf wterm
 	- cd src/plugin; make clean
