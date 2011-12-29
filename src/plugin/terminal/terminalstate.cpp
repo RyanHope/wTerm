@@ -781,14 +781,15 @@ Point TerminalState::getDisplayScreenSize()
 }
 
 void TerminalState::displayScreenAlignmentPattern() {
-	int nScreenWidth = m_displayScreenSize.getX();
-	int nScreenHeight = m_displayScreenSize.getY();
-	for (int w=1;w<=nScreenWidth;w++) {
-		for (int h=1;h<=nScreenHeight;h++) {
-			setCursorLocation(w,h);
+	int nCols = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+	int nRows = m_displayScreenSize.getY();
+	for (int r=0;r<nRows;r++) {
+		for (int c=0;c<nCols;c++) {
+			setCursorLocation(c+1,r+1);
 			insertChar(69, false);
 		}
 	}
+	setCursorLocation(1,1);
 }
 
 /**
@@ -1648,5 +1649,6 @@ void TerminalState::getLineGraphicsState(int nLine, TSLineGraphicsState_t **stat
 
 void TerminalState::resetTerminal() {
 	setTerminalModeFlags(TS_TM_AUTO_REPEAT|TS_TM_AUTO_WRAP|TS_TM_COLUMN);
+	eraseScreen();
 	setMargin(1,getDisplayScreenSize().getY());
 }
