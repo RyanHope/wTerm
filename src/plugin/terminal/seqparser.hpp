@@ -112,6 +112,12 @@ typedef enum
 	CS_INDEX, //ESCD INDEX
 	CS_REVERSE_INDEX, //ESCM REVERSE INDEX
 
+	CS_VPA, //ESC[<Value>d Line Position Absolute
+	CS_CHA, //ESC[<Value>G Cursor Character Absolute
+	CS_ECH, //ESC[<Value>X Erase Characters
+	CS_IL, //ESC[<Value>L Insert Lines
+	CS_DL, //ESC[<Value>M Delete Lines
+
 	CS_KEYPAD_APP_MODE, //ESC=
 	CS_KEYPAD_NUM_MODE, //ESC>
 

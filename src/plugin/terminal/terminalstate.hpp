@@ -279,6 +279,8 @@ public:
 	void addGraphicsState(int nColumn, int nLine, TSColor_t foregroundColor, TSColor_t backgroundColor, int nGraphicsMode, TSGraphicsModeOp_t op, bool bTrim);
 
 	void resetTerminal();
+	void insertLines(int nLines);
+	void deleteLines(int nLines);
 };
 
 #endif

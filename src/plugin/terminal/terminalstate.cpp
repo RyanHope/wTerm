@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <syslog.h>
 
 const char TerminalState::BLANK = '\x20';
 
@@ -367,6 +368,43 @@ void TerminalState::eraseScreen()
 	pthread_mutex_lock(&m_rwLock);
 
 	erase(Point(1, 1), m_displayScreenSize);
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
+void TerminalState::insertLines(int nLines)
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	int curLine = convertToDisplayLocation(m_cursorLoc).getY();
+
+
+	if (curLine >= m_nTopMargin && curLine < m_nBottomMargin) {
+		for (int i=0; i<nLines; i++) {
+			if (curLine-1+i < m_nBottomMargin) {
+				m_data.erase(m_data.begin()+m_nBottomMargin-1);
+				m_data.insert(m_data.begin()+curLine-1+i, new DataBuffer());
+			}
+		}
+	}
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
+void TerminalState::deleteLines(int nLines)
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	int curLine = convertToDisplayLocation(m_cursorLoc).getY();
+
+	if (curLine >= m_nTopMargin && curLine < m_nBottomMargin) {
+		for (int i=0; i<nLines; i++) {
+			if (curLine-1+i < m_nBottomMargin) {
+				m_data.erase(m_data.begin()+curLine-1+i);
+				m_data.insert(m_data.begin()+m_nBottomMargin-1, new DataBuffer());
+			}
+		}
+	}
 
 	pthread_mutex_unlock(&m_rwLock);
 }
