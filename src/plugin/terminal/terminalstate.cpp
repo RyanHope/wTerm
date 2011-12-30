@@ -1707,7 +1707,7 @@ void TerminalState::getLineGraphicsState(int nLine, TSLineGraphicsState_t **stat
 }
 
 void TerminalState::resetTerminal() {
-	setTerminalModeFlags(TS_TM_AUTO_REPEAT|TS_TM_AUTO_WRAP|TS_TM_COLUMN);
+	setTerminalModeFlags(TS_TM_AUTO_REPEAT|TS_TM_AUTO_WRAP|TS_TM_COLUMN|TS_TM_CURSOR);
 	eraseScreen();
 	setMargin(1,getDisplayScreenSize().getY());
 }

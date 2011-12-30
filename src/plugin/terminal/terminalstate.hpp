@@ -83,6 +83,11 @@ typedef enum
 	 */
 	TS_TM_SCREEN = 256,
 
+	/**
+	 * Set to show the cursor, otherwise, hide the cursor.
+	 */
+	TS_TM_CURSOR = 512,
+
 	TS_TM_MAX
 } TSTermMode_t;
 

@@ -507,7 +507,8 @@ void SDLTerminal::redraw()
 			nLine++;
 		}
 
-		drawCursor(m_terminalState->getCursorLocation().getX(), m_terminalState->getCursorLocation().getY());
+		if (m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR)
+			drawCursor(m_terminalState->getCursorLocation().getX(), m_terminalState->getCursorLocation().getY());
 	}
 
 	if (sBuffer != NULL)

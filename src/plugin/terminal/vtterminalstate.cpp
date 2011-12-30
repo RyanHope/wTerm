@@ -280,6 +280,10 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			{
 				addTerminalModeFlags(TS_TM_NEW_LINE);
 			}
+			else if (values[i] == 25)
+			{
+				addTerminalModeFlags(TS_TM_CURSOR);
+			}
 		}
 		break;
 	case CS_MODE_RESET: //ESC[<?><Value>;...;<Value>l
@@ -326,6 +330,10 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			else if (values[i] == 20)
 			{
 				removeTerminalModeFlags(TS_TM_NEW_LINE);
+			}
+			else if (values[i] == 25)
+			{
+				removeTerminalModeFlags(TS_TM_CURSOR);
 			}
 		}
 		break;
