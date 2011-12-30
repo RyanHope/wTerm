@@ -6,7 +6,8 @@ enyo.kind({
 	published: {
 		width: 0,
 		height: 0,
-		vkb: null
+		vkb: null,
+		prefs: null
 	},
 		
 	events: {
@@ -37,7 +38,8 @@ enyo.kind({
 			onPluginConnected: 'pluginConnected',
 			onPluginDisconnected: 'pluginDisconnected',
 			width: this.width,
-			height: this.height
+			height: this.height,
+			params: [this.prefs.get('fontSize').toString(10)]
 		})
 	},
 		

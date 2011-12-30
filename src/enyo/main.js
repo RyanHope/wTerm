@@ -8,8 +8,8 @@ enyo.kind({
 
 	components: [
 		{kind: "AppMenu", components: [
-			{caption: "About", onclick: "openAbout"}
-			//{caption: "Preferences", onclick: "openPrefs"}
+			{caption: "About", onclick: "openAbout"},
+			{caption: "Preferences", onclick: "openPrefs", onClose: 'refresh'}
 		]},
 		{
 			kind: 'Popup2',
@@ -23,17 +23,18 @@ enyo.kind({
 		}
 	],
 
-  	initComponents: function() {
-        this.inherited(arguments)
-        this.createComponent({
-        	name: 'terminal',
+	initComponents: function() {
+    this.inherited(arguments)
+    this.createComponent({kind: 'Preferences', name: 'preferences', prefs: this.prefs, onClose: 'refresh'})
+    this.createComponent({
+    	name: 'terminal',
 			kind: 'Terminal',
+			prefs: this.prefs,
 			bgcolor: '000000',
 			width: 1020, height: 390 // 30x145
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal})
 		this.$.terminal.vkb = this.$.vkb
-		this.createComponent({kind: 'Preferences', name: 'preferences', prefs: this.prefs, onClose: 'refresh'})
 	},
 
 	openAbout: function() {
@@ -48,6 +49,7 @@ enyo.kind({
 	},
 
 	refresh: function() {
+		this.log("This is refresh!")
 	}
 
 })

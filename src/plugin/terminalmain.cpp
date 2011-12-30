@@ -60,7 +60,7 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 	return PDL_TRUE;
 }
 
-int main()
+int main(int argc, const char* argv[])
 {
 
 	openlog("us.ryanhope.wterm.plugin", LOG_PID, LOG_USER);
@@ -69,6 +69,7 @@ int main()
 	Terminal *terminal = new Terminal();
 
 	sdlTerminal->start();
+	sdlTerminal->setFontSize(atoi(argv[1]));
 
 	PDL_Init(0);
 

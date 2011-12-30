@@ -1,6 +1,7 @@
 function Prefs() {
 	
-	this.defaults = {	
+	this.defaults = {
+		fontSize: 12
 	}
 	
 	for (key in this.defaults)

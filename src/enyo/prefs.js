@@ -6,7 +6,7 @@ enyo.kind({
 	modal: true,
 	autoClose: false,
 	dismissWithClick: false,
-	width: "680px",
+	width: "420px",
 	align: 'center',
 		
 	published: {
@@ -32,8 +32,7 @@ enyo.kind({
 				{kind: "RadioGroup", name: "myGroup", onclick: "myGroupClick", value: 'general',
 		      		components: [
 		          		{caption: "General", value: "general", width: '120px'},
-					]
-		  		}
+					]}
 			]
 		},
 		{
@@ -43,12 +42,14 @@ enyo.kind({
 			style: 'padding: 8px;',
 			name: 'general',
 			components: [
-				{kind: "Group", caption: "TERM", flex: 1, components: [
-          			{kind: "Input", name: 'defaultTERM', alwaysLooksFocused: true, flex: 1},
-      			]}
-			]
-		},
-		{flex:1},
+				{kind: "Group", flex: 1, components: [
+					{kind: 'HFlexBox', align: "center", components: [
+						{content: "Font Size", style: "padding-left: 8px", flex: 1},
+						{kind: "IntegerPicker", name: 'fontSize', label: '', min: 8, max: 22}
+					]}
+  			]}
+			]},
+			{flex:1},
   		{
   			layoutKind: "HFlexLayout",
   			pack: "center",
@@ -74,11 +75,11 @@ enyo.kind({
 	
 	rendered: function() {
 		this.$.myGroup.setValue('general')
-		this.$.defaultTERM.setValue(this.prefs.get('term'))
+		this.$.fontSize.setValue(this.prefs.get('fontSize'))
 	},
 	
 	closePrefs: function(inSender, inEvent) {
-		this.prefs.set('defaultTERM',this.$.defaultTERM.value)
+		this.prefs.set('fontSize',this.$.fontSize.value)
 		this.doClose()
 		this.close()
 	},

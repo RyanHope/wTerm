@@ -12,4 +12,5 @@ Features
 --------
 
 * Hardware accelerated with OpenGL
-* Custom 74 key virtual keyboard 
+* Custom 74 key virtual keyboard
+* Customizable font size
