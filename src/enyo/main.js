@@ -49,7 +49,8 @@ enyo.kind({
 	},
 
 	refresh: function() {
-		this.log("This is refresh!")
+		var size = this.$.terminal.setFontSize(this.prefs.get('fontSize'))
+		this.log("Font size: "+size)
 	}
 
 })

@@ -26,6 +26,15 @@
 
 SDLTerminal *sdlTerminal;
 
+PDL_bool setFontSize(PDL_JSParameters *params) {
+	sdlTerminal->setFontSize(PDL_GetJSParamInt(params, 0));
+	char *reply = 0;
+	asprintf(&reply, "%d", sdlTerminal->getFontSize());
+	PDL_JSReply(params, reply);
+	free(reply);
+	return PDL_TRUE;
+}
+
 PDL_bool getFontSize(PDL_JSParameters *params) {
 	char *reply = 0;
 	asprintf(&reply, "%d", sdlTerminal->getFontSize());
@@ -76,6 +85,7 @@ int main(int argc, const char* argv[])
 	PDL_RegisterJSHandler("pushKeyEvent", pushKeyEvent);
 	PDL_RegisterJSHandler("getDimensions", getDimensions);
 	PDL_RegisterJSHandler("getFontSize", getFontSize);
+	PDL_RegisterJSHandler("setFontSize", setFontSize);
 
 	PDL_JSRegistrationComplete();
 	PDL_CallJS("ready", NULL, 0);

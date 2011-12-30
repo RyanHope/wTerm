@@ -71,6 +71,10 @@ enyo.kind({
   	
   	getFontSize: function() {
   		return parseInt(this.$.plugin.callPluginMethod('getFontSize'),10)
+  	},
+  	
+  	setFontSize: function(fontSize) {
+  		return parseInt(this.$.plugin.callPluginMethod('setFontSize', fontSize),10)
   	}
   	
 })
