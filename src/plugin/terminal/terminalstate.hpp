@@ -281,6 +281,7 @@ public:
 	void resetTerminal();
 	void insertLines(int nLines);
 	void deleteLines(int nLines);
+	void deleteCharacters(int nChars);
 };
 
 #endif

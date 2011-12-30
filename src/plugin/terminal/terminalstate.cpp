@@ -372,6 +372,16 @@ void TerminalState::eraseScreen()
 	pthread_mutex_unlock(&m_rwLock);
 }
 
+void TerminalState::deleteCharacters(int nChars)
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	Point cursor = convertToDisplayLocation(m_cursorLoc);
+	m_data[cursor.getY() - 1]->clear(cursor.getX() - 1, nChars, true);
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
 void TerminalState::insertLines(int nLines)
 {
 	pthread_mutex_lock(&m_rwLock);
