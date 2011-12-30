@@ -75,13 +75,16 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		erase(Point(m_cursorLoc.getX(), m_cursorLoc.getY()), Point(m_cursorLoc.getX()+values[0], m_cursorLoc.getY()));
 		break;
 	case CS_IL: //ESC[<Lines>L
-		insertLines((values[0]>0) ? values[0] : 1);
+		insertLines(values[0] ? values[0] : 1);
 		break;
 	case CS_DL: //ESC[<Lines>M
-		deleteLines((values[0]>0) ? values[0] : 1);
+		deleteLines(values[0] ? values[0] : 1);
 		break;
 	case CS_DCH: //ESC[<Chars>P
-		deleteCharacters(values[0]);
+		deleteCharacters(values[0] ? values[0] : 1);
+		break;
+	case CS_ICH: //ESC[<Blanks>@
+		insertBlanks(values[0] ? values[0] : 1);
 		break;
 	case CS_INDEX: //ESCD
 		moveCursorDown(1, true);

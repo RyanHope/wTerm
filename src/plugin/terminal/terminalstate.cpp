@@ -828,6 +828,17 @@ Point TerminalState::getDisplayScreenSize()
 	return m_displayScreenSize;
 }
 
+void TerminalState::insertBlanks(int nBlanks)
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	Point cursor = convertToDisplayLocation(m_cursorLoc);
+	for (int i=0; i<nBlanks; i++)
+		m_data[cursor.getY()-1]->insert(cursor.getX()-1, " ", 1);
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
 void TerminalState::displayScreenAlignmentPattern() {
 	int nCols = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
 	int nRows = m_displayScreenSize.getY();

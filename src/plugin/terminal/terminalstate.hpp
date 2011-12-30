@@ -282,6 +282,7 @@ public:
 	void insertLines(int nLines);
 	void deleteLines(int nLines);
 	void deleteCharacters(int nChars);
+	void insertBlanks(int nBlanks);
 };
 
 #endif
