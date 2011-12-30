@@ -254,6 +254,54 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			{
 				m_terminalState->sendCursorCommand(VTTS_CURSOR_LEFT, extTerminal);
 			}
+			else if (sym == SDLK_F1)
+			{
+				extTerminal->insertData("\033OP\0", 4);
+			}
+			else if (sym == SDLK_F2)
+			{
+				extTerminal->insertData("\033OQ\0", 4);
+			}
+			else if (sym == SDLK_F3)
+			{
+				extTerminal->insertData("\033OR\0", 4);
+			}
+			else if (sym == SDLK_F4)
+			{
+				extTerminal->insertData("\033OS\0", 4);
+			}
+			else if (sym == SDLK_F5)
+			{
+				extTerminal->insertData("\033[15~\0", 5);
+			}
+			else if (sym == SDLK_F6)
+			{
+				extTerminal->insertData("\033[17~\0", 5);
+			}
+			else if (sym == SDLK_F7)
+			{
+				extTerminal->insertData("\033[18~\0", 5);
+			}
+			else if (sym == SDLK_F8)
+			{
+				extTerminal->insertData("\033[19~\0", 5);
+			}
+			else if (sym == SDLK_F9)
+			{
+				extTerminal->insertData("\033[20~\0", 5);
+			}
+			else if (sym == SDLK_F10)
+			{
+				extTerminal->insertData("\033[21~\0", 5);
+			}
+			else if (sym == SDLK_F11)
+			{
+				extTerminal->insertData("\033[23~\0", 5);
+			}
+			else if (sym == SDLK_F12)
+			{
+				extTerminal->insertData("\033[24~\0", 5);
+			}
 			//Printable characters.
 			else if ((unicode & 0xFF80) == 0 )
 			{
