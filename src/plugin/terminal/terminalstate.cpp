@@ -1706,8 +1706,23 @@ void TerminalState::getLineGraphicsState(int nLine, TSLineGraphicsState_t **stat
 	pthread_mutex_unlock(&m_rwLock);
 }
 
+void TerminalState::tabForward(int nTabs) {
+	if (tabs.size()==0 || nTabs>tabs.size())
+		setCursorLocation(m_displayScreenSize.getX(),m_cursorLoc.getY());
+	else {
+		int i = 0, t = 0;
+		while (t!=nTabs) {
+			if (tabs[i]>m_cursorLoc.getX())
+				t++;
+			i++;
+		}
+		setCursorLocation(tabs[i-1],m_cursorLoc.getY());
+	}
+}
+
 void TerminalState::resetTerminal() {
 	setTerminalModeFlags(TS_TM_AUTO_REPEAT|TS_TM_AUTO_WRAP|TS_TM_COLUMN|TS_TM_CURSOR);
 	eraseScreen();
 	setMargin(1,getDisplayScreenSize().getY());
+	tabs.clear();
 }

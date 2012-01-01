@@ -112,6 +112,8 @@ typedef enum
 
 	CS_INDEX, //ESCD INDEX
 	CS_REVERSE_INDEX, //ESCM REVERSE INDEX
+	CS_TAB_SET, //ESCH TAB SET
+	CS_TAB_CLEAR, //ESC[<Value>g
 
 	CS_VPA, //ESC[<Value>d Line Position Absolute
 	CS_CHA, //ESC[<Value>G Cursor Character Absolute
@@ -141,9 +143,7 @@ typedef enum
 	CS_MOVE_UP, //ESCD
 	CS_MOVE_DOWN, //ESCM
 	CS_MOVE_NEXT_LINE, //ESCE
-
-	CS_TAB, //ESCH
-	CS_TAB_CLEAR, //ESC[<Value>;...;<Value>g
+	CS_TAB_FORWARD, //ESC[<Value>I
 
 	CS_DOUBLE_HEIGHT_LINE_TOP, //ESC#3
 	CS_DOUBLE_HEIGHT_LINE_BOTTOM, //ESC#4

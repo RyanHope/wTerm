@@ -19,6 +19,8 @@
 #include "vtterminalstate.hpp"
 #include "seqparser.hpp"
 
+#include <algorithm>
+
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
@@ -85,6 +87,25 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		break;
 	case CS_ICH: //ESC[<Blanks>@
 		insertBlanks(values[0] ? values[0] : 1);
+		break;
+	case CS_TAB_SET: //ESCH TAB SET
+		tabs.push_back(m_cursorLoc.getX());
+		sort(tabs.begin(),tabs.end());
+		break;
+	case CS_TAB_CLEAR: //ESCH TAB CLEAR
+		switch (values[0]) {
+			case 0:
+				for (int i=0; i < tabs.size(); ++i)
+					if (tabs[i] == m_cursorLoc.getX())
+						tabs.erase(tabs.begin()+i);
+				break;
+			case 3:
+				tabs.clear();
+				break;
+		}
+		break;
+	case CS_TAB_FORWARD: //ESC[<Tabs>I
+		tabForward(values[0]);
 		break;
 	case CS_INDEX: //ESCD
 		moveCursorDown(1, true);
@@ -387,13 +408,6 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_MOVE_NEXT_LINE: //ESCE
 		moveCursorNextLine();
 		break;
-	case CS_TAB: //ESCH
-		insertChar(9, false, false);
-		break;
-	case CS_TAB_CLEAR: //ESC[<Value>;...;<Value>g
-		//FIXME Not implemented.
-		syslog(LOG_ERR, "VT100 Control Sequence: CLEAR TAB not implemented.", nToken);
-		break;
 	case CS_DOUBLE_HEIGHT_LINE_TOP: //ESC#3
 	case CS_DOUBLE_HEIGHT_LINE_BOTTOM: //ESC#4
 	case CS_SINGLE_WIDTH_LINE: //ESC#5
@@ -480,6 +494,10 @@ void VTTerminalState::insertString(const char *sStr, ExtTerminal *extTerminal)
 		if (nToken != CS_UNKNOWN)
 		{
 			processControlSeq(nToken, values, nValues, extTerminal);
+		}
+		else if (sStr[nCurrentIndex] == '\t')
+		{
+			tabForward(1);
 		}
 		else
 		{

@@ -116,6 +116,9 @@ void ControlSeqParser::buildLookup()
 
 	addLookupEntry("", CS_INDEX, 0, 0, 0, 'D');
 	addLookupEntry("", CS_REVERSE_INDEX, 0, 0, 0, 'M');
+	addLookupEntry("", CS_TAB_SET, 0, 0, 0, 'H');
+	addLookupEntry("[", CS_TAB_CLEAR, 0, 1, 0, 'g');
+	addLookupEntry("[", CS_TAB_FORWARD, 0, 1, 1, 'I');
 
 	addLookupEntry("(", CS_USER_MAPPING, 0, 0, 0, 'K');
 
@@ -142,9 +145,6 @@ void ControlSeqParser::buildLookup()
 	addLookupEntry("", CS_MOVE_UP, 0, 0, 1, 'D');
 	addLookupEntry("", CS_MOVE_DOWN, 0, 0, 1, 'M');
 	addLookupEntry("", CS_MOVE_NEXT_LINE, 0, 0, 1, 'E');
-
-	addLookupEntry("", CS_TAB, 0, 0, 1, 'H');
-	addLookupEntry("[", CS_TAB_CLEAR, 0, -1, 1, 'g');
 
 	addLookupEntry("#", CS_DOUBLE_HEIGHT_LINE_TOP, 0, 0, 1, '3');
 	addLookupEntry("#", CS_DOUBLE_HEIGHT_LINE_BOTTOM, 0, 0, 1, '4');

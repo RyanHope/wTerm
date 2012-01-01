@@ -203,6 +203,8 @@ protected:
 
 	virtual bool processNonPrintableChar(char &c);
 
+	std::vector<int> tabs;
+
 public:
 	static const char BLANK;
 
@@ -288,6 +290,7 @@ public:
 	void deleteLines(int nLines);
 	void deleteCharacters(int nChars);
 	void insertBlanks(int nBlanks);
+	void tabForward(int nTabs);
 };
 
 #endif
