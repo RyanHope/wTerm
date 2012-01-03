@@ -43,7 +43,8 @@ int cmp_graphics_state(TSLineGraphicsState_t const *state1, TSLineGraphicsState_
 TerminalState::TerminalState()
 {
 	m_nTermModeFlags = 0;
-	m_charset = TS_CS_NONE;
+	m_g0charset = TS_CS_G0_ASCII;
+	m_g1charset = TS_CS_G1_ASCII;
 	m_bShiftText = false;
 
 	m_shift = false;
@@ -1013,14 +1014,24 @@ TSColor_t TerminalState::getBackgroundColor()
 	return m_currentGraphicsState.backgroundColor;
 }
 
-void TerminalState::setCharset(TSCharset_t charset)
+void TerminalState::setG0Charset(TSCharset_t charset)
 {
-	m_charset = charset;
+	m_g0charset = charset;
 }
 
-TSCharset_t TerminalState::getCharset()
+TSCharset_t TerminalState::getG0Charset()
 {
-	return m_charset;
+	return m_g0charset;
+}
+
+void TerminalState::setG1Charset(TSCharset_t charset)
+{
+	m_g1charset = charset;
+}
+
+TSCharset_t TerminalState::getG1Charset()
+{
+	return m_g1charset;
 }
 
 TSLineGraphicsState_t TerminalState::getCurrentGraphicsState()
@@ -1120,8 +1131,8 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 	DataBuffer *line, *nextLine;
 	bool bPrint = true;
 
-	if ((getCharset() == TS_CS_G0_SPEC) || (getCharset() == TS_CS_G1_SPEC))
-		c = c + 128;
+	if (getShift() && getG0Charset() == TS_CS_G0_SPEC && c>95) c = c + 128;
+	else if (!getShift() && getG1Charset() == TS_CS_G1_SPEC && c>95) c = c + 128;
 
 	int nCols = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
 

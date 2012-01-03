@@ -163,7 +163,8 @@ class TerminalState
 {
 protected:
 	int m_nTermModeFlags;
-	TSCharset_t m_charset;
+	TSCharset_t m_g0charset;
+	TSCharset_t m_g1charset;
 
 	TSLineGraphicsState_t m_defaultGraphicsState;
 	TSLineGraphicsState_t m_currentGraphicsState;
@@ -270,8 +271,10 @@ public:
 	TSLineGraphicsState_t getCurrentGraphicsState();
 	TSLineGraphicsState_t getDefaultGraphicsState();
 
-	void setCharset(TSCharset_t charset);
-	TSCharset_t getCharset();
+	void setG0Charset(TSCharset_t charset);
+	TSCharset_t getG0Charset();
+	void setG1Charset(TSCharset_t charset);
+	TSCharset_t getG1Charset();
 
 	int getBufferScreenHeight();
 	DataBuffer *getBufferLine(int nLineIndex);

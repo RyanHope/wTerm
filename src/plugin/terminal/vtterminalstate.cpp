@@ -364,34 +364,34 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		syslog(LOG_ERR, "VT100 Control Sequence: KEYPAD not implemented.");
 		break;
 	case CS_CHARSET_UK_G0_SET: //ESC(A
-		setCharset(TS_CS_G0_UK);
+		setG0Charset(TS_CS_G0_UK);
 		break;
 	case CS_CHARSET_UK_G1_SET: //ESC)A
-		setCharset(TS_CS_G1_UK);
+		setG1Charset(TS_CS_G1_UK);
 		break;
 	case CS_CHARSET_US_G0_SET: //ESC(B
-		setCharset(TS_CS_G0_ASCII);
+		setG0Charset(TS_CS_G0_ASCII);
 		break;
 	case CS_CHARSET_US_G1_SET: //ESC)B
-		setCharset(TS_CS_G1_ASCII);
+		setG1Charset(TS_CS_G1_ASCII);
 		break;
 	case CS_CHARSET_SPEC_G0_SET: //ESC(0
-		setCharset(TS_CS_G0_SPEC);
+		setG0Charset(TS_CS_G0_SPEC);
 		break;
 	case CS_CHARSET_SPEC_G1_SET: //ESC)0
-		setCharset(TS_CS_G1_SPEC);
+		setG1Charset(TS_CS_G1_SPEC);
 		break;
 	case CS_CHARSET_ALT_G0_SET: //ESC(1
-		setCharset(TS_CS_G0_ALT_STD);
+		setG0Charset(TS_CS_G0_ALT_STD);
 		break;
 	case CS_CHARSET_ALT_G1_SET: //ESC)1
-		setCharset(TS_CS_G1_ALT_STD);
+		setG1Charset(TS_CS_G1_ALT_STD);
 		break;
 	case CS_CHARSET_ALT_SPEC_G0_SET: //ESC(2
-		setCharset(TS_CS_G0_ALT_SPEC);
+		setG0Charset(TS_CS_G0_ALT_SPEC);
 		break;
 	case CS_CHARSET_ALT_SPEC_G1_SET: //ESC)2
-		setCharset(TS_CS_G1_ALT_SPEC);
+		setG1Charset(TS_CS_G1_ALT_SPEC);
 		break;
 	case CS_MARGIN_SET: //ESC[<Top>;<Bottom>r
 		values[0] = (values[0] <= 0) ? 1 : values[0];
