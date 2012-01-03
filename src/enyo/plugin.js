@@ -65,6 +65,11 @@ enyo.kind({
   		this.pushKeyEvent(0,sym,unicode)
   	},
   	
+  	resize: function(width, height) {
+  		this.$.plugin.setWidth(width)
+  		this.$.plugin.setHeight(height)
+  	},
+  	
   	getDimensions: function() {
   		return enyo.json.parse(this.$.plugin.callPluginMethod('getDimensions'))
   	},

@@ -52,10 +52,6 @@ SDLCore::SDLCore()
 	m_bRunning = false;
 	m_bSuspend = false;
 
-	//In webOS, width and height must be 0.
-	m_nWidth = 0;
-	m_nHeight = 0;
-
 	m_surface = NULL;
 	m_nFontSize = 12;
 	m_foregroundColor = COLOR_WHITE_BRIGHT;
@@ -103,8 +99,7 @@ int SDLCore::init()
 		return -1;
 	}
 
-	//For 2D mode, flags must be set to 0 for webOS.
-	m_surface = SDL_SetVideoMode(m_nWidth, m_nHeight, 0, SDL_OPENGL);
+	m_surface = SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
 
 	if (m_surface == NULL)
 	{
@@ -301,6 +296,14 @@ void SDLCore::eventLoop()
 					redraw();
 					setDirty(BUFFER_DIRTY_BIT);
 					break;
+				case SDL_VIDEORESIZE:
+					closeFonts();
+					m_surface = SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
+					initOpenGL();
+					createFonts(m_nFontSize);
+					redraw();
+					setDirty(BUFFER_DIRTY_BIT);
+					break;
 				default:
 					break;
 			}
@@ -431,25 +434,6 @@ bool SDLCore::isSuspend()
 void SDLCore::setSuspend(bool bSuspend)
 {
 	m_bSuspend = bSuspend;
-}
-
-/**
- * Sets the resolution of the application window. Will not take affect until next start.
- */
-void SDLCore::setResolution(int nWidth, int nHeight)
-{
-	if (nWidth < 0)
-	{
-		nWidth = 0;
-	}
-
-	if (nHeight < 0)
-	{
-		nHeight = 0;
-	}
-
-	m_nWidth = nWidth;
-	m_nHeight = nHeight;
 }
 
 int SDLCore::getFontSize()

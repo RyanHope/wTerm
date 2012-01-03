@@ -32,7 +32,7 @@ enyo.kind({
 			kind: 'Terminal',
 			prefs: this.prefs,
 			bgcolor: '000000',
-			width: 1020, height: 390 // 30x145
+			width: window.innerWidth, height: 390 // 30x145
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal})
 		this.$.terminal.vkb = this.$.vkb
@@ -40,10 +40,13 @@ enyo.kind({
 	
 	toggleVKB: function() {
 		this.$.vkb.setShowing(!this.$.vkb.showing)
-		if (this.$.vkb.showing)
+		if (this.$.vkb.showing) {
 			this.$.vkbToggle.setCaption('Hide Virtual Keyboard')
-		else
+			this.$.terminal.resize(window.innerWidth, 390)
+		} else {
 			this.$.vkbToggle.setCaption('Show Virtual Keyboard')
+			this.$.terminal.resize(window.innerWidth, window.innerHeight)
+		}
 	},
 
 	openAbout: function() {
