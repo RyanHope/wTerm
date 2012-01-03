@@ -307,7 +307,6 @@ void SDLCore::eventLoop()
 					createFonts(m_nFontSize);
 					updateDisplaySize();
 					redraw();
-					setDirty(BUFFER_DIRTY_BIT);
 					break;
 				default:
 					break;
