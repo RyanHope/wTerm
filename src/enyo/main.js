@@ -9,6 +9,7 @@ enyo.kind({
 	components: [
 		{kind: "AppMenu", components: [
 			{caption: "About", onclick: "openAbout"},
+			{name: 'vkbToggle', caption: "Hide Virtual Keyboard", onclick: 'toggleVKB'},
 			{caption: "Preferences", onclick: "openPrefs", onClose: 'refresh'}
 		]},
 		{
@@ -24,10 +25,10 @@ enyo.kind({
 	],
 
 	initComponents: function() {
-    this.inherited(arguments)
-    this.createComponent({kind: 'Preferences', name: 'preferences', prefs: this.prefs, onClose: 'refresh'})
-    this.createComponent({
-    	name: 'terminal',
+    	this.inherited(arguments)
+    	this.createComponent({kind: 'Preferences', name: 'preferences', prefs: this.prefs, onClose: 'refresh'})
+		this.createComponent({
+    		name: 'terminal',
 			kind: 'Terminal',
 			prefs: this.prefs,
 			bgcolor: '000000',
@@ -35,6 +36,14 @@ enyo.kind({
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal})
 		this.$.terminal.vkb = this.$.vkb
+	},
+	
+	toggleVKB: function() {
+		this.$.vkb.setShowing(!this.$.vkb.showing)
+		if (this.$.vkb.showing)
+			this.$.vkbToggle.setCaption('Hide Virtual Keyboard')
+		else
+			this.$.vkbToggle.setCaption('Show Virtual Keyboard')
 	},
 
 	openAbout: function() {
