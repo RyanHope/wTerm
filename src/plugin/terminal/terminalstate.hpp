@@ -171,6 +171,8 @@ protected:
 
 	bool m_bShiftText;
 
+	bool m_shift;
+
 	Point m_cursorLoc; //Bound by the display screen size. Home location is (1, 1).
 	Point m_displayScreenSize; //The actual terminal screen size.
 
@@ -291,6 +293,8 @@ public:
 	void deleteCharacters(int nChars);
 	void insertBlanks(int nBlanks);
 	void tabForward(int nTabs);
+	void setShift(bool shift);
+	bool getShift();
 };
 
 #endif

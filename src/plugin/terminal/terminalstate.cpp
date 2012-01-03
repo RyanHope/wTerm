@@ -46,6 +46,8 @@ TerminalState::TerminalState()
 	m_charset = TS_CS_NONE;
 	m_bShiftText = false;
 
+	m_shift = false;
+
 	m_nTopBufferLine = 0;
 	m_nNumBufferLines = 0;
 	m_nTopMargin = 0;
@@ -1118,6 +1120,9 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 	DataBuffer *line, *nextLine;
 	bool bPrint = true;
 
+	if ((getCharset() == TS_CS_G0_SPEC) || (getCharset() == TS_CS_G1_SPEC))
+		c = c + 128;
+
 	int nCols = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
 
 	if (!bIgnoreNonPrintable && !isPrintable(c))
@@ -1725,4 +1730,13 @@ void TerminalState::resetTerminal() {
 	eraseScreen();
 	setMargin(1,getDisplayScreenSize().getY());
 	tabs.clear();
+}
+
+void TerminalState::setShift(bool shift) {
+	m_shift = shift;
+	syslog(LOG_ERR, "SHIFT STATE: %s", m_shift?"IN":"OUT");
+}
+
+bool TerminalState::getShift() {
+	return m_shift;
 }

@@ -174,7 +174,7 @@ int SDLCore::createFonts(int nSize)
 		return -1;
 	}
 
-	TTF_Font *font = TTF_OpenFont("./fonts/AnonymousPro.ttf", nSize);
+	TTF_Font *font = TTF_OpenFont("./fonts/AnonymousProSpecial.ttf", nSize);
 	TTF_Font *fontBold = TTF_OpenFont("./fonts/AnonymousProB.ttf", nSize);
 	TTF_Font *fontItal = TTF_OpenFont("./fonts/AnonymousProI.ttf", nSize);
 	TTF_Font *fontBoldItal = TTF_OpenFont("./fonts/AnonymousProBI.ttf", nSize);

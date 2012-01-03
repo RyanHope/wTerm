@@ -499,6 +499,14 @@ void VTTerminalState::insertString(const char *sStr, ExtTerminal *extTerminal)
 		{
 			tabForward(1);
 		}
+		else if (sStr[nCurrentIndex] == 14)
+		{
+			setShift(false);
+		}
+		else if (sStr[nCurrentIndex] == 15)
+		{
+			setShift(true);
+		}
 		else
 		{
 			//Treat as text.
