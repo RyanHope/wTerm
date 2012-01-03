@@ -69,6 +69,7 @@ TerminalState::TerminalState()
 
 	setDisplayScreenSize(80, 40);
 	setMargin(1, 40);
+	cursorHome();
 	saveCursor();
 }
 
@@ -890,8 +891,6 @@ void TerminalState::setMargin(int nTop, int nBottom)
 
 	m_nTopMargin = nTop;
 	m_nBottomMargin = nBottom;
-
-	cursorHome();
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -1740,7 +1739,11 @@ void TerminalState::resetTerminal() {
 	setTerminalModeFlags(TS_TM_AUTO_REPEAT|TS_TM_AUTO_WRAP|TS_TM_COLUMN|TS_TM_CURSOR);
 	eraseScreen();
 	setMargin(1,getDisplayScreenSize().getY());
+	cursorHome();
 	tabs.clear();
+	setShift(true);
+	setG0Charset(TS_CS_G0_ASCII);
+	setG1Charset(TS_CS_G1_ASCII);
 }
 
 void TerminalState::setShift(bool shift) {

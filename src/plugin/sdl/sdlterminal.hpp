@@ -64,6 +64,8 @@ public:
 	void setForegroundColor(TSColor_t color);
 	void setBackgroundColor(TSColor_t color);
 	void setGraphicsState(TSLineGraphicsState_t &state);
+
+	void updateDisplaySize();
 };
 
 #endif

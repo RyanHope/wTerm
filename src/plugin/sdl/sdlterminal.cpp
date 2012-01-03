@@ -100,11 +100,19 @@ SDLTerminal::~SDLTerminal()
 	}
 }
 
+void SDLTerminal::updateDisplaySize()
+{
+	m_terminalState->setDisplayScreenSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
+	/* This should probably get called here too. ~PTM */
+	//ExtTerminal *extTerminal = getExtTerminal();
+	//extTerminal->setWindowSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
+}
+
 int SDLTerminal::initCustom()
 {
 	m_terminalState = new VTTerminalState();
 
-	m_terminalState->setDisplayScreenSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
+	updateDisplaySize();
 
 	SDL_EnableUNICODE(1);
 

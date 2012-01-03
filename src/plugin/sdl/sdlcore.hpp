@@ -127,6 +127,7 @@ public:
 	int getMaximumColumnsOfText();
 
 	virtual void redraw();
+	virtual void updateDisplaySize();
 };
 
 #endif

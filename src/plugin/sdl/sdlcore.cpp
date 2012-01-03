@@ -243,6 +243,10 @@ void SDLCore::redraw()
 {
 }
 
+void SDLCore::updateDisplaySize()
+{
+}
+
 /**
  * Main event loop. Does not return until the application exits.
  */
@@ -301,6 +305,7 @@ void SDLCore::eventLoop()
 					m_surface = SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
 					initOpenGL();
 					createFonts(m_nFontSize);
+					updateDisplaySize();
 					redraw();
 					setDirty(BUFFER_DIRTY_BIT);
 					break;

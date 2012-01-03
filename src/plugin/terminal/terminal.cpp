@@ -513,6 +513,8 @@ void Terminal::setWindowSize(int nWidth, int nHeight)
 
 	m_winSize.ws_col = nWidth;
 	m_winSize.ws_row = nHeight;
+
+	setWindowSize();
 }
 
 /**
@@ -528,7 +530,7 @@ int Terminal::setWindowSize()
 
 	if (m_winSize.ws_col <= 0 || m_winSize.ws_row <= 0)
 	{
-syslog(LOG_WARNING, "Invalid window size.");
+		syslog(LOG_WARNING, "Invalid window size.");
 		return -1;
 	}
 

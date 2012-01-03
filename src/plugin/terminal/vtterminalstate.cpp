@@ -398,6 +398,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		values[1] = (values[1] <= 0) ? m_nNumBufferLines : values[1];
 		values[1] = (values[1] <= values[0]) ? (values[0] + 1) : values[1];
 		setMargin(values[0], values[1]);
+		cursorHome();
 		break;
 	case CS_MOVE_UP: //ESCD
 		moveCursorUp(1, true);
