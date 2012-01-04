@@ -23,29 +23,14 @@
 #include <SDL/SDL_ttf.h>
 #include <map>
 
+#include "terminal/vtterminalstate.hpp"
+
 /**
  * Initializer and basic 2D function for webOS SDL.
  */
 class SDLCore
 {
 protected:
-	static const SDL_Color COLOR_WHITE;
-	static const SDL_Color COLOR_BLACK;
-	static const SDL_Color COLOR_RED;
-	static const SDL_Color COLOR_GREEN;
-	static const SDL_Color COLOR_YELLOW;
-	static const SDL_Color COLOR_BLUE;
-	static const SDL_Color COLOR_MAGENTA;
-	static const SDL_Color COLOR_CYAN;
-	static const SDL_Color COLOR_WHITE_BRIGHT;
-	static const SDL_Color COLOR_BLACK_BRIGHT;
-	static const SDL_Color COLOR_RED_BRIGHT;
-	static const SDL_Color COLOR_GREEN_BRIGHT;
-	static const SDL_Color COLOR_YELLOW_BRIGHT;
-	static const SDL_Color COLOR_BLUE_BRIGHT;
-	static const SDL_Color COLOR_MAGENTA_BRIGHT;
-	static const SDL_Color COLOR_CYAN_BRIGHT;
-
 	static const int BUFFER_DIRTY_BIT;
 	static const int FONT_DIRTY_BIT;
 	static const int FOREGROUND_COLOR_DIRTY_BIT;
@@ -126,6 +111,7 @@ public:
 	int getMaximumLinesOfText();
 	int getMaximumColumnsOfText();
 
+	virtual SDL_Color getColor(TSColor_t color);
 	virtual void redraw();
 	virtual void updateDisplaySize();
 };

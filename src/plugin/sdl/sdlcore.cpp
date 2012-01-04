@@ -25,23 +25,6 @@
 #include <stdio.h>
 #include <syslog.h>
 
-const SDL_Color SDLCore::COLOR_BLACK = { 0, 0, 0 };
-const SDL_Color SDLCore::COLOR_RED = { 194, 54, 33 };
-const SDL_Color SDLCore::COLOR_GREEN = { 37, 188, 36 };
-const SDL_Color SDLCore::COLOR_YELLOW = { 173, 173, 39 } ;
-const SDL_Color SDLCore::COLOR_BLUE = { 73, 46, 225 };
-const SDL_Color SDLCore::COLOR_MAGENTA = { 211, 56, 211 };
-const SDL_Color SDLCore::COLOR_CYAN = { 51, 187, 200 };
-const SDL_Color SDLCore::COLOR_WHITE = { 203, 204, 205 };
-const SDL_Color SDLCore::COLOR_BLACK_BRIGHT = { 129, 131, 131 };
-const SDL_Color SDLCore::COLOR_RED_BRIGHT = { 252, 57, 31 };
-const SDL_Color SDLCore::COLOR_GREEN_BRIGHT = { 37, 188, 36 };
-const SDL_Color SDLCore::COLOR_YELLOW_BRIGHT = { 234, 236, 35 };
-const SDL_Color SDLCore::COLOR_BLUE_BRIGHT = { 88, 51, 255 };
-const SDL_Color SDLCore::COLOR_MAGENTA_BRIGHT = { 249, 53, 248 };
-const SDL_Color SDLCore::COLOR_CYAN_BRIGHT = { 20, 240, 240 };
-const SDL_Color SDLCore::COLOR_WHITE_BRIGHT = { 233, 235, 235 };
-
 const int SDLCore::BUFFER_DIRTY_BIT = 1;
 const int SDLCore::FONT_DIRTY_BIT = 2;
 const int SDLCore::FOREGROUND_COLOR_DIRTY_BIT = 4;
@@ -54,8 +37,32 @@ SDLCore::SDLCore()
 
 	m_surface = NULL;
 	m_nFontSize = 12;
-	m_foregroundColor = COLOR_WHITE_BRIGHT;
-	m_backgroundColor = COLOR_BLACK;
+
+	SDL_Color m_colors[] = {
+			{ 0, 0, 0 }, // COLOR_BLACK
+			{ 187, 0, 0 }, // COLOR_RED
+			{ 0, 187, 0 }, // COLOR_GREEN
+			{ 187, 187, 0 }, // COLOR_YELLOW
+			{ 0, 0, 187 }, // COLOR_BLUE
+			{ 187, 0, 187 }, // COLOR_MAGENTA
+			{ 0, 187, 187 }, // COLOR_CYAN
+			{ 187, 187, 187 }, // COLOR_WHITE
+			{ 85, 85, 85 }, // COLOR_BLACK_BRIGHT
+			{ 255, 85, 85 }, // COLOR_RED_BRIGHT
+			{ 85, 255, 85 }, // COLOR_GREEN_BRIGHT
+			{ 255, 255, 85 }, // COLOR_YELLOW_BRIGHT
+			{ 85, 85, 255 }, // COLOR_BLUE_BRIGHT
+			{ 255, 85, 255 }, // COLOR_MAGENTA_BRIGHT
+			{ 85, 255, 255 }, // COLOR_CYAN_BRIGHT
+			{ 255, 255, 255 }, // COLOR_WHITE_BRIGHT
+			{ 187, 187, 187 }, // COLOR_FOREGROUND
+			{ 0, 0, 0 }, // COLOR_BACKGROUND
+			{ 255, 255, 255 }, // COLOR_FOREGROUND_BRIGHT
+			{ 0, 0, 0 }, // COLOR_BACKGROUND_BRIGHT
+	};
+
+	m_foregroundColor = m_colors[TS_COLOR_WHITE_BRIGHT];
+	m_backgroundColor = m_colors[TS_COLOR_BLACK];
 
 	m_fontNormal = NULL;
 	m_fontBold = NULL;
@@ -244,6 +251,10 @@ void SDLCore::redraw()
 }
 
 void SDLCore::updateDisplaySize()
+{
+}
+
+SDL_Color SDLCore::getColor(TSColor_t color)
 {
 }
 
@@ -511,7 +522,7 @@ void SDLCore::drawCursor(int nColumn, int nLine)
 	int nX = (nColumn - 1) * m_nFontWidth;
 	int nY = (nLine - 1) * m_nFontHeight;
 
-	drawRect(nX, nY, m_nFontWidth, m_nFontHeight, COLOR_WHITE_BRIGHT, 0.35f);
+	drawRect(nX, nY, m_nFontWidth, m_nFontHeight, getColor(TS_COLOR_WHITE_BRIGHT), 0.35f);
 }
 
 /**

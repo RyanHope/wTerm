@@ -52,6 +52,9 @@ protected:
 	void toggleKeyMod(Term_KeyMod_t keyMod);
 	void disableKeyMod();
 
+private:
+	SDL_Color m_colors[];
+
 public:
 	SDLTerminal();
 	virtual ~SDLTerminal();
@@ -61,6 +64,7 @@ public:
 	TerminalState *getTerminalState();
 
 	SDL_Color getColor(TSColor_t color);
+	void setColor(TSColor_t color, int r, int g, int b);
 	void setForegroundColor(TSColor_t color);
 	void setBackgroundColor(TSColor_t color);
 	void setGraphicsState(TSLineGraphicsState_t &state);

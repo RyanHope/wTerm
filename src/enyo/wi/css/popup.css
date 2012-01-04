@@ -1,0 +1,31 @@
+.wi-popup.enyo-popup {
+	-webkit-transform: scale(1.5);
+	opacity: 0;
+	-webkit-transition-property: opacity, -webkit-transform;
+	-webkit-transition-duration: 0.2s;
+}
+.wi-popup.enyo-popup.open {
+	-webkit-transform: scale(1);
+	opacity: 1;
+}
+
+.wi-popup.enyo-popup .container {
+	margin: 0 -7px;
+	height: 100%;
+}
+.wi-popup.enyo-popup .container .header {
+	margin: -14px -7px 0 -7px;
+}
+.wi-popup.enyo-popup .container .scroller {
+	width: 100%;
+	height: 100%;
+}
+.wi-popup.enyo-popup .container .scroller .enyo-scrollfades-top {
+	background: url(../images/popup-scrollfade-top.png) top center repeat-x;
+}
+.wi-popup.enyo-popup .container .scroller .enyo-scrollfades-bottom {
+	background: url(../images/popup-scrollfade-bottom.png) bottom center repeat-x;
+}
+.wi-popup.enyo-popup .container .toolbar {
+	margin: 0 -7px -14px -7px;
+}
