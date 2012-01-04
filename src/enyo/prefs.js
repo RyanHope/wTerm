@@ -53,10 +53,6 @@ enyo.kind({
 		this.$.shadow.addRemoveClass("flyInFromLeft", this.flyInFrom == "left");
 		this.$.dragHandle.addRemoveClass("flyInFromLeft", this.flyInFrom == "left");
 	},
-	findZIndex: function() {
-		// we want to make sure this is on top of any other popups, even popups that open after this is opened.
-		return 400;
-	},
 	close: function(e, reason) {
 		if (!this.doBypassClose(e)) {
 			this.inherited(arguments);
@@ -113,6 +109,7 @@ enyo.kind({
 	},
 	fontSizeChanged: function() {
 		this.prefs.set('fontSize',this.$.fontSize.value)
+		this.terminal.setFontSize(this.prefs.get('fontSize'))
 	},
 	rendered: function() {
 		this.getColors()

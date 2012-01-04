@@ -35,6 +35,8 @@ PDL_bool setColor(PDL_JSParameters *params) {
 
 	sdlTerminal->setColor(color,r,g,b);
 
+	sdlTerminal->refresh();
+
 	return PDL_TRUE;
 }
 
@@ -44,6 +46,9 @@ PDL_bool setFontSize(PDL_JSParameters *params) {
 	asprintf(&reply, "%d", sdlTerminal->getFontSize());
 	PDL_JSReply(params, reply);
 	free(reply);
+
+	sdlTerminal->refresh();
+
 	return PDL_TRUE;
 }
 

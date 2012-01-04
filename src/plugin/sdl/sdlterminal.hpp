@@ -59,6 +59,8 @@ public:
 	SDLTerminal();
 	virtual ~SDLTerminal();
 
+	void refresh();
+
 	void redraw();
 	void insertData(const char *data, size_t size);
 	TerminalState *getTerminalState();

@@ -595,6 +595,18 @@ void SDLTerminal::redraw()
 	}
 }
 
+void SDLTerminal::refresh()
+{
+	SDL_Event event;
+
+	setDirty(BUFFER_DIRTY_BIT);
+
+	memset(&event, 0, sizeof(event));
+	event.type = SDL_VIDEOEXPOSE;
+
+	SDL_PushEvent(&event);
+}
+
 /**
  * Accepts NULL terminating string.
  */
@@ -602,24 +614,8 @@ void SDLTerminal::insertData(const char *data, size_t size)
 {
 	if (size > 0)
 	{
-		/*
-		printf("Insert string: ");
-		for (int i=0; i<strlen(data); i++)
-		{
-			printf("[%d]'%c'", data[i], data[i]);
-		}
-		printf("\n");
-		*/
-
-		SDL_Event event;
-
 		m_terminalState->insertString(data, getExtTerminal());
-		setDirty(BUFFER_DIRTY_BIT);
-
-		memset(&event, 0, sizeof(event));
-		event.type = SDL_VIDEOEXPOSE;
-
-		SDL_PushEvent(&event);
+		refresh();
 	}
 }
 
