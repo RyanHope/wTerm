@@ -18,6 +18,7 @@
 
 #include "sdl/sdlterminal.hpp"
 #include "util/databuffer.hpp"
+#include "terminal/terminal.hpp"
 
 #include <GLES/gl.h>
 #include <SDL/SDL_image.h>
@@ -102,10 +103,17 @@ SDLTerminal::~SDLTerminal()
 
 void SDLTerminal::updateDisplaySize()
 {
-	m_terminalState->setDisplayScreenSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
+	if (m_terminalState != NULL) 
+	{
+		m_terminalState->setDisplayScreenSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
+		m_terminalState->setMargin(1,m_terminalState->getDisplayScreenSize().getY());
+		Terminal *extTerminal = (Terminal *)getExtTerminal();
+		if (extTerminal != NULL)
+			extTerminal->setWindowSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
+		
+		//m_terminalState->resetTerminal();
+	}
 	/* This should probably get called here too. ~PTM */
-	//ExtTerminal *extTerminal = getExtTerminal();
-	//extTerminal->setWindowSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
 }
 
 int SDLTerminal::initCustom()
