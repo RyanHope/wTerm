@@ -310,6 +310,13 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			{
 				extTerminal->insertData("\033[24~\0", 5);
 			}
+			else if (sym == SDLK_RETURN)
+			{
+				if ((m_terminalState->getTerminalModeFlags() & TS_TM_NEW_LINE) > 0)
+					extTerminal->insertData("\r\n", 2);
+				else
+					extTerminal->insertData("\r", 1);
+			}
 			//Printable characters.
 			else if ((unicode & 0xFF80) == 0 )
 			{
