@@ -120,6 +120,10 @@ typedef enum
 	TS_COLOR_MAGENTA_BRIGHT,
 	TS_COLOR_CYAN_BRIGHT,
 	TS_COLOR_WHITE_BRIGHT,
+	TS_COLOR_FOREGROUND,
+	TS_COLOR_BACKGROUND,
+	TS_COLOR_FOREGROUND_BRIGHT,
+	TS_COLOR_BACKGROUND_BRIGHT,
 	TS_COLOR_MAX
 } TSColor_t;
 
@@ -146,6 +150,8 @@ typedef struct
 	int nColumn;
 	int nLine;
 	int nGraphicsMode;
+	TSCharset_t g0charset;
+	TSCharset_t g1charset;
 } TSLineGraphicsState_t;
 
 typedef enum
@@ -163,8 +169,6 @@ class TerminalState
 {
 protected:
 	int m_nTermModeFlags;
-	TSCharset_t m_g0charset;
-	TSCharset_t m_g1charset;
 
 	TSLineGraphicsState_t m_defaultGraphicsState;
 	TSLineGraphicsState_t m_currentGraphicsState;
@@ -182,6 +186,8 @@ protected:
 
 	pthread_mutexattr_t m_rwLockAttr;
 	pthread_mutex_t m_rwLock;
+
+	bool unsolicited;
 
 	int m_nNumBufferLines; //Must at least be the height of the display screen size.
 	int m_nTopBufferLine; //The index number in the buffer that corresponds to the first line of the display. Starts at 0.

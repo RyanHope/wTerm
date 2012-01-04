@@ -318,6 +318,13 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			{
 				extTerminal->insertData("\033[24~\0", 5);
 			}
+			else if (sym == SDLK_RETURN)
+			{
+				if ((m_terminalState->getTerminalModeFlags() & TS_TM_NEW_LINE) > 0)
+					extTerminal->insertData("\r\n", 2);
+				else
+					extTerminal->insertData("\r", 1);
+			}
 			//Printable characters.
 			else if ((unicode & 0xFF80) == 0 )
 			{
@@ -544,9 +551,9 @@ void SDLTerminal::redraw()
 		int nY = m_surface->h - 32;
 
 		glColor4f(
-			((float)COLOR_WHITE_BRIGHT.r) / 255.0f,
-			((float)COLOR_WHITE_BRIGHT.g) / 255.0f,
-			((float)COLOR_WHITE_BRIGHT.b) / 255.0f,
+			((float)m_colors[TS_COLOR_WHITE_BRIGHT].r) / 255.0f,
+			((float)m_colors[TS_COLOR_WHITE_BRIGHT].g) / 255.0f,
+			((float)m_colors[TS_COLOR_WHITE_BRIGHT].b) / 255.0f,
 			0.70f);
 
 		if (m_keyMod == TERM_KEYMOD_CTRL)
@@ -596,6 +603,18 @@ void SDLTerminal::redraw()
 	}
 }
 
+void SDLTerminal::refresh()
+{
+	SDL_Event event;
+
+	setDirty(BUFFER_DIRTY_BIT);
+
+	memset(&event, 0, sizeof(event));
+	event.type = SDL_VIDEOEXPOSE;
+
+	SDL_PushEvent(&event);
+}
+
 /**
  * Accepts NULL terminating string.
  */
@@ -603,24 +622,8 @@ void SDLTerminal::insertData(const char *data, size_t size)
 {
 	if (size > 0)
 	{
-		/*
-		printf("Insert string: ");
-		for (int i=0; i<strlen(data); i++)
-		{
-			printf("[%d]'%c'", data[i], data[i]);
-		}
-		printf("\n");
-		*/
-
-		SDL_Event event;
-
 		m_terminalState->insertString(data, getExtTerminal());
-		setDirty(BUFFER_DIRTY_BIT);
-
-		memset(&event, 0, sizeof(event));
-		event.type = SDL_VIDEOEXPOSE;
-
-		SDL_PushEvent(&event);
+		refresh();
 	}
 }
 
@@ -631,43 +634,14 @@ TerminalState *SDLTerminal::getTerminalState()
 
 SDL_Color SDLTerminal::getColor(TSColor_t color)
 {
-	switch (color)
-	{
-	case TS_COLOR_BLACK:
-		return COLOR_BLACK;
-	case TS_COLOR_RED:
-		return COLOR_RED;
-	case TS_COLOR_GREEN:
-		return COLOR_GREEN;
-	case TS_COLOR_YELLOW:
-		return COLOR_YELLOW;
-	case TS_COLOR_BLUE:
-		return COLOR_BLUE;
-	case TS_COLOR_MAGENTA:
-		return COLOR_MAGENTA;
-	case TS_COLOR_CYAN:
-		return COLOR_CYAN;
-	case TS_COLOR_WHITE:
-		return COLOR_WHITE;
-	case TS_COLOR_BLACK_BRIGHT:
-		return COLOR_BLACK_BRIGHT;
-	case TS_COLOR_RED_BRIGHT:
-		return COLOR_RED_BRIGHT;
-	case TS_COLOR_GREEN_BRIGHT:
-		return COLOR_GREEN_BRIGHT;
-	case TS_COLOR_YELLOW_BRIGHT:
-		return COLOR_YELLOW_BRIGHT;
-	case TS_COLOR_BLUE_BRIGHT:
-		return COLOR_BLUE_BRIGHT;
-	case TS_COLOR_MAGENTA_BRIGHT:
-		return COLOR_MAGENTA_BRIGHT;
-	case TS_COLOR_CYAN_BRIGHT:
-		return COLOR_CYAN_BRIGHT;
-	case TS_COLOR_WHITE_BRIGHT:
-		return COLOR_WHITE_BRIGHT;
-	}
+	return m_colors[color];
+}
 
-	return COLOR_BLACK;
+void SDLTerminal::setColor(TSColor_t color, int r, int g, int b)
+{
+	m_colors[color].r = r;
+	m_colors[color].g = g;
+	m_colors[color].b = b;
 }
 
 void SDLTerminal::setForegroundColor(TSColor_t color)

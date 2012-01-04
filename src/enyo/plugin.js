@@ -45,6 +45,7 @@ enyo.kind({
 		
   	pluginReady: function(inSender, inResponse, inRequest) {
   		this.log('~~~~~ Terminal Plugin Ready ~~~~~')
+  		this.setColors()
   		//this.doPluginReady()
   	},
   	pluginConnected: function(inSender, inResponse, inRequest) {
@@ -80,6 +81,14 @@ enyo.kind({
   	
   	setFontSize: function(fontSize) {
   		return parseInt(this.$.plugin.callPluginMethod('setFontSize', fontSize),10)
+  	},
+  	
+  	setColors: function() {
+  		var colors = this.prefs.get('colors')
+  		for (i in colors) {
+	  		this.error("SET COLORS BITCH!", i, colors[i][0], colors[i][1], colors[i][2])
+  			this.$.plugin.callPluginMethod('setColor', i, colors[i][0], colors[i][1], colors[i][2])
+  		}
   	}
   	
 })

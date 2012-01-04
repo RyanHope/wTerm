@@ -1,0 +1,11 @@
+.enyo-group-label-right {
+	margin: -26px 0px;
+	padding: 4px 0 12px 10px;
+	font-size: .7rem;
+	color: #fff;
+	text-shadow: #646454 0 1px 0;
+	font-weight: bold;
+	height: 44px;
+	text-transform: uppercase;
+	float: right;
+}

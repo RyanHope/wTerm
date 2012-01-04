@@ -43,11 +43,11 @@ int cmp_graphics_state(TSLineGraphicsState_t const *state1, TSLineGraphicsState_
 TerminalState::TerminalState()
 {
 	m_nTermModeFlags = 0;
-	m_g0charset = TS_CS_G0_ASCII;
-	m_g1charset = TS_CS_G1_ASCII;
 	m_bShiftText = false;
 
 	m_shift = false;
+
+	unsolicited = false;
 
 	m_nTopBufferLine = 0;
 	m_nNumBufferLines = 0;
@@ -57,8 +57,10 @@ TerminalState::TerminalState()
 	memset(&m_defaultGraphicsState, 0, sizeof(m_defaultGraphicsState));
 	m_defaultGraphicsState.nColumn = 1;
 	m_defaultGraphicsState.nLine = 1;
-	m_defaultGraphicsState.foregroundColor = TS_COLOR_WHITE_BRIGHT;
-	m_defaultGraphicsState.backgroundColor = TS_COLOR_BLACK;
+	m_defaultGraphicsState.foregroundColor = TS_COLOR_FOREGROUND;
+	m_defaultGraphicsState.backgroundColor = TS_COLOR_BACKGROUND;
+	m_defaultGraphicsState.g0charset = TS_CS_G0_ASCII;
+	m_defaultGraphicsState.g1charset = TS_CS_G1_ASCII;
 
 	memcpy(&m_currentGraphicsState, &m_defaultGraphicsState, sizeof(m_currentGraphicsState));
 	memcpy(&m_savedGraphicsState, &m_defaultGraphicsState, sizeof(m_savedGraphicsState));
@@ -1015,22 +1017,22 @@ TSColor_t TerminalState::getBackgroundColor()
 
 void TerminalState::setG0Charset(TSCharset_t charset)
 {
-	m_g0charset = charset;
+	m_currentGraphicsState.g0charset = charset;
 }
 
 TSCharset_t TerminalState::getG0Charset()
 {
-	return m_g0charset;
+	return m_currentGraphicsState.g0charset;
 }
 
 void TerminalState::setG1Charset(TSCharset_t charset)
 {
-	m_g1charset = charset;
+	m_currentGraphicsState.g1charset = charset;
 }
 
 TSCharset_t TerminalState::getG1Charset()
 {
-	return m_g1charset;
+	return m_currentGraphicsState.g1charset;
 }
 
 TSLineGraphicsState_t TerminalState::getCurrentGraphicsState()
@@ -1334,6 +1336,8 @@ void TerminalState::saveCursor()
 	m_savedGraphicsState.nGraphicsMode = m_currentGraphicsState.nGraphicsMode;
 	m_savedGraphicsState.foregroundColor = m_currentGraphicsState.foregroundColor;
 	m_savedGraphicsState.backgroundColor = m_currentGraphicsState.backgroundColor;
+	m_savedGraphicsState.g0charset = m_currentGraphicsState.g0charset;
+	m_savedGraphicsState.g1charset = m_currentGraphicsState.g1charset;
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -1349,6 +1353,8 @@ void TerminalState::restoreCursor()
 	m_currentGraphicsState.nGraphicsMode = m_savedGraphicsState.nGraphicsMode;
 	m_currentGraphicsState.foregroundColor = m_savedGraphicsState.foregroundColor;
 	m_currentGraphicsState.backgroundColor = m_savedGraphicsState.backgroundColor;
+	m_currentGraphicsState.g0charset = m_savedGraphicsState.g0charset;
+	m_currentGraphicsState.g1charset = m_savedGraphicsState.g1charset;
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -1744,6 +1750,7 @@ void TerminalState::resetTerminal() {
 	setShift(true);
 	setG0Charset(TS_CS_G0_ASCII);
 	setG1Charset(TS_CS_G1_ASCII);
+	unsolicited = false;
 }
 
 void TerminalState::setShift(bool shift) {

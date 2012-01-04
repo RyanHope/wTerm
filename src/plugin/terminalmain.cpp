@@ -26,12 +26,29 @@
 
 SDLTerminal *sdlTerminal;
 
+PDL_bool setColor(PDL_JSParameters *params) {
+
+	TSColor_t color = (TSColor_t)PDL_GetJSParamInt(params, 0);
+	int r = PDL_GetJSParamInt(params, 1);
+	int g = PDL_GetJSParamInt(params, 2);
+	int b = PDL_GetJSParamInt(params, 3);
+
+	sdlTerminal->setColor(color,r,g,b);
+
+	sdlTerminal->refresh();
+
+	return PDL_TRUE;
+}
+
 PDL_bool setFontSize(PDL_JSParameters *params) {
 	sdlTerminal->setFontSize(PDL_GetJSParamInt(params, 0));
 	char *reply = 0;
 	asprintf(&reply, "%d", sdlTerminal->getFontSize());
 	PDL_JSReply(params, reply);
 	free(reply);
+
+	sdlTerminal->refresh();
+
 	return PDL_TRUE;
 }
 
@@ -82,6 +99,7 @@ int main(int argc, const char* argv[])
 
 	PDL_Init(0);
 
+	PDL_RegisterJSHandler("setColor", setColor);
 	PDL_RegisterJSHandler("pushKeyEvent", pushKeyEvent);
 	PDL_RegisterJSHandler("getDimensions", getDimensions);
 	PDL_RegisterJSHandler("getFontSize", getFontSize);

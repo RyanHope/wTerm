@@ -26,7 +26,16 @@ enyo.kind({
 
 	initComponents: function() {
     	this.inherited(arguments)
-    	this.createComponent({kind: 'Preferences', name: 'preferences', prefs: this.prefs, onClose: 'refresh'})
+    	this.createComponent({
+			name: "prefs", 
+			kind: "Preferences", 
+			style: "width: 320px; top: 0px; bottom: 0; margin-bottom: 0px;", //width: 384px
+			className: "enyo-bg",
+			flyInFrom: "right",
+			onOpen: "pulloutToggle",
+			onClose: "closeRightPullout",
+			prefs: this.prefs
+		})
 		this.createComponent({
     		name: 'terminal',
 			kind: 'Terminal',
@@ -36,6 +45,7 @@ enyo.kind({
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal})
 		this.$.terminal.vkb = this.$.vkb
+		this.$.prefs.terminal = this.$.terminal
 	},
 	
 	toggleVKB: function() {
@@ -57,7 +67,15 @@ enyo.kind({
 	},
 
 	openPrefs: function() {
-		this.$.preferences.openAtTopCenter()
+		//this.$.preferences.openAtTopCenter()
+		if (this.$.prefs.showing)
+			this.$.prefs.close();
+		else {
+			//this.$.messages.hasNode();
+			//this.$.prefs.domStyles['height'] = this.$.messages.node.clientHeight + 'px';
+			this.$.prefs.open();
+			//this.$.nicks.render();
+		}
 	},
 
 	refresh: function() {

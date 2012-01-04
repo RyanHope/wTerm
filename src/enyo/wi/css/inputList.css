@@ -1,0 +1,12 @@
+.wi-input-list .enyo-swipeableitem {
+	padding: 10px 10px;
+	min-height: 1px;
+}
+
+.wi-input-list .enyo-single.enyo-held {
+	border-radius: 10px;
+}
+.wi-input-list .enyo-last.enyo-held {
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+}
