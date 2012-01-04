@@ -57,8 +57,8 @@ TerminalState::TerminalState()
 	memset(&m_defaultGraphicsState, 0, sizeof(m_defaultGraphicsState));
 	m_defaultGraphicsState.nColumn = 1;
 	m_defaultGraphicsState.nLine = 1;
-	m_defaultGraphicsState.foregroundColor = TS_COLOR_WHITE_BRIGHT;
-	m_defaultGraphicsState.backgroundColor = TS_COLOR_BLACK;
+	m_defaultGraphicsState.foregroundColor = TS_COLOR_FOREGROUND;
+	m_defaultGraphicsState.backgroundColor = TS_COLOR_BACKGROUND;
 
 	memcpy(&m_currentGraphicsState, &m_defaultGraphicsState, sizeof(m_currentGraphicsState));
 	memcpy(&m_savedGraphicsState, &m_defaultGraphicsState, sizeof(m_savedGraphicsState));

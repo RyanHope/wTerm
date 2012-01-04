@@ -210,6 +210,8 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				else if (values[i] == 1)
 				{
 					addGraphicsModeFlags(TS_GM_BOLD);
+					if (m_currentGraphicsState.foregroundColor == TS_COLOR_FOREGROUND)
+						setForegroundColor(TS_COLOR_FOREGROUND_BRIGHT);
 				}
 				else if (values[i] == 4)
 				{

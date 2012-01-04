@@ -61,8 +61,8 @@ SDLCore::SDLCore()
 			{ 0, 0, 0 }, // COLOR_BACKGROUND_BRIGHT
 	};
 
-	m_foregroundColor = m_colors[TS_COLOR_WHITE_BRIGHT];
-	m_backgroundColor = m_colors[TS_COLOR_BLACK];
+	m_foregroundColor = m_colors[TS_COLOR_FOREGROUND];
+	m_backgroundColor = m_colors[TS_COLOR_BACKGROUND];
 
 	m_fontNormal = NULL;
 	m_fontBold = NULL;
