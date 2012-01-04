@@ -187,6 +187,8 @@ protected:
 	pthread_mutexattr_t m_rwLockAttr;
 	pthread_mutex_t m_rwLock;
 
+	bool unsolicited;
+
 	int m_nNumBufferLines; //Must at least be the height of the display screen size.
 	int m_nTopBufferLine; //The index number in the buffer that corresponds to the first line of the display. Starts at 0.
 	int m_nTopMargin;

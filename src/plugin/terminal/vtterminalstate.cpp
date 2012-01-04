@@ -455,6 +455,14 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		syslog(LOG_ERR, "VT100 Control Sequence: TERM IDENTIFY not implemented.", nToken);
 		break;
 	case CS_TERM_PARAM: //ESC[<Value>;...;<Value>x
+		if (values[0]) {
+			unsolicited = false;
+			extTerminal->insertData("\x1B[3;1;2;120,120;1;0x", 1);
+		} else {
+			unsolicited = true;
+			extTerminal->insertData("\x1B[2;1;2;120,120;1;0x", 1);
+		}
+		break;
 	case CS_TERM_RESET: //ESCc
 		syslog(LOG_WARNING, "VT100 Control Sequence: TERM RESET partially implemented.", nToken);
 		resetTerminal();

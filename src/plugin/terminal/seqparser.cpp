@@ -161,7 +161,7 @@ void ControlSeqParser::buildLookup()
 	addLookupEntry("[>", CS_DEVICE_ATTR_SECONDARY_RESPONSE, 0, -1, 0, 'c');
 
 	addLookupEntry("", CS_TERM_IDENTIFY, 0, 0, 1, 'Z');
-	addLookupEntry("[", CS_TERM_PARAM, 0, -1, 1, 'x');
+	addLookupEntry("[", CS_TERM_PARAM, 0, 1, 0, 'x');
 	addLookupEntry("", CS_TERM_RESET, 0, 0, 1, 'c');
 }
 

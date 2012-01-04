@@ -47,6 +47,8 @@ TerminalState::TerminalState()
 
 	m_shift = false;
 
+	unsolicited = false;
+
 	m_nTopBufferLine = 0;
 	m_nNumBufferLines = 0;
 	m_nTopMargin = 0;
@@ -1748,6 +1750,7 @@ void TerminalState::resetTerminal() {
 	setShift(true);
 	setG0Charset(TS_CS_G0_ASCII);
 	setG1Charset(TS_CS_G1_ASCII);
+	unsolicited = false;
 }
 
 void TerminalState::setShift(bool shift) {
