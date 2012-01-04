@@ -522,7 +522,7 @@ void SDLCore::drawCursor(int nColumn, int nLine)
 	int nX = (nColumn - 1) * m_nFontWidth;
 	int nY = (nLine - 1) * m_nFontHeight;
 
-	drawRect(nX, nY, m_nFontWidth, m_nFontHeight, getColor(TS_COLOR_WHITE_BRIGHT), 0.35f);
+	drawRect(nX, nY, m_nFontWidth, m_nFontHeight, getColor(TS_COLOR_FOREGROUND), 0.35f);
 }
 
 /**

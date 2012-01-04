@@ -150,6 +150,8 @@ typedef struct
 	int nColumn;
 	int nLine;
 	int nGraphicsMode;
+	TSCharset_t g0charset;
+	TSCharset_t g1charset;
 } TSLineGraphicsState_t;
 
 typedef enum
@@ -167,8 +169,6 @@ class TerminalState
 {
 protected:
 	int m_nTermModeFlags;
-	TSCharset_t m_g0charset;
-	TSCharset_t m_g1charset;
 
 	TSLineGraphicsState_t m_defaultGraphicsState;
 	TSLineGraphicsState_t m_currentGraphicsState;
