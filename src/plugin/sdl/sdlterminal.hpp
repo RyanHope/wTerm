@@ -53,7 +53,7 @@ protected:
 	void disableKeyMod();
 
 private:
-	SDL_Color m_colors[];
+	SDL_Color m_colors[TS_COLOR_MAX];
 
 public:
 	SDLTerminal();

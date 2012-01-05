@@ -18,6 +18,7 @@
 
 #include "sdl/sdlterminal.hpp"
 #include "util/databuffer.hpp"
+#include "terminal/terminal.hpp"
 
 #include <GLES/gl.h>
 #include <SDL/SDL_image.h>
@@ -43,6 +44,16 @@ SDLTerminal::SDLTerminal()
 	m_keyModCtrlLockedSurface = NULL;
 	m_keyModAltLockedSurface = NULL;
 	m_keyModFnLockedSurface = NULL;
+
+	// this is bad practice, enums are not meant for iteration	
+	int i = TS_COLOR_BLACK;
+	while (i != TS_COLOR_MAX)
+	{
+		m_colors[i].r = 0;
+		m_colors[i].b = 0;
+		m_colors[i].g = 0;
+		i++;
+	}
 
 	m_config->parse("./terminal.config");
 }
@@ -102,10 +113,14 @@ SDLTerminal::~SDLTerminal()
 
 void SDLTerminal::updateDisplaySize()
 {
-	m_terminalState->setDisplayScreenSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
-	/* This should probably get called here too. ~PTM */
-	//ExtTerminal *extTerminal = getExtTerminal();
-	//extTerminal->setWindowSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
+	if (m_terminalState != NULL) 
+	{
+		m_terminalState->setDisplayScreenSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
+		m_terminalState->setMargin(1,m_terminalState->getDisplayScreenSize().getY());
+		Terminal *extTerminal = (Terminal *)getExtTerminal();
+		if (extTerminal != NULL)
+			extTerminal->setWindowSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
+	}
 }
 
 int SDLTerminal::initCustom()
@@ -631,6 +646,13 @@ SDL_Color SDLTerminal::getColor(TSColor_t color)
 
 void SDLTerminal::setColor(TSColor_t color, int r, int g, int b)
 {
+/*
+	// Should probably do something like this to prevent worst case scenarios
+	// though maybe just make m_colors a map
+	int colorSize = sizeof(m_colors) / sizeof(SDL_Color);
+	if (color >= colorSize)
+		return;
+*/
 	m_colors[color].r = r;
 	m_colors[color].g = g;
 	m_colors[color].b = b;
