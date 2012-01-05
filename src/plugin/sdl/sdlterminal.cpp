@@ -110,10 +110,7 @@ void SDLTerminal::updateDisplaySize()
 		Terminal *extTerminal = (Terminal *)getExtTerminal();
 		if (extTerminal != NULL)
 			extTerminal->setWindowSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
-		
-		//m_terminalState->resetTerminal();
 	}
-	/* This should probably get called here too. ~PTM */
 }
 
 int SDLTerminal::initCustom()
