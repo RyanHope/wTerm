@@ -84,7 +84,9 @@ enyo.kind({
   	},
   	
   	setColors: function() {
-  		var colors = this.prefs.get('colors')
+  		var colorScheme = this.prefs.get('colorScheme') 
+		var colorSchemes = this.prefs.get('colorSchemes')
+		var colors = colorSchemes[colorScheme]
   		for (i in colors) {
 	  		this.error("SET COLORS BITCH!", i, colors[i][0], colors[i][1], colors[i][2])
   			this.$.plugin.callPluginMethod('setColor', i, colors[i][0], colors[i][1], colors[i][2])

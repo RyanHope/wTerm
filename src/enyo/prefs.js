@@ -59,6 +59,7 @@ enyo.kind({
 		}
 	},
 	updateColors: function() {
+		var colorSchemes = this.prefs.get('colorSchemes')
 		var colors = [
 			this.$.color1.getValue(),
 			this.$.color2.getValue(),
@@ -81,11 +82,14 @@ enyo.kind({
 			this.$.foregroundBright.getValue(),
 			this.$.backgroundBright.getValue(),
 		]
-		this.prefs.set('colors', colors)
+		colorSchemes['Custom'] = colors
+		this.prefs.set('colorSchemes', colorSchemes)
 		this.terminal.setColors()
 	},
 	getColors: function() {
-		var colors = this.prefs.get('colors')
+		var colorScheme = this.prefs.get('colorScheme') 
+		var colorSchemes = this.prefs.get('colorSchemes')
+		var colors = colorSchemes[colorScheme]
 		this.$.color1.setValue(colors[0])
 		this.$.color2.setValue(colors[1])
 		this.$.color3.setValue(colors[2])
