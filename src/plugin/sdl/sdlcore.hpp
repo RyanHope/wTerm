@@ -55,7 +55,6 @@ protected:
 
 private:
 	bool m_bRunning;
-	bool m_bSuspend;
 
 	int m_nWidth;
 	int m_nHeight;
@@ -89,8 +88,6 @@ public:
 	void start();
 	void run();
 	bool isRunning();
-	bool isSuspend();
-	void setSuspend(bool bSuspend);
 
 	void setResolution(int nWidth, int nHeight);
 

@@ -33,7 +33,6 @@ const int SDLCore::BACKGROUND_COLOR_DIRTY_BIT = 8;
 SDLCore::SDLCore()
 {
 	m_bRunning = false;
-	m_bSuspend = false;
 
 	m_surface = NULL;
 	m_nFontSize = 12;
@@ -265,92 +264,46 @@ void SDLCore::eventLoop()
 {
 	// Event descriptor
 	SDL_Event event;
-	Uint32 lOldTime = SDL_GetTicks();
-	Uint32 lCurrentTime = SDL_GetTicks();
-	Uint32 lCycleTimeSlot = 25;
-	Uint32 lSuspendWait = 500;
-	Uint32 lDelay = 0;
 
-	if (!isRunning())
-	{
-		return;
-	}
-
-	setSuspend(false);
-
-	do
-	{
-		while (SDL_PollEvent(&event))
+	while (isRunning()) {
+		SDL_WaitEvent(&event);
+		switch (event.type)
 		{
-			switch (event.type)
-			{
-				case SDL_MOUSEMOTION:
-				case SDL_MOUSEBUTTONDOWN:
-				case SDL_MOUSEBUTTONUP:
-					handleMouseEvent(event);
-					break;
-				case SDL_KEYUP:
-				case SDL_KEYDOWN:
-					handleKeyboardEvent(event);
-					break;
-				case SDL_ACTIVEEVENT:
-					if ((event.active.state & SDL_APPACTIVE) > 0)
-					{
-						setSuspend(event.active.gain == 0);
-					}
-
-					if ((event.active.state & SDL_APPINPUTFOCUS) > 0)
-					{
-						if (isSuspend() && event.active.gain == 1)
-						{
-							setSuspend(false);
-						}
-					}
-					break;
-				case SDL_VIDEOEXPOSE:
-					redraw();
-					setDirty(BUFFER_DIRTY_BIT);
-					break;
-				case SDL_VIDEORESIZE:
-					closeFonts();
-					m_surface = SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
-					initOpenGL();
-					createFonts(m_nFontSize);
-					updateDisplaySize();
-					redraw();
-					break;
-				default:
-					break;
-			}
+			case SDL_MOUSEMOTION:
+			case SDL_MOUSEBUTTONDOWN:
+			case SDL_MOUSEBUTTONUP:
+				handleMouseEvent(event);
+				break;
+			case SDL_KEYUP:
+			case SDL_KEYDOWN:
+				handleKeyboardEvent(event);
+				break;
+			case SDL_ACTIVEEVENT:
+				// Remove old suspend stuff, maybe add back later. ~PTM
+				break;
+			case SDL_VIDEOEXPOSE:
+				redraw();
+				setDirty(BUFFER_DIRTY_BIT);
+				break;
+			case SDL_VIDEORESIZE:
+				closeFonts();
+				m_surface = SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
+				initOpenGL();
+				createFonts(m_nFontSize);
+				updateDisplaySize();
+				redraw();
+				break;
+			case SDL_QUIT:
+				return;
+			default:
+				break;
 		}
-
-		if (!isSuspend() && isDirty(BUFFER_DIRTY_BIT))
+		if (isDirty(BUFFER_DIRTY_BIT))
 		{
 			SDL_GL_SwapBuffers();
 			clearDirty(BUFFER_DIRTY_BIT);
 		}
-
-		lCurrentTime = SDL_GetTicks();
-
-		if (isSuspend())
-		{
-			SDL_Delay(lSuspendWait);
-		}
-		else if ((lCurrentTime - lOldTime) < lCycleTimeSlot)
-		{
-			lDelay = lOldTime + lCycleTimeSlot - lCurrentTime;
-
-			if (lDelay > lCycleTimeSlot)
-			{
-				lDelay = lCycleTimeSlot;
-			}
-
-			SDL_Delay(lDelay);
-		}
-
-		lOldTime = SDL_GetTicks();
-
-	} while (event.type != SDL_QUIT && isRunning());
+	}
 }
 
 /**
@@ -439,16 +392,6 @@ void SDLCore::shutdown()
 bool SDLCore::isRunning()
 {
 	return m_bRunning;
-}
-
-bool SDLCore::isSuspend()
-{
-	return m_bSuspend;
-}
-
-void SDLCore::setSuspend(bool bSuspend)
-{
-	m_bSuspend = bSuspend;
 }
 
 int SDLCore::getFontSize()
