@@ -20,6 +20,7 @@ enyo.kind({
 					]}
 				]},
 				{kind: 'RowGroup', flex :1, caption: 'Color Scheme', components: [
+					{kind: "ListSelector", name: 'colorSchemes', onChange: "colorSchemeChanged"},
 					{name: 'foreground', kind: 'wi.InputColor', caption: 'Foreground', onChanged: 'updateColors'},
 					{name: 'background', kind: 'wi.InputColor', caption: 'Background', onChanged: 'updateColors'},					
 					{name: 'color1', kind: 'wi.InputColor', caption: 'Color1', onChanged: 'updateColors'},
@@ -84,7 +85,9 @@ enyo.kind({
 		]
 		colorSchemes['Custom'] = colors
 		this.prefs.set('colorSchemes', colorSchemes)
+		this.prefs.set('colorScheme', 'Custom')
 		this.terminal.setColors()
+		this.getColorSchemes()
 	},
 	getColors: function() {
 		var colorScheme = this.prefs.get('colorScheme') 
@@ -115,8 +118,22 @@ enyo.kind({
 		this.prefs.set('fontSize',this.$.fontSize.value)
 		this.terminal.setFontSize(this.prefs.get('fontSize'))
 	},
+	getColorSchemes: function() {
+		var colorSchemes = this.prefs.get('colorSchemes')
+		var items = []
+		for (var colorScheme in colorSchemes)
+			items.push(colorScheme)
+		this.$.colorSchemes.setItems(items)
+		this.$.colorSchemes.setValue(this.prefs.get('colorScheme'))
+	},
 	rendered: function() {
 		this.getColors()
 		this.$.fontSize.setValue(this.prefs.get('fontSize'))
+		this.getColorSchemes()
+	},
+	colorSchemeChanged: function() {
+		this.prefs.set('colorScheme', this.$.colorSchemes.getValue())
+		this.terminal.setColors()
+		this.getColors()
 	}
 })

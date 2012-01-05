@@ -13,20 +13,6 @@ enyo.kind({
 	events: {
 		onPluginReady:''
 	},
-	
-	published: {
-		modes: {
-			wrap: true,
-			newline: false,
-			reverse: false,
-			charset: 0,
-			charsetG0: 'US',
-			charsetG1: 'US',
-			origin: 0,
-			insert: false,
-			appkeys: false,
-		}
-	},
 
 	initComponents: function() {
 		this.warn('Creating plugin')
@@ -87,10 +73,8 @@ enyo.kind({
   		var colorScheme = this.prefs.get('colorScheme') 
 		var colorSchemes = this.prefs.get('colorSchemes')
 		var colors = colorSchemes[colorScheme]
-  		for (i in colors) {
-	  		this.error("SET COLORS BITCH!", i, colors[i][0], colors[i][1], colors[i][2])
+  		for (i in colors)
   			this.$.plugin.callPluginMethod('setColor', i, colors[i][0], colors[i][1], colors[i][2])
-  		}
   	}
   	
 })
