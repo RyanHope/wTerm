@@ -90,9 +90,7 @@ enyo.kind({
 		this.getColorSchemes()
 	},
 	getColors: function() {
-		var colorScheme = this.prefs.get('colorScheme') 
-		var colorSchemes = this.prefs.get('colorSchemes')
-		var colors = colorSchemes[colorScheme]
+		var colors = this.terminal.currentColors
 		this.$.color1.setValue(colors[0])
 		this.$.color2.setValue(colors[1])
 		this.$.color3.setValue(colors[2])
