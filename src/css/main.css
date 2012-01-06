@@ -15,3 +15,22 @@
 	margin: 0px;
 	margin-bottom: 6px;
 }
+
+.enyo-button.key2 {
+	font-size: 11px;
+	font-weight: bold;
+	min-height: 21px;
+	min-width: 30px;
+	margin: 0px;
+}
+
+.enyo-button.key2-small {
+	padding-top: 0px;
+	font-size: 11px;
+	font-weight: bold;
+	max-height: 12px;
+	min-height: 12px;
+	min-width: 30px;
+	margin: 0px;
+	margin-bottom: 4px;
+}

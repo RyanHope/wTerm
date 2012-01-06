@@ -13,6 +13,7 @@ enyo.depends(
 	"src/enyo/prefs.js",
 	"src/enyo/vkbKey.js",
 	"src/enyo/vkb.js",
+	"src/enyo/vkbsmall.js",
 	"src/enyo/main.js"
 
 )

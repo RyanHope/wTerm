@@ -43,7 +43,8 @@ enyo.kind({
 			bgcolor: '000000',
 			width: window.innerWidth, height: 400 // 30x145
 		})
-		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal})
+		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: false})
+		this.createComponent({kind: 'vkbsmall', name: 'vkbsmall', terminal: this.$.terminal})
 		this.$.terminal.vkb = this.$.vkb
 		this.$.prefs.terminal = this.$.terminal
 	},
