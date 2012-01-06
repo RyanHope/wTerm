@@ -22,6 +22,8 @@
 	min-height: 21px;
 	min-width: 30px;
 	margin: 0px;
+	padding-top: 0px;
+	padding-bottom: 0px;
 }
 
 .enyo-button.key2-small {

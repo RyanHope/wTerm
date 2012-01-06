@@ -5,13 +5,16 @@ enyo.kind({
 	align: 'center',
 
 	prefs: new Prefs(),
+	
+	showVKB: true,
 
 	components: [
 		{kind: "AppMenu", components: [
 			{caption: "About", onclick: "openAbout"},
 			{name: 'vkbToggle', caption: "Hide Virtual Keyboard", onclick: 'toggleVKB'},
-			{caption: "Preferences", onclick: "openPrefs", onClose: 'refresh'}
+			{caption: "Preferences", onclick: "openPrefs"}
 		]},
+		{kind: "ApplicationEvents", onWindowRotated: "setup"},
 		{
 			kind: 'Popup2',
 			name: 'about',
@@ -41,23 +44,23 @@ enyo.kind({
 			kind: 'Terminal',
 			prefs: this.prefs,
 			bgcolor: '000000',
-			width: window.innerWidth, height: 400 // 30x145
+			width: window.innerWidth,
+			height: 400,
 		})
-		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: false})
-		this.createComponent({kind: 'vkbsmall', name: 'vkbsmall', terminal: this.$.terminal})
+		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
+		this.createComponent({kind: 'vkbsmall', name: 'vkbsmall', terminal: this.$.terminal, showing: false})
 		this.$.terminal.vkb = this.$.vkb
 		this.$.prefs.terminal = this.$.terminal
+		this.setup()
 	},
 	
 	toggleVKB: function() {
-		this.$.vkb.setShowing(!this.$.vkb.showing)
-		if (this.$.vkb.showing) {
+		this.showVKB = !this.showVKB
+		if (this.showVKB)
 			this.$.vkbToggle.setCaption('Hide Virtual Keyboard')
-			this.$.terminal.resize(window.innerWidth, 400)
-		} else {
+		else
 			this.$.vkbToggle.setCaption('Show Virtual Keyboard')
-			this.$.terminal.resize(window.innerWidth, window.innerHeight)
-		}
+		this.setup()
 	},
 
 	openAbout: function() {
@@ -78,10 +81,26 @@ enyo.kind({
 			//this.$.nicks.render();
 		}
 	},
-
-	refresh: function() {
-		var size = this.$.terminal.setFontSize(this.prefs.get('fontSize'))
-		this.log("Font size: "+size)
+	
+	setup: function() {
+		var o = enyo.getWindowOrientation()
+		if (o == 'up' || o == 'down') {
+			this.$.terminal.vkb = this.$.vkb
+			this.$.vkb.setShowing(true)
+			this.$.vkbsmall.setShowing(false)
+			if (this.showVKB)
+				this.$.terminal.resize(window.innerWidth, 400)
+			else
+				this.$.terminal.resize(window.innerWidth, window.innerHeight)
+		} else {
+			this.$.terminal.vkb = this.$.vkbsmall
+			this.$.vkb.setShowing(false)
+			this.$.vkbsmall.setShowing(true)
+			if (this.showVKB)
+				this.$.terminal.resize(window.innerWidth, 722)
+			else
+				this.$.terminal.resize(window.innerWidth, window.innerHeight)
+		}
 	}
 
 })
