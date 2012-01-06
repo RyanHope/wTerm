@@ -11,13 +11,21 @@ enyo.kind({
 	components: [
 		{name: "shadow", className: "enyo-sliding-view-shadow"},
 		{kind: "VFlexBox", height: "100%", components: [
-			{kind: "Header", pack: 'center', content: "Preferences"},
+			{kind: "Header", pack: 'center', components: [
+				{kind: "RadioToolButtonGroup", components: [
+	    	  		{caption: "Appearance", style: ''},
+			      	{caption: "KeyBindings"},
+			  	]}
+			]},
 	  		{kind: "Scroller", flex: 1, components: [
 	  			{kind: "RowGroup", caption: 'Text', flex: 1, components: [
 					{kind: 'Item', layoutKind: 'HFlexLayout', align: "center", style: 'padding: 0; margin: 0', components: [
 						{kind: "IntegerPicker", name: 'fontSize', label: '', min: 8, max: 22, flex: 1, onChange: 'fontSizeChanged'},
 						{content: "Font Size", style: 'padding-right: 10px'}
 					]}
+				]},
+				{kind: 'RowGroup', flex :1, caption: 'Background Behavior', components: [
+					{kind: "ListSelector", name: 'backgroundBehavior', onChange: "backgroundBehaviorChanged", items: ["Dark and Bright", "Always Dark", "Always Bright"]},
 				]},
 				{kind: 'RowGroup', flex :1, caption: 'Color Scheme', components: [
 					{kind: "ListSelector", name: 'colorSchemes', onChange: "colorSchemeChanged"},
