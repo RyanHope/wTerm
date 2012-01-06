@@ -1159,18 +1159,53 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 			displayLoc = getDisplayCursorLocation();
 		}
 
-		addGraphicsState(displayLoc.getX(), displayLoc.getY(),
-			m_currentGraphicsState.foregroundColor, m_currentGraphicsState.backgroundColor,
-			m_currentGraphicsState.nGraphicsMode, TS_GM_OP_SET, false);
 
+
+		// Get the 'line' for these coordinates
 		nPos = displayLoc.getX() - 1;
 		nLine = getBufferTopLineIndex() + displayLoc.getY() - 1;
 		line = getBufferLine(nLine);
 
-		//Add padding.
-		if (line->size() <= nPos)
+		// If we're overwriting text, determine if the graphics state for it
+		// (the char we're overwriting) is the same that the following character
+		// relies on (since we chain them together).
+		// If so, we need to be sure to set the original state afterwards
+		bool needsRestore = false;
+		TSLineGraphicsState_t restoreState;
+		if (line->size() > displayLoc.getX() + 1) {
+			int thisLocator = findGraphicsState(displayLoc.getX(),
+																					displayLoc.getY(), true);
+			int nextLocator = findGraphicsState(displayLoc.getX() + 1,
+																					displayLoc.getY(), true);
+			if (thisLocator == nextLocator) {
+				needsRestore = true;
+				if (thisLocator >= 0 && thisLocator < m_graphicsState.size()) {
+					memcpy(&restoreState, m_graphicsState[thisLocator], sizeof(restoreState));
+				} else {
+					memcpy(&restoreState, &m_defaultGraphicsState, sizeof(restoreState));
+				}
+			}
+		} else if (line->size() < nPos)
 		{
+			// Inserting past existing end of line, need to add padding.
+			// The padding we add should have the default graphics settings
+			addGraphicsState(line->size() + 1, displayLoc.getY(),
+					m_defaultGraphicsState.foregroundColor, m_defaultGraphicsState.backgroundColor,
+					m_defaultGraphicsState.nGraphicsMode, TS_GM_OP_SET, false);
+
 			line->fill(BLANK, nPos - line->size());
+		}
+
+		// Set the graphics state for the character we're inserting
+		addGraphicsState(displayLoc.getX(), displayLoc.getY(),
+				m_currentGraphicsState.foregroundColor, m_currentGraphicsState.backgroundColor,
+				m_currentGraphicsState.nGraphicsMode, TS_GM_OP_SET, false);
+
+		// If we have a graphics state to restore, it starts on the character after
+		if (needsRestore) {
+			addGraphicsState(displayLoc.getX() + 1, displayLoc.getY(),
+					restoreState.foregroundColor, restoreState.backgroundColor,
+					restoreState.nGraphicsMode, TS_GM_OP_SET, false);
 		}
 
 		if (bShift)
