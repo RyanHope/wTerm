@@ -1,3 +1,6 @@
+
+BUILD_ROOT=/srv/preware/build
+
 ifdef DEVICE
 	ARCH=armv7
 	HOST=arm-none-linux-gnueabi
@@ -8,9 +11,9 @@ ifdef DEVICE
 		ROOT=/opt/PalmPDK/device
 	else
 		MARCH_TUNE=-O2 -march=armv7-a -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp
-		CC=/srv/preware/build/toolchain/cs07q3armel/build/arm-2007q3/bin/arm-none-linux-gnueabi-gcc
-		CXX=/srv/preware/build/toolchain/cs07q3armel/build/arm-2007q3/bin/arm-none-linux-gnueabi-g++
-		ROOT=/srv/preware/build/staging/armv7/usr
+		CC=$(BUILD_ROOT)/toolchain/cs07q3armel/build/arm-2007q3/bin/arm-none-linux-gnueabi-gcc
+		CXX=$(BUILD_ROOT)/toolchain/cs07q3armel/build/arm-2007q3/bin/arm-none-linux-gnueabi-g++
+		ROOT=$(BUILD_ROOT)/staging/armv7/usr
 	endif
 else
 	ARCH=i686
@@ -20,8 +23,8 @@ else
 		CXX=/opt/PalmPDK/i686-gcc/bin/i686-nptl-linux-gnu-g++ --sysroot=/opt/PalmPDK/i686-gcc/sys-root
 		ROOT=/opt/PalmPDK/device
 	else
-		CC/srv/preware/build/toolchain/i686-unknown-linux-gnu/build/i686-unknown-linux-gnu/bin/i686-unknown-linux-gnu-g++
-		CXX/srv/preware/build/toolchain/i686-unknown-linux-gnu/build/i686-unknown-linux-gnu/bin/i686-unknown-linux-gnu-g++
-		ROOT=/srv/preware/build/staging/i686/usr
+		CC=$(BUILD_ROOT)/toolchain/i686-unknown-linux-gnu/build/i686-unknown-linux-gnu/bin/i686-unknown-linux-gnu-g++
+		CXX=$(BUILD_ROOT)/toolchain/i686-unknown-linux-gnu/build/i686-unknown-linux-gnu/bin/i686-unknown-linux-gnu-g++
+		ROOT=$(BUILD_ROOT)/staging/i686/usr
 	endif
 endif
