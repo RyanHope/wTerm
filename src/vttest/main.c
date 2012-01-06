@@ -1122,15 +1122,8 @@ bye (void)
   if (LOG_ENABLED)
     fprintf(log_fp, "Cleanup & exit\n");
 
-  default_level();    /* Enter ANSI mode (if in VT52 mode)    */
-  decckm(FALSE);      /* cursor keys normal   */
-  deccolm(FALSE);     /* 80 col mode          */
-  decscnm(FALSE);     /* Normal screen        */
-  decom(FALSE);       /* Absolute origin mode */
-  decawm(TRUE);       /* Wrap around on       */
-  decarm(TRUE);       /* Auto repeat on       */
-  decstbm(0,0);       /* No scroll region     */
-  sgr("0");           /* Normal character attributes  */
+  /* Reset terminal ~PTM */
+  ris();
 
   /* Say goodbye */
 
