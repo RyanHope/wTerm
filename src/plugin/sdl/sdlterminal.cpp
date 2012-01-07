@@ -558,11 +558,7 @@ void SDLTerminal::redraw()
 	{
 		int nY = m_surface->h - 32;
 
-		glColor4f(
-			((float)m_colors[TS_COLOR_WHITE_BRIGHT].r) / 255.0f,
-			((float)m_colors[TS_COLOR_WHITE_BRIGHT].g) / 255.0f,
-			((float)m_colors[TS_COLOR_WHITE_BRIGHT].b) / 255.0f,
-			0.70f);
+		glColor4f(1.0f, 1.0f, 1.0f, 0.70f);
 
 		if (m_keyMod == TERM_KEYMOD_CTRL)
 		{
