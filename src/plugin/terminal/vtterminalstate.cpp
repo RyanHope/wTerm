@@ -243,14 +243,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				}
 				else if (values[i] >= 40 && values[i] <= 47)
 				{
-					if ((m_currentGraphicsState.nGraphicsMode & TS_GM_BOLD) > 0)
-					{
-						setBackgroundColor((TSColor_t)(values[i] - 40 + TS_COLOR_BLACK_BRIGHT));
-					}
-					else
-					{
-						setBackgroundColor((TSColor_t)(values[i] - 40));
-					}
+					setBackgroundColor((TSColor_t)(values[i] - 40));
 				}
 				else if (values[i] == 49)
 				{

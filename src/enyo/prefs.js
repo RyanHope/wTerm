@@ -24,9 +24,6 @@ enyo.kind({
 						{content: "Font Size", style: 'padding-right: 10px'}
 					]}
 				]},
-				{kind: 'RowGroup', flex :1, caption: 'Background Behavior', components: [
-					{kind: "ListSelector", name: 'backgroundBehavior', onChange: "backgroundBehaviorChanged", items: ["Dark and Bright", "Always Dark", "Always Bright"]},
-				]},
 				{kind: 'RowGroup', flex :1, caption: 'Color Scheme', components: [
 					{kind: "ListSelector", name: 'colorSchemes', onChange: "colorSchemeChanged"},
 					{name: 'foreground', kind: 'wi.InputColor', caption: 'Foreground', onChanged: 'updateColors'},
