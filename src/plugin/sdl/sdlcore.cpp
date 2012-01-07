@@ -631,9 +631,7 @@ void SDLCore::drawText(int nX, int nY, const char *sText, bool bBold, bool bItal
 		font = m_fontBold;
 	}
 
-	SDL_Surface* textSurface = TTF_RenderText_Shaded(font, sText,
-																m_foregroundColor, m_backgroundColor);
-
+	SDL_Surface* textSurface = TTF_RenderText_Shaded(font, sText, m_foregroundColor, m_backgroundColor);
 
 	if (textSurface == NULL)
 	{
