@@ -600,15 +600,9 @@ void SDLCore::drawText(int nX, int nY, const char *sText, bool bBold, bool bItal
 		font = m_fontBold;
 	}
 
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, sText, m_foregroundColor);
+	SDL_Surface* textSurface = TTF_RenderText_Shaded(font, sText,
+																m_foregroundColor, m_backgroundColor);
 
-	drawRect(nX, nY, textSurface->w, textSurface->h, m_backgroundColor, 1.0f);
-
-	glColor4f(
-		((float)m_foregroundColor.r) / 255.0f,
-		((float)m_foregroundColor.g) / 255.0f,
-		((float)m_foregroundColor.b) / 255.0f,
-		1.0f);
 
 	if (textSurface == NULL)
 	{
@@ -616,7 +610,7 @@ void SDLCore::drawText(int nX, int nY, const char *sText, bool bBold, bool bItal
 		return;
 	}
 
-	SDL_SetAlpha(textSurface, 0, 0);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	drawSurface(nX, nY, textSurface);
 	SDL_FreeSurface(textSurface);
 
