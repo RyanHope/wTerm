@@ -38,8 +38,8 @@ protected:
 	static const int BACKGROUND_COLOR_DIRTY_BIT;
 
 	SDL_Surface *m_surface;
-	SDL_Color m_backgroundColor;
-	SDL_Color m_foregroundColor;
+	TSColor_t m_foregroundColor;
+	TSColor_t m_backgroundColor;
 
 	int createFonts(int nSize);
 

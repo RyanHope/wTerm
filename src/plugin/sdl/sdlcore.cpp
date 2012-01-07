@@ -38,31 +38,8 @@ SDLCore::SDLCore()
 	m_surface = NULL;
 	m_nFontSize = 12;
 
-	SDL_Color m_colors[] = {
-			{ 0, 0, 0 }, // COLOR_BLACK
-			{ 187, 0, 0 }, // COLOR_RED
-			{ 0, 187, 0 }, // COLOR_GREEN
-			{ 187, 187, 0 }, // COLOR_YELLOW
-			{ 0, 0, 187 }, // COLOR_BLUE
-			{ 187, 0, 187 }, // COLOR_MAGENTA
-			{ 0, 187, 187 }, // COLOR_CYAN
-			{ 187, 187, 187 }, // COLOR_WHITE
-			{ 85, 85, 85 }, // COLOR_BLACK_BRIGHT
-			{ 255, 85, 85 }, // COLOR_RED_BRIGHT
-			{ 85, 255, 85 }, // COLOR_GREEN_BRIGHT
-			{ 255, 255, 85 }, // COLOR_YELLOW_BRIGHT
-			{ 85, 85, 255 }, // COLOR_BLUE_BRIGHT
-			{ 255, 85, 255 }, // COLOR_MAGENTA_BRIGHT
-			{ 85, 255, 255 }, // COLOR_CYAN_BRIGHT
-			{ 255, 255, 255 }, // COLOR_WHITE_BRIGHT
-			{ 187, 187, 187 }, // COLOR_FOREGROUND
-			{ 0, 0, 0 }, // COLOR_BACKGROUND
-			{ 255, 255, 255 }, // COLOR_FOREGROUND_BRIGHT
-			{ 0, 0, 0 }, // COLOR_BACKGROUND_BRIGHT
-	};
-
-	m_foregroundColor = m_colors[TS_COLOR_FOREGROUND];
-	m_backgroundColor = m_colors[TS_COLOR_BACKGROUND];
+	m_foregroundColor = TS_COLOR_FOREGROUND;
+	m_backgroundColor = TS_COLOR_BACKGROUND;
 
 	m_fontNormal = NULL;
 	m_fontBold = NULL;
@@ -505,10 +482,11 @@ void SDLCore::drawCursor(int nColumn, int nLine)
  */
 void SDLCore::clearScreen()
 {
+	SDL_Color bkgd = getColor(m_backgroundColor);
 	glClearColor(
-		((float)m_backgroundColor.r) / 255.0f,
-		((float)m_backgroundColor.g) / 255.0f,
-		((float)m_backgroundColor.b) / 255.0f,
+		((float)bkgd.r) / 255.0f,
+		((float)bkgd.g) / 255.0f,
+		((float)bkgd.b) / 255.0f,
 		1.0f);
 
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -631,7 +609,8 @@ void SDLCore::drawText(int nX, int nY, const char *sText, bool bBold, bool bItal
 		font = m_fontBold;
 	}
 
-	SDL_Surface* textSurface = TTF_RenderText_Shaded(font, sText, m_foregroundColor, m_backgroundColor);
+	SDL_Surface* textSurface = TTF_RenderText_Shaded(font, sText, getColor(m_foregroundColor), getColor(m_backgroundColor));
+
 
 	if (textSurface == NULL)
 	{
@@ -644,24 +623,6 @@ void SDLCore::drawText(int nX, int nY, const char *sText, bool bBold, bool bItal
 	SDL_FreeSurface(textSurface);
 
 	setDirty(BUFFER_DIRTY_BIT);
-}
-
-void SDLCore::setForegroundColor(unsigned char nRed, unsigned char nGreen, unsigned char nBlue)
-{
-	m_foregroundColor.r = nRed;
-	m_foregroundColor.g = nGreen;
-	m_foregroundColor.b = nBlue;
-
-	setDirty(FOREGROUND_COLOR_DIRTY_BIT);
-}
-
-void SDLCore::setBackgroundColor(unsigned char nRed, unsigned char nGreen, unsigned char nBlue)
-{
-	m_backgroundColor.r = nRed;
-	m_backgroundColor.g = nGreen;
-	m_backgroundColor.b = nBlue;
-
-	setDirty(BACKGROUND_COLOR_DIRTY_BIT);
 }
 
 /**

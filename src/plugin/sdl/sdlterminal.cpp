@@ -657,12 +657,12 @@ void SDLTerminal::setColor(TSColor_t color, int r, int g, int b)
 
 void SDLTerminal::setForegroundColor(TSColor_t color)
 {
-	m_foregroundColor = getColor(color);
+	m_foregroundColor = color;
 }
 
 void SDLTerminal::setBackgroundColor(TSColor_t color)
 {
-	m_backgroundColor = getColor(color);
+	m_backgroundColor = color;
 }
 
 void SDLTerminal::setGraphicsState(TSLineGraphicsState_t &state)
