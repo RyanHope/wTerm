@@ -69,10 +69,6 @@ Terminal::Terminal()
 
 	setUser("root");
 	memset(&m_winSize, 0, sizeof(m_winSize));
-
-	pthread_mutexattr_init(&m_masterLockAttr);
-	pthread_mutexattr_settype(&m_masterLockAttr, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&m_masterLock, &m_masterLockAttr);
 }
 
 Terminal::~Terminal()
@@ -98,9 +94,6 @@ Terminal::~Terminal()
 
 	free(m_sUser);
 	delete m_dataBuffer;
-
-	pthread_mutexattr_destroy(&m_masterLockAttr);
-	pthread_mutex_destroy(&m_masterLock);
 }
 
 int Terminal::openPTYMaster()
@@ -127,6 +120,12 @@ int Terminal::openPTYMaster()
 	{
 		syslog(LOG_ERR, "Cannot get name of slave pseudo-terminal.");
 		return -3;
+	}
+
+	if (setFlag(m_masterFD, O_NONBLOCK) != 0)
+	{
+		syslog(LOG_ERR, "Couldn't set FD to non-blocking.");
+		return -4;
 	}
 
 	syslog(LOG_INFO, "Initialized master with FD %d.", m_masterFD);
@@ -280,52 +279,37 @@ int Terminal::sendCommand(const char *command)
 	fd_set writeFDSet;
 	bool bDone = false;
 
-	syslog(LOG_DEBUG, "Sending command '%s' to FD %d.", command, m_masterFD);
-	++m_nWritePriority;
+	unsigned bytes = strlen(command);
+	const char * buf = command;
 
-	//Write input command.
-	while(!bDone)
+	while(bytes)
 	{
-		pthread_mutex_lock(&m_masterLock);
-
 		FD_ZERO(&writeFDSet);
 		FD_SET(m_masterFD, &writeFDSet);
 
-		timeout.tv_sec = 0;
-		timeout.tv_usec = 1;
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
 
 		if (select(m_masterFD + 1, NULL, &writeFDSet, NULL, &timeout) < 1)
-		{
-			//Pseudo terminal is not ready to write.
-		}
-		else if (FD_ISSET(m_masterFD, &writeFDSet))
-		{
-			if (command[cmdCharIndex] != 0)
-			{
-				dataBuffer[0] = command[cmdCharIndex];
+			continue;
 
-				if (write(m_masterFD, dataBuffer, 1) > 0)
-				{
-					++cmdCharIndex;
-				}
-				else
-				{
-			syslog(LOG_WARNING, "Cannot write to master.");
-				}
-			}
+		int res = write(m_masterFD, buf, bytes);
 
-			if (command[cmdCharIndex] == 0)
-			{
-				//Nothing more to write.
-				syslog(LOG_DEBUG, "Sent pseudo terminal command '%s'.", command);
-				bDone = true;
-			}
+		if (res < 0)
+		{
+			// If we have written all we can, loop back to select()
+			if (errno == EWOULDBLOCK)
+				continue;
+
+			// If write failed, bail
+			syslog(LOG_WARNING, "Error writing command to terminal!");
+			return -1;
 		}
 
-		pthread_mutex_unlock(&m_masterLock);
+		// Otherwise, adjust buffer/bytes by amount written and continue
+		buf += res;
+		bytes -= res;
 	}
-
-	--m_nWritePriority;
 
 	return 0;
 }
@@ -388,77 +372,58 @@ int Terminal::runReader()
 	ssize_t readResult;
 	struct timeval timeout;
 	fd_set readFDSet;
-	int result = 0;
 
-	m_bDone = false;
-
-	while(!m_bDone)
+	// Loop until m_bDone is set (elsewhere)
+	while (!m_bDone)
 	{
-		pthread_mutex_lock(&m_masterLock);
-
 		FD_ZERO(&readFDSet);
 		FD_SET (m_masterFD, &readFDSet);
 
-		timeout.tv_sec = 0;
-		timeout.tv_usec = 1;
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
 
-		while(!m_bDone)
+		if (select(m_masterFD + 1, &readFDSet, NULL, NULL, &timeout) < 1)
+			continue;
+
+		// Read all available data:
+		while(true)
 		{
-			if (m_nWritePriority > 0)
-			{
-				break;
-			}
-			else if (select(m_masterFD + 1, &readFDSet, NULL, NULL, &timeout) < 1)
-			{
-				//Pseudo terminal is not ready to read.
-				break;
-			}
-			else if (FD_ISSET(m_masterFD, &readFDSet))
-			{
-				// Read one character at a time.
-				readResult = read(m_masterFD, dataBuffer, dataBufferSize);
+			readResult = read(m_masterFD, dataBuffer, dataBufferSize);
 
-				if (readResult < 0)
-				{
-					syslog(LOG_ERR, "Cannot read pseudo terminal.");
-					result = -1;
-					m_bDone = true;
-				}
-				else if (readResult == 0)
-				{
-					//EOF
-					m_bDone = true;
-				}
-				else
-				{
-					m_dataBuffer->append(dataBuffer, readResult);
-
-					if (readResult < dataBufferSize)
-					{
-						flushOutputBuffer();
-					}
-				}
-			}
-			else
+			if (readResult < 0)
 			{
-				//Pseudo terminal is not ready to read.
-				break;
+				// If we've read all we can, leave this loop
+				if (errno == EWOULDBLOCK)
+					break;
+
+				syslog(LOG_ERR, "Cannot read pseudo terminal.");
+				return -1;
 			}
+
+			// If EOF, we're done
+			if (readResult == 0)
+				break;
+			
+			// We got data!  Add to our buffer
+			m_dataBuffer->append(dataBuffer, readResult);
+
+			// Flush buffer if it gets too large
+			if (m_dataBuffer->size() > (1 << 20))
+				flushOutputBuffer();
 		}
 
+		// Flush since we've read all that's available.
 		flushOutputBuffer();
-
-		pthread_mutex_unlock(&m_masterLock);
-		pthread_yield();
 	}
 
-	return result;
+	// Indicate we exited neatly.
+	return 0;
 }
 
 void Terminal::flushOutputBuffer()
 {
-	pthread_mutex_lock(&m_masterLock);
-
+	// Not thread-safe, meant to only be called from
+	// the reader thread.
 	char *tmp;
 	int nTmpSize;
 
@@ -480,8 +445,6 @@ void Terminal::flushOutputBuffer()
 			free(tmp);
 		}
 	}
-
-	pthread_mutex_unlock(&m_masterLock);
 }
 
 int Terminal::startReaderThread()
