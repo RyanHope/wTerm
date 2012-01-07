@@ -43,8 +43,6 @@ private:
 	DataBuffer *m_dataBuffer;
 
 	pthread_t m_readerThread;
-	pthread_mutexattr_t m_masterLockAttr;
-	pthread_mutex_t m_masterLock; //Mutex lock for the master FD.
 	struct winsize m_winSize;
 
 	int openPTYMaster();
@@ -62,6 +60,7 @@ private:
 	static void *readerThread(void *terminal);
 
 	int sendCommand(const char *command);
+	void flushOutputBuffer();
 
 public:
 	Terminal();
@@ -71,7 +70,6 @@ public:
 	int start();
 
 	void insertData(const char *data, size_t size);
-	void flushOutputBuffer();
 
 	const char *getUser();
 	void setUser(const char *sUser);
