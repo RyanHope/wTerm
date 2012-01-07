@@ -265,45 +265,76 @@ void SDLCore::eventLoop()
 {
 	// Event descriptor
 	SDL_Event event;
+	Uint32 lOldTime = SDL_GetTicks();
+	Uint32 lCurrentTime = SDL_GetTicks();
+	Uint32 lCycleTimeSlot = 25;
+	Uint32 lDelay;
 
 	while (isRunning()) {
+		// Block for an event, and then handle all queued events.
+		// This is important since input events (particularly mouse events)
+		// shouldn't be synchronous with a redraw but especially because various
+		// terminal-source events (a quickly scrolling buffer, for example) mark
+		// the screen as dirty and force a refresh.  We should never end up trying
+		// to draw faster than a controlled amount in all cases.
 		SDL_WaitEvent(&event);
-		switch (event.type)
-		{
-			case SDL_MOUSEMOTION:
-			case SDL_MOUSEBUTTONDOWN:
-			case SDL_MOUSEBUTTONUP:
-				handleMouseEvent(event);
-				break;
-			case SDL_KEYUP:
-			case SDL_KEYDOWN:
-				handleKeyboardEvent(event);
-				break;
-			case SDL_ACTIVEEVENT:
-				// Remove old suspend stuff, maybe add back later. ~PTM
-				break;
-			case SDL_VIDEOEXPOSE:
-				redraw();
-				setDirty(BUFFER_DIRTY_BIT);
-				break;
-			case SDL_VIDEORESIZE:
-				closeFonts();
-				m_surface = SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
-				initOpenGL();
-				createFonts(m_nFontSize);
-				updateDisplaySize();
-				redraw();
-				break;
-			case SDL_QUIT:
-				return;
-			default:
-				break;
-		}
+		do {
+			switch (event.type)
+			{
+				case SDL_MOUSEMOTION:
+				case SDL_MOUSEBUTTONDOWN:
+				case SDL_MOUSEBUTTONUP:
+					handleMouseEvent(event);
+					break;
+				case SDL_KEYUP:
+				case SDL_KEYDOWN:
+					handleKeyboardEvent(event);
+					break;
+				case SDL_ACTIVEEVENT:
+					// Remove old suspend stuff, maybe add back later. ~PTM
+					break;
+				case SDL_VIDEOEXPOSE:
+					redraw();
+					setDirty(BUFFER_DIRTY_BIT);
+					break;
+				case SDL_VIDEORESIZE:
+					closeFonts();
+					m_surface = SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
+					initOpenGL();
+					createFonts(m_nFontSize);
+					updateDisplaySize();
+					redraw();
+					break;
+				case SDL_QUIT:
+					return;
+				default:
+					break;
+			}
+		} while (SDL_PollEvent(&event));
+
+		// Redraw if needed
 		if (isDirty(BUFFER_DIRTY_BIT))
 		{
 			SDL_GL_SwapBuffers();
 			clearDirty(BUFFER_DIRTY_BIT);
 		}
+
+		// Are we going too fast?  If so, sleep some accordingly.
+		lCurrentTime = SDL_GetTicks();
+
+		if ((lCurrentTime - lOldTime) < lCycleTimeSlot)
+		{
+			lDelay = lOldTime + lCycleTimeSlot - lCurrentTime;
+
+			if (lDelay > lCycleTimeSlot)
+			{
+				lDelay = lCycleTimeSlot;
+			}
+
+			SDL_Delay(lDelay);
+		}
+
+		lOldTime = SDL_GetTicks();
 	}
 }
 
