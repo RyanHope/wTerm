@@ -16,3 +16,10 @@ Features
 * Customizable font size
 * Selectable color schemes
 * Custom color scheme
+
+Contributors
+------------
+
+* Will Dietz
+* Ryan Hope (Project Lead)
+* Brian Kearney
