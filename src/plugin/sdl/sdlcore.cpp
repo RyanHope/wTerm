@@ -40,6 +40,8 @@ SDLCore::SDLCore()
 
 	m_foregroundColor = TS_COLOR_FOREGROUND;
 	m_backgroundColor = TS_COLOR_BACKGROUND;
+	m_bBold = false;
+	m_bItalic = false;
 
 	m_fontNormal = NULL;
 	m_fontBold = NULL;
@@ -442,14 +444,14 @@ int SDLCore::setFontSize(int nSize)
  * Draws a string on the display. Given the monospaced font, assumes that the display is a grid of text.
  * The top left corner of the screen is (1, 1). If the give location is out of bounds, then no action is taken.
  */
-void SDLCore::printText(int nColumn, int nLine, const char *sText, bool bBold, bool bItalic)
+void SDLCore::printText(int nColumn, int nLine, const char *sText)
 {
 	if (nColumn < 1 || nLine < 1 || nColumn > m_nMaxColumnsOfText || nLine > m_nMaxLinesOfText)
 	{
 		return;
 	}
 
-	drawText((nColumn - 1) * m_nFontWidth, (nLine - 1) * m_nFontHeight, sText, bBold, bItalic);
+	drawText((nColumn - 1) * m_nFontWidth, (nLine - 1) * m_nFontHeight, sText);
 }
 
 void SDLCore::drawRect(int nX, int nY, int nWidth, int nHeight, SDL_Color color, float fAlpha)
@@ -597,7 +599,7 @@ void SDLCore::drawImage(int nX, int nY, const char *sImage)
 /**
  * Draws a string on an arbiturary location of the screen.
  */
-void SDLCore::drawText(int nX, int nY, const char *sText, bool bBold, bool bItalic)
+void SDLCore::drawText(int nX, int nY, const char *sText)
 {
 	if (sText == NULL)
 	{
@@ -606,11 +608,11 @@ void SDLCore::drawText(int nX, int nY, const char *sText, bool bBold, bool bItal
 	
 	// Match mapping in resetGlyphCache
 	int fnt = 0;
-	if (bBold && bItalic)
+	if (m_bBold && m_bItalic)
 		fnt = 1;
-	else if (bItalic)
+	else if (m_bItalic)
 		fnt = 2;
-	else if (bBold)
+	else if (m_bBold)
 		fnt = 3;
 
 	drawTextGL(fnt, (int)m_foregroundColor, (int)m_backgroundColor, nX, nY, sText);
