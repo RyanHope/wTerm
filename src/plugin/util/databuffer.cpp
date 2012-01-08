@@ -258,8 +258,10 @@ int DataBuffer::copy(char *dest, size_t size)
  * The size of the buffer is decreased if data is shifted, or the tail of the buffer is removed.
  * Returns -1 if an error occurs. Returns 0 if success.
  */
-int DataBuffer::clear(int startIndex, size_t size, bool bShift)
+int DataBuffer::clear(int startIndex, size_t size, bool bShift, char clearChar)
 {
+	// clearChar is used when not bShift
+
 	int nResult = 0;
 
 	pthread_mutex_lock(&m_rwLock);
@@ -295,7 +297,7 @@ int DataBuffer::clear(int startIndex, size_t size, bool bShift)
 		}
 		else
 		{
-			memset(m_buffer + startIndex, 0, size);
+			memset(m_buffer + startIndex, clearChar, size);
 
 			if ((startIndex + size) >= m_size)
 			{

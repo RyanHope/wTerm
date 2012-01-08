@@ -62,7 +62,7 @@ bool VTTerminalState::processNonPrintableChar(char &c)
 
 void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, ExtTerminal *extTerminal)
 {
-	int i;
+	int i, len;
 
 	pthread_mutex_lock(&m_rwLock);
 
@@ -74,8 +74,9 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_VPA: //ESC[<Line>d
 		setCursorLocation(m_cursorLoc.getX(), values[0]);
 		break;
-	case CS_ECH: //ESC[<Line>X
-		erase(Point(m_cursorLoc.getX(), m_cursorLoc.getY()), Point(m_cursorLoc.getX()+values[0], m_cursorLoc.getY()));
+	case CS_ECH: //ESC[<Chars>X
+		len = values[0] ? values[0] - 1 : 0;
+		erase(m_cursorLoc, Point(m_cursorLoc.getX()+len, m_cursorLoc.getY()));
 		break;
 	case CS_IL: //ESC[<Lines>L
 		insertLines(values[0] ? values[0] : 1);

@@ -172,7 +172,7 @@ void TerminalState::clearBufferLine(int nLine, int nStart, int nEnd)
 		if (nStart <= nEnd)
 		{
 			nSize = (nEnd - nStart + 1);
-			line->clear(nStart, nSize, false);
+			line->clear(nStart, nSize, false, ' ');
 		}
 	}
 
