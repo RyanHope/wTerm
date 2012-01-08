@@ -133,6 +133,8 @@ int SDLCore::initOpenGL()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	resetGlyphCache();
+
 	return 0;
 }
 
@@ -277,8 +279,8 @@ void SDLCore::eventLoop()
 				case SDL_VIDEORESIZE:
 					closeFonts();
 					m_surface = SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
-					initOpenGL();
 					createFonts(m_nFontSize);
+					initOpenGL();
 					updateDisplaySize();
 					redraw();
 					break;
@@ -289,11 +291,18 @@ void SDLCore::eventLoop()
 			}
 		} while (SDL_PollEvent(&event));
 
+		if (isDirty(FONT_DIRTY_BIT))
+		{
+			clearDirty(FONT_DIRTY_BIT);
+			resetGlyphCache();
+			redraw();
+		}
+
 		// Redraw if needed
 		if (isDirty(BUFFER_DIRTY_BIT))
 		{
-			SDL_GL_SwapBuffers();
 			clearDirty(BUFFER_DIRTY_BIT);
+			SDL_GL_SwapBuffers();
 		}
 
 		// Are we going too fast?  If so, sleep some accordingly.
@@ -446,6 +455,7 @@ void SDLCore::printText(int nColumn, int nLine, const char *sText, bool bBold, b
 void SDLCore::drawRect(int nX, int nY, int nWidth, int nHeight, SDL_Color color, float fAlpha)
 {
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	GLfloat vtx[] = {
 		nX, nY + nHeight,
@@ -593,34 +603,17 @@ void SDLCore::drawText(int nX, int nY, const char *sText, bool bBold, bool bItal
 	{
 		return;
 	}
-
-	TTF_Font *font = m_fontNormal;
-
+	
+	// Match mapping in resetGlyphCache
+	int fnt = 0;
 	if (bBold && bItalic)
-	{
-		font = m_fontBoldItal;
-	}
+		fnt = 1;
 	else if (bItalic)
-	{
-		font = m_fontItal;
-	}
+		fnt = 2;
 	else if (bBold)
-	{
-		font = m_fontBold;
-	}
+		fnt = 3;
 
-	SDL_Surface* textSurface = TTF_RenderText_Shaded(font, sText, getColor(m_foregroundColor), getColor(m_backgroundColor));
-
-
-	if (textSurface == NULL)
-	{
-		syslog(LOG_ERR, "Cannot render text.");
-		return;
-	}
-
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	drawSurface(nX, nY, textSurface);
-	SDL_FreeSurface(textSurface);
+	drawTextGL(fnt, (int)m_foregroundColor, (int)m_backgroundColor, nX, nY, sText);
 
 	setDirty(BUFFER_DIRTY_BIT);
 }
@@ -706,3 +699,24 @@ int SDLCore::getNextPowerOfTwo(int n)
 
 	return it->second;
 }
+
+void SDLCore::resetGlyphCache()
+{
+	int nFonts = 4;
+	TTF_Font* fnts[4];
+
+	// Match mapping in drawText()
+	fnts[0] = m_fontNormal;
+	fnts[1] = m_fontBoldItal;
+	fnts[2] = m_fontItal;
+	fnts[3] = m_fontBold;
+
+	int nCols = TS_COLOR_MAX;
+	SDL_Color cols[nCols];
+	for(unsigned i = 0; i < TS_COLOR_MAX; ++i)
+		cols[i] = getColor((TSColor_t)i);
+
+	setupFontGL(nFonts, (TTF_Font**)fnts, nCols, (SDL_Color*)&cols);
+}
+
+

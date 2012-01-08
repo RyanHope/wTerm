@@ -25,11 +25,12 @@
 #include <map>
 
 #include "terminal/vtterminalstate.hpp"
+#include "sdlfontgl.h"
 
 /**
  * Initializer and basic 2D function for webOS SDL.
  */
-class SDLCore
+class SDLCore : protected SDLFontGL
 {
 protected:
 	static const int BUFFER_DIRTY_BIT;
@@ -81,6 +82,7 @@ private:
 	void eventLoop();
 
 	void closeFonts();
+	void resetGlyphCache();
 
 public:
 	SDLCore();

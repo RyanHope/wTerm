@@ -93,13 +93,13 @@ int main(int argc, const char* argv[])
 
 	openlog("us.ryanhope.wterm.plugin", LOG_PID, LOG_USER);
 
+	PDL_Init(0);
+
 	sdlTerminal = new SDLTerminal();
 	Terminal *terminal = new Terminal();
 
 	sdlTerminal->start();
 	sdlTerminal->setFontSize(atoi(argv[1]));
-
-	PDL_Init(0);
 
 	PDL_RegisterJSHandler("setColor", setColor);
 	PDL_RegisterJSHandler("pushKeyEvent", pushKeyEvent);
