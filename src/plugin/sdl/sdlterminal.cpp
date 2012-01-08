@@ -448,6 +448,9 @@ void SDLTerminal::redraw()
 	setGraphicsState(defState);
 	clearScreen();
 
+	startTextGL(m_terminalState->getDisplayScreenSize().getX() + 1,
+							m_terminalState->getDisplayScreenSize().getY() + 1);
+
 	if (size <= 0)
 	{
 		nResult = -1;
@@ -552,6 +555,8 @@ void SDLTerminal::redraw()
 		free(states);
 	}
 
+	endTextGL();
+
 	m_terminalState->unlock();
 
 	if (m_keyMod != TERM_KEYMOD_NONE)
@@ -653,16 +658,19 @@ void SDLTerminal::setColor(TSColor_t color, int r, int g, int b)
 	m_colors[color].r = r;
 	m_colors[color].g = g;
 	m_colors[color].b = b;
+	setDirty(FONT_DIRTY_BIT);
 }
 
 void SDLTerminal::setForegroundColor(TSColor_t color)
 {
-	m_foregroundColor = getColor(color);
+	m_foregroundColor = color;
+	setDirty(FOREGROUND_COLOR_DIRTY_BIT);
 }
 
 void SDLTerminal::setBackgroundColor(TSColor_t color)
 {
-	m_backgroundColor = getColor(color);
+	m_backgroundColor = color;
+	setDirty(BACKGROUND_COLOR_DIRTY_BIT);
 }
 
 void SDLTerminal::setGraphicsState(TSLineGraphicsState_t &state)
