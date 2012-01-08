@@ -46,7 +46,7 @@ public:
 	int copy(char *dest, size_t size);
 	int copy(int startIndex, char *dest, size_t size);
 	int insert(int startIndex, const char *data, size_t size);
-	int clear(int startIndex, size_t size, bool bShift, char clearChar='\0');
+	int clear(int startIndex, size_t size, bool bShift);
 	int clear();
 	size_t size() const;
 	void print(FILE *out);
