@@ -520,7 +520,7 @@ void SDLTerminal::redraw()
 
 					if (strlen(sBuffer + nStartIdx) > 0)
 					{
-						printText(nStartIdx + 1, nLine, sBuffer + nStartIdx, false, false);
+						printText(nStartIdx + 1, nLine, sBuffer + nStartIdx);
 						sBuffer[nStartIdx] = '\0';
 					}
 
@@ -534,7 +534,7 @@ void SDLTerminal::redraw()
 			{
 				if (strlen(sBuffer) > 0)
 				{
-					printText(1, nLine, sBuffer, false, false);
+					printText(1, nLine, sBuffer);
 				}
 			}
 
@@ -692,4 +692,6 @@ void SDLTerminal::setGraphicsState(TSLineGraphicsState_t &state)
 	{
 		setBackgroundColor(state.backgroundColor);
 	}
+
+	m_bBold = ((state.nGraphicsMode & TS_GM_BOLD) > 0);
 }
