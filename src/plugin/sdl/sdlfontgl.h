@@ -51,17 +51,13 @@ private:
 	void createTexture();
 	void drawBackground(int color, int X, int Y, int cells);
 
+	void initializePrintables();
+
 public:
 	SDLFontGL() : GlyphCache(0), texW(0), texH(0),
 	nFonts(0), nCols(0), fnts(0), cols(0), screenCols(0), screenRows(0),
 	colorValues(0), texValues(0), vtxValues(0) {
-		// Characters [32,127),[128,255]
-		for(unsigned i = 32; i < 127; ++i)
-			printableChars[i-32] = i;
-		for(unsigned i = 128; i < 256; ++i)
-			printableChars[i-33] = i;
-		printableChars[223] = '\0';
-		nChars = 223;
+		initializePrintables();
 	}
 	~SDLFontGL();
 

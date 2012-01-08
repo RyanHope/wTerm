@@ -413,3 +413,14 @@ void SDLFontGL::endTextGL() {
 	glFlush();
 	glDisableClientState(GL_COLOR_ARRAY);
 }
+
+void SDLFontGL::initializePrintables() {
+	nChars = 223;
+	assert(sizeof(printableChars)/sizeof(printableChars[0]) >= 223);
+
+	// Characters [32,127),[128,255]
+	for(unsigned i = 32; i < 127; ++i)
+		printableChars[i-32] = i;
+	for(unsigned i = 128; i < 256; ++i)
+		printableChars[i-33] = i;
+}
