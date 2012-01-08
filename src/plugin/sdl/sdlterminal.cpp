@@ -28,6 +28,13 @@
 #include <time.h>
 #include <syslog.h>
 
+// Convert mid-string null characters to blanks
+static void stringify(char * str, size_t len) {
+	for(unsigned i = 0; i < len; ++i)
+		if (!str[i]) str[i] = ' ';
+	str[len] = '\0';
+}
+
 SDLTerminal::SDLTerminal()
 {
 	m_terminalState = NULL;
@@ -481,6 +488,7 @@ void SDLTerminal::redraw()
 			databuffer = m_terminalState->getBufferLine(i);
 			memset(sBuffer, 0, size);
 			databuffer->copy(sBuffer, size - 1);
+			stringify(sBuffer, databuffer->size());
 
 			if (nNumStates > 0)
 			{
