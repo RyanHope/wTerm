@@ -78,6 +78,15 @@ private:
 
 	std::map<int, int> m_powerOfTwoLookup;
 
+	// pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
+	struct {
+		int firsttime;    /* if we check against the delay or repeat value */
+		int delay;        /* the delay before we start repeating */
+		int interval;     /* the delay between key repeat events */
+		Uint32 timestamp; /* the time the first keydown event occurred */
+		SDL_Event evt;    /* the event we are supposed to repeat */
+	} m_keyRepeat;
+
 	int init();
 	int initOpenGL();
 	void shutdown();
@@ -85,6 +94,7 @@ private:
 
 	void closeFonts();
 	void resetGlyphCache();
+	void checkKeyRepeat();
 
 public:
 	SDLCore();
@@ -115,7 +125,10 @@ public:
 
 	virtual SDL_Color getColor(TSColor_t color);
 	virtual void redraw();
+
 	virtual void updateDisplaySize();
+
+	void fakeKeyEvent(SDL_Event &event);
 };
 
 #endif

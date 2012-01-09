@@ -71,7 +71,7 @@ PDL_bool getDimensions(PDL_JSParameters *params) {
 }
 
 PDL_bool pushKeyEvent(PDL_JSParameters *params) {
-
+	syslog(LOG_ERR,"KEYPRESS");
 	SDL_Event event;
 
 	int type = PDL_GetJSParamInt(params, 0);
@@ -83,7 +83,7 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 	event.key.keysym.sym = (SDLKey)PDL_GetJSParamInt(params, 1);
 	event.key.keysym.unicode = PDL_GetJSParamString(params, 2)[0];
 
-	int ret = SDL_PushEvent(&event);
+	sdlTerminal->fakeKeyEvent(event);
 
 	return PDL_TRUE;
 }

@@ -50,6 +50,12 @@ SDLCore::SDLCore()
 	m_nFontHeight = 0;
 	m_nFontWidth = 0;
 
+	
+	m_keyRepeat.firsttime = 0;
+	m_keyRepeat.delay = 500; // 500
+	m_keyRepeat.interval = 35; // 35
+	m_keyRepeat.timestamp = 0;
+
 	clearDirty(0);
 }
 
@@ -252,7 +258,18 @@ void SDLCore::eventLoop()
 		// terminal-source events (a quickly scrolling buffer, for example) mark
 		// the screen as dirty and force a refresh.  We should never end up trying
 		// to draw faster than a controlled amount in all cases.
-		SDL_WaitEvent(&event);
+
+		bool gotEvent = false;
+		if (!m_keyRepeat.timestamp)
+		{
+			SDL_WaitEvent(&event);
+			gotEvent = true;
+		}
+		else
+			gotEvent = SDL_PollEvent(&event);
+
+		if (gotEvent)
+		{
 		do {
 			switch (event.type)
 			{
@@ -286,6 +303,9 @@ void SDLCore::eventLoop()
 					break;
 			}
 		} while (SDL_PollEvent(&event));
+		}
+		checkKeyRepeat();
+		
 
 		if (isDirty(FONT_DIRTY_BIT))
 		{
@@ -715,4 +735,167 @@ void SDLCore::resetGlyphCache()
 	setupFontGL(nFonts, (TTF_Font**)fnts, nCols, (SDL_Color*)&cols);
 }
 
+// pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
+void SDLCore::checkKeyRepeat()
+{
+	//syslog(LOG_ERR, "check ran %i", SDL_GetTicks());
+	if (m_keyRepeat.timestamp)
+	{
+		Uint32 now, interval;
+		now = SDL_GetTicks();
+		interval = (now - m_keyRepeat.timestamp);
+		//syslog(LOG_ERR, "Key Repeat Active [now,interval,delay,timestamp,first] %i - %i - %i - %i - %i",now,interval,m_keyRepeat.delay,m_keyRepeat.timestamp,m_keyRepeat.firsttime);
+		if (m_keyRepeat.firsttime) 
+		{
+			if (interval > (Uint32)m_keyRepeat.delay) 
+			{
+				m_keyRepeat.timestamp = now;
+				m_keyRepeat.firsttime = 0;
+				//syslog(LOG_ERR, "First time delay hit");
+			}
+		} 
+		else 
+		{
+			if (interval > (Uint32)m_keyRepeat.interval) 
+			{
+				m_keyRepeat.timestamp = now;
+				SDL_PushEvent(&m_keyRepeat.evt);
+				//syslog(LOG_ERR, "Pushed Repeat Event");
+			}
+		}
+	}
+}
 
+// pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
+void SDLCore::fakeKeyEvent(SDL_Event &event)
+{
+	int repeatable = 0;
+	Uint16 modstate;
+
+	modstate = (Uint16)SDL_GetModState();
+
+	if (event.type == SDL_KEYDOWN) 
+	{
+		event.key.keysym.mod = (SDLMod)modstate;
+		switch (event.key.keysym.sym) 
+		{
+			case SDLK_UNKNOWN:
+				break;
+/*			case SDLK_NUMLOCK:
+				modstate ^= KMOD_NUM;
+				if ( ! (modstate&KMOD_NUM) )
+					state = SDL_RELEASED;
+				keysym->mod = (SDLMod)modstate;
+				break;
+*/			case SDLK_CAPSLOCK:
+				modstate ^= KMOD_CAPS;
+//				if ( ! (modstate&KMOD_CAPS) )
+//					state = SDL_RELEASED;
+				event.key.keysym.mod = (SDLMod)modstate;
+				break;
+			case SDLK_LCTRL:
+				modstate |= KMOD_LCTRL;
+				break;
+			case SDLK_RCTRL:
+				modstate |= KMOD_RCTRL;
+				break;
+			case SDLK_LSHIFT:
+				modstate |= KMOD_LSHIFT;
+				break;
+			case SDLK_RSHIFT:
+				modstate |= KMOD_RSHIFT;
+				break;
+			case SDLK_LALT:
+				modstate |= KMOD_LALT;
+				break;
+			case SDLK_RALT:
+				modstate |= KMOD_RALT;
+				break;
+			case SDLK_LMETA:
+				modstate |= KMOD_LMETA;
+				break;
+			case SDLK_RMETA:
+				modstate |= KMOD_RMETA;
+				break;
+			case SDLK_MODE:
+				modstate |= KMOD_MODE;
+				break;
+			default:
+				repeatable = 1;
+				break;
+		}
+	} 
+	else  // key up
+	{
+		switch (event.key.keysym.sym) 
+		{
+			case SDLK_UNKNOWN:
+				break;
+			case SDLK_NUMLOCK:
+			case SDLK_CAPSLOCK:
+				/* Only send keydown events */
+				return;
+			case SDLK_LCTRL:
+				modstate &= ~KMOD_LCTRL;
+				break;
+			case SDLK_RCTRL:
+				modstate &= ~KMOD_RCTRL;
+				break;
+			case SDLK_LSHIFT:
+				modstate &= ~KMOD_LSHIFT;
+				break;
+			case SDLK_RSHIFT:
+				modstate &= ~KMOD_RSHIFT;
+				break;
+			case SDLK_LALT:
+				modstate &= ~KMOD_LALT;
+				break;
+			case SDLK_RALT:
+				modstate &= ~KMOD_RALT;
+				break;
+			case SDLK_LMETA:
+				modstate &= ~KMOD_LMETA;
+				break;
+			case SDLK_RMETA:
+				modstate &= ~KMOD_RMETA;
+				break;
+			case SDLK_MODE:
+				modstate &= ~KMOD_MODE;
+				break;
+			default:
+				break;
+		}
+		event.key.keysym.mod = (SDLMod)modstate;
+	}
+
+	if (event.key.keysym.sym != SDLK_UNKNOWN) 
+	{
+		/* Drop events that don't change state */
+		//if ( SDL_KeyState[keysym->sym] == state )
+			//return;
+
+		/* Update internal keyboard state */
+		//SDL_KeyState[keysym->sym] = state;
+		SDL_SetModState((SDLMod)modstate);
+	}
+
+	if (event.type == SDL_KEYUP)
+	{
+		if (m_keyRepeat.timestamp && m_keyRepeat.evt.key.keysym.sym == event.key.keysym.sym) 
+		{
+			m_keyRepeat.timestamp = 0;
+			syslog(LOG_ERR, "Removed Repeat Event");
+		}
+	}
+	else
+	{
+		if (repeatable && m_keyRepeat.delay != 0) 
+		{
+			m_keyRepeat.evt = event;
+			m_keyRepeat.firsttime = 1;
+			m_keyRepeat.timestamp = SDL_GetTicks();
+			syslog(LOG_ERR, "Added Repeat Event");
+		}
+	}
+	SDL_PushEvent(&event);
+}
