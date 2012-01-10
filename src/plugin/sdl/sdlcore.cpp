@@ -206,6 +206,8 @@ int SDLCore::createFonts(int nSize)
 	m_nMaxLinesOfText = getMaximumLinesOfText();
 	m_nMaxColumnsOfText = getMaximumColumnsOfText();
 
+	resetGlyphCache();
+
 	setDirty(FONT_DIRTY_BIT);
 
 	return 0;
