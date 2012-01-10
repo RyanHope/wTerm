@@ -516,9 +516,6 @@ void SDLTerminal::redraw()
 	setGraphicsState(defState);
 	clearScreen();
 
-	startTextGL(m_terminalState->getDisplayScreenSize().getX() + 1,
-							m_terminalState->getDisplayScreenSize().getY() + 1);
-
 	if (size <= 0)
 	{
 		nResult = -1;
@@ -543,6 +540,10 @@ void SDLTerminal::redraw()
 
 	if (nResult == 0)
 	{
+
+		startTextGL(m_terminalState->getDisplayScreenSize().getX() + 1,
+				m_terminalState->getDisplayScreenSize().getY() + 1);
+
 		for (int i = nTopLineIndex; i < nEndLine; i++)
 		{
 			m_terminalState->getLineGraphicsState(nLine, states, nNumStates, nMaxStates);
@@ -610,6 +611,8 @@ void SDLTerminal::redraw()
 			nLine++;
 		}
 
+		endTextGL();
+
 		if (m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR)
 			drawCursor(m_terminalState->getCursorLocation().getX(), m_terminalState->getCursorLocation().getY());
 	}
@@ -623,8 +626,6 @@ void SDLTerminal::redraw()
 	{
 		free(states);
 	}
-
-	endTextGL();
 
 	m_terminalState->unlock();
 
