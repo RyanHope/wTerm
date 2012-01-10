@@ -41,12 +41,12 @@ SDLCore::SDLCore()
 	m_foregroundColor = TS_COLOR_FOREGROUND;
 	m_backgroundColor = TS_COLOR_BACKGROUND;
 	m_bBold = false;
-	m_bItalic = false;
+	m_bUnderline = false;
 
 	m_fontNormal = NULL;
 	m_fontBold = NULL;
-	m_fontItal = NULL;
-	m_fontBoldItal = NULL;
+	m_fontUnder = NULL;
+	m_fontBoldUnder = NULL;
 	m_nFontHeight = 0;
 	m_nFontWidth = 0;
 
@@ -159,32 +159,16 @@ int SDLCore::createFonts(int nSize)
 
 	TTF_Font *font = TTF_OpenFont("./fonts/AnonymousProSpecial.ttf", nSize);
 	TTF_Font *fontBold = TTF_OpenFont("./fonts/AnonymousProB.ttf", nSize);
-	TTF_Font *fontItal = TTF_OpenFont("./fonts/AnonymousProI.ttf", nSize);
-	TTF_Font *fontBoldItal = TTF_OpenFont("./fonts/AnonymousProBI.ttf", nSize);
+	TTF_Font *fontUnder = TTF_OpenFont("./fonts/AnonymousProSpecial.ttf", nSize);
+	TTF_Font *fontBoldUnder = TTF_OpenFont("./fonts/AnonymousProB.ttf", nSize);
 
-	if (font == NULL)
+	if (!font || !fontBold || !fontUnder || !fontBoldUnder)
 	{
-		return -1;
-	}
-
-	if (fontBold == NULL)
-	{
-		TTF_CloseFont(font);
-		return -1;
-	}
-
-	if (fontItal == NULL)
-	{
+		syslog(LOG_ERR, "Error loading font!");
 		TTF_CloseFont(font);
 		TTF_CloseFont(fontBold);
-		return -1;
-	}
-
-	if (fontBoldItal == NULL)
-	{
-		TTF_CloseFont(font);
-		TTF_CloseFont(fontBold);
-		TTF_CloseFont(fontItal);
+		TTF_CloseFont(fontUnder);
+		TTF_CloseFont(fontBoldUnder);
 		return -1;
 	}
 
@@ -195,10 +179,14 @@ int SDLCore::createFonts(int nSize)
 		syslog(LOG_ERR, "Cannot calculate font size: %s", TTF_GetError());
 		TTF_CloseFont(font);
 		TTF_CloseFont(fontBold);
-		TTF_CloseFont(fontItal);
-		TTF_CloseFont(fontBoldItal);
+		TTF_CloseFont(fontUnder);
+		TTF_CloseFont(fontBoldUnder);
 		return -1;
 	}
+
+	// Set underline styles
+	TTF_SetFontStyle(fontUnder, TTF_STYLE_UNDERLINE);
+	TTF_SetFontStyle(fontBoldUnder, TTF_STYLE_UNDERLINE);
 
 	//Releases current fonts.
 	closeFonts();
@@ -208,8 +196,8 @@ int SDLCore::createFonts(int nSize)
 
 	m_fontNormal = font;
 	m_fontBold = fontBold;
-	m_fontItal = fontItal;
-	m_fontBoldItal = fontBoldItal;
+	m_fontUnder = fontUnder;
+	m_fontBoldUnder = fontBoldUnder;
 
 	m_nMaxLinesOfText = getMaximumLinesOfText();
 	m_nMaxColumnsOfText = getMaximumColumnsOfText();
@@ -369,16 +357,16 @@ void SDLCore::closeFonts()
 		m_fontBold = NULL;
 	}
 
-	if (m_fontItal != NULL)
+	if (m_fontUnder != NULL)
 	{
-		TTF_CloseFont(m_fontItal);
-		m_fontItal = NULL;
+		TTF_CloseFont(m_fontUnder);
+		m_fontUnder = NULL;
 	}
 
-	if (m_fontBoldItal != NULL)
+	if (m_fontBoldUnder != NULL)
 	{
-		TTF_CloseFont(m_fontBoldItal);
-		m_fontBoldItal = NULL;
+		TTF_CloseFont(m_fontBoldUnder);
+		m_fontBoldUnder = NULL;
 	}
 
 	m_nFontHeight = 0;
@@ -608,9 +596,9 @@ void SDLCore::drawText(int nX, int nY, const char *sText)
 	
 	// Match mapping in resetGlyphCache
 	int fnt = 0;
-	if (m_bBold && m_bItalic)
+	if (m_bBold && m_bUnderline)
 		fnt = 1;
-	else if (m_bItalic)
+	else if (m_bUnderline)
 		fnt = 2;
 	else if (m_bBold)
 		fnt = 3;
@@ -709,8 +697,8 @@ void SDLCore::resetGlyphCache()
 
 	// Match mapping in drawText()
 	fnts[0] = m_fontNormal;
-	fnts[1] = m_fontBoldItal;
-	fnts[2] = m_fontItal;
+	fnts[1] = m_fontBoldUnder;
+	fnts[2] = m_fontUnder;
 	fnts[3] = m_fontBold;
 
 	int nCols = TS_COLOR_MAX;
