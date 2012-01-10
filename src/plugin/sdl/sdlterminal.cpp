@@ -727,4 +727,7 @@ void SDLTerminal::setGraphicsState(TSLineGraphicsState_t &state)
 
 	m_bBold = ((state.nGraphicsMode & TS_GM_BOLD) > 0);
 	m_bUnderline = ((state.nGraphicsMode & TS_GM_UNDERSCORE) > 0);
+
+	m_slot1 = state.g0charset;
+	m_slot2 = state.g1charset;
 }

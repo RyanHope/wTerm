@@ -41,6 +41,8 @@ protected:
 	SDL_Surface *m_surface;
 	TSColor_t m_foregroundColor;
 	TSColor_t m_backgroundColor;
+	TSCharset_t m_slot1;
+	TSCharset_t m_slot2;
 	bool m_bBold;
 	bool m_bUnderline;
 

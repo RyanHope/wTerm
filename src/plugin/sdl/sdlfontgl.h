@@ -23,15 +23,28 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 
+#define MAX_CHARSETS 12
+
 // OpenGL Font Rendering
 class SDLFontGL {
+public:
+	typedef struct {
+		Uint16 map[128];
+	} CharMapping_t;
+	typedef struct {
+		int font;
+		int fg;
+		int bg;
+		int slot1;
+		int slot2;
+	} TextGraphicsInfo_t;
 private:
 	// Master font rendering texture.
 	GLuint GlyphCache;
 	int texW, texH;
 
-	// Dirty bit for each font
-	bool * haveFontLine;
+	// Dirty bit for each cache line
+	bool * haveCacheLine;
 
 	int nFonts, nCols;
 	TTF_Font** fnts;
@@ -43,21 +56,24 @@ private:
 	GLfloat * texValues;
 	GLfloat * vtxValues;
 	int numChars;
-	char printableChars[223];
-	size_t nChars;
+
+	// Encodings
+	CharMapping_t charMappings[MAX_CHARSETS];
 
 	void clearGL();
-	void ensureFontLine(int font);
+	void ensureCacheLine(int font, int slot);
+	bool &hasCacheLine(int font, int slot);
 	void createTexture();
 	void drawBackground(int color, int X, int Y, int cells);
-
-	void initializePrintables();
+	Uint16 lookupChar(char c);
+	void initializeCharMapping();
+	void getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, char c, int &x, int &y);
 
 public:
-	SDLFontGL() : GlyphCache(0), texW(0), texH(0), haveFontLine(0),
+	SDLFontGL() : GlyphCache(0), texW(0), texH(0), haveCacheLine(0),
 	nFonts(0), nCols(0), fnts(0), cols(0), screenCols(0), screenRows(0),
 	colorValues(0), texValues(0), vtxValues(0) {
-		initializePrintables();
+		memset(charMappings,0, sizeof(charMappings));
 	}
 	~SDLFontGL();
 
@@ -65,9 +81,12 @@ public:
 	// This invalidates the cache, so only call when things change.
 	void setupFontGL(int fnCount, TTF_Font** fnts, int colCount, SDL_Color *cols);
 
+	// Define a character set
+	void setCharMapping(int index, CharMapping_t map);
+
 	// Begin drawing text to the screen, assuming the given screen size
 	void startTextGL(int cols, int rows);
-	void drawTextGL(int font, int fg, int bg, int x, int y, const char * text);
+	void drawTextGL(TextGraphicsInfo_t & graphicsInfo, int x, int y, const char * text);
 	// Done drawing text, commit!
 	void endTextGL();
 };

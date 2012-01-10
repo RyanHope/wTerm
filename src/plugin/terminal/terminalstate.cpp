@@ -32,7 +32,9 @@ int cmp_graphics_state(TSLineGraphicsState_t const *state1, TSLineGraphicsState_
 	{
 		if (state1->nGraphicsMode == state2->nGraphicsMode
 			&& state1->foregroundColor == state2->foregroundColor
-			&& state1->backgroundColor == state2->backgroundColor)
+			&& state1->backgroundColor == state2->backgroundColor
+			&& state1->g0charset == state2->g0charset
+			&& state1->g1charset == state2->g1charset)
 		{
 			return 0;
 		}
@@ -1500,6 +1502,10 @@ void TerminalState::addGraphicsState(int nColumn, int nLine, TSColor_t foregroun
 	newState->foregroundColor = foregroundColor;
 	newState->backgroundColor = backgroundColor;
 	newState->nGraphicsMode = nMode;
+
+	// TODO: Implement this properly!
+	newState->g0charset = m_defaultGraphicsState.g0charset;
+	newState->g1charset = m_defaultGraphicsState.g1charset;
 
 	if (prevState != newState)
 	{
