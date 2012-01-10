@@ -528,9 +528,13 @@ void TerminalState::moveCursorForward(int nPos)
 {
 	pthread_mutex_lock(&m_rwLock);
 
+	int newX = m_cursorLoc.getX() + nPos;
+	int maxX = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+	newX = (newX>maxX) ? maxX : newX;
+
 	if (nPos >= 0)
 	{
-		setCursorLocation(m_cursorLoc.getX() + nPos, m_cursorLoc.getY());
+		setCursorLocation(newX, m_cursorLoc.getY());
 	}
 
 	pthread_mutex_unlock(&m_rwLock);
