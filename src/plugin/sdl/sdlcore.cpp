@@ -42,6 +42,8 @@ SDLCore::SDLCore()
 	m_backgroundColor = TS_COLOR_BACKGROUND;
 	m_bBold = false;
 	m_bUnderline = false;
+	m_slot1 = TS_CS_NONE;
+	m_slot2 = TS_CS_NONE;
 
 	m_fontNormal = NULL;
 	m_fontBold = NULL;
@@ -609,7 +611,15 @@ void SDLCore::drawText(int nX, int nY, const char *sText)
 	else if (m_bBold)
 		fnt = 3;
 
-	drawTextGL(fnt, (int)m_foregroundColor, (int)m_backgroundColor, nX, nY, sText);
+	SDLFontGL::TextGraphicsInfo_t graphicsInfo;
+	graphicsInfo.font = fnt;
+	graphicsInfo.fg = (int)m_foregroundColor;
+	graphicsInfo.bg = (int)m_backgroundColor;
+
+	graphicsInfo.slot1 = (int)m_slot1;
+	graphicsInfo.slot2 = (int)m_slot2;
+
+	drawTextGL(graphicsInfo, nX, nY, sText);
 
 	setDirty(BUFFER_DIRTY_BIT);
 }
