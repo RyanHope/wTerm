@@ -231,24 +231,24 @@ tst_movements(MENU_ARGS)
     }
     cup(17,30); el(2);
     for (col = 1; col <= width; col++) {
-      hvp(max_lines, col); printf("B");
-      hvp( 1, col); printf("T");
+      hvp(max_lines, col); printf("*");
+      hvp( 1, col); printf("*");
     }
     cup(2,2);
     for (row = 2; row <= max_lines-1; row++) {
-      printf("l");
+      printf("+");
       cub(1);
       ind();
     }
     cup(max_lines-1,width-1);
     for (row = max_lines-1; row >=2; row--) {
-      printf("r");
+      printf("+");
       cub(1); ri();
     }
     cup(2,1);
     for (row = 2; row <= max_lines-1; row++) {
-      printf("L");  cup(row, width);
-      printf("R");
+      printf("*");  cup(row, width);
+      printf("*");
       cub(10);
       if (row < 10) nel();
       else          printf("\n");
@@ -256,13 +256,13 @@ tst_movements(MENU_ARGS)
     cup(2,10);
     cub(42+hlfxtra); cuf(2);
     for (col = 3; col <= width-2; col++) {
-      printf("t");
+      printf("+");
       cuf(0); cub(2); cuf(1);
     }
     cup(max_lines-1,inner_r-1);
     cuf(42+hlfxtra); cub(2);
     for (col = width-2; col >= 3; col--) {
-      printf("b");
+      printf("+");
       cub(1); cuf(1); cub(0); printf("%c", 8);
     }
     cup( 1, 1); cuu(10); cuu(1); cuu(0);
