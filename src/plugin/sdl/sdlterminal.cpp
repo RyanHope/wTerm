@@ -53,15 +53,34 @@ SDLTerminal::SDLTerminal()
 	m_keyModAltLockedSurface = NULL;
 	m_keyModFnLockedSurface = NULL;
 
-	// this is bad practice, enums are not meant for iteration	
-	int i = TS_COLOR_BLACK;
-	while (i != TS_COLOR_MAX)
-	{
-		m_colors[i].r = 0;
-		m_colors[i].b = 0;
-		m_colors[i].g = 0;
-		i++;
-	}
+	SDL_Color defaultColors[] = {
+		{ 0, 0, 0 }, // COLOR_BLACK
+		{ 187, 0, 0 }, // COLOR_RED
+		{ 0, 187, 0 }, // COLOR_GREEN
+		{ 187, 187, 0 }, // COLOR_YELLOW
+		{ 0, 0, 187 }, // COLOR_BLUE
+		{ 187, 0, 187 }, // COLOR_MAGENTA
+		{ 0, 187, 187 }, // COLOR_CYAN
+		{ 187, 187, 187 }, // COLOR_WHITE
+		{ 85, 85, 85 }, // COLOR_BLACK_BRIGHT
+		{ 255, 85, 85 }, // COLOR_RED_BRIGHT
+		{ 85, 255, 85 }, // COLOR_GREEN_BRIGHT
+		{ 255, 255, 85 }, // COLOR_YELLOW_BRIGHT
+		{ 85, 85, 255 }, // COLOR_BLUE_BRIGHT
+		{ 255, 85, 255 }, // COLOR_MAGENTA_BRIGHT
+		{ 85, 255, 255 }, // COLOR_CYAN_BRIGHT
+		{ 255, 255, 255 }, // COLOR_WHITE_BRIGHT
+		{ 187, 187, 187 }, // COLOR_FOREGROUND
+		{ 0, 0, 0 }, // COLOR_BACKGROUND
+		{ 255, 255, 255 }, // COLOR_FOREGROUND_BRIGHT
+		{ 0, 0, 0 }, // COLOR_BACKGROUND_BRIGHT
+	};
+	size_t colorCount = sizeof(defaultColors)/sizeof(defaultColors[0]);
+	size_t mcolorCount = sizeof(m_colors)/sizeof(m_colors[0]);
+
+	memset(m_colors, 0, sizeof(m_colors));
+	for (int i = 0; i < colorCount && i < mcolorCount; ++i)
+		m_colors[i] = defaultColors[i];
 
 	m_config->parse("./terminal.config");
 }
