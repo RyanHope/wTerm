@@ -99,7 +99,7 @@ int main(int argc, const char* argv[])
 	Terminal *terminal = new Terminal();
 
 	sdlTerminal->start();
-	sdlTerminal->setFontSize(atoi(argv[1]));
+	sdlTerminal->setFontSize((argc == 2 && atoi(argv[1])) ? atoi(argv[1]) : 12);
 
 	PDL_RegisterJSHandler("setColor", setColor);
 	PDL_RegisterJSHandler("pushKeyEvent", pushKeyEvent);
