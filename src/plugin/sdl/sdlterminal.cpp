@@ -694,7 +694,12 @@ void SDLTerminal::setGraphicsState(TSLineGraphicsState_t &state)
 
 	if ((state.nGraphicsMode & TS_GM_NEGATIVE) > 0)
 	{
-		setBackgroundColor(state.foregroundColor);
+		if (state.foregroundColor>7 && state.foregroundColor<16)
+			setBackgroundColor((TSColor_t)(state.foregroundColor-8));
+		else if (state.foregroundColor>17)
+			setBackgroundColor((TSColor_t)(state.foregroundColor-2));
+		else
+			setBackgroundColor(state.foregroundColor);
 	}
 	else
 	{
