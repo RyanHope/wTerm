@@ -23,7 +23,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 
-#define MAX_CHARSETS 10
+#define MAX_CHARSETS 12
 
 // OpenGL Font Rendering
 class SDLFontGL {
