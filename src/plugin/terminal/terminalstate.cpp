@@ -1139,8 +1139,7 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 	DataBuffer *line, *nextLine;
 	bool bPrint = true;
 
-	if (getShift() && getG0Charset() == TS_CS_G0_SPEC && c>95) c = c + 128;
-	else if (!getShift() && getG1Charset() == TS_CS_G1_SPEC && c>95) c = c + 128;
+	if (getShift() && c>95) c = c + 128;
 
 	int nCols = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
 
@@ -1197,7 +1196,7 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 			// The padding we add should have the default graphics settings
 			addGraphicsState(line->size() + 1, displayLoc.getY(),
 					m_defaultGraphicsState.foregroundColor, m_defaultGraphicsState.backgroundColor,
-					m_defaultGraphicsState.nGraphicsMode, TS_GM_OP_SET, false);
+					m_defaultGraphicsState.nGraphicsMode, TS_GM_OP_SET, false, m_defaultGraphicsState.g0charset, m_defaultGraphicsState.g1charset);
 
 			line->fill(BLANK, nPos - line->size());
 		}
@@ -1205,13 +1204,14 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 		// Set the graphics state for the character we're inserting
 		addGraphicsState(displayLoc.getX(), displayLoc.getY(),
 				m_currentGraphicsState.foregroundColor, m_currentGraphicsState.backgroundColor,
-				m_currentGraphicsState.nGraphicsMode, TS_GM_OP_SET, false);
+				m_currentGraphicsState.nGraphicsMode, TS_GM_OP_SET, false, m_currentGraphicsState.g0charset, m_currentGraphicsState.g1charset);
 
 		// If we have a graphics state to restore, it starts on the character after
 		if (needsRestore) {
 			addGraphicsState(displayLoc.getX() + 1, displayLoc.getY(),
 					restoreState.foregroundColor, restoreState.backgroundColor,
-					restoreState.nGraphicsMode, TS_GM_OP_SET, false);
+					restoreState.nGraphicsMode, TS_GM_OP_SET, false,
+					restoreState.g0charset, restoreState.g1charset);
 		}
 
 		if (bShift)
@@ -1434,7 +1434,7 @@ bool TerminalState::isShiftText()
 	return m_bShiftText;
 }
 
-void TerminalState::addGraphicsState(int nColumn, int nLine, TSColor_t foregroundColor, TSColor_t backgroundColor, int nGraphicsMode, TSGraphicsModeOp_t op, bool bTrim)
+void TerminalState::addGraphicsState(int nColumn, int nLine, TSColor_t foregroundColor, TSColor_t backgroundColor, int nGraphicsMode, TSGraphicsModeOp_t op, bool bTrim, TSCharset_t g0charset, TSCharset_t g1charset)
 {
 	pthread_mutex_lock(&m_rwLock);
 
@@ -1504,8 +1504,8 @@ void TerminalState::addGraphicsState(int nColumn, int nLine, TSColor_t foregroun
 	newState->nGraphicsMode = nMode;
 
 	// TODO: Implement this properly!
-	newState->g0charset = m_defaultGraphicsState.g0charset;
-	newState->g1charset = m_defaultGraphicsState.g1charset;
+	newState->g0charset = g0charset;
+	newState->g1charset = g1charset;
 
 	if (prevState != newState)
 	{
@@ -1582,7 +1582,7 @@ void TerminalState::removeGraphicsState(int nColumn, int nLine, bool bTrim, TSLi
 					|| tmpState->backgroundColor != resetState->backgroundColor
 					|| tmpState->nGraphicsMode != resetState->nGraphicsMode)
 				{
-					addGraphicsState(nColumn, nLine, resetState->foregroundColor, resetState->backgroundColor, resetState->nGraphicsMode, TS_GM_OP_SET, false);
+					addGraphicsState(nColumn, nLine, resetState->foregroundColor, resetState->backgroundColor, resetState->nGraphicsMode, TS_GM_OP_SET, false, resetState->g0charset, resetState->g1charset);
 				}
 			}
 		}
@@ -1643,7 +1643,7 @@ void TerminalState::removeGraphicsState(int nBeginColumn, int nBeginLine, int nE
 				|| tmpState->backgroundColor != resetState->backgroundColor
 				|| tmpState->nGraphicsMode != resetState->nGraphicsMode)
 			{
-				addGraphicsState(nBeginColumn, nBeginLine, resetState->foregroundColor, resetState->backgroundColor, resetState->nGraphicsMode, TS_GM_OP_SET, false);
+				addGraphicsState(nBeginColumn, nBeginLine, resetState->foregroundColor, resetState->backgroundColor, resetState->nGraphicsMode, TS_GM_OP_SET, false, resetState->g0charset, resetState->g1charset);
 			}
 		}
 	}

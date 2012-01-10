@@ -52,6 +52,7 @@ protected:
 	int initCustom();
 	void toggleKeyMod(Term_KeyMod_t keyMod);
 	void disableKeyMod();
+	void initCharsets();
 
 private:
 	SDL_Color m_colors[TS_COLOR_MAX];

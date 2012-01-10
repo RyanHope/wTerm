@@ -83,6 +83,8 @@ SDLTerminal::SDLTerminal()
 		m_colors[i] = defaultColors[i];
 
 	m_config->parse("./terminal.config");
+
+	initCharsets();
 }
 
 SDLTerminal::~SDLTerminal()
@@ -148,6 +150,46 @@ void SDLTerminal::updateDisplaySize()
 		if (extTerminal != NULL)
 			extTerminal->setWindowSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
 	}
+}
+
+void SDLTerminal::initCharsets()
+{
+	CharMapping_t lineDrawing;
+	memset(&lineDrawing, 0, sizeof(lineDrawing));
+	lineDrawing.map[96] = 9670;
+	lineDrawing.map[97] = 0;
+	lineDrawing.map[98] = 0;
+	lineDrawing.map[99] = 0;
+	lineDrawing.map[100] = 0;
+	lineDrawing.map[101] = 0;
+	lineDrawing.map[102] = 176;
+	lineDrawing.map[103] = 177;
+	lineDrawing.map[104] = 0;
+	lineDrawing.map[105] = 0;
+	lineDrawing.map[106] = 9496;
+	lineDrawing.map[107] = 9488;
+	lineDrawing.map[108] = 9484;
+	lineDrawing.map[109] = 9492;
+	lineDrawing.map[110] = 9532;
+	lineDrawing.map[111] = 9472;
+	lineDrawing.map[112] = 9472;
+	lineDrawing.map[113] = 9472;
+	lineDrawing.map[114] = 9472;
+	lineDrawing.map[115] = 9472;
+	lineDrawing.map[116] = 9500;
+	lineDrawing.map[117] = 9508;
+	lineDrawing.map[118] = 9524;
+	lineDrawing.map[119] = 9516;
+	lineDrawing.map[120] = 9474;
+	lineDrawing.map[121] = 8804;
+	lineDrawing.map[122] = 8805;
+	lineDrawing.map[123] = 960;
+	lineDrawing.map[124] = 8800;
+	lineDrawing.map[125] = 163;
+	lineDrawing.map[126] = 183;
+	lineDrawing.map[127] = 0;
+	setCharMapping(TS_CS_G0_SPEC, lineDrawing);
+	setCharMapping(TS_CS_G1_SPEC, lineDrawing);
 }
 
 int SDLTerminal::initCustom()

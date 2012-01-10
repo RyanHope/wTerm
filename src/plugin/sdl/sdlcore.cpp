@@ -42,8 +42,8 @@ SDLCore::SDLCore()
 	m_backgroundColor = TS_COLOR_BACKGROUND;
 	m_bBold = false;
 	m_bUnderline = false;
-	m_slot1 = TS_CS_NONE;
-	m_slot2 = TS_CS_NONE;
+	m_slot1 = TS_CS_G0_ASCII;
+	m_slot2 = TS_CS_G1_ASCII;
 
 	m_fontNormal = NULL;
 	m_fontBold = NULL;
