@@ -42,6 +42,8 @@ SDLCore::SDLCore()
 	m_backgroundColor = TS_COLOR_BACKGROUND;
 	m_bBold = false;
 	m_bUnderline = false;
+	m_slot1 = TS_CS_NONE;
+	m_slot2 = TS_CS_NONE;
 
 	m_fontNormal = NULL;
 	m_fontBold = NULL;
@@ -614,10 +616,8 @@ void SDLCore::drawText(int nX, int nY, const char *sText)
 	graphicsInfo.fg = (int)m_foregroundColor;
 	graphicsInfo.bg = (int)m_backgroundColor;
 
-	// TODO: Implement these!
-	// (Only refer here to slots we've told sdlfontgl about via setCharMapping)
-	graphicsInfo.slot1 = 0;
-	graphicsInfo.slot2 = 0;
+	graphicsInfo.slot1 = (int)m_slot1;
+	graphicsInfo.slot2 = (int)m_slot2;
 
 	drawTextGL(graphicsInfo, nX, nY, sText);
 
