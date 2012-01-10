@@ -42,7 +42,7 @@ protected:
 	TSColor_t m_foregroundColor;
 	TSColor_t m_backgroundColor;
 	bool m_bBold;
-	bool m_bItalic;
+	bool m_bUnderline;
 
 	int createFonts(int nSize);
 
@@ -69,8 +69,8 @@ private:
 
 	TTF_Font *m_fontNormal;
 	TTF_Font *m_fontBold;
-	TTF_Font *m_fontItal;
-	TTF_Font *m_fontBoldItal;
+	TTF_Font *m_fontUnder;
+	TTF_Font *m_fontBoldUnder;
 	int m_nFontHeight;
 	int m_nFontWidth;
 	int m_nMaxLinesOfText;
