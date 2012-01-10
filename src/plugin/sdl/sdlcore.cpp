@@ -609,7 +609,17 @@ void SDLCore::drawText(int nX, int nY, const char *sText)
 	else if (m_bBold)
 		fnt = 3;
 
-	drawTextGL(fnt, (int)m_foregroundColor, (int)m_backgroundColor, nX, nY, sText);
+	SDLFontGL::TextGraphicsInfo_t graphicsInfo;
+	graphicsInfo.font = fnt;
+	graphicsInfo.fg = (int)m_foregroundColor;
+	graphicsInfo.bg = (int)m_backgroundColor;
+
+	// TODO: Implement these!
+	// (Only refer here to slots we've told sdlfontgl about via setCharMapping)
+	graphicsInfo.slot1 = 0;
+	graphicsInfo.slot2 = 0;
+
+	drawTextGL(graphicsInfo, nX, nY, sText);
 
 	setDirty(BUFFER_DIRTY_BIT);
 }
