@@ -54,7 +54,7 @@ private:
 	void initializePrintables();
 
 public:
-	SDLFontGL() : GlyphCache(0), texW(0), texH(0),
+	SDLFontGL() : GlyphCache(0), texW(0), texH(0), haveFontLine(0),
 	nFonts(0), nCols(0), fnts(0), cols(0), screenCols(0), screenRows(0),
 	colorValues(0), texValues(0), vtxValues(0) {
 		initializePrintables();
