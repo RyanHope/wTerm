@@ -157,10 +157,13 @@ int SDLCore::createFonts(int nSize)
 		return -1;
 	}
 
-	TTF_Font *font = TTF_OpenFont("./fonts/AnonymousProSpecial.ttf", nSize);
-	TTF_Font *fontBold = TTF_OpenFont("./fonts/AnonymousProB.ttf", nSize);
-	TTF_Font *fontUnder = TTF_OpenFont("./fonts/AnonymousProSpecial.ttf", nSize);
-	TTF_Font *fontBoldUnder = TTF_OpenFont("./fonts/AnonymousProB.ttf", nSize);
+	// TODO: Let user set this?
+	const char * Font = "./fonts/AnonymousProSpecial.ttf";
+
+	TTF_Font *font = TTF_OpenFont(Font, nSize);
+	TTF_Font *fontBold = TTF_OpenFont(Font, nSize);
+	TTF_Font *fontUnder = TTF_OpenFont(Font, nSize);
+	TTF_Font *fontBoldUnder = TTF_OpenFont(Font, nSize);
 
 	if (!font || !fontBold || !fontUnder || !fontBoldUnder)
 	{
@@ -184,9 +187,10 @@ int SDLCore::createFonts(int nSize)
 		return -1;
 	}
 
-	// Set underline styles
+	// Set font styles:
+	TTF_SetFontStyle(fontBold, TTF_STYLE_BOLD);
 	TTF_SetFontStyle(fontUnder, TTF_STYLE_UNDERLINE);
-	TTF_SetFontStyle(fontBoldUnder, TTF_STYLE_UNDERLINE);
+	TTF_SetFontStyle(fontBoldUnder, TTF_STYLE_BOLD | TTF_STYLE_UNDERLINE);
 
 	//Releases current fonts.
 	closeFonts();
