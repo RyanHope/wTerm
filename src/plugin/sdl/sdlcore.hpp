@@ -48,6 +48,8 @@ protected:
 	bool m_bBlink;
 	bool doBlink;
 
+	bool m_reverse;
+
 	pthread_t m_blinkThread;
 	static void *blinkThread(void *ptr);
 	int startBlinkThread();
@@ -116,7 +118,7 @@ public:
 
 	void setForegroundColor(unsigned char nRed, unsigned char nGreen, unsigned char nBlue);
 	void setBackgroundColor(unsigned char nRed, unsigned char nGreen, unsigned char nBlue);
-	void clearScreen();
+	void clearScreen(TSColor_t color);
 
 	int getMaximumLinesOfText();
 	int getMaximumColumnsOfText();

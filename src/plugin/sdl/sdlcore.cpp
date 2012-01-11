@@ -48,6 +48,8 @@ SDLCore::SDLCore()
 	m_slot1 = TS_CS_G0_ASCII;
 	m_slot2 = TS_CS_G1_ASCII;
 
+	m_reverse = false;
+
 	m_fontNormal = NULL;
 	m_fontBold = NULL;
 	m_fontUnder = NULL;
@@ -124,7 +126,7 @@ int SDLCore::initOpenGL()
 {
 	const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
 
-	clearScreen();
+	clearScreen(m_backgroundColor);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -512,9 +514,9 @@ void SDLCore::drawCursor(int nColumn, int nLine)
 /**
  * Clears the screen with the current background color.
  */
-void SDLCore::clearScreen()
+void SDLCore::clearScreen(TSColor_t color)
 {
-	SDL_Color bkgd = getColor(m_backgroundColor);
+	SDL_Color bkgd = getColor(color);
 	glClearColor(
 		((float)bkgd.r) / 255.0f,
 		((float)bkgd.g) / 255.0f,
@@ -637,8 +639,13 @@ void SDLCore::drawText(int nX, int nY, const char *sText)
 
 	SDLFontGL::TextGraphicsInfo_t graphicsInfo;
 	graphicsInfo.font = fnt;
-	graphicsInfo.fg = (int)m_foregroundColor;
-	graphicsInfo.bg = (int)m_backgroundColor;
+	if (m_reverse) {
+		graphicsInfo.bg = (int)m_foregroundColor;
+		graphicsInfo.fg = (int)m_backgroundColor;
+	} else {
+		graphicsInfo.fg = (int)m_foregroundColor;
+		graphicsInfo.bg = (int)m_backgroundColor;
+	}
 	graphicsInfo.blink = ((int)m_bBlink && !(int)doBlink) ? 1 : 0;
 
 	graphicsInfo.slot1 = (int)m_slot1;

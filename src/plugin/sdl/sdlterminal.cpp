@@ -514,7 +514,8 @@ void SDLTerminal::redraw()
 	TSLineGraphicsState_t defState = m_terminalState->getDefaultGraphicsState();
 
 	setGraphicsState(defState);
-	clearScreen();
+	m_reverse = (m_terminalState->getTerminalModeFlags() & TS_TM_SCREEN);
+	clearScreen(m_reverse ? defState.foregroundColor : defState.backgroundColor);
 
 	if (size <= 0)
 	{
