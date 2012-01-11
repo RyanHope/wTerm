@@ -89,6 +89,11 @@ typedef enum
 	 */
 	TS_TM_CURSOR = 512,
 
+	/**
+	 * Set to enable insert mode, otherwise, overwrite.
+	 */
+	TS_TM_INSERT = 1024,
+
 	TS_TM_MAX
 } TSTermMode_t;
 

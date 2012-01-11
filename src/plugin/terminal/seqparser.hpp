@@ -108,8 +108,12 @@ typedef enum
 	CS_ERASE_DISPLAY, //ESC[<Value>;...;<Value>J
 	CS_ERASE_LINE, //ESC[<Value>;...;<Value>K
 	CS_GRAPHICS_MODE_SET, //ESC[<Value>;...;<Value>m
-	CS_MODE_SET, //ESC[<?><Value>;...;<Value>h
-	CS_MODE_RESET, //ESC[<?><Value>;...;<Value>l
+
+	CS_MODE_SET, //ESC[<Value>;...;<Value>h
+	CS_MODE_RESET, //ESC[<Value>;...;<Value>l
+
+	CS_MODE_SET_PRIV, //ESC[<?><Value>;...;<Value>h
+	CS_MODE_RESET_PRIV, //ESC[<?><Value>;...;<Value>l
 
 	CS_INDEX, //ESCD INDEX
 	CS_REVERSE_INDEX, //ESCM REVERSE INDEX

@@ -1074,7 +1074,6 @@ bool TerminalState::processNonPrintableChar(char &c)
 	switch (c)
 	{
 	case 8: //Backspace.
-		syslog(LOG_ERR, "Do Backspace %d", getCursorLocation().getX());
 		if (getCursorLocation().getX() >= 1)
 			moveCursorBackward(1);
 		break;
@@ -1214,8 +1213,6 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 		if (bShift)
 		{
 			int nOverFlowSize;
-			char *tmp = (char *)malloc(nCols * sizeof(char));
-			char cEmpty = BLANK;
 
 			getBufferLine(nLine)->insert(nPos, &c, 1);
 
@@ -1226,27 +1223,9 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 			{
 				line = getBufferLine(i);
 				nOverFlowSize = line->size() - nCols;
-
-				if ((i + 1) < m_data.size())
-				{
-					nextLine = getBufferLine(i + 1);
-
-					if (nOverFlowSize > 0)
-					{
-						line->copy(nCols, tmp, nOverFlowSize);
-						nextLine->insert(0, tmp, nOverFlowSize);
-					}
-					else if (nextLine->size() > 0)
-					{
-						//Insert an empty padding.
-						nextLine->insert(0, &cEmpty, 1);
-					}
-				}
-
 				line->clear(nCols, nOverFlowSize, true);
 			}
 
-			free(tmp);
 		}
 		else
 		{

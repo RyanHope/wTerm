@@ -107,10 +107,12 @@ void ControlSeqParser::buildLookup()
 	addLookupEntry("[", CS_ERASE_DISPLAY, 0, -1, 1, 'J');
 	addLookupEntry("[", CS_ERASE_LINE, 0, -1, 1, 'K');
 	addLookupEntry("[", CS_GRAPHICS_MODE_SET, 0, -1, 1, 'm');
+
 	addLookupEntry("[", CS_MODE_SET, 0, -1, 1, 'h');
-	addLookupEntry("[?", CS_MODE_SET, 0, -1, 1, 'h');
 	addLookupEntry("[", CS_MODE_RESET, 0, -1, 1, 'l');
-	addLookupEntry("[?", CS_MODE_RESET, 0, -1, 1, 'l');
+
+	addLookupEntry("[?", CS_MODE_SET_PRIV, 0, -1, 1, 'h');
+	addLookupEntry("[?", CS_MODE_RESET_PRIV, 0, -1, 1, 'l');
 
 	addLookupEntry("", CS_KEYPAD_APP_MODE, 0, 0, 1, '=');
 	addLookupEntry("", CS_KEYPAD_NUM_MODE, 0, 0, 1, '>');

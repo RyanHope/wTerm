@@ -242,7 +242,17 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			}
 		}
 		break;
-	case CS_MODE_SET: //ESC[<?><Value>;...;<Value>h
+	case CS_MODE_SET: //ESC[<Value>;...;<Value>h
+		for (i = 0; i < numValues; i++)
+		{
+			if (values[i] == 4)
+			{
+				addTerminalModeFlags(TS_TM_INSERT);
+				enableShiftText(true);
+			}
+		}
+		break;
+	case CS_MODE_SET_PRIV: //ESC[<?><Value>;...;<Value>h
 		for (i = 0; i < numValues; i++)
 		{
 			if (values[i] == 1)
@@ -273,7 +283,6 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			}
 			else if (values[i] == 7)
 			{
-				syslog(LOG_ERR, "AUTOWRAP ON");
 				addTerminalModeFlags(TS_TM_AUTO_WRAP);
 			}
 			else if (values[i] == 8)
@@ -295,7 +304,17 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			}
 		}
 		break;
-	case CS_MODE_RESET: //ESC[<?><Value>;...;<Value>l
+	case CS_MODE_RESET: //ESC[<Value>;...;<Value>l
+		for (i = 0; i < numValues; i++)
+		{
+			if (values[i] == 4)
+			{
+				removeTerminalModeFlags(TS_TM_INSERT);
+				enableShiftText(false);
+			}
+		}
+		break;
+	case CS_MODE_RESET_PRIV: //ESC[<?><Value>;...;<Value>l
 		for (i = 0; i < numValues; i++)
 		{
 			if (values[i] == 1)
@@ -326,7 +345,6 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			}
 			else if (values[i] == 7)
 			{
-				syslog(LOG_ERR, "AUTOWRAP OFF");
 				removeTerminalModeFlags(TS_TM_AUTO_WRAP);
 			}
 			else if (values[i] == 8)
