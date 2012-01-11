@@ -145,8 +145,6 @@ void SDLFontGL::clearGL() {
 		GlyphCache = 0;
 	}
 
-	memset(charMappings, 0, sizeof(charMappings));
-
 	free(haveCacheLine);
 	free(fnts);
 	free(cols);
