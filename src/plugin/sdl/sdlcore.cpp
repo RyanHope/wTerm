@@ -160,7 +160,7 @@ int SDLCore::createFonts(int nSize)
 	}
 
 	// TODO: Let user set this?
-	const char * Font = "./fonts/AnonymousPro.ttf";
+	const char * Font = "./fonts/LiberationMono-Regular.ttf";
 
 	TTF_Font *font = TTF_OpenFont(Font, nSize);
 	TTF_Font *fontBold = TTF_OpenFont(Font, nSize);
