@@ -42,18 +42,7 @@ bool VTTerminalState::processNonPrintableChar(char &c)
 
 	pthread_mutex_lock(&m_rwLock);
 
-	switch (c)
-	{
-	case 8: //Backspace.
-		if (getCursorLocation().getX() >= 1)
-		{
-			moveCursorBackward(1);
-		}
-		break;
-	default:
-		bPrint = TerminalState::processNonPrintableChar(c);
-		break;
-	}
+	bPrint = TerminalState::processNonPrintableChar(c);
 
 	pthread_mutex_unlock(&m_rwLock);
 
@@ -284,6 +273,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			}
 			else if (values[i] == 7)
 			{
+				syslog(LOG_ERR, "AUTOWRAP ON");
 				addTerminalModeFlags(TS_TM_AUTO_WRAP);
 			}
 			else if (values[i] == 8)
@@ -336,6 +326,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			}
 			else if (values[i] == 7)
 			{
+				syslog(LOG_ERR, "AUTOWRAP OFF");
 				removeTerminalModeFlags(TS_TM_AUTO_WRAP);
 			}
 			else if (values[i] == 8)

@@ -546,9 +546,14 @@ void TerminalState::moveCursorBackward(int nPos)
 {
 	pthread_mutex_lock(&m_rwLock);
 
+	int maxX = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+
 	if (nPos >= 0)
 	{
-		setCursorLocation(m_cursorLoc.getX() - nPos, m_cursorLoc.getY());
+		if (m_cursorLoc.getX()>maxX)
+			setCursorLocation(maxX - nPos, m_cursorLoc.getY());
+		else
+			setCursorLocation(m_cursorLoc.getX() - nPos, m_cursorLoc.getY());
 	}
 
 	pthread_mutex_unlock(&m_rwLock);
@@ -1069,10 +1074,9 @@ bool TerminalState::processNonPrintableChar(char &c)
 	switch (c)
 	{
 	case 8: //Backspace.
+		syslog(LOG_ERR, "Do Backspace %d", getCursorLocation().getX());
 		if (getCursorLocation().getX() >= 1)
-		{
-			deleteChar(true, m_bShiftText);
-		}
+			moveCursorBackward(1);
 		break;
 	case 10: //Line feed.
 		if ((getTerminalModeFlags() & TS_TM_NEW_LINE) > 0)
@@ -1159,13 +1163,11 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 			}
 			else
 			{
-				setCursorLocation(getDisplayScreenSize().getX(), m_cursorLoc.getY());
+				setCursorLocation(nCols, m_cursorLoc.getY());
 			}
 
 			displayLoc = getDisplayCursorLocation();
 		}
-
-
 
 		// Get the 'line' for these coordinates
 		nPos = displayLoc.getX() - 1;
@@ -1179,10 +1181,8 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 		bool needsRestore = false;
 		TSLineGraphicsState_t restoreState;
 		if (line->size() > displayLoc.getX() + 1) {
-			int thisLocator = findGraphicsState(displayLoc.getX(),
-																					displayLoc.getY(), true);
-			int nextLocator = findGraphicsState(displayLoc.getX() + 1,
-																					displayLoc.getY(), true);
+			int thisLocator = findGraphicsState(displayLoc.getX(), displayLoc.getY(), true);
+			int nextLocator = findGraphicsState(displayLoc.getX() + 1, displayLoc.getY(), true);
 			if (thisLocator == nextLocator) {
 				needsRestore = true;
 				if (thisLocator >= 0 && thisLocator < m_graphicsState.size()) {
@@ -1213,9 +1213,8 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 
 		if (bShift)
 		{
-			int nScreenWidth = getDisplayScreenSize().getX();
 			int nOverFlowSize;
-			char *tmp = (char *)malloc(nScreenWidth * sizeof(char));
+			char *tmp = (char *)malloc(nCols * sizeof(char));
 			char cEmpty = BLANK;
 
 			getBufferLine(nLine)->insert(nPos, &c, 1);
@@ -1226,7 +1225,7 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 			for (int i = nLine; i < m_data.size(); i++)
 			{
 				line = getBufferLine(i);
-				nOverFlowSize = line->size() - nScreenWidth;
+				nOverFlowSize = line->size() - nCols;
 
 				if ((i + 1) < m_data.size())
 				{
@@ -1234,7 +1233,7 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 
 					if (nOverFlowSize > 0)
 					{
-						line->copy(nScreenWidth, tmp, nOverFlowSize);
+						line->copy(nCols, tmp, nOverFlowSize);
 						nextLine->insert(0, tmp, nOverFlowSize);
 					}
 					else if (nextLine->size() > 0)
@@ -1244,7 +1243,7 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 					}
 				}
 
-				line->clear(nScreenWidth, nOverFlowSize, true);
+				line->clear(nCols, nOverFlowSize, true);
 			}
 
 			free(tmp);
@@ -1267,7 +1266,7 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 			{
 				if ((getTerminalModeFlags() & TS_TM_AUTO_WRAP) > 0)
 				{
-					m_cursorLoc.setX(getDisplayScreenSize().getX() + 1);
+					m_cursorLoc.setX(nCols + 1);
 				}
 			}
 			else
