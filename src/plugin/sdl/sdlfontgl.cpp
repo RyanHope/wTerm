@@ -296,6 +296,7 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
 	int fnt = graphicsInfo.font;
 	int fg = graphicsInfo.fg;
 	int bg = graphicsInfo.bg;
+	int blink = graphicsInfo.blink;
 
 	assert(fnt >= 0 && fnt < nFonts);
 	assert(fg >= 0 && fg < nCols);
@@ -311,6 +312,8 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
 	const int stride = 12; // GL_TRIANGLE_STRIP 2*6
 
 	drawBackground(bg, nX, nY, len);
+
+	if (blink) return;
 
 	GLfloat *tex = &texValues[stride*numChars];
 	GLfloat *vtx = &vtxValues[stride*numChars];

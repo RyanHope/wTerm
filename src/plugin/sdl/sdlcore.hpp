@@ -45,6 +45,12 @@ protected:
 	TSCharset_t m_slot2;
 	bool m_bBold;
 	bool m_bUnderline;
+	bool m_bBlink;
+	bool doBlink;
+
+	pthread_t m_blinkThread;
+	static void *blinkThread(void *ptr);
+	int startBlinkThread();
 
 	int createFonts(int nSize);
 

@@ -37,6 +37,7 @@ public:
 		int bg;
 		int slot1;
 		int slot2;
+		int blink;
 	} TextGraphicsInfo_t;
 private:
 	// Master font rendering texture.

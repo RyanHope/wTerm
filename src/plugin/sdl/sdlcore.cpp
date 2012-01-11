@@ -25,6 +25,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <syslog.h>
+#include <unistd.h>
 
 const int SDLCore::BUFFER_DIRTY_BIT = 1;
 const int SDLCore::FONT_DIRTY_BIT = 2;
@@ -42,6 +43,8 @@ SDLCore::SDLCore()
 	m_backgroundColor = TS_COLOR_BACKGROUND;
 	m_bBold = false;
 	m_bUnderline = false;
+	m_bBlink = false;
+	doBlink = false;
 	m_slot1 = TS_CS_G0_ASCII;
 	m_slot2 = TS_CS_G1_ASCII;
 
@@ -59,6 +62,7 @@ SDLCore::~SDLCore()
 {
 	if (isRunning())
 	{
+		pthread_join(m_blinkThread, NULL);
 		shutdown();
 	}
 }
@@ -338,6 +342,25 @@ void SDLCore::start()
 	}
 }
 
+int SDLCore::startBlinkThread()
+{
+	return pthread_create(&m_blinkThread, NULL, blinkThread, this);
+}
+
+void *SDLCore::blinkThread(void *ptr)
+{
+	SDL_Event event;
+	event.type = SDL_VIDEOEXPOSE;
+	SDLCore *core = (SDLCore *)ptr;
+	while (core->isRunning()) {
+		core->doBlink = !core->doBlink;
+		SDL_PushEvent(&event);
+		usleep(500000);
+	}
+	pthread_exit(NULL);
+	return NULL;
+}
+
 /**
  * Starts the main application event loop. Will not return until the application exits.
  * If SDL is not initialized, then this will return immediately.
@@ -346,6 +369,7 @@ void SDLCore::run()
 {
 	if (isRunning())
 	{
+		startBlinkThread();
 		eventLoop();
 	}
 }
@@ -615,6 +639,7 @@ void SDLCore::drawText(int nX, int nY, const char *sText)
 	graphicsInfo.font = fnt;
 	graphicsInfo.fg = (int)m_foregroundColor;
 	graphicsInfo.bg = (int)m_backgroundColor;
+	graphicsInfo.blink = ((int)m_bBlink && !(int)doBlink) ? 1 : 0;
 
 	graphicsInfo.slot1 = (int)m_slot1;
 	graphicsInfo.slot2 = (int)m_slot2;
