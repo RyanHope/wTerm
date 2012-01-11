@@ -130,7 +130,8 @@ typedef enum
 
 typedef enum
 {
-	TS_CS_G0_UK = 0,
+	TS_CS_NONE = 0,
+	TS_CS_G0_UK,
 	TS_CS_G0_ASCII,
 	TS_CS_G0_SPEC,
 	TS_CS_G0_ALT_STD,
@@ -294,7 +295,8 @@ public:
 	void unlock();
 
 	void getLineGraphicsState(int nLine, TSLineGraphicsState_t **states, int &nNumStates, int nMaxStates);
-	void addGraphicsState(int nColumn, int nLine, TSColor_t foregroundColor, TSColor_t backgroundColor, int nGraphicsMode, TSGraphicsModeOp_t op, bool bTrim, TSCharset_t g0charset, TSCharset_t g1charset);
+	void addGraphicsState(int nColumn, int nLine, TSLineGraphicsState_t& state, TSGraphicsModeOp_t op, bool bTrim);
+	void addGraphicsState(int nColumn, int nLine, TSColor_t foregroundColor, TSColor_t backgroundColor, int nGraphicsMode, TSCharset_t g0charset, TSCharset_t g1charset, TSGraphicsModeOp_t op, bool bTrim);
 
 	void resetTerminal();
 	void insertLines(int nLines);
