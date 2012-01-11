@@ -268,6 +268,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			{
 				addTerminalModeFlags(TS_TM_COLUMN);
 				eraseScreen();
+				cursorHome();
 			}
 			else if (values[i] == 4)
 			{
@@ -319,6 +320,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			{
 				removeTerminalModeFlags(TS_TM_COLUMN);
 				eraseScreen();
+				cursorHome();
 			}
 			else if (values[i] == 4)
 			{
