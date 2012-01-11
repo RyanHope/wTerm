@@ -1074,9 +1074,6 @@ bool TerminalState::processNonPrintableChar(char &c)
 			deleteChar(true, m_bShiftText);
 		}
 		break;
-	case 9: //Tab.
-		insertChar(' ', true, true, m_bShiftText);
-		break;
 	case 10: //Line feed.
 		if ((getTerminalModeFlags() & TS_TM_NEW_LINE) > 0)
 		{
@@ -1086,6 +1083,9 @@ bool TerminalState::processNonPrintableChar(char &c)
 		{
 			moveCursorDown(1, true);
 		}
+		break;
+	case 11: //Vertical tab
+		moveCursorDown(1, true);
 		break;
 	case 13: //Return.
 		setCursorLocation(1, getCursorLocation().getY());
@@ -1784,7 +1784,7 @@ void TerminalState::getLineGraphicsState(int nLine, TSLineGraphicsState_t **stat
 
 void TerminalState::tabForward(int nTabs) {
 	if (tabs.size()==0 || nTabs>tabs.size())
-		setCursorLocation(m_displayScreenSize.getX(),m_cursorLoc.getY());
+		setCursorLocation((getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80, m_cursorLoc.getY());
 	else {
 		int i = 0, t = 0;
 		while (t!=nTabs) {
