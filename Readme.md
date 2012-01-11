@@ -23,3 +23,21 @@ Contributors
 * Will Dietz
 * Ryan Hope (Project Lead)
 * Brian Kearney
+
+Screenshots
+-----------
+
+![][sc1]
+[sc1]: http://ompldr.org/vYnl6Mw/wterm_2011-29-12_152014.png
+
+![][sc2]
+[sc2]: hhttp://ompldr.org/vYnV4MQ/wterm_2011-21-12_205004.png
+
+![][sc3]
+[sc3]: http://ompldr.org/vYzEwcQ/wterm_2012-02-01_183109.png
+
+![][sc4]
+[sc4]: http://ompldr.org/vYzdkaw/wterm_2012-11-01_170738.png
+
+![][sc5]
+[sc5]: http://ompldr.org/vYzIzNw/wterm_2012-04-01_151716.png
