@@ -24,6 +24,9 @@ enyo.kind({
 						{content: "Font Size", style: 'padding-right: 10px'}
 					]}
 				]},
+				{kind: "RowGroup", showing: false, caption: 'Keyboard Layout', flex: 1, components: [
+					{kind: "ListSelector", name: 'kbdLayouts', onChange: "kbdLayoutChanged" },
+				]},
 				{kind: 'RowGroup', flex :1, caption: 'Color Scheme', components: [
 					{kind: "ListSelector", name: 'colorSchemes', onChange: "colorSchemeChanged"},
 					{name: 'foreground', kind: 'wi.InputColor', caption: 'Foreground', onChanged: 'updateColors'},
@@ -54,6 +57,7 @@ enyo.kind({
 			]}
 		]}
 	],
+	
 	flyInFromChanged: function() {
 		this.inherited(arguments);
 		this.$.shadow.addRemoveClass("flyInFromLeft", this.flyInFrom == "left");
@@ -132,11 +136,17 @@ enyo.kind({
 	rendered: function() {
 		this.getColors()
 		this.$.fontSize.setValue(this.prefs.get('fontSize'))
+		this.$.kbdLayouts.setItems(kbdLayoutList());
+		this.$.kbdLayouts.setValue(this.prefs.get('kbdLayout'))
 		this.getColorSchemes()
 	},
 	colorSchemeChanged: function() {
 		this.prefs.set('colorScheme', this.$.colorSchemes.getValue())
 		this.terminal.setColors()
 		this.getColors()
+	},
+	kbdLayoutChanged: function() {
+		this.prefs.set('kbdLayout', this.$.kbdLayouts.getValue());
+		this.vkb.loadLayout(this.$.kbdLayouts.getValue());
 	}
 })
