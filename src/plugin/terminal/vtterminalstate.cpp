@@ -64,7 +64,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		setCursorLocation(m_cursorLoc.getX(), values[0]);
 		break;
 	case CS_ECH: //ESC[<Chars>X
-		len = values[0] ? values[0] - 1 : 0;
+		len = values[0] ? values[0] : 1;
 		erase(m_cursorLoc, Point(m_cursorLoc.getX()+len, m_cursorLoc.getY()));
 		break;
 	case CS_IL: //ESC[<Lines>L
