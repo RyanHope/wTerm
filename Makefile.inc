@@ -28,3 +28,7 @@ else
 		ROOT=$(BUILD_ROOT)/staging/i686/usr
 	endif
 endif
+
+ifdef DEBUG
+	MARCH_TUNE+=-g -Wall
+endif
