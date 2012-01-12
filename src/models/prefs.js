@@ -3,6 +3,7 @@ function Prefs() {
 	this.defaults = {
 		fontSize: 12,
 		colorScheme: 'Linux Colors',
+		kbdLayout: 'default',
 		colorSchemes: {
 			'Linux Colors': [
 				[0,0,0],

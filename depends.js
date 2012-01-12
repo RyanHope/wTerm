@@ -5,7 +5,8 @@ enyo.depends(
 	"src/css/main.css",
 
 	"src/models/prefs.js",
-	
+	"src/models/vkblayout.js",
+
 	"src/enyo/wi/depends.js",
 
 	"src/enyo/plugin.js",
@@ -13,7 +14,6 @@ enyo.depends(
 	"src/enyo/prefs.js",
 	"src/enyo/vkbKey.js",
 	"src/enyo/vkb.js",
-	"src/enyo/vkbsmall.js",
 	"src/enyo/main.js"
 
 )
