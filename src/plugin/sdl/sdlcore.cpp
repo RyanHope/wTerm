@@ -718,24 +718,17 @@ void SDLCore::clearDirty(int nDirtyBits)
 	}
 }
 
-int SDLCore::getNextPowerOfTwo(int n)
-{
-	std::map<int, int>::iterator it = m_powerOfTwoLookup.find(n);
+int SDLCore::getNextPowerOfTwo(int n) {
+	if (n <= 0) return 1;
 
-	if (it == m_powerOfTwoLookup.end())
-	{
-		int i = 1;
-
-		while (i < n)
-		{
-			i *= 2;
-		}
-
-		m_powerOfTwoLookup[n] = i;
-		return i;
-	}
-
-	return it->second;
+	/* http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2 */
+	--n;
+	n |= n >> 1;
+	n |= n >> 2;
+	n |= n >> 4;
+	n |= n >> 8;
+	n |= n >> 16;
+	return (n+1); /* warning: overflow possible */
 }
 
 void SDLCore::resetGlyphCache()
