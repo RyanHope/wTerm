@@ -50,6 +50,11 @@ protected:
 
 	bool m_reverse;
 
+	SDL_RWops *file1;
+	SDL_RWops *file2;
+	SDL_RWops *file3;
+	SDL_RWops *file4;
+
 	pthread_t m_blinkThread;
 	static void *blinkThread(void *ptr);
 	int startBlinkThread();

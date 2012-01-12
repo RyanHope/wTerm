@@ -166,50 +166,31 @@ int SDLCore::createFonts(int nSize)
 	}
 
 	// TODO: Let user set this?
-	const char * Font = "./fonts/LiberationMono-Regular.ttf";
+	const char * Font = "./LiberationMono-Regular.ttf";
 
-	TTF_Font *font = TTF_OpenFont(Font, nSize);
-	TTF_Font *fontBold = TTF_OpenFont(Font, nSize);
-	TTF_Font *fontUnder = TTF_OpenFont(Font, nSize);
-	TTF_Font *fontBoldUnder = TTF_OpenFont(Font, nSize);
+	m_fontNormal = TTF_OpenFont(Font, nSize);
+	m_fontBold = TTF_OpenFont(Font, nSize);
+	m_fontUnder = TTF_OpenFont(Font, nSize);
+	m_fontBoldUnder = TTF_OpenFont(Font, nSize);
 
-	if (!font || !fontBold || !fontUnder || !fontBoldUnder)
+	if (!m_fontNormal || !m_fontBold || !m_fontUnder || !m_fontBoldUnder)
 	{
 		syslog(LOG_ERR, "Error loading font!");
-		TTF_CloseFont(font);
-		TTF_CloseFont(fontBold);
-		TTF_CloseFont(fontUnder);
-		TTF_CloseFont(fontBoldUnder);
+		closeFonts();
 		return -1;
 	}
 
-	int nWidth, nHeight;
-
-	if (TTF_SizeText(font, "O", &nWidth, &nHeight) != 0)
+	if (TTF_SizeText(m_fontNormal, "O", &m_nFontWidth, &m_nFontHeight) != 0)
 	{
 		syslog(LOG_ERR, "Cannot calculate font size: %s", TTF_GetError());
-		TTF_CloseFont(font);
-		TTF_CloseFont(fontBold);
-		TTF_CloseFont(fontUnder);
-		TTF_CloseFont(fontBoldUnder);
+		closeFonts();
 		return -1;
 	}
 
 	// Set font styles:
-	TTF_SetFontStyle(fontBold, TTF_STYLE_BOLD);
-	TTF_SetFontStyle(fontUnder, TTF_STYLE_UNDERLINE);
-	TTF_SetFontStyle(fontBoldUnder, TTF_STYLE_BOLD | TTF_STYLE_UNDERLINE);
-
-	//Releases current fonts.
-	closeFonts();
-
-	m_nFontWidth = nWidth;
-	m_nFontHeight = nHeight;
-
-	m_fontNormal = font;
-	m_fontBold = fontBold;
-	m_fontUnder = fontUnder;
-	m_fontBoldUnder = fontBoldUnder;
+	TTF_SetFontStyle(m_fontBold, TTF_STYLE_BOLD);
+	TTF_SetFontStyle(m_fontUnder, TTF_STYLE_UNDERLINE);
+	TTF_SetFontStyle(m_fontBoldUnder, TTF_STYLE_BOLD | TTF_STYLE_UNDERLINE);
 
 	m_nMaxLinesOfText = getMaximumLinesOfText();
 	m_nMaxColumnsOfText = getMaximumColumnsOfText();
@@ -450,6 +431,8 @@ int SDLCore::setFontSize(int nSize)
 	{
 		nSize = 1;
 	}
+
+	closeFonts();
 
 	if (createFonts(nSize) != 0)
 	{
