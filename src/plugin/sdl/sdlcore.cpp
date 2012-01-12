@@ -884,7 +884,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 		if (m_keyRepeat.timestamp && m_keyRepeat.evt.key.keysym.sym == event.key.keysym.sym) 
 		{
 			m_keyRepeat.timestamp = 0;
-			syslog(LOG_ERR, "Removed Repeat Event");
+//			syslog(LOG_ERR, "Removed Repeat Event");
 		}
 	}
 	else
@@ -894,8 +894,9 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 			m_keyRepeat.evt = event;
 			m_keyRepeat.firsttime = 1;
 			m_keyRepeat.timestamp = SDL_GetTicks();
-			syslog(LOG_ERR, "Added Repeat Event");
+//			syslog(LOG_ERR, "Added Repeat Event");
 		}
 	}
 	SDL_PushEvent(&event);
 }
+

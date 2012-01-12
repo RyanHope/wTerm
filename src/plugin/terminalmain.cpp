@@ -71,7 +71,6 @@ PDL_bool getDimensions(PDL_JSParameters *params) {
 }
 
 PDL_bool pushKeyEvent(PDL_JSParameters *params) {
-	syslog(LOG_ERR,"KEYPRESS");
 	SDL_Event event;
 
 	int type = PDL_GetJSParamInt(params, 0);
