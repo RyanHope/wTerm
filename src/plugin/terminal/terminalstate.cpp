@@ -1774,6 +1774,11 @@ void TerminalState::tabForward(int nTabs) {
 	}
 }
 
+void TerminalState::tabBackward(int nTabs) {
+	int maxX = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+	setCursorLocation(maxX-nTabs*8, m_cursorLoc.getY());
+}
+
 void TerminalState::resetTerminal() {
 	setTerminalModeFlags(TS_TM_AUTO_REPEAT|TS_TM_AUTO_WRAP|TS_TM_COLUMN|TS_TM_CURSOR);
 	eraseScreen();

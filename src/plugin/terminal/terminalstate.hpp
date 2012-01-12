@@ -309,6 +309,7 @@ public:
 	void deleteCharacters(int nChars);
 	void insertBlanks(int nBlanks);
 	void tabForward(int nTabs);
+	void tabBackward(int nTabs);
 	void setShift(bool shift);
 	bool getShift();
 };
