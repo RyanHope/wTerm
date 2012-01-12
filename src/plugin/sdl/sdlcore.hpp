@@ -95,8 +95,6 @@ private:
 	int m_nMaxColumnsOfText;
 
 
-	std::map<int, int> m_powerOfTwoLookup;
-
 	// pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
 	struct {
 		int firsttime;    /* if we check against the delay or repeat value */

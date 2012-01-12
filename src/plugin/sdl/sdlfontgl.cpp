@@ -68,10 +68,16 @@ static int getGLFormat() {
 static unsigned nextPowerOfTwo(int n) {
 	assert(n > 0);
 
-	unsigned res = 1;
-	while (res < (unsigned)n) res <<= 1;
+	unsigned res = n;
 
-	return res;
+	/* http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2 */
+	--res;
+	res |= res >> 1;
+	res |= res >> 2;
+	res |= res >> 4;
+	res |= res >> 8;
+	res |= res >> 16;
+	return (res+1); /* warning: overflow possible */
 }
 
 void SDLFontGL::setupFontGL(int fnCount, TTF_Font** fnts, int colCount, SDL_Color *cols) {
