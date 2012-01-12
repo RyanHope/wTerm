@@ -143,6 +143,7 @@ void ControlSeqParser::buildLookup()
 	addLookupEntry("[", CS_DL, 0, 1, 1, 'M');
 	addLookupEntry("[", CS_DCH, 0, 1, 1, 'P');
 	addLookupEntry("[", CS_ICH, 0, 1, 1, '@');
+	addLookupEntry("[", CS_HPA, 0, 1, 1, '`');
 
 	addLookupEntry("[", CS_MARGIN_SET, 0, 2, 1, 'r');
 	addLookupEntry("", CS_MOVE_UP, 0, 0, 1, 'D');

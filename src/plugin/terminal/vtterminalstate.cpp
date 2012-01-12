@@ -57,6 +57,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 
 	switch (nToken)
 	{
+	case CS_HPA: //ESC[<Column>`
 	case CS_CHA: //ESC[<Column>G
 		setCursorLocation(values[0],m_cursorLoc.getY());
 		break;

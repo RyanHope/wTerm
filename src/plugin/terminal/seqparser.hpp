@@ -127,6 +127,7 @@ typedef enum
 	CS_DL, //ESC[<Value>M Delete Lines
 	CS_DCH, //ESC[<Value>P Delete Characters
 	CS_ICH, //ESC[<Value>@ Insert Blank Characters
+	CS_HPA, //ESC[<Value>` Character Position Absolute
 
 	CS_KEYPAD_APP_MODE, //ESC=
 	CS_KEYPAD_NUM_MODE, //ESC>
