@@ -86,8 +86,6 @@ private:
 	int m_nMaxLinesOfText;
 	int m_nMaxColumnsOfText;
 
-	std::map<int, int> m_powerOfTwoLookup;
-
 	int init();
 	int initOpenGL();
 	void shutdown();
