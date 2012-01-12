@@ -1803,7 +1803,6 @@ void TerminalState::resetTerminal() {
 
 void TerminalState::setShift(bool shift) {
 	m_shift = shift;
-	syslog(LOG_ERR, "SHIFT STATE: %s", m_shift?"IN":"OUT");
 }
 
 bool TerminalState::getShift() {

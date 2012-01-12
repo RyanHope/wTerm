@@ -36,3 +36,9 @@ else ifeq ($(DEBUG),2)
 else ifeq ($(DEBUG),3)
 	MARCH_TUNE+=-g -Wall -pendantic
 endif
+
+ifdef LOGLEVEL
+	MARCH_TUNE+=-DLOGLEVEL=${LOGLEVEL}
+else
+	MARCH_TUNE+=-DLOGLEVEL=0
+endif
