@@ -421,6 +421,10 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_MOVE_NEXT_LINE: //ESCE
 		moveCursorNextLine();
 		break;
+	case CS_CNL: //ESC[<Value>E
+		for (i=0; i<values[0]; i++)
+			moveCursorNextLine();
+		break;
 	case CS_DOUBLE_HEIGHT_LINE_TOP: //ESC#3
 	case CS_DOUBLE_HEIGHT_LINE_BOTTOM: //ESC#4
 	case CS_SINGLE_WIDTH_LINE: //ESC#5
