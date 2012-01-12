@@ -130,6 +130,7 @@ typedef enum
 	CS_HPA, //ESC[<Value>` Character Position Absolute
 	CS_CBT, //ESC[<Value>Z Cursor Backward Tabulation
 	CS_CNL, //ESC[<Value>E Cursor Next Line
+	CS_CPL, //ESC[<Value>F Cursor Preceding Line
 
 	CS_KEYPAD_APP_MODE, //ESC=
 	CS_KEYPAD_NUM_MODE, //ESC>

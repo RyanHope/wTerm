@@ -559,6 +559,16 @@ void TerminalState::moveCursorBackward(int nPos)
 	pthread_mutex_unlock(&m_rwLock);
 }
 
+void TerminalState::moveCursorPreviousLine()
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	moveCursorUp(1, true);
+	moveCursorBackward(m_cursorLoc.getX() - 1);
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
 void TerminalState::moveCursorNextLine()
 {
 	pthread_mutex_lock(&m_rwLock);

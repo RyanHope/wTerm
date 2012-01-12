@@ -245,6 +245,7 @@ public:
 	void moveCursorForward(int nPos);
 	void moveCursorBackward(int nPos);
 	void moveCursorNextLine();
+	void moveCursorPreviousLine();
 
 	void eraseCurrentLine();
 	void eraseCursorToEndOfLine();
