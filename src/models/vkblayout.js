@@ -28,7 +28,7 @@ function kbdLayoutList() {
 kbdLayouts.default = { caption: 'default (en-US)' };
 kbdLayouts.default.keys = [
 	[
-		{small: 1, content: 'Esc', sym: 27, unicode: '\x1B'},
+		{small: 1, extraClasses: 'escape', content: 'Esc', sym: 27, unicode: '\x1B'},
 		{flex:1},
 		{small: 1, content: 'F1', sym: 282, unicode: null},
 		{small: 1, content: 'F2', sym: 283, unicode: null},
@@ -60,10 +60,10 @@ kbdLayouts.default.keys = [
 		{content: ')<br>0', sym: 48, unicode: '0'},
 		{content: '_<br>-', sym: 45, unicode: '-'},
 		{content: '+<br>=', sym: 61, unicode: '='},
-		{content: 'Bksp', extraClasses: 'backspace', sym: 8, unicode: '\x7f'},
+		{content: 'Bksp<br><img src="images/key_backspace.png" height="24"/>', extraClasses: 'backspace', sym: 8, unicode: '\x7f'},
 	],
 	[
-		{content: 'Tab', extraClasses: 'tab', sym: 9, unicode: '\x09'},
+		{content: 'Tab<br><img src="images/key_tab.png" height="24"/>', extraClasses: 'tab', sym: 9, unicode: '\x09'},
 		{content: 'Q', sym: 113},
 		{content: 'W', sym: 119},
 		{content: 'E', sym: 101},
@@ -91,7 +91,7 @@ kbdLayouts.default.keys = [
 		{content: 'L', sym: 108},
 		{content: ':<br>;', sym: 59, unicode: ';'},
 		{content: '\"<br>\'', sym: 39, unicode: '\''},
-		{content: 'Enter', extraClasses: 'enter', sym: 13, unicode: '\x0D'},
+		{content: 'Enter<br><img src="images/key_enter.png" height="24"/>', extraClasses: 'enter', sym: 13, unicode: '\x0D'},
 	],
 	[
 		{content: 'Shift', extraClasses: 'shift-left', sym: 304, unicode: null},
@@ -104,8 +104,8 @@ kbdLayouts.default.keys = [
 		{content: 'M', sym: 109},
 		{content: '&lt;<br>,', sym: 44, unicode: ','},
 		{content: '&gt;<br>.', sym: 46, unicode: '.'},
-		{content: '?&nbsp;&nbsp;&nbsp;Ins<br>/', extraClasses: 'arrow', sym: 47, unicode: '/'},
-		{content: 'Up<br>PgUp', extraClasses: 'arrow', sym: 273},
+		{content: '?&nbsp;&nbsp;&nbsp;<span class="fnBind">Ins</span><br>/', extraClasses: 'arrow', sym: 47, unicode: '/'},
+		{content: '<span class="fnBind">PgUp</span><br><img src="images/cursorUp.png" height="24"/>', extraClasses: 'arrow', sym: 273},
 		{content: 'Del', extraClasses: 'arrow'},
 	],
 	[
@@ -114,8 +114,8 @@ kbdLayouts.default.keys = [
 		{content: 'Alt', extraClasses: 'alt', sym: 308, unicode: null},
 		{content: 'Space', extraClasses: 'spacebar', sym: 32, unicode: ' '},
 		{content: 'Meta', extraClasses: 'meta', sym: 313, unicode: null},
-		{content: 'Left<br>Home', extraClasses: 'arrow', sym: 276, unicode: null},
-		{content: 'Down<br>PgDn', extraClasses: 'arrow', sym: 274, unicode: null},
-		{content: 'Right<br>End', extraClasses: 'arrow', sym: 275, unicode: null},
+		{content: '<span class="fnBind">Home</span><br><img src="images/cursorLeft.png" height="24"/>', extraClasses: 'arrow', sym: 276, unicode: null},
+		{content: '<span class="fnBind">PgDn</span><br><img src="images/cursorDown.png" height="24"/>', extraClasses: 'arrow', sym: 274, unicode: null},
+		{content: '<span class="fnBind">End</span><br><img src="images/cursorRight.png" height="24"/>', extraClasses: 'arrow', sym: 275, unicode: null},
 	]
 ];
