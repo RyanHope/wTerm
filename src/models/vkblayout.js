@@ -25,7 +25,7 @@ function kbdLayoutList() {
 	return l;
 }
 
-kbdLayouts.default = { caption: 'default (en-US)' };
+kbdLayouts.default = { caption: 'Default (en-US)' };
 kbdLayouts.default.keys = [
 	[
 		{small: 1, extraClasses: 'escape', content: 'Esc', sym: 27, unicode: '\x1B'},

@@ -50,6 +50,9 @@ enyo.kind({
 					]},
 				]},
 				{name: 'grp2', showing: false, components: [
+					{kind: "RowGroup", caption: 'Keyboard Layout', flex: 1, components: [
+						{kind: "ListSelector", name: 'kbdLayouts', onChange: "kbdLayoutChanged" },
+					]},
 					{kind: 'RowGroup', flex :1, caption: 'Key Bindings', components: [
 						{kind: "ListSelector", name: 'inputSchemes', onChange: "inputSchemeChanged"},
 						{kind: "Input", name: 'inputF1', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F1'}]},
