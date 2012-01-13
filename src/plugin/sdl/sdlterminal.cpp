@@ -354,11 +354,17 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			}
 			else if (sym == SDLK_RIGHT)
 			{
-				m_terminalState->sendCursorCommand(VTTS_CURSOR_RIGHT, extTerminal);
+				if ((mod & KMOD_MODE) || m_keyMod == TERM_KEYMOD_FN)
+					extTerminal->insertData("\x1B[F",1);
+				else
+					m_terminalState->sendCursorCommand(VTTS_CURSOR_RIGHT, extTerminal);
 			}
 			else if (sym == SDLK_LEFT)
 			{
-				m_terminalState->sendCursorCommand(VTTS_CURSOR_LEFT, extTerminal);
+				if ((mod & KMOD_MODE) || m_keyMod == TERM_KEYMOD_FN)
+					extTerminal->insertData("\x1B[H",1);
+				else
+					m_terminalState->sendCursorCommand(VTTS_CURSOR_LEFT, extTerminal);
 			}
 			else if (sym == SDLK_F1)
 			{
