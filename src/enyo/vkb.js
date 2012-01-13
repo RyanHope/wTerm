@@ -49,7 +49,7 @@ enyo.kind({
 					}
 					if (c.small) c.className += ' small';
 					if (c.extraClasses) c.className += ' ' + c.extraClasses;
-					c.unicode = (!c.hasOwnProperty('unicode') && c.content != null) ? c.content.toLowerCase() : null;
+					if (!c.hasOwnProperty('unicode') && c.content) c.unicode = c.content.toLowerCase();
 					comps.push(c);
 				}
 				components.push({layoutKind: 'HFlexLayout', pack: 'end', components: comps});
