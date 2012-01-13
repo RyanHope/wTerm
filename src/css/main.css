@@ -151,3 +151,10 @@
 .vkb.large .functionPadding {
 	height: 2px;
 }
+
+.vkb.large .keyImg {
+	height: 24px;
+}
+.vkb.small .keyImg {
+	height: 16px;
+}

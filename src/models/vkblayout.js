@@ -60,10 +60,10 @@ kbdLayouts.default.keys = [
 		{content: ')<br>0', sym: 48, unicode: '0'},
 		{content: '_<br>-', sym: 45, unicode: '-'},
 		{content: '+<br>=', sym: 61, unicode: '='},
-		{content: 'Bksp<br><img src="images/key_backspace.png" height="24"/>', extraClasses: 'backspace', sym: 8, unicode: '\x7f'},
+		{content: 'Bksp<br><img src="images/key_backspace.png" class="keyImg"/>', extraClasses: 'backspace', sym: 8, unicode: '\x7f'},
 	],
 	[
-		{content: 'Tab<br><img src="images/key_tab.png" height="24"/>', extraClasses: 'tab', sym: 9, unicode: '\x09'},
+		{content: 'Tab<br><img src="images/key_tab.png" class="keyImg"/>', extraClasses: 'tab', sym: 9, unicode: '\x09'},
 		{content: 'Q', sym: 113},
 		{content: 'W', sym: 119},
 		{content: 'E', sym: 101},
@@ -91,7 +91,7 @@ kbdLayouts.default.keys = [
 		{content: 'L', sym: 108},
 		{content: ':<br>;', sym: 59, unicode: ';'},
 		{content: '\"<br>\'', sym: 39, unicode: '\''},
-		{content: 'Enter<br><img src="images/key_enter.png" height="24"/>', extraClasses: 'enter', sym: 13, unicode: '\x0D'},
+		{content: 'Enter<br><img src="images/key_enter.png" class="keyImg"/>', extraClasses: 'enter', sym: 13, unicode: '\x0D'},
 	],
 	[
 		{content: 'Shift', extraClasses: 'shift-left', sym: 304, unicode: null},
@@ -105,7 +105,7 @@ kbdLayouts.default.keys = [
 		{content: '&lt;<br>,', sym: 44, unicode: ','},
 		{content: '&gt;<br>.', sym: 46, unicode: '.'},
 		{content: '?&nbsp;&nbsp;&nbsp;<span class="fnBind">Ins</span><br>/', extraClasses: 'arrow', sym: 47, unicode: '/'},
-		{content: '<span class="fnBind">PgUp</span><br><img src="images/cursorUp.png" height="24"/>', extraClasses: 'arrow', sym: 273},
+		{content: '<span class="fnBind">PgUp</span><br><img src="images/cursorUp.png" class="keyImg"/>', extraClasses: 'arrow', sym: 273},
 		{content: 'Del', extraClasses: 'arrow'},
 	],
 	[
@@ -114,8 +114,8 @@ kbdLayouts.default.keys = [
 		{content: 'Alt', extraClasses: 'alt', sym: 308, unicode: null},
 		{content: 'Space', extraClasses: 'spacebar', sym: 32, unicode: ' '},
 		{content: 'Meta', extraClasses: 'meta', sym: 313, unicode: null},
-		{content: '<span class="fnBind">Home</span><br><img src="images/cursorLeft.png" height="24"/>', extraClasses: 'arrow', sym: 276, unicode: null},
-		{content: '<span class="fnBind">PgDn</span><br><img src="images/cursorDown.png" height="24"/>', extraClasses: 'arrow', sym: 274, unicode: null},
-		{content: '<span class="fnBind">End</span><br><img src="images/cursorRight.png" height="24"/>', extraClasses: 'arrow', sym: 275, unicode: null},
+		{content: '<span class="fnBind">Home</span><br><img src="images/cursorLeft.png" class="keyImg"/>', extraClasses: 'arrow', sym: 276, unicode: null},
+		{content: '<span class="fnBind">PgDn</span><br><img src="images/cursorDown.png" class="keyImg"/>', extraClasses: 'arrow', sym: 274, unicode: null},
+		{content: '<span class="fnBind">End</span><br><img src="images/cursorRight.png" class="keyImg"/>', extraClasses: 'arrow', sym: 275, unicode: null},
 	]
 ];
