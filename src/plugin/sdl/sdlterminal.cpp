@@ -445,10 +445,6 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 				{
 					nKey = m_config->getKeyBinding(TERM_KEYMOD_FN, c[0]);
 				}
-				else if ((mod & KMOD_ALT) == 0 && m_keyMod == TERM_KEYMOD_ALT)
-				{
-					nKey = m_config->getKeyBinding(TERM_KEYMOD_ALT, c[0]);
-				}
 				else if ((mod & KMOD_SHIFT) == 0 && m_keyMod == TERM_KEYMOD_SHIFT)
 				{
 					nKey = m_config->getKeyBinding(TERM_KEYMOD_SHIFT, c[0]);
@@ -484,6 +480,8 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 
 				if (bPrint)
 				{
+					if ((mod & KMOD_ALT) == 0 && m_keyMod == TERM_KEYMOD_ALT)
+						extTerminal->insertData("\x1b", 1);
 					extTerminal->insertData(c, 1);
 				}
 			}
