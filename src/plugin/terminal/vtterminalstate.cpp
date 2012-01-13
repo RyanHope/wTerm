@@ -42,18 +42,7 @@ bool VTTerminalState::processNonPrintableChar(char &c)
 
 	pthread_mutex_lock(&m_rwLock);
 
-	switch (c)
-	{
-	case 8: //Backspace.
-		if (getCursorLocation().getX() >= 1)
-		{
-			moveCursorBackward(1);
-		}
-		break;
-	default:
-		bPrint = TerminalState::processNonPrintableChar(c);
-		break;
-	}
+	bPrint = TerminalState::processNonPrintableChar(c);
 
 	pthread_mutex_unlock(&m_rwLock);
 
@@ -68,6 +57,10 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 
 	switch (nToken)
 	{
+	case CS_CBT: //ESC[<Tabs>Z
+		tabBackward(values[0]);
+		break;
+	case CS_HPA: //ESC[<Column>`
 	case CS_CHA: //ESC[<Column>G
 		setCursorLocation(values[0],m_cursorLoc.getY());
 		break;
@@ -75,7 +68,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		setCursorLocation(m_cursorLoc.getX(), values[0]);
 		break;
 	case CS_ECH: //ESC[<Chars>X
-		len = values[0] ? values[0] - 1 : 0;
+		len = values[0] ? values[0] : 1;
 		erase(m_cursorLoc, Point(m_cursorLoc.getX()+len, m_cursorLoc.getY()));
 		break;
 	case CS_IL: //ESC[<Lines>L
@@ -112,6 +105,8 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_INDEX: //ESCD
 		moveCursorDown(1, true);
 		break;
+	case CS_VT52_REVERSE_LINE_FEED:
+		syslog(LOG_ERR, "CS_VT52_REVERSE_LINE_FEED");
 	case CS_REVERSE_INDEX: //ESCM
 		moveCursorUp(1, true);
 		break;
@@ -120,21 +115,33 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		values[1] = (values[1] <= 0) ? 1 : values[1];
 		setCursorLocation(values[1], values[0]);
 		break;
+	case CS_VT52_CURSOR_UP:
+		syslog(LOG_ERR, "CS_VT52_CURSOR_UP");
 	case CS_CURSOR_UP: //ESC[<Value>A
 		values[0] = (values[0] <= 0) ? 1 : values[0];
 		moveCursorUp(values[0]);
 		break;
+	case CS_VT52_CURSOR_DOWN:
+		syslog(LOG_ERR, "CS_VT52_CURSOR_DOWN");
 	case CS_CURSOR_DOWN: //ESC[<Value>B
 		values[0] = (values[0] <= 0) ? 1 : values[0];
 		moveCursorDown(values[0]);
 		break;
+	case CS_VT52_CURSOR_RIGHT:
+		syslog(LOG_ERR, "CS_VT52_CURSOR_RIGHT");
 	case CS_CURSOR_FORWARD: //ESC[<Value>C
 		values[0] = (values[0] <= 0) ? 1 : values[0];
 		moveCursorForward(values[0]);
 		break;
+	case CS_VT52_CURSOR_LEFT:
+		syslog(LOG_ERR, "CS_VT52_CURSOR_LEFT");
 	case CS_CURSOR_BACKWARD: //ESC[<Value>D
 		values[0] = (values[0] <= 0) ? 1 : values[0];
 		moveCursorBackward(values[0]);
+		break;
+	case CS_VT52_CURSOR_HOME:
+		syslog(LOG_ERR, "CS_VT52_CURSOR_HOME");
+		cursorHome();
 		break;
 	case CS_CURSOR_POSITION_SAVE: //ESC[s or ESC7
 		saveCursor();
@@ -142,6 +149,8 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_CURSOR_POSITION_RESTORE: //ESC[u or ESC8
 		restoreCursor();
 		break;
+	case CS_VT52_ERASE_SCREEN:
+		syslog(LOG_ERR, "CS_VT52_ERASE_SCREEN %d", numValues);
 	case CS_ERASE_DISPLAY: //ESC[<Value>;...;<Value>J
 		if (numValues == 0)
 		{
@@ -168,6 +177,8 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			}
 		}
 		break;
+	case CS_VT52_ERASE_LINE:
+		syslog(LOG_ERR, "CS_VT52_ERASE_LINE %d", numValues);
 	case CS_ERASE_LINE: //ESC[<Value>;...;<Value>K
 		if (numValues == 0)
 		{
@@ -253,21 +264,35 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			}
 		}
 		break;
-	case CS_MODE_SET: //ESC[<?><Value>;...;<Value>h
+	case CS_MODE_SET: //ESC[<Value>;...;<Value>h
+		for (i = 0; i < numValues; i++)
+		{
+			if (values[i] == 4)
+			{
+				addTerminalModeFlags(TS_TM_INSERT);
+				enableShiftText(true);
+			}
+			else if (values[i] == 20)
+			{
+				addTerminalModeFlags(TS_TM_NEW_LINE);
+			}
+		}
+		break;
+	case CS_SETANSI: //ESC<
+		removeTerminalModeFlags(TS_TM_VT52);
+		break;
+	case CS_MODE_SET_PRIV: //ESC[<?><Value>;...;<Value>h
 		for (i = 0; i < numValues; i++)
 		{
 			if (values[i] == 1)
 			{
 				addTerminalModeFlags(TS_TM_CURSOR_KEYS);
 			}
-			else if (values[i] == 2)
-			{
-				addTerminalModeFlags(TS_TM_VT52);
-			}
 			else if (values[i] == 3)
 			{
 				addTerminalModeFlags(TS_TM_COLUMN);
 				eraseScreen();
+				cursorHome();
 			}
 			else if (values[i] == 4)
 			{
@@ -294,17 +319,31 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				//FIXME Not implemented.
 				//Interlace.
 			}
-			else if (values[i] == 20)
-			{
-				addTerminalModeFlags(TS_TM_NEW_LINE);
-			}
 			else if (values[i] == 25)
 			{
 				addTerminalModeFlags(TS_TM_CURSOR);
 			}
+			else if (values[i] == 67)
+			{
+				addTerminalModeFlags(TS_TM_BACKSPACE);
+			}
 		}
 		break;
-	case CS_MODE_RESET: //ESC[<?><Value>;...;<Value>l
+	case CS_MODE_RESET: //ESC[<Value>;...;<Value>l
+		for (i = 0; i < numValues; i++)
+		{
+			if (values[i] == 4)
+			{
+				removeTerminalModeFlags(TS_TM_INSERT);
+				enableShiftText(false);
+			}
+			else if (values[i] == 20)
+			{
+				removeTerminalModeFlags(TS_TM_NEW_LINE);
+			}
+		}
+		break;
+	case CS_MODE_RESET_PRIV: //ESC[<?><Value>;...;<Value>l
 		for (i = 0; i < numValues; i++)
 		{
 			if (values[i] == 1)
@@ -313,12 +352,13 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			}
 			else if (values[i] == 2)
 			{
-				removeTerminalModeFlags(TS_TM_VT52);
+				addTerminalModeFlags(TS_TM_VT52);
 			}
 			else if (values[i] == 3)
 			{
 				removeTerminalModeFlags(TS_TM_COLUMN);
 				eraseScreen();
+				cursorHome();
 			}
 			else if (values[i] == 4)
 			{
@@ -345,13 +385,13 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				//FIXME Not implemented.
 				//Interlace.
 			}
-			else if (values[i] == 20)
-			{
-				removeTerminalModeFlags(TS_TM_NEW_LINE);
-			}
 			else if (values[i] == 25)
 			{
 				removeTerminalModeFlags(TS_TM_CURSOR);
+			}
+			else if (values[i] == 67)
+			{
+				removeTerminalModeFlags(TS_TM_BACKSPACE);
 			}
 		}
 		break;
@@ -406,6 +446,14 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_MOVE_NEXT_LINE: //ESCE
 		moveCursorNextLine();
 		break;
+	case CS_CNL: //ESC[<Value>E
+		for (i=0; i<values[0]; i++)
+			moveCursorNextLine();
+		break;
+	case CS_CPL: //ESC[<Value>F
+		for (i=0; i<values[0]; i++)
+			moveCursorPreviousLine();
+		break;
 	case CS_DOUBLE_HEIGHT_LINE_TOP: //ESC#3
 	case CS_DOUBLE_HEIGHT_LINE_BOTTOM: //ESC#4
 	case CS_SINGLE_WIDTH_LINE: //ESC#5
@@ -445,9 +493,9 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		if (extTerminal != NULL && extTerminal->isReady())
 			extTerminal->insertData("\x1B[>0;115;0c", 1);
 		break;
-	case CS_TERM_IDENTIFY: //ESCZ
-		//FIXME Not implemented.
-		syslog(LOG_ERR, "VT100 Control Sequence: TERM IDENTIFY not implemented.", nToken);
+	case CS_VT52_IDENTIFY:
+		syslog(LOG_ERR, "CS_VT52_IDENTIFY");
+		extTerminal->insertData("\x1B/Z", 1);
 		break;
 	case CS_TERM_PARAM: //ESC[<Value>;...;<Value>x
 		if (values[0]) {
@@ -531,11 +579,16 @@ void VTTerminalState::sendCursorCommand(VTTS_Cursor_t cursor, ExtTerminal *extTe
 {
 	if (extTerminal != NULL)
 	{
+		bool bVT52 = ((getTerminalModeFlags() & TS_TM_VT52) != 0);
 		bool bCursorKeys = ((getTerminalModeFlags() & TS_TM_CURSOR_KEYS) != 0);
 
 		if (cursor == VTTS_CURSOR_UP)
 		{
-			if (!bCursorKeys)
+			if (bVT52)
+			{
+				extTerminal->insertData("\033A", 1);
+			}
+			else if (!bCursorKeys)
 			{
 				extTerminal->insertData("\x1B[A", 1);
 			}
@@ -546,7 +599,11 @@ void VTTerminalState::sendCursorCommand(VTTS_Cursor_t cursor, ExtTerminal *extTe
 		}
 		else if (cursor == VTTS_CURSOR_DOWN)
 		{
-			if (!bCursorKeys)
+			if (bVT52)
+			{
+				extTerminal->insertData("\033B", 1);
+			}
+			else if (!bCursorKeys)
 			{
 				extTerminal->insertData("\x1B[B", 1);
 			}
@@ -557,7 +614,11 @@ void VTTerminalState::sendCursorCommand(VTTS_Cursor_t cursor, ExtTerminal *extTe
 		}
 		else if (cursor == VTTS_CURSOR_RIGHT)
 		{
-			if (!bCursorKeys)
+			if (bVT52)
+			{
+				extTerminal->insertData("\033C", 1);
+			}
+			else if (!bCursorKeys)
 			{
 				extTerminal->insertData("\x1B[C", 1);
 			}
@@ -568,7 +629,11 @@ void VTTerminalState::sendCursorCommand(VTTS_Cursor_t cursor, ExtTerminal *extTe
 		}
 		else if (cursor == VTTS_CURSOR_LEFT)
 		{
-			if (!bCursorKeys)
+			if (bVT52)
+			{
+				extTerminal->insertData("\033D", 1);
+			}
+			else if (!bCursorKeys)
 			{
 				extTerminal->insertData("\x1B[D", 1);
 			}

@@ -28,3 +28,17 @@ else
 		ROOT=$(BUILD_ROOT)/staging/i686/usr
 	endif
 endif
+
+ifeq ($(DEBUG),1)
+	MARCH_TUNE+=-g
+else ifeq ($(DEBUG),2)
+	MARCH_TUNE+=-g -Wall
+else ifeq ($(DEBUG),3)
+	MARCH_TUNE+=-g -Wall -pendantic
+endif
+
+ifdef LOGLEVEL
+	MARCH_TUNE+=-DLOGLEVEL=${LOGLEVEL}
+else
+	MARCH_TUNE+=-DLOGLEVEL=0
+endif

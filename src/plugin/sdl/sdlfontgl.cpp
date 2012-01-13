@@ -36,6 +36,9 @@
 				err, __FILE__, __LINE__); \
 	} while(0)
 
+// How many characters do we support?
+static const int nChars = 128;
+
 // Helper functions
 static void getRGBAMask(Uint32 &rmask, Uint32 &gmask,
 												Uint32 &bmask, Uint32 &amask) {
@@ -88,10 +91,11 @@ void SDLFontGL::setupFontGL(int fnCount, TTF_Font** fnts, int colCount, SDL_Colo
 
 	GlyphCache = 0;
 
-	haveFontLine = (bool*)malloc(nFonts*sizeof(bool));
-	memset(haveFontLine, 0, nFonts*sizeof(bool));
+	haveCacheLine = (bool*)malloc(nFonts*MAX_CHARSETS*sizeof(bool));
+	memset(haveCacheLine, 0, nFonts*MAX_CHARSETS*sizeof(bool));
 
-	if (TTF_SizeText(fnts[0], "O", &nWidth, &nHeight) != 0)
+	const Uint16 OStr[] = {'O', 0};
+	if (TTF_SizeUNICODE(fnts[0], OStr, &nWidth, &nHeight) != 0)
 		assert(0 && "Failed to size font");
 	assert((nWidth > 0) && (nHeight > 0));
 }
@@ -109,13 +113,14 @@ void SDLFontGL::createTexture() {
 	// so we can draw solid colors as part
 	// of the same operations.
 	texW = nextPowerOfTwo(nChars*nWidth);
-	texH = nextPowerOfTwo(nFonts*nHeight + 1);
+	texH = nextPowerOfTwo(nFonts*MAX_CHARSETS*nHeight + 1);
 	int nMode = getGLFormat();
 	glTexImage2D(GL_TEXTURE_2D,
 			0, nMode,
 			texW, texH,
 			0, nMode,
 			GL_UNSIGNED_BYTE, NULL);
+	checkGLError();
 
 
 	// Put a single white pixel at bottom of texture.
@@ -124,7 +129,7 @@ void SDLFontGL::createTexture() {
 	char whitepixel[] = { 255, 255, 255, 255 };
 	assert(nFonts && nHeight);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
-			0,nFonts*nHeight,
+			0,nFonts*MAX_CHARSETS*nHeight,
 			1, 1,
 			GL_RGBA, GL_UNSIGNED_BYTE, whitepixel);
 	checkGLError();
@@ -140,14 +145,14 @@ void SDLFontGL::clearGL() {
 		GlyphCache = 0;
 	}
 
-	free(haveFontLine);
+	free(haveCacheLine);
 	free(fnts);
 	free(cols);
 	free(colorValues);
 	free(texValues);
 	free(vtxValues);
 
-	haveFontLine = 0;
+	haveCacheLine = 0;
 	fnts = NULL;
 	cols = NULL;
 	colorValues = NULL;
@@ -159,13 +164,14 @@ void SDLFontGL::clearGL() {
 	numChars = 0;
 }
 
-void SDLFontGL::ensureFontLine(int fnt)
+void SDLFontGL::ensureCacheLine(int fnt, int slot)
 {
 
 	assert(fnt >= 0 && fnt < nFonts);
-	assert(fnts && cols && GlyphCache && haveFontLine);
+	assert(slot >= 0 && slot < MAX_CHARSETS);
+	assert(fnts && cols && GlyphCache && haveCacheLine);
 
-	bool & have = haveFontLine[fnt];
+	bool & have = hasCacheLine(fnt, slot);
 	if (have) {
 		return;
 	}
@@ -201,18 +207,23 @@ void SDLFontGL::ensureFontLine(int fnt)
 	// For each character, render the glyph, and put in the appropriate location
 	for(int i = 0; i < nChars; ++i)
 	{
-		// Make a little string out of the character
-		char buf[2] = { printableChars[i], 0 };
+		// Lookup this character, and make a single-char string out of it.
+		Uint16 C = charMappings[slot].map[i];
+		if (!C) C = (Uint16)i;
+		Uint16 buf[2] = { C, 0 };
 
-		SDL_Surface* surface = TTF_RenderText_Blended(font, (const char*)buf, fg);
-		SDL_SetAlpha(surface, 0, 0);
+		SDL_Surface* surface = TTF_RenderUNICODE_Blended(font, (const Uint16*)buf, fg);
+		if (surface)
+		{
+			SDL_SetAlpha(surface, 0, 0);
 
-		SDL_Rect dstRect = { 0, 0, nWidth, nHeight };
-		dstRect.x = i*nWidth;
+			SDL_Rect dstRect = { 0, 0, nWidth, nHeight };
+			dstRect.x = i*nWidth;
 
-		SDL_BlitSurface(surface, 0, mainSurface, &dstRect);
+			SDL_BlitSurface(surface, 0, mainSurface, &dstRect);
 
-		SDL_FreeSurface(surface);
+			SDL_FreeSurface(surface);
+		}
 	}
 
 	// Now upload the big set of characters as a single texture:
@@ -223,7 +234,7 @@ void SDLFontGL::ensureFontLine(int fnt)
 
 		// Upload this font to its place in the big texture
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
-				0, fnt*nHeight,
+				0, (slot*nFonts + fnt)*nHeight,
 				mainSurface->w, mainSurface->h,
 				nMode, GL_UNSIGNED_BYTE, mainSurface->pixels);
 		glFlush();
@@ -251,7 +262,7 @@ void SDLFontGL::drawBackground(int color, int nX, int nY, int cells) {
 	};
 	memcpy(vtx, vtxCopy, sizeof(vtxCopy));
 
-	float y_offset = ((float)nFonts*nHeight)/(float)texH;
+	float y_offset = ((float)nFonts*MAX_CHARSETS*nHeight)/(float)texH;
 	float x1 = ((float)1)/(float)texW;
 	float y1 = ((float)1)/(float)texH;
 	GLfloat texCopy[] = {
@@ -278,9 +289,14 @@ void SDLFontGL::drawBackground(int color, int nX, int nY, int cells) {
 	}
 }
 
-void SDLFontGL::drawTextGL(int fnt, int fg, int bg,
+void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
 													 int nX, int nY, const char * text) {
 	if (!GlyphCache) createTexture();
+
+	int fnt = graphicsInfo.font;
+	int fg = graphicsInfo.fg;
+	int bg = graphicsInfo.bg;
+	int blink = graphicsInfo.blink;
 
 	assert(fnt >= 0 && fnt < nFonts);
 	assert(fg >= 0 && fg < nCols);
@@ -289,12 +305,15 @@ void SDLFontGL::drawTextGL(int fnt, int fg, int bg,
 
 	unsigned len = strlen(text);
 
-	// Ensure we have this font line:
-	ensureFontLine(fnt);
+	// Ensure we have the needed font/slots:
+	ensureCacheLine(fnt, graphicsInfo.slot1);
+	ensureCacheLine(fnt, graphicsInfo.slot2);
 
 	const int stride = 12; // GL_TRIANGLE_STRIP 2*6
 
 	drawBackground(bg, nX, nY, len);
+
+	if (blink) return;
 
 	GLfloat *tex = &texValues[stride*numChars];
 	GLfloat *vtx = &vtxValues[stride*numChars];
@@ -347,7 +366,6 @@ void SDLFontGL::drawTextGL(int fnt, int fg, int bg,
 			1.f
 	};
 
-	float y_offset = ((float)(fnt*nHeight)) / (float)texH;
 	for (unsigned i = 0; i < len; ++i)
 	{
 		// Populate texture coordinates
@@ -355,8 +373,11 @@ void SDLFontGL::drawTextGL(int fnt, int fg, int bg,
 
 		char c = text[i];
 
-		int index = c > 127 ? c - 33 : c - 32;
-		float x_offset = ((float)(index * nWidth)) / texW;
+		int x,y;
+		getTextureCoordinates(graphicsInfo, c, x, y);
+
+		float x_offset = ((float)x) / texW;
+		float y_offset = ((float)y) / texH;
 
 		for(unsigned j = 0; j < stride; j += 2) {
 			tex[i*stride+j] += x_offset;
@@ -414,13 +435,25 @@ void SDLFontGL::endTextGL() {
 	glDisableClientState(GL_COLOR_ARRAY);
 }
 
-void SDLFontGL::initializePrintables() {
-	nChars = 223;
-	assert(sizeof(printableChars)/sizeof(printableChars[0]) >= 223);
+void SDLFontGL::setCharMapping(int index, CharMapping_t map) {
+	assert(index >= 0 && index < MAX_CHARSETS);
+	memcpy(&charMappings[index], &map, sizeof(CharMapping_t));
 
-	// Characters [32,127),[128,255]
-	for(unsigned i = 32; i < 127; ++i)
-		printableChars[i-32] = i;
-	for(unsigned i = 128; i < 256; ++i)
-		printableChars[i-33] = i;
+	// Invalidate the appropriate cache lines
+	for(unsigned i = 0; i < nFonts; ++i)
+		hasCacheLine(i, index) = false;
+}
+
+void SDLFontGL::getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, char c, int &x, int &y) {
+	int slot = c > 127 ? graphicsInfo.slot1 : graphicsInfo.slot2;
+
+	assert(hasCacheLine(graphicsInfo.font, slot));
+
+	// Set by reference
+	x = (c % 128)*nWidth;
+	y = (slot*nFonts + graphicsInfo.font)*nHeight;
+}
+
+bool &SDLFontGL::hasCacheLine(int font, int slot) {
+	return haveCacheLine[slot*nFonts + font];
 }

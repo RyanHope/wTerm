@@ -22,7 +22,7 @@ enyo.kind({
 			{flex:1},
 			{kind: 'vkbKey', className: 'enyo-button key-small', content: 'F1', sym: 282, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
 			{kind: 'vkbKey', className: 'enyo-button key-small', content: 'F2', sym: 283, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
-			{kind: 'vkbKey', className: 'enyo-button key-small', content: 'F3', sym: 294, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
+			{kind: 'vkbKey', className: 'enyo-button key-small', content: 'F3', sym: 284, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
 			{kind: 'vkbKey', className: 'enyo-button key-small', content: 'F4', sym: 285, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
 			{flex:1},
 			{kind: 'vkbKey', className: 'enyo-button key-small', content: 'F5', sym: 286, ontouchstart: 'keyDown', ontouchend: 'keyUp'},
@@ -124,7 +124,7 @@ enyo.kind({
   				unicode = '\x0D'
   				break
   			case 'Bksp':
-  				unicode = '\x7f'
+  				unicode = '\x08'
   				break
   			case 'Esc':
   				unicode = '\x1B'

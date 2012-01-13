@@ -32,7 +32,9 @@ int cmp_graphics_state(TSLineGraphicsState_t const *state1, TSLineGraphicsState_
 	{
 		if (state1->nGraphicsMode == state2->nGraphicsMode
 			&& state1->foregroundColor == state2->foregroundColor
-			&& state1->backgroundColor == state2->backgroundColor)
+			&& state1->backgroundColor == state2->backgroundColor
+			&& state1->g0charset == state2->g0charset
+			&& state1->g1charset == state2->g1charset)
 		{
 			return 0;
 		}
@@ -544,10 +546,25 @@ void TerminalState::moveCursorBackward(int nPos)
 {
 	pthread_mutex_lock(&m_rwLock);
 
+	int maxX = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+
 	if (nPos >= 0)
 	{
-		setCursorLocation(m_cursorLoc.getX() - nPos, m_cursorLoc.getY());
+		if (m_cursorLoc.getX()>maxX)
+			setCursorLocation(maxX - nPos, m_cursorLoc.getY());
+		else
+			setCursorLocation(m_cursorLoc.getX() - nPos, m_cursorLoc.getY());
 	}
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
+void TerminalState::moveCursorPreviousLine()
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	moveCursorUp(1, true);
+	moveCursorBackward(m_cursorLoc.getX() - 1);
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -1068,12 +1085,7 @@ bool TerminalState::processNonPrintableChar(char &c)
 	{
 	case 8: //Backspace.
 		if (getCursorLocation().getX() >= 1)
-		{
-			deleteChar(true, m_bShiftText);
-		}
-		break;
-	case 9: //Tab.
-		insertChar(' ', true, true, m_bShiftText);
+			moveCursorBackward(1);
 		break;
 	case 10: //Line feed.
 		if ((getTerminalModeFlags() & TS_TM_NEW_LINE) > 0)
@@ -1084,6 +1096,9 @@ bool TerminalState::processNonPrintableChar(char &c)
 		{
 			moveCursorDown(1, true);
 		}
+		break;
+	case 11: //Vertical tab
+		moveCursorDown(1, true);
 		break;
 	case 13: //Return.
 		setCursorLocation(1, getCursorLocation().getY());
@@ -1137,9 +1152,6 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 	DataBuffer *line, *nextLine;
 	bool bPrint = true;
 
-	if (getShift() && getG0Charset() == TS_CS_G0_SPEC && c>95) c = c + 128;
-	else if (!getShift() && getG1Charset() == TS_CS_G1_SPEC && c>95) c = c + 128;
-
 	int nCols = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
 
 	if (!bIgnoreNonPrintable && !isPrintable(c))
@@ -1149,6 +1161,9 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 
 	if (isPrintable(c) || bPrint)
 	{
+		// TODO: Should mappings be applied to parsing too, not just rendering?
+		if (getShift()) c += 128;
+
 		if (displayLoc.getX() > nCols)
 		{
 			if ((getTerminalModeFlags() & TS_TM_AUTO_WRAP) > 0)
@@ -1157,13 +1172,11 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 			}
 			else
 			{
-				setCursorLocation(getDisplayScreenSize().getX(), m_cursorLoc.getY());
+				setCursorLocation(nCols, m_cursorLoc.getY());
 			}
 
 			displayLoc = getDisplayCursorLocation();
 		}
-
-
 
 		// Get the 'line' for these coordinates
 		nPos = displayLoc.getX() - 1;
@@ -1177,10 +1190,8 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 		bool needsRestore = false;
 		TSLineGraphicsState_t restoreState;
 		if (line->size() > displayLoc.getX() + 1) {
-			int thisLocator = findGraphicsState(displayLoc.getX(),
-																					displayLoc.getY(), true);
-			int nextLocator = findGraphicsState(displayLoc.getX() + 1,
-																					displayLoc.getY(), true);
+			int thisLocator = findGraphicsState(displayLoc.getX(), displayLoc.getY(), true);
+			int nextLocator = findGraphicsState(displayLoc.getX() + 1, displayLoc.getY(), true);
 			if (thisLocator == nextLocator) {
 				needsRestore = true;
 				if (thisLocator >= 0 && thisLocator < m_graphicsState.size()) {
@@ -1194,30 +1205,24 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 			// Inserting past existing end of line, need to add padding.
 			// The padding we add should have the default graphics settings
 			addGraphicsState(line->size() + 1, displayLoc.getY(),
-					m_defaultGraphicsState.foregroundColor, m_defaultGraphicsState.backgroundColor,
-					m_defaultGraphicsState.nGraphicsMode, TS_GM_OP_SET, false);
+					m_defaultGraphicsState, TS_GM_OP_SET, false);
 
 			line->fill(BLANK, nPos - line->size());
 		}
 
 		// Set the graphics state for the character we're inserting
 		addGraphicsState(displayLoc.getX(), displayLoc.getY(),
-				m_currentGraphicsState.foregroundColor, m_currentGraphicsState.backgroundColor,
-				m_currentGraphicsState.nGraphicsMode, TS_GM_OP_SET, false);
+				m_currentGraphicsState, TS_GM_OP_SET, false);
 
 		// If we have a graphics state to restore, it starts on the character after
 		if (needsRestore) {
 			addGraphicsState(displayLoc.getX() + 1, displayLoc.getY(),
-					restoreState.foregroundColor, restoreState.backgroundColor,
-					restoreState.nGraphicsMode, TS_GM_OP_SET, false);
+					restoreState, TS_GM_OP_SET, false);
 		}
 
 		if (bShift)
 		{
-			int nScreenWidth = getDisplayScreenSize().getX();
 			int nOverFlowSize;
-			char *tmp = (char *)malloc(nScreenWidth * sizeof(char));
-			char cEmpty = BLANK;
 
 			getBufferLine(nLine)->insert(nPos, &c, 1);
 
@@ -1227,28 +1232,10 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 			for (int i = nLine; i < m_data.size(); i++)
 			{
 				line = getBufferLine(i);
-				nOverFlowSize = line->size() - nScreenWidth;
-
-				if ((i + 1) < m_data.size())
-				{
-					nextLine = getBufferLine(i + 1);
-
-					if (nOverFlowSize > 0)
-					{
-						line->copy(nScreenWidth, tmp, nOverFlowSize);
-						nextLine->insert(0, tmp, nOverFlowSize);
-					}
-					else if (nextLine->size() > 0)
-					{
-						//Insert an empty padding.
-						nextLine->insert(0, &cEmpty, 1);
-					}
-				}
-
-				line->clear(nScreenWidth, nOverFlowSize, true);
+				nOverFlowSize = line->size() - nCols;
+				line->clear(nCols, nOverFlowSize, true);
 			}
 
-			free(tmp);
 		}
 		else
 		{
@@ -1268,7 +1255,7 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
 			{
 				if ((getTerminalModeFlags() & TS_TM_AUTO_WRAP) > 0)
 				{
-					m_cursorLoc.setX(getDisplayScreenSize().getX() + 1);
+					m_cursorLoc.setX(nCols + 1);
 				}
 			}
 			else
@@ -1432,7 +1419,14 @@ bool TerminalState::isShiftText()
 	return m_bShiftText;
 }
 
-void TerminalState::addGraphicsState(int nColumn, int nLine, TSColor_t foregroundColor, TSColor_t backgroundColor, int nGraphicsMode, TSGraphicsModeOp_t op, bool bTrim)
+void TerminalState::addGraphicsState(int nColumn, int nLine, TSLineGraphicsState_t & state, TSGraphicsModeOp_t op, bool bTrim) {
+	TSColor_t fg = state.foregroundColor, bg = state.backgroundColor;
+	TSCharset_t g0charset = state.g0charset, g1charset = state.g1charset;
+	int nGraphicsMode = state.nGraphicsMode;
+	addGraphicsState(nColumn, nLine, fg, bg, nGraphicsMode, g0charset, g1charset, op, bTrim);
+}
+
+void TerminalState::addGraphicsState(int nColumn, int nLine, TSColor_t foregroundColor, TSColor_t backgroundColor, int nGraphicsMode, TSCharset_t g0charset, TSCharset_t g1charset, TSGraphicsModeOp_t op, bool bTrim)
 {
 	pthread_mutex_lock(&m_rwLock);
 
@@ -1470,6 +1464,16 @@ void TerminalState::addGraphicsState(int nColumn, int nLine, TSColor_t foregroun
 		backgroundColor = (prevState == NULL) ? m_defaultGraphicsState.backgroundColor : prevState->backgroundColor;
 	}
 
+	if (g0charset == TS_CS_NONE)
+	{
+		g0charset = (prevState == NULL) ? m_defaultGraphicsState.g0charset : prevState->g0charset;
+	}
+
+	if (g1charset == TS_CS_NONE)
+	{
+		g1charset = (prevState == NULL) ? m_defaultGraphicsState.g1charset : prevState->g1charset;
+	}
+
 	nMode = (prevState == NULL) ? m_defaultGraphicsState.nGraphicsMode : prevState->nGraphicsMode;
 
 	switch (op)
@@ -1500,6 +1504,9 @@ void TerminalState::addGraphicsState(int nColumn, int nLine, TSColor_t foregroun
 	newState->foregroundColor = foregroundColor;
 	newState->backgroundColor = backgroundColor;
 	newState->nGraphicsMode = nMode;
+
+	newState->g0charset = g0charset;
+	newState->g1charset = g1charset;
 
 	if (prevState != newState)
 	{
@@ -1572,11 +1579,9 @@ void TerminalState::removeGraphicsState(int nColumn, int nLine, bool bTrim, TSLi
 			{
 				TSLineGraphicsState_t *tmpState = m_graphicsState[nLocator];
 
-				if (tmpState->foregroundColor != resetState->foregroundColor
-					|| tmpState->backgroundColor != resetState->backgroundColor
-					|| tmpState->nGraphicsMode != resetState->nGraphicsMode)
+				if (cmp_graphics_state(tmpState, resetState) == -1)
 				{
-					addGraphicsState(nColumn, nLine, resetState->foregroundColor, resetState->backgroundColor, resetState->nGraphicsMode, TS_GM_OP_SET, false);
+					addGraphicsState(nColumn, nLine, *resetState, TS_GM_OP_SET, false);
 				}
 			}
 		}
@@ -1633,11 +1638,9 @@ void TerminalState::removeGraphicsState(int nBeginColumn, int nBeginLine, int nE
 		{
 			tmpState = m_graphicsState[nBeginLocator];
 
-			if (tmpState->foregroundColor != resetState->foregroundColor
-				|| tmpState->backgroundColor != resetState->backgroundColor
-				|| tmpState->nGraphicsMode != resetState->nGraphicsMode)
+			if (cmp_graphics_state(tmpState, resetState))
 			{
-				addGraphicsState(nBeginColumn, nBeginLine, resetState->foregroundColor, resetState->backgroundColor, resetState->nGraphicsMode, TS_GM_OP_SET, false);
+				addGraphicsState(nBeginColumn, nBeginLine, *resetState, TS_GM_OP_SET, false);
 			}
 		}
 	}
@@ -1769,7 +1772,7 @@ void TerminalState::getLineGraphicsState(int nLine, TSLineGraphicsState_t **stat
 
 void TerminalState::tabForward(int nTabs) {
 	if (tabs.size()==0 || nTabs>tabs.size())
-		setCursorLocation(m_displayScreenSize.getX(),m_cursorLoc.getY());
+		setCursorLocation((getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80, m_cursorLoc.getY());
 	else {
 		int i = 0, t = 0;
 		while (t!=nTabs) {
@@ -1779,6 +1782,11 @@ void TerminalState::tabForward(int nTabs) {
 		}
 		setCursorLocation(tabs[i-1],m_cursorLoc.getY());
 	}
+}
+
+void TerminalState::tabBackward(int nTabs) {
+	int maxX = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+	setCursorLocation(maxX-nTabs*8, m_cursorLoc.getY());
 }
 
 void TerminalState::resetTerminal() {
@@ -1795,7 +1803,6 @@ void TerminalState::resetTerminal() {
 
 void TerminalState::setShift(bool shift) {
 	m_shift = shift;
-	syslog(LOG_ERR, "SHIFT STATE: %s", m_shift?"IN":"OUT");
 }
 
 bool TerminalState::getShift() {

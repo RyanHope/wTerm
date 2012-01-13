@@ -108,8 +108,12 @@ typedef enum
 	CS_ERASE_DISPLAY, //ESC[<Value>;...;<Value>J
 	CS_ERASE_LINE, //ESC[<Value>;...;<Value>K
 	CS_GRAPHICS_MODE_SET, //ESC[<Value>;...;<Value>m
-	CS_MODE_SET, //ESC[<?><Value>;...;<Value>h
-	CS_MODE_RESET, //ESC[<?><Value>;...;<Value>l
+
+	CS_MODE_SET, //ESC[<Value>;...;<Value>h
+	CS_MODE_RESET, //ESC[<Value>;...;<Value>l
+
+	CS_MODE_SET_PRIV, //ESC[<?><Value>;...;<Value>h
+	CS_MODE_RESET_PRIV, //ESC[<?><Value>;...;<Value>l
 
 	CS_INDEX, //ESCD INDEX
 	CS_REVERSE_INDEX, //ESCM REVERSE INDEX
@@ -123,9 +127,15 @@ typedef enum
 	CS_DL, //ESC[<Value>M Delete Lines
 	CS_DCH, //ESC[<Value>P Delete Characters
 	CS_ICH, //ESC[<Value>@ Insert Blank Characters
+	CS_HPA, //ESC[<Value>` Character Position Absolute
+	CS_CBT, //ESC[<Value>Z Cursor Backward Tabulation
+	CS_CNL, //ESC[<Value>E Cursor Next Line
+	CS_CPL, //ESC[<Value>F Cursor Preceding Line
 
 	CS_KEYPAD_APP_MODE, //ESC=
 	CS_KEYPAD_NUM_MODE, //ESC>
+
+	CS_SETANSI, //ESC<
 
 	CS_USER_MAPPING, // USER MAPPING ??
 

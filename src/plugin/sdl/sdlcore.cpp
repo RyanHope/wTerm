@@ -25,6 +25,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <syslog.h>
+#include <unistd.h>
 
 const int SDLCore::BUFFER_DIRTY_BIT = 1;
 const int SDLCore::FONT_DIRTY_BIT = 2;
@@ -42,6 +43,12 @@ SDLCore::SDLCore()
 	m_backgroundColor = TS_COLOR_BACKGROUND;
 	m_bBold = false;
 	m_bUnderline = false;
+	m_bBlink = false;
+	doBlink = false;
+	m_slot1 = TS_CS_G0_ASCII;
+	m_slot2 = TS_CS_G1_ASCII;
+
+	m_reverse = false;
 
 	m_fontNormal = NULL;
 	m_fontBold = NULL;
@@ -63,6 +70,7 @@ SDLCore::~SDLCore()
 {
 	if (isRunning())
 	{
+		pthread_join(m_blinkThread, NULL);
 		shutdown();
 	}
 }
@@ -124,7 +132,7 @@ int SDLCore::initOpenGL()
 {
 	const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
 
-	clearScreen();
+	clearScreen(m_backgroundColor);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -164,50 +172,31 @@ int SDLCore::createFonts(int nSize)
 	}
 
 	// TODO: Let user set this?
-	const char * Font = "./fonts/AnonymousProSpecial.ttf";
+	const char * Font = "./LiberationMono-Regular.ttf";
 
-	TTF_Font *font = TTF_OpenFont(Font, nSize);
-	TTF_Font *fontBold = TTF_OpenFont(Font, nSize);
-	TTF_Font *fontUnder = TTF_OpenFont(Font, nSize);
-	TTF_Font *fontBoldUnder = TTF_OpenFont(Font, nSize);
+	m_fontNormal = TTF_OpenFont(Font, nSize);
+	m_fontBold = TTF_OpenFont(Font, nSize);
+	m_fontUnder = TTF_OpenFont(Font, nSize);
+	m_fontBoldUnder = TTF_OpenFont(Font, nSize);
 
-	if (!font || !fontBold || !fontUnder || !fontBoldUnder)
+	if (!m_fontNormal || !m_fontBold || !m_fontUnder || !m_fontBoldUnder)
 	{
 		syslog(LOG_ERR, "Error loading font!");
-		TTF_CloseFont(font);
-		TTF_CloseFont(fontBold);
-		TTF_CloseFont(fontUnder);
-		TTF_CloseFont(fontBoldUnder);
+		closeFonts();
 		return -1;
 	}
 
-	int nWidth, nHeight;
-
-	if (TTF_SizeText(font, "O", &nWidth, &nHeight) != 0)
+	if (TTF_SizeText(m_fontNormal, "O", &m_nFontWidth, &m_nFontHeight) != 0)
 	{
 		syslog(LOG_ERR, "Cannot calculate font size: %s", TTF_GetError());
-		TTF_CloseFont(font);
-		TTF_CloseFont(fontBold);
-		TTF_CloseFont(fontUnder);
-		TTF_CloseFont(fontBoldUnder);
+		closeFonts();
 		return -1;
 	}
 
 	// Set font styles:
-	TTF_SetFontStyle(fontBold, TTF_STYLE_BOLD);
-	TTF_SetFontStyle(fontUnder, TTF_STYLE_UNDERLINE);
-	TTF_SetFontStyle(fontBoldUnder, TTF_STYLE_BOLD | TTF_STYLE_UNDERLINE);
-
-	//Releases current fonts.
-	closeFonts();
-
-	m_nFontWidth = nWidth;
-	m_nFontHeight = nHeight;
-
-	m_fontNormal = font;
-	m_fontBold = fontBold;
-	m_fontUnder = fontUnder;
-	m_fontBoldUnder = fontBoldUnder;
+	TTF_SetFontStyle(m_fontBold, TTF_STYLE_BOLD);
+	TTF_SetFontStyle(m_fontUnder, TTF_STYLE_UNDERLINE);
+	TTF_SetFontStyle(m_fontBoldUnder, TTF_STYLE_BOLD | TTF_STYLE_UNDERLINE);
 
 	m_nMaxLinesOfText = getMaximumLinesOfText();
 	m_nMaxColumnsOfText = getMaximumColumnsOfText();
@@ -356,6 +345,25 @@ void SDLCore::start()
 	}
 }
 
+int SDLCore::startBlinkThread()
+{
+	return pthread_create(&m_blinkThread, NULL, blinkThread, this);
+}
+
+void *SDLCore::blinkThread(void *ptr)
+{
+	SDL_Event event;
+	event.type = SDL_VIDEOEXPOSE;
+	SDLCore *core = (SDLCore *)ptr;
+	while (core->isRunning()) {
+		core->doBlink = !core->doBlink;
+		SDL_PushEvent(&event);
+		usleep(500000);
+	}
+	pthread_exit(NULL);
+	return NULL;
+}
+
 /**
  * Starts the main application event loop. Will not return until the application exits.
  * If SDL is not initialized, then this will return immediately.
@@ -364,6 +372,7 @@ void SDLCore::run()
 {
 	if (isRunning())
 	{
+		startBlinkThread();
 		eventLoop();
 	}
 }
@@ -443,6 +452,8 @@ int SDLCore::setFontSize(int nSize)
 		nSize = 1;
 	}
 
+	closeFonts();
+
 	if (createFonts(nSize) != 0)
 	{
 		syslog(LOG_ERR, "Cannot set new font size.");
@@ -500,15 +511,15 @@ void SDLCore::drawCursor(int nColumn, int nLine)
 	int nX = (nColumn - 1) * m_nFontWidth;
 	int nY = (nLine - 1) * m_nFontHeight;
 
-	drawRect(nX, nY, m_nFontWidth, m_nFontHeight, getColor(TS_COLOR_FOREGROUND), 0.35f);
+	drawRect(nX, nY, m_nFontWidth, m_nFontHeight, m_reverse ? getColor(TS_COLOR_BACKGROUND) : getColor(TS_COLOR_FOREGROUND), 0.35f);
 }
 
 /**
  * Clears the screen with the current background color.
  */
-void SDLCore::clearScreen()
+void SDLCore::clearScreen(TSColor_t color)
 {
-	SDL_Color bkgd = getColor(m_backgroundColor);
+	SDL_Color bkgd = getColor(color);
 	glClearColor(
 		((float)bkgd.r) / 255.0f,
 		((float)bkgd.g) / 255.0f,
@@ -629,7 +640,21 @@ void SDLCore::drawText(int nX, int nY, const char *sText)
 	else if (m_bBold)
 		fnt = 3;
 
-	drawTextGL(fnt, (int)m_foregroundColor, (int)m_backgroundColor, nX, nY, sText);
+	SDLFontGL::TextGraphicsInfo_t graphicsInfo;
+	graphicsInfo.font = fnt;
+	if (m_reverse) {
+		graphicsInfo.bg = (int)m_foregroundColor;
+		graphicsInfo.fg = (int)m_backgroundColor;
+	} else {
+		graphicsInfo.fg = (int)m_foregroundColor;
+		graphicsInfo.bg = (int)m_backgroundColor;
+	}
+	graphicsInfo.blink = ((int)m_bBlink && !(int)doBlink) ? 1 : 0;
+
+	graphicsInfo.slot1 = (int)m_slot1;
+	graphicsInfo.slot2 = (int)m_slot2;
+
+	drawTextGL(graphicsInfo, nX, nY, sText);
 
 	setDirty(BUFFER_DIRTY_BIT);
 }
@@ -696,24 +721,17 @@ void SDLCore::clearDirty(int nDirtyBits)
 	}
 }
 
-int SDLCore::getNextPowerOfTwo(int n)
-{
-	std::map<int, int>::iterator it = m_powerOfTwoLookup.find(n);
+int SDLCore::getNextPowerOfTwo(int n) {
+	if (n <= 0) return 1;
 
-	if (it == m_powerOfTwoLookup.end())
-	{
-		int i = 1;
-
-		while (i < n)
-		{
-			i *= 2;
-		}
-
-		m_powerOfTwoLookup[n] = i;
-		return i;
-	}
-
-	return it->second;
+	/* http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2 */
+	--n;
+	n |= n >> 1;
+	n |= n >> 2;
+	n |= n >> 4;
+	n |= n >> 8;
+	n |= n >> 16;
+	return (n+1); /* warning: overflow possible */
 }
 
 void SDLCore::resetGlyphCache()

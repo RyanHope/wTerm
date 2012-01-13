@@ -107,10 +107,12 @@ void ControlSeqParser::buildLookup()
 	addLookupEntry("[", CS_ERASE_DISPLAY, 0, -1, 1, 'J');
 	addLookupEntry("[", CS_ERASE_LINE, 0, -1, 1, 'K');
 	addLookupEntry("[", CS_GRAPHICS_MODE_SET, 0, -1, 1, 'm');
+
 	addLookupEntry("[", CS_MODE_SET, 0, -1, 1, 'h');
-	addLookupEntry("[?", CS_MODE_SET, 0, -1, 1, 'h');
 	addLookupEntry("[", CS_MODE_RESET, 0, -1, 1, 'l');
-	addLookupEntry("[?", CS_MODE_RESET, 0, -1, 1, 'l');
+
+	addLookupEntry("[?", CS_MODE_SET_PRIV, 0, -1, 1, 'h');
+	addLookupEntry("[?", CS_MODE_RESET_PRIV, 0, -1, 1, 'l');
 
 	addLookupEntry("", CS_KEYPAD_APP_MODE, 0, 0, 1, '=');
 	addLookupEntry("", CS_KEYPAD_NUM_MODE, 0, 0, 1, '>');
@@ -134,13 +136,17 @@ void ControlSeqParser::buildLookup()
 	addLookupEntry(")", CS_CHARSET_ALT_G1_SET, 0, 0, 1, '1');
 	addLookupEntry(")", CS_CHARSET_ALT_SPEC_G1_SET, 0, 0, 1, '2');
 
-	addLookupEntry("[", CS_VPA, 1, 1, 1, 'd');
-	addLookupEntry("[", CS_CHA, 1, 1, 1, 'G');
-	addLookupEntry("[", CS_ECH, 1, 1, 1, 'X');
-	addLookupEntry("[", CS_IL, 1, 1, 1, 'L');
-	addLookupEntry("[", CS_DL, 1, 1, 1, 'M');
-	addLookupEntry("[", CS_DCH, 1, 1, 1, 'P');
-	addLookupEntry("[", CS_ICH, 1, 1, 1, '@');
+	addLookupEntry("[", CS_VPA, 0, 1, 1, 'd');
+	addLookupEntry("[", CS_CHA, 0, 1, 1, 'G');
+	addLookupEntry("[", CS_ECH, 0, 1, 1, 'X');
+	addLookupEntry("[", CS_IL, 0, 1, 1, 'L');
+	addLookupEntry("[", CS_DL, 0, 1, 1, 'M');
+	addLookupEntry("[", CS_DCH, 0, 1, 1, 'P');
+	addLookupEntry("[", CS_ICH, 0, 1, 1, '@');
+	addLookupEntry("[", CS_HPA, 0, 1, 1, '`');
+	addLookupEntry("[", CS_CBT, 0, 1, 1, 'Z');
+	addLookupEntry("[", CS_CNL, 0, 1, 1, 'E');
+	addLookupEntry("[", CS_CPL, 0, 1, 1, 'F');
 
 	addLookupEntry("[", CS_MARGIN_SET, 0, 2, 1, 'r');
 	addLookupEntry("", CS_MOVE_UP, 0, 0, 1, 'D');
@@ -161,9 +167,25 @@ void ControlSeqParser::buildLookup()
 	addLookupEntry("[>", CS_DEVICE_ATTR_SECONDARY_REQUEST, 0, 1, 0, 'c');
 	addLookupEntry("[>", CS_DEVICE_ATTR_SECONDARY_RESPONSE, 0, -1, 0, 'c');
 
-	addLookupEntry("", CS_TERM_IDENTIFY, 0, 0, 1, 'Z');
 	addLookupEntry("[", CS_TERM_PARAM, 0, 1, 0, 'x');
 	addLookupEntry("", CS_TERM_RESET, 0, 0, 1, 'c');
+
+	/* VT52 Compat */
+	addLookupEntry("", CS_VT52_ANSI_MODE, 0, 0, 0, '<');
+	addLookupEntry("", CS_VT52_CURSOR_UP, 0, 0, 1, 'A');
+	addLookupEntry("", CS_VT52_CURSOR_DOWN, 0, 0, 1, 'B');
+	addLookupEntry("", CS_VT52_CURSOR_RIGHT, 0, 0, 1, 'C');
+	addLookupEntry("", CS_VT52_CURSOR_LEFT, 0, 0, 1, 'D');
+	addLookupEntry("", CS_VT52_ERASE_SCREEN, 0, 0, 0, 'J');
+	addLookupEntry("", CS_VT52_ERASE_LINE, 0, 0, 0, 'K');
+	addLookupEntry("", CS_VT52_CURSOR_HOME, 0, 0, 0, 'H');
+	addLookupEntry("", CS_VT52_REVERSE_LINE_FEED, 0, 0, 0, 'I');
+	addLookupEntry("", CS_VT52_IDENTIFY, 0, 0, 0, 'Z');
+	/**
+	 * Can't implement VT52 cursor position with current setup as
+	 * the row col values come after the identifying "end char".
+	 */
+	//addLookupEntry("", CS_VT52_CURSOR_POSITION, 0, 0, 0, 'Y');
 }
 
 /**

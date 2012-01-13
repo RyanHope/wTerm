@@ -89,6 +89,16 @@ typedef enum
 	 */
 	TS_TM_CURSOR = 512,
 
+	/**
+	 * Set to enable insert mode, otherwise, overwrite.
+	 */
+	TS_TM_INSERT = 1024,
+
+	/**Set to make backspace key work as backspace, otherwise, delete.
+	 *
+	 */
+	TS_TM_BACKSPACE = 2048,
+
 	TS_TM_MAX
 } TSTermMode_t;
 
@@ -127,6 +137,23 @@ typedef enum
 	TS_COLOR_BACKGROUND_BRIGHT,
 	TS_COLOR_MAX
 } TSColor_t;
+
+typedef enum
+{
+	TS_INPUT_F1 = 0,
+	TS_INPUT_F2,
+	TS_INPUT_F3,
+	TS_INPUT_F4,
+	TS_INPUT_F5,
+	TS_INPUT_F6,
+	TS_INPUT_F7,
+	TS_INPUT_F8,
+	TS_INPUT_F9,
+	TS_INPUT_F10,
+	TS_INPUT_F11,
+	TS_INPUT_F12,
+	TS_INPUT_MAX
+} TSInput_t;
 
 typedef enum
 {
@@ -240,6 +267,7 @@ public:
 	void moveCursorForward(int nPos);
 	void moveCursorBackward(int nPos);
 	void moveCursorNextLine();
+	void moveCursorPreviousLine();
 
 	void eraseCurrentLine();
 	void eraseCursorToEndOfLine();
@@ -295,7 +323,8 @@ public:
 	void unlock();
 
 	void getLineGraphicsState(int nLine, TSLineGraphicsState_t **states, int &nNumStates, int nMaxStates);
-	void addGraphicsState(int nColumn, int nLine, TSColor_t foregroundColor, TSColor_t backgroundColor, int nGraphicsMode, TSGraphicsModeOp_t op, bool bTrim);
+	void addGraphicsState(int nColumn, int nLine, TSLineGraphicsState_t& state, TSGraphicsModeOp_t op, bool bTrim);
+	void addGraphicsState(int nColumn, int nLine, TSColor_t foregroundColor, TSColor_t backgroundColor, int nGraphicsMode, TSCharset_t g0charset, TSCharset_t g1charset, TSGraphicsModeOp_t op, bool bTrim);
 
 	void resetTerminal();
 	void insertLines(int nLines);
@@ -303,6 +332,7 @@ public:
 	void deleteCharacters(int nChars);
 	void insertBlanks(int nBlanks);
 	void tabForward(int nTabs);
+	void tabBackward(int nTabs);
 	void setShift(bool shift);
 	bool getShift();
 };

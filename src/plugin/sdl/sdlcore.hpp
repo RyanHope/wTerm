@@ -41,8 +41,23 @@ protected:
 	SDL_Surface *m_surface;
 	TSColor_t m_foregroundColor;
 	TSColor_t m_backgroundColor;
+	TSCharset_t m_slot1;
+	TSCharset_t m_slot2;
 	bool m_bBold;
 	bool m_bUnderline;
+	bool m_bBlink;
+	bool doBlink;
+
+	bool m_reverse;
+
+	SDL_RWops *file1;
+	SDL_RWops *file2;
+	SDL_RWops *file3;
+	SDL_RWops *file4;
+
+	pthread_t m_blinkThread;
+	static void *blinkThread(void *ptr);
+	int startBlinkThread();
 
 	int createFonts(int nSize);
 
@@ -76,6 +91,7 @@ private:
 	int m_nMaxLinesOfText;
 	int m_nMaxColumnsOfText;
 
+
 	std::map<int, int> m_powerOfTwoLookup;
 
 	// pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
@@ -86,6 +102,7 @@ private:
 		Uint32 timestamp; /* the time the first keydown event occurred */
 		SDL_Event evt;    /* the event we are supposed to repeat */
 	} m_keyRepeat;
+
 
 	int init();
 	int initOpenGL();
@@ -118,7 +135,7 @@ public:
 
 	void setForegroundColor(unsigned char nRed, unsigned char nGreen, unsigned char nBlue);
 	void setBackgroundColor(unsigned char nRed, unsigned char nGreen, unsigned char nBlue);
-	void clearScreen();
+	void clearScreen(TSColor_t color);
 
 	int getMaximumLinesOfText();
 	int getMaximumColumnsOfText();

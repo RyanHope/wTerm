@@ -82,7 +82,23 @@ SDLTerminal::SDLTerminal()
 	for (int i = 0; i < colorCount && i < mcolorCount; ++i)
 		m_colors[i] = defaultColors[i];
 
+	m_keys.clear();
+	m_keys.push_back("\033OP");
+	m_keys.push_back("\033OQ");
+	m_keys.push_back("\033OR");
+	m_keys.push_back("\033OS");
+	m_keys.push_back("\033[15~");
+	m_keys.push_back("\033[17~");
+	m_keys.push_back("\033[18~");
+	m_keys.push_back("\033[19~");
+	m_keys.push_back("\033[20~");
+	m_keys.push_back("\033[21~");
+	m_keys.push_back("\033[23~");
+	m_keys.push_back("\033[24~");
+
 	m_config->parse("./terminal.config");
+
+	initCharsets();
 }
 
 SDLTerminal::~SDLTerminal()
@@ -148,6 +164,46 @@ void SDLTerminal::updateDisplaySize()
 		if (extTerminal != NULL)
 			extTerminal->setWindowSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
 	}
+}
+
+void SDLTerminal::initCharsets()
+{
+	CharMapping_t lineDrawing;
+	memset(&lineDrawing, 0, sizeof(lineDrawing));
+	lineDrawing.map[96] = 9830;
+	lineDrawing.map[97] = 9618;
+	lineDrawing.map[98] = 9621;
+	lineDrawing.map[99] = 9621;
+	lineDrawing.map[100] = 9621;
+	lineDrawing.map[101] = 9621;
+	lineDrawing.map[102] = 176;
+	lineDrawing.map[103] = 177;
+	lineDrawing.map[104] = 9621;
+	lineDrawing.map[105] = 9621;
+	lineDrawing.map[106] = 9496;
+	lineDrawing.map[107] = 9488;
+	lineDrawing.map[108] = 9484;
+	lineDrawing.map[109] = 9492;
+	lineDrawing.map[110] = 9532;
+	lineDrawing.map[111] = 9621;
+	lineDrawing.map[112] = 9621;
+	lineDrawing.map[113] = 9472;
+	lineDrawing.map[114] = 9621;
+	lineDrawing.map[115] = 9621;
+	lineDrawing.map[116] = 9500;
+	lineDrawing.map[117] = 9508;
+	lineDrawing.map[118] = 9524;
+	lineDrawing.map[119] = 9516;
+	lineDrawing.map[120] = 9474;
+	lineDrawing.map[121] = 8804;
+	lineDrawing.map[122] = 8805;
+	lineDrawing.map[123] = 960;
+	lineDrawing.map[124] = 8800;
+	lineDrawing.map[125] = 163;
+	lineDrawing.map[126] = 183;
+	lineDrawing.map[127] = 0;
+	setCharMapping(TS_CS_G0_SPEC, lineDrawing);
+	setCharMapping(TS_CS_G1_SPEC, lineDrawing);
 }
 
 int SDLTerminal::initCustom()
@@ -306,58 +362,67 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			}
 			else if (sym == SDLK_F1)
 			{
-				extTerminal->insertData("\033OP\0", 4);
+				extTerminal->insertData(m_keys[TS_INPUT_F1].c_str(),1);
 			}
 			else if (sym == SDLK_F2)
 			{
-				extTerminal->insertData("\033OQ\0", 4);
+				extTerminal->insertData(m_keys[TS_INPUT_F2].c_str(),1);
 			}
 			else if (sym == SDLK_F3)
 			{
-				extTerminal->insertData("\033OR\0", 4);
+				extTerminal->insertData(m_keys[TS_INPUT_F3].c_str(),1);
 			}
 			else if (sym == SDLK_F4)
 			{
-				extTerminal->insertData("\033OS\0", 4);
+				extTerminal->insertData(m_keys[TS_INPUT_F4].c_str(),1);
 			}
 			else if (sym == SDLK_F5)
 			{
-				extTerminal->insertData("\033[15~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F5].c_str(),1);
 			}
 			else if (sym == SDLK_F6)
 			{
-				extTerminal->insertData("\033[17~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F6].c_str(),1);
 			}
 			else if (sym == SDLK_F7)
 			{
-				extTerminal->insertData("\033[18~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F7].c_str(),1);
 			}
 			else if (sym == SDLK_F8)
 			{
-				extTerminal->insertData("\033[19~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F8].c_str(),1);
 			}
 			else if (sym == SDLK_F9)
 			{
-				extTerminal->insertData("\033[20~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F9].c_str(),1);
 			}
 			else if (sym == SDLK_F10)
 			{
-				extTerminal->insertData("\033[21~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F10].c_str(),1);
 			}
 			else if (sym == SDLK_F11)
 			{
-				extTerminal->insertData("\033[23~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F11].c_str(),1);
 			}
 			else if (sym == SDLK_F12)
 			{
-				extTerminal->insertData("\033[24~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F12].c_str(),1);
 			}
 			else if (sym == SDLK_RETURN)
 			{
-				if ((m_terminalState->getTerminalModeFlags() & TS_TM_NEW_LINE) > 0)
+				syslog(LOG_ERR, "RETURN");
+				if (m_terminalState->getTerminalModeFlags() & TS_TM_NEW_LINE)
 					extTerminal->insertData("\r\n", 2);
 				else
 					extTerminal->insertData("\r", 1);
+			}
+			else if (sym == SDLK_BACKSPACE)
+			{
+				syslog(LOG_ERR, "BACKSPACE");
+				if (m_terminalState->getTerminalModeFlags() & TS_TM_BACKSPACE)
+					extTerminal->insertData("\x08", 1);
+				else
+					extTerminal->insertData("\x7F", 1);
 			}
 			//Printable characters.
 			else if ((unicode & 0xFF80) == 0 )
@@ -472,10 +537,8 @@ void SDLTerminal::redraw()
 	TSLineGraphicsState_t defState = m_terminalState->getDefaultGraphicsState();
 
 	setGraphicsState(defState);
-	clearScreen();
-
-	startTextGL(m_terminalState->getDisplayScreenSize().getX() + 1,
-							m_terminalState->getDisplayScreenSize().getY() + 1);
+	m_reverse = (m_terminalState->getTerminalModeFlags() & TS_TM_SCREEN);
+	clearScreen(m_reverse ? defState.foregroundColor : defState.backgroundColor);
 
 	if (size <= 0)
 	{
@@ -501,6 +564,10 @@ void SDLTerminal::redraw()
 
 	if (nResult == 0)
 	{
+
+		startTextGL(m_terminalState->getDisplayScreenSize().getX() + 1,
+				m_terminalState->getDisplayScreenSize().getY() + 1);
+
 		for (int i = nTopLineIndex; i < nEndLine; i++)
 		{
 			m_terminalState->getLineGraphicsState(nLine, states, nNumStates, nMaxStates);
@@ -568,6 +635,8 @@ void SDLTerminal::redraw()
 			nLine++;
 		}
 
+		endTextGL();
+
 		if (m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR)
 			drawCursor(m_terminalState->getCursorLocation().getX(), m_terminalState->getCursorLocation().getY());
 	}
@@ -581,8 +650,6 @@ void SDLTerminal::redraw()
 	{
 		free(states);
 	}
-
-	endTextGL();
 
 	m_terminalState->unlock();
 
@@ -673,6 +740,10 @@ SDL_Color SDLTerminal::getColor(TSColor_t color)
 	return m_colors[color];
 }
 
+void SDLTerminal::setKey(TSInput_t key, const char *cmd) {
+	m_keys[key] = std::string(cmd);
+}
+
 void SDLTerminal::setColor(TSColor_t color, int r, int g, int b)
 {
 /*
@@ -727,4 +798,8 @@ void SDLTerminal::setGraphicsState(TSLineGraphicsState_t &state)
 
 	m_bBold = ((state.nGraphicsMode & TS_GM_BOLD) > 0);
 	m_bUnderline = ((state.nGraphicsMode & TS_GM_UNDERSCORE) > 0);
+	m_bBlink = ((state.nGraphicsMode & TS_GM_BLINK) > 0);
+
+	m_slot1 = state.g0charset;
+	m_slot2 = state.g1charset;
 }
