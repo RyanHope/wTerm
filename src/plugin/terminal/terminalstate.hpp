@@ -94,6 +94,11 @@ typedef enum
 	 */
 	TS_TM_INSERT = 1024,
 
+	/**Set to make backspace key work as backspace, otherwise, delete.
+	 *
+	 */
+	TS_TM_BACKSPACE = 2048,
+
 	TS_TM_MAX
 } TSTermMode_t;
 

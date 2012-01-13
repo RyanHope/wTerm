@@ -272,6 +272,10 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				addTerminalModeFlags(TS_TM_INSERT);
 				enableShiftText(true);
 			}
+			else if (values[i] == 20)
+			{
+				addTerminalModeFlags(TS_TM_NEW_LINE);
+			}
 		}
 		break;
 	case CS_SETANSI: //ESC<
@@ -315,13 +319,13 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				//FIXME Not implemented.
 				//Interlace.
 			}
-			else if (values[i] == 20)
-			{
-				addTerminalModeFlags(TS_TM_NEW_LINE);
-			}
 			else if (values[i] == 25)
 			{
 				addTerminalModeFlags(TS_TM_CURSOR);
+			}
+			else if (values[i] == 67)
+			{
+				addTerminalModeFlags(TS_TM_BACKSPACE);
 			}
 		}
 		break;
@@ -332,6 +336,10 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			{
 				removeTerminalModeFlags(TS_TM_INSERT);
 				enableShiftText(false);
+			}
+			else if (values[i] == 20)
+			{
+				removeTerminalModeFlags(TS_TM_NEW_LINE);
 			}
 		}
 		break;
@@ -377,13 +385,13 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				//FIXME Not implemented.
 				//Interlace.
 			}
-			else if (values[i] == 20)
-			{
-				removeTerminalModeFlags(TS_TM_NEW_LINE);
-			}
 			else if (values[i] == 25)
 			{
 				removeTerminalModeFlags(TS_TM_CURSOR);
+			}
+			else if (values[i] == 67)
+			{
+				removeTerminalModeFlags(TS_TM_BACKSPACE);
 			}
 		}
 		break;

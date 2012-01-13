@@ -410,10 +410,19 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			}
 			else if (sym == SDLK_RETURN)
 			{
-				if ((m_terminalState->getTerminalModeFlags() & TS_TM_NEW_LINE) > 0)
+				syslog(LOG_ERR, "RETURN");
+				if (m_terminalState->getTerminalModeFlags() & TS_TM_NEW_LINE)
 					extTerminal->insertData("\r\n", 2);
 				else
 					extTerminal->insertData("\r", 1);
+			}
+			else if (sym == SDLK_BACKSPACE)
+			{
+				syslog(LOG_ERR, "BACKSPACE");
+				if (m_terminalState->getTerminalModeFlags() & TS_TM_BACKSPACE)
+					extTerminal->insertData("\x08", 1);
+				else
+					extTerminal->insertData("\x7F", 1);
 			}
 			//Printable characters.
 			else if ((unicode & 0xFF80) == 0 )

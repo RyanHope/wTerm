@@ -124,7 +124,7 @@ enyo.kind({
   				unicode = '\x0D'
   				break
   			case 'Bksp':
-  				unicode = '\x7f'
+  				unicode = '\x08'
   				break
   			case 'Esc':
   				unicode = '\x1B'
