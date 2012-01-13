@@ -70,9 +70,7 @@ enyo.kind({
 				break;
 			case 3: // up
 			case 4: // down
-				this.$.terminal.vkb = this.$.vkb
-				this.$.vkb.setShowing(true)
-				this.$.vkbsmall.setShowing(false)
+				this.$.vkb.large()
 				if (this.showVKB)
 					this.$.terminal.resize(window.innerWidth, 400)
 				else
@@ -80,9 +78,7 @@ enyo.kind({
 				break;
 			case 5: // left
 			case 6: // right
-				this.$.terminal.vkb = this.$.vkbsmall
-				this.$.vkb.setShowing(false)
-				this.$.vkbsmall.setShowing(true)
+				this.$.vkb.small()
 				if (this.showVKB)
 					this.$.terminal.resize(window.innerWidth, 722)
 				else

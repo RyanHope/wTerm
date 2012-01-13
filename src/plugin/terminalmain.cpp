@@ -27,6 +27,11 @@
 
 SDLTerminal *sdlTerminal;
 
+PDL_bool setKey(PDL_JSParameters *params) {
+	sdlTerminal->setKey((TSInput_t)PDL_GetJSParamInt(params, 0), PDL_GetJSParamString(params, 1));
+	return PDL_TRUE;
+}
+
 PDL_bool setColor(PDL_JSParameters *params) {
 
 	TSColor_t color = (TSColor_t)PDL_GetJSParamInt(params, 0);
@@ -102,6 +107,7 @@ int main(int argc, const char* argv[])
 	sdlTerminal->start();
 	sdlTerminal->setFontSize((argc > 1 && atoi(argv[1])) ? atoi(argv[1]) : 12);
 
+	PDL_RegisterJSHandler("setKey", setKey);
 	PDL_RegisterJSHandler("setColor", setColor);
 	PDL_RegisterJSHandler("pushKeyEvent", pushKeyEvent);
 	PDL_RegisterJSHandler("getDimensions", getDimensions);

@@ -33,7 +33,7 @@ enyo.kind({
 				{name: 'displayText2', className: 'value-display-text-2'}
 			]},
 		]},
-		{name: 'caption'},
+		{name: 'caption', className: 'enyo-label'},
 	],
 	
 	create: function () {

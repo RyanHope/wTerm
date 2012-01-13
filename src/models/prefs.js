@@ -2,6 +2,51 @@ function Prefs() {
 	
 	this.defaults = {
 		fontSize: 12,
+		inputScheme: 'XFree86 xterm',
+		inputSchemes: {
+			'X11R6 xterm': [
+				'\\x1b[11~',
+				'\\x1b[12~',
+				'\\x1b[13~',
+				'\\x1b[14~',
+				'\\x1b[15~',
+				'\\x1b[17~',
+				'\\x1b[18~',
+				'\\x1b[19~',
+				'\\x1b[20~',
+				'\\x1b[21~',
+				'\\x1b[23~',
+				'\\x1b[24~',
+			],
+			'XFree86 xterm': [
+				'\\x1bOP',
+				'\\x1bOQ',
+				'\\x1bOR',
+				'\\x1bOS',
+				'\\x1b[15~',
+				'\\x1b[17~',
+				'\\x1b[18~',
+				'\\x1b[19~',
+				'\\x1b[20~',
+				'\\x1b[21~',
+				'\\x1b[23~',
+				'\\x1b[24~',
+			],
+			'rxvt': [
+				'\\x1b[11~',
+				'\\x1b[12~',
+				'\\x1b[13~',
+				'\\x1b[14~',
+				'\\x1b[15~',
+				'\\x1b[17~',
+				'\\x1b[18~',
+				'\\x1b[19~',
+				'\\x1b[20~',
+				'\\x1b[21~',
+				'\\x1b[23~',
+				'\\x1b[24~',
+			]
+		},
 		colorScheme: 'Linux Colors',
 		kbdLayout: 'default',
 		colorSchemes: {
@@ -170,6 +215,12 @@ function Prefs() {
 			for (var colorScheme in this.defaults[key])
 				colorSchemes[colorScheme] = this.defaults[key][colorScheme]
 			this.set(key, colorSchemes)
+		}
+		else if (key == 'inputSchemes') {
+			var inputSchemes = this.get(key)
+			for (var inputScheme in this.defaults[key])
+				inputSchemes[inputScheme] = this.defaults[key][inputScheme]
+			this.set(key, inputSchemes)
 		}
 	}
 	

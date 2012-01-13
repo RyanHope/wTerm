@@ -1,39 +1,146 @@
+.vkb .key {
+	margin: 1px;
+	padding: 0px;
+}
+
+.vkb.small .key {
+	height: 37px;
+	width: 43px;
+	font-size: 50%;
+}
+
+.vkb.small .key.spacebar {
+	width: 320px;
+}
+
+.vkb.small .key.fn {
+	width: 52px;
+}
+
+.vkb.small .key.alt {
+	width: 52px;
+}
+
+.vkb.small .key.meta {
+	width: 52px;
+}
+
+.vkb.small .key.ctrl-left {
+	width: 62px;
+}
+
+.vkb.small .key.arrow {
+	width: 50px;
+}
+
+.vkb.small .key.shift-left {
+	width: 90px;
+}
+
+.vkb.small .key.small {
+	height: 13px;
+}
+
+.vkb.small .key.tab {
+	width: 66px;
+}
+
+.vkb.small .key.backspace {
+	width: 66px;
+}
+
+.vkb.small .key.enter {
+	width: 80px;
+}
+
+.vkb.small .key.caps {
+	width: 80px;
+}
+
+.vkb.large .key {
+	height: 50px;
+	width: 60px;
+}
+
+.vkb.large .key.arrow {
+	width: 70px;
+}
+
+.vkb.large .key.backspace {
+	width: 100px;
+}
+
+.vkb.large .key.tab {
+	width: 100px;
+}
+
+.vkb.large .key.enter {
+	width: 112px;
+}
+
+.vkb.large .key.caps {
+	width: 120px;
+}
+
+.vkb.large .key.shift-left {
+	width: 140px;
+}
+
+.vkb.large .key.ctrl-left {
+	width: 100px;
+}
+
+.vkb.large .key.fn {
+	width: 72px;
+}
+
+.vkb.large .key.alt {
+	width: 72px;
+}
+
+.vkb.large .key.meta {
+	width: 72px;
+}
+
+.vkb.large .key.spacebar {
+	width: 418px;
+}
+
+.vkb.large .key.small {
+	height: 22px;
+}
+
+.vkb.large .functionPadding {
+	height: 2px;
+}
+
+/*
 .vkb.large .key {
 	font-size: 18px;
 	font-weight: bold;
 	min-height: 42px;
 	min-width: 48px;
-	margin: 0px;
 }
-
 
 .vkb.large .key.small {
 	max-height: 22px;
 	min-height: 22px;
-	margin-bottom: 6px;
 }
 
-.vkb.large .key.shift-left {
-	-webkit-box-flex: 1;
-}
+
 .vkb.large .key.shift-right {
 	min-width: 120px;
 }
 .vkb.large .key.ctrl-left {
 	-webkit-box-flex: .6;
 }
-.vkb.large .key.spacebar {
-	-webkit-box-flex: 4;
-}
+
 
 .vkb.small .key {
 	font-size: 11px;
 	font-weight: bold;
 	min-height: 21px;
 	min-width: 30px;
-	margin: 0px;
-	padding-top: 0px;
-	padding-bottom: 0px;
 }
 
 .vkb.small .key.small {
@@ -55,3 +162,4 @@
 .vkb.small .key.spacebar {
 	-webkit-box-flex: 3.8;
 }
+*/

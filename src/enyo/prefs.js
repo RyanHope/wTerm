@@ -12,44 +12,60 @@ enyo.kind({
 		{name: "shadow", className: "enyo-sliding-view-shadow"},
 		{kind: "VFlexBox", height: "100%", components: [
 			{kind: "Header", pack: 'center', components: [
-				{kind: "RadioToolButtonGroup", components: [
-	    	  		{caption: "Appearance", style: ''},
-			      	{caption: "KeyBindings"},
+				{kind: "RadioToolButtonGroup", name: 'grp', value: 'appearance', flex: 1, onChange: 'grpChanged', components: [
+	    	  		{caption: "Appearance", value: 'appearance'},
+			      	{caption: "Input", value: 'input'},
 			  	]}
 			]},
 	  		{kind: "Scroller", flex: 1, components: [
-	  			{kind: "RowGroup", caption: 'Text', flex: 1, components: [
-					{kind: 'Item', layoutKind: 'HFlexLayout', align: "center", style: 'padding: 0; margin: 0', components: [
-						{kind: "IntegerPicker", name: 'fontSize', label: '', min: 8, max: 22, flex: 1, onChange: 'fontSizeChanged'},
-						{content: "Font Size", style: 'padding-right: 10px'}
+				{name: 'grp1', components: [
+					{kind: "RowGroup", caption: 'Text', flex: 1, components: [
+						{kind: 'Item', layoutKind: 'HFlexLayout', align: "center", style: 'padding: 0; margin: 0', components: [
+							{kind: "IntegerPicker", name: 'fontSize', label: '', min: 8, max: 22, flex: 1, onChange: 'fontSizeChanged'},
+							{content: "Font Size", style: 'padding-right: 10px', className: 'enyo-label'}
+						]}
+					]},
+					{kind: 'RowGroup', flex :1, caption: 'Color Scheme', components: [
+						{kind: "ListSelector", name: 'colorSchemes', onChange: "colorSchemeChanged"},
+						{name: 'foreground', kind: 'wi.InputColor', caption: 'Foreground', onChanged: 'updateColors'},
+						{name: 'background', kind: 'wi.InputColor', caption: 'Background', onChanged: 'updateColors'},					
+						{name: 'color1', kind: 'wi.InputColor', caption: 'Color1', onChanged: 'updateColors'},
+						{name: 'color2', kind: 'wi.InputColor', caption: 'Color2', onChanged: 'updateColors'},
+						{name: 'color3', kind: 'wi.InputColor', caption: 'Color3', onChanged: 'updateColors'},
+						{name: 'color4', kind: 'wi.InputColor', caption: 'Color4', onChanged: 'updateColors'},
+						{name: 'color5', kind: 'wi.InputColor', caption: 'Color5', onChanged: 'updateColors'},
+						{name: 'color6', kind: 'wi.InputColor', caption: 'Color6', onChanged: 'updateColors'},
+						{name: 'color7', kind: 'wi.InputColor', caption: 'Color7', onChanged: 'updateColors'},
+						{name: 'color8', kind: 'wi.InputColor', caption: 'Color8', onChanged: 'updateColors'},
+						{name: 'foregroundBright', kind: 'wi.InputColor', caption: 'Foreground Bright', onChanged: 'updateColors'},
+						{name: 'backgroundBright', kind: 'wi.InputColor', caption: 'Background Bright', onChanged: 'updateColors'},
+						{name: 'color1Bright', kind: 'wi.InputColor', caption: 'Color1 Bright', onChanged: 'updateColors'},
+						{name: 'color2Bright', kind: 'wi.InputColor', caption: 'Color2 Bright', onChanged: 'updateColors'},
+						{name: 'color3Bright', kind: 'wi.InputColor', caption: 'Color3 Bright', onChanged: 'updateColors'},
+						{name: 'color4Bright', kind: 'wi.InputColor', caption: 'Color4 Bright', onChanged: 'updateColors'},
+						{name: 'color5Bright', kind: 'wi.InputColor', caption: 'Color5 Bright', onChanged: 'updateColors'},
+						{name: 'color6Bright', kind: 'wi.InputColor', caption: 'Color6 Bright', onChanged: 'updateColors'},
+						{name: 'color7Bright', kind: 'wi.InputColor', caption: 'Color7 Bright', onChanged: 'updateColors'},
+						{name: 'color8Bright', kind: 'wi.InputColor', caption: 'Color8 Bright', onChanged: 'updateColors'},
+					]},
+				]},
+				{name: 'grp2', showing: false, components: [
+					{kind: 'RowGroup', flex :1, caption: 'Key Bindings', components: [
+						{kind: "ListSelector", name: 'inputSchemes', onChange: "inputSchemeChanged"},
+						{kind: "Input", name: 'inputF1', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F1'}]},
+						{kind: "Input", name: 'inputF2', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F2'}]},
+						{kind: "Input", name: 'inputF3', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F3'}]},
+						{kind: "Input", name: 'inputF4', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F4'}]},
+						{kind: "Input", name: 'inputF5', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F5'}]},
+						{kind: "Input", name: 'inputF6', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F6'}]},
+						{kind: "Input", name: 'inputF7', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F7'}]},
+						{kind: "Input", name: 'inputF8', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F8'}]},
+						{kind: "Input", name: 'inputF9', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F9'}]},
+						{kind: "Input", name: 'inputF10', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F10'}]},
+						{kind: "Input", name: 'inputF11', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F11'}]},
+						{kind: "Input", name: 'inputF12', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F12'}]},
 					]}
-				]},
-				{kind: "RowGroup", showing: false, caption: 'Keyboard Layout', flex: 1, components: [
-					{kind: "ListSelector", name: 'kbdLayouts', onChange: "kbdLayoutChanged" },
-				]},
-				{kind: 'RowGroup', flex :1, caption: 'Color Scheme', components: [
-					{kind: "ListSelector", name: 'colorSchemes', onChange: "colorSchemeChanged"},
-					{name: 'foreground', kind: 'wi.InputColor', caption: 'Foreground', onChanged: 'updateColors'},
-					{name: 'background', kind: 'wi.InputColor', caption: 'Background', onChanged: 'updateColors'},					
-					{name: 'color1', kind: 'wi.InputColor', caption: 'Color1', onChanged: 'updateColors'},
-					{name: 'color2', kind: 'wi.InputColor', caption: 'Color2', onChanged: 'updateColors'},
-					{name: 'color3', kind: 'wi.InputColor', caption: 'Color3', onChanged: 'updateColors'},
-					{name: 'color4', kind: 'wi.InputColor', caption: 'Color4', onChanged: 'updateColors'},
-					{name: 'color5', kind: 'wi.InputColor', caption: 'Color5', onChanged: 'updateColors'},
-					{name: 'color6', kind: 'wi.InputColor', caption: 'Color6', onChanged: 'updateColors'},
-					{name: 'color7', kind: 'wi.InputColor', caption: 'Color7', onChanged: 'updateColors'},
-					{name: 'color8', kind: 'wi.InputColor', caption: 'Color8', onChanged: 'updateColors'},
-					{name: 'foregroundBright', kind: 'wi.InputColor', caption: 'Foreground Bright', onChanged: 'updateColors'},
-					{name: 'backgroundBright', kind: 'wi.InputColor', caption: 'Background Bright', onChanged: 'updateColors'},
-					{name: 'color1Bright', kind: 'wi.InputColor', caption: 'Color1 Bright', onChanged: 'updateColors'},
-					{name: 'color2Bright', kind: 'wi.InputColor', caption: 'Color2 Bright', onChanged: 'updateColors'},
-					{name: 'color3Bright', kind: 'wi.InputColor', caption: 'Color3 Bright', onChanged: 'updateColors'},
-					{name: 'color4Bright', kind: 'wi.InputColor', caption: 'Color4 Bright', onChanged: 'updateColors'},
-					{name: 'color5Bright', kind: 'wi.InputColor', caption: 'Color5 Bright', onChanged: 'updateColors'},
-					{name: 'color6Bright', kind: 'wi.InputColor', caption: 'Color6 Bright', onChanged: 'updateColors'},
-					{name: 'color7Bright', kind: 'wi.InputColor', caption: 'Color7 Bright', onChanged: 'updateColors'},
-					{name: 'color8Bright', kind: 'wi.InputColor', caption: 'Color8 Bright', onChanged: 'updateColors'},
-				]},
+				]}
 	  		]},
 			{kind: "Toolbar", className: 'enyo-toolbar-light', align: "center", showing: true, components: [
 				{name: "dragHandle", kind: "GrabButton", onclick: "close"},
@@ -98,6 +114,21 @@ enyo.kind({
 		this.terminal.setColors()
 		this.getColorSchemes()
 	},
+	getKeys: function() {
+		var keys = this.terminal.currentKeys
+		this.$.inputF1.setValue(keys[0])
+		this.$.inputF2.setValue(keys[1])
+		this.$.inputF3.setValue(keys[2])
+		this.$.inputF4.setValue(keys[3])
+		this.$.inputF5.setValue(keys[4])
+		this.$.inputF6.setValue(keys[5])
+		this.$.inputF7.setValue(keys[6])
+		this.$.inputF8.setValue(keys[7])
+		this.$.inputF9.setValue(keys[8])
+		this.$.inputF10.setValue(keys[9])
+		this.$.inputF11.setValue(keys[10])
+		this.$.inputF12.setValue(keys[11])
+	},
 	getColors: function() {
 		var colors = this.terminal.currentColors
 		this.$.color1.setValue(colors[0])
@@ -133,12 +164,22 @@ enyo.kind({
 		this.$.colorSchemes.setItems(items)
 		this.$.colorSchemes.setValue(this.prefs.get('colorScheme'))
 	},
+	getInputSchemes: function() {
+		var inputSchemes = this.prefs.get('inputSchemes')
+		var items = []
+		for (var inputScheme in inputSchemes)
+			items.push(inputScheme)
+		this.$.inputSchemes.setItems(items)
+		this.$.inputSchemes.setValue(this.prefs.get('inputScheme'))
+	},
 	rendered: function() {
 		this.getColors()
 		this.$.fontSize.setValue(this.prefs.get('fontSize'))
 		this.$.kbdLayouts.setItems(kbdLayoutList());
 		this.$.kbdLayouts.setValue(this.prefs.get('kbdLayout'))
 		this.getColorSchemes()
+		this.getKeys()
+		this.getInputSchemes()
 	},
 	colorSchemeChanged: function() {
 		this.prefs.set('colorScheme', this.$.colorSchemes.getValue())
@@ -148,5 +189,19 @@ enyo.kind({
 	kbdLayoutChanged: function() {
 		this.prefs.set('kbdLayout', this.$.kbdLayouts.getValue());
 		this.vkb.loadLayout(this.$.kbdLayouts.getValue());
+	},
+	inputSchemeChanged: function() {
+		this.prefs.set('inputScheme', this.$.inputSchemes.getValue())
+		this.terminal.setKeys()
+		this.getKeys()
+	},
+	grpChanged: function() {
+		if (this.$.grp.getValue() == 'appearance') {
+			this.$.grp1.setShowing(true)
+			this.$.grp2.setShowing(false)
+		} else {
+			this.$.grp1.setShowing(false)
+			this.$.grp2.setShowing(true)
+		}
 	}
 })

@@ -94,6 +94,11 @@ typedef enum
 	 */
 	TS_TM_INSERT = 1024,
 
+	/**Set to make backspace key work as backspace, otherwise, delete.
+	 *
+	 */
+	TS_TM_BACKSPACE = 2048,
+
 	TS_TM_MAX
 } TSTermMode_t;
 
@@ -132,6 +137,23 @@ typedef enum
 	TS_COLOR_BACKGROUND_BRIGHT,
 	TS_COLOR_MAX
 } TSColor_t;
+
+typedef enum
+{
+	TS_INPUT_F1 = 0,
+	TS_INPUT_F2,
+	TS_INPUT_F3,
+	TS_INPUT_F4,
+	TS_INPUT_F5,
+	TS_INPUT_F6,
+	TS_INPUT_F7,
+	TS_INPUT_F8,
+	TS_INPUT_F9,
+	TS_INPUT_F10,
+	TS_INPUT_F11,
+	TS_INPUT_F12,
+	TS_INPUT_MAX
+} TSInput_t;
 
 typedef enum
 {
