@@ -167,9 +167,25 @@ void ControlSeqParser::buildLookup()
 	addLookupEntry("[>", CS_DEVICE_ATTR_SECONDARY_REQUEST, 0, 1, 0, 'c');
 	addLookupEntry("[>", CS_DEVICE_ATTR_SECONDARY_RESPONSE, 0, -1, 0, 'c');
 
-	addLookupEntry("", CS_TERM_IDENTIFY, 0, 0, 1, 'Z');
 	addLookupEntry("[", CS_TERM_PARAM, 0, 1, 0, 'x');
 	addLookupEntry("", CS_TERM_RESET, 0, 0, 1, 'c');
+
+	/* VT52 Compat */
+	addLookupEntry("", CS_VT52_ANSI_MODE, 0, 0, 0, '<');
+	addLookupEntry("", CS_VT52_CURSOR_UP, 0, 0, 1, 'A');
+	addLookupEntry("", CS_VT52_CURSOR_DOWN, 0, 0, 1, 'B');
+	addLookupEntry("", CS_VT52_CURSOR_RIGHT, 0, 0, 1, 'C');
+	addLookupEntry("", CS_VT52_CURSOR_LEFT, 0, 0, 1, 'D');
+	addLookupEntry("", CS_VT52_ERASE_SCREEN, 0, 0, 0, 'J');
+	addLookupEntry("", CS_VT52_ERASE_LINE, 0, 0, 0, 'K');
+	addLookupEntry("", CS_VT52_CURSOR_HOME, 0, 0, 0, 'H');
+	addLookupEntry("", CS_VT52_REVERSE_LINE_FEED, 0, 0, 0, 'I');
+	addLookupEntry("", CS_VT52_IDENTIFY, 0, 0, 0, 'Z');
+	/**
+	 * Can't implement VT52 cursor position with current setup as
+	 * the row col values come after the identifying "end char".
+	 */
+	//addLookupEntry("", CS_VT52_CURSOR_POSITION, 0, 0, 0, 'Y');
 }
 
 /**
