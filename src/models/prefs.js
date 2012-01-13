@@ -48,6 +48,7 @@ function Prefs() {
 			]
 		},
 		colorScheme: 'Linux Colors',
+		kbdLayout: 'default',
 		colorSchemes: {
 			'Linux Colors': [
 				[0,0,0],

@@ -1,7 +1,7 @@
 enyo.kind({
 	name: 'vkbKey',
 	kind: enyo.Button,
-	className: 'enyo-button key',
+	className: '',
 	allowHtml: true,
 	
 	published: {
@@ -17,7 +17,14 @@ enyo.kind({
 		ontouchend: ''
 	},
 
+	create: function() {
+		this.inherited(arguments);
+		this.addClass('enyo-button');
+		this.addClass('key');
+	},
+
   	rendered: function() {
+		this.inherited(arguments);
   		this.hasNode();
         this.node.ontouchstart = enyo.bind(this,'handleTouchstart')
         //this.node.ontouchmove = this.doTouchMove;

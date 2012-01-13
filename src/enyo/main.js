@@ -54,10 +54,10 @@ enyo.kind({
 			method : "getPreferences",
 			onSuccess : "prefCallSuccess",
 		})
-		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
-		this.createComponent({kind: 'vkbsmall', name: 'vkbsmall', terminal: this.$.terminal, showing: false})
+		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, prefs: this.prefs, showing: true})
 		this.$.terminal.vkb = this.$.vkb
 		this.$.prefs.terminal = this.$.terminal
+		this.$.prefs.vkb = this.$.vkb
 		this.setup()
 		// fix the keyboard if orientation is locked
 		this.$.getPreferencesCall.call({"keys":["rotationLock"]});
@@ -70,9 +70,7 @@ enyo.kind({
 				break;
 			case 3: // up
 			case 4: // down
-				this.$.terminal.vkb = this.$.vkb
-				this.$.vkb.setShowing(true)
-				this.$.vkbsmall.setShowing(false)
+				this.$.vkb.large()
 				if (this.showVKB)
 					this.$.terminal.resize(window.innerWidth, 400)
 				else
@@ -80,9 +78,7 @@ enyo.kind({
 				break;
 			case 5: // left
 			case 6: // right
-				this.$.terminal.vkb = this.$.vkbsmall
-				this.$.vkb.setShowing(false)
-				this.$.vkbsmall.setShowing(true)
+				this.$.vkb.small()
 				if (this.showVKB)
 					this.$.terminal.resize(window.innerWidth, 722)
 				else
@@ -124,17 +120,13 @@ enyo.kind({
 	setup: function() {
 		var o = enyo.getWindowOrientation()
 		if (o == 'up' || o == 'down') {
-			this.$.terminal.vkb = this.$.vkb
-			this.$.vkb.setShowing(true)
-			this.$.vkbsmall.setShowing(false)
+			this.$.vkb.large()
 			if (this.showVKB)
 				this.$.terminal.resize(window.innerWidth, 400)
 			else
 				this.$.terminal.resize(window.innerWidth, window.innerHeight)
 		} else {
-			this.$.terminal.vkb = this.$.vkbsmall
-			this.$.vkb.setShowing(false)
-			this.$.vkbsmall.setShowing(true)
+			this.$.vkb.small()
 			if (this.showVKB)
 				this.$.terminal.resize(window.innerWidth, 722)
 			else

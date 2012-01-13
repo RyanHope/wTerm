@@ -354,11 +354,17 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			}
 			else if (sym == SDLK_RIGHT)
 			{
-				m_terminalState->sendCursorCommand(VTTS_CURSOR_RIGHT, extTerminal);
+				if ((mod & KMOD_MODE) || m_keyMod == TERM_KEYMOD_FN)
+					extTerminal->insertData("\x1B[F",1);
+				else
+					m_terminalState->sendCursorCommand(VTTS_CURSOR_RIGHT, extTerminal);
 			}
 			else if (sym == SDLK_LEFT)
 			{
-				m_terminalState->sendCursorCommand(VTTS_CURSOR_LEFT, extTerminal);
+				if ((mod & KMOD_MODE) || m_keyMod == TERM_KEYMOD_FN)
+					extTerminal->insertData("\x1B[H",1);
+				else
+					m_terminalState->sendCursorCommand(VTTS_CURSOR_LEFT, extTerminal);
 			}
 			else if (sym == SDLK_F1)
 			{
@@ -439,10 +445,6 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 				{
 					nKey = m_config->getKeyBinding(TERM_KEYMOD_FN, c[0]);
 				}
-				else if ((mod & KMOD_ALT) == 0 && m_keyMod == TERM_KEYMOD_ALT)
-				{
-					nKey = m_config->getKeyBinding(TERM_KEYMOD_ALT, c[0]);
-				}
 				else if ((mod & KMOD_SHIFT) == 0 && m_keyMod == TERM_KEYMOD_SHIFT)
 				{
 					nKey = m_config->getKeyBinding(TERM_KEYMOD_SHIFT, c[0]);
@@ -478,6 +480,8 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 
 				if (bPrint)
 				{
+					if ((mod & KMOD_ALT) == 0 && m_keyMod == TERM_KEYMOD_ALT)
+						extTerminal->insertData("\x1b", 1);
 					extTerminal->insertData(c, 1);
 				}
 			}
