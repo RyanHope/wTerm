@@ -12,10 +12,11 @@ Features
 --------
 
 * Hardware accelerated with OpenGL
-* Custom 74 key virtual keyboard (portrait and landscape versions)
-* Customizable font size
-* Selectable color schemes
-* Custom color scheme
+* Custom virtual keyboard
+* Customizable virtual keyboard layout (coming soon)
+* Customizable font sizes
+* Customizable color schemes
+* Customizable key bindings
 
 Contributors
 ------------
