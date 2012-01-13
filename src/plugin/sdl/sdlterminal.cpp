@@ -82,6 +82,20 @@ SDLTerminal::SDLTerminal()
 	for (int i = 0; i < colorCount && i < mcolorCount; ++i)
 		m_colors[i] = defaultColors[i];
 
+	m_keys.clear();
+	m_keys.push_back("\033OP");
+	m_keys.push_back("\033OQ");
+	m_keys.push_back("\033OR");
+	m_keys.push_back("\033OS");
+	m_keys.push_back("\033[15~");
+	m_keys.push_back("\033[17~");
+	m_keys.push_back("\033[18~");
+	m_keys.push_back("\033[19~");
+	m_keys.push_back("\033[20~");
+	m_keys.push_back("\033[21~");
+	m_keys.push_back("\033[23~");
+	m_keys.push_back("\033[24~");
+
 	m_config->parse("./terminal.config");
 
 	initCharsets();
@@ -348,51 +362,51 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			}
 			else if (sym == SDLK_F1)
 			{
-				extTerminal->insertData("\033OP\0", 4);
+				extTerminal->insertData(m_keys[TS_INPUT_F1].c_str(),1);
 			}
 			else if (sym == SDLK_F2)
 			{
-				extTerminal->insertData("\033OQ\0", 4);
+				extTerminal->insertData(m_keys[TS_INPUT_F2].c_str(),1);
 			}
 			else if (sym == SDLK_F3)
 			{
-				extTerminal->insertData("\033OR\0", 4);
+				extTerminal->insertData(m_keys[TS_INPUT_F3].c_str(),1);
 			}
 			else if (sym == SDLK_F4)
 			{
-				extTerminal->insertData("\033OS\0", 4);
+				extTerminal->insertData(m_keys[TS_INPUT_F4].c_str(),1);
 			}
 			else if (sym == SDLK_F5)
 			{
-				extTerminal->insertData("\033[15~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F5].c_str(),1);
 			}
 			else if (sym == SDLK_F6)
 			{
-				extTerminal->insertData("\033[17~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F6].c_str(),1);
 			}
 			else if (sym == SDLK_F7)
 			{
-				extTerminal->insertData("\033[18~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F7].c_str(),1);
 			}
 			else if (sym == SDLK_F8)
 			{
-				extTerminal->insertData("\033[19~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F8].c_str(),1);
 			}
 			else if (sym == SDLK_F9)
 			{
-				extTerminal->insertData("\033[20~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F9].c_str(),1);
 			}
 			else if (sym == SDLK_F10)
 			{
-				extTerminal->insertData("\033[21~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F10].c_str(),1);
 			}
 			else if (sym == SDLK_F11)
 			{
-				extTerminal->insertData("\033[23~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F11].c_str(),1);
 			}
 			else if (sym == SDLK_F12)
 			{
-				extTerminal->insertData("\033[24~\0", 5);
+				extTerminal->insertData(m_keys[TS_INPUT_F12].c_str(),1);
 			}
 			else if (sym == SDLK_RETURN)
 			{
@@ -715,6 +729,10 @@ TerminalState *SDLTerminal::getTerminalState()
 SDL_Color SDLTerminal::getColor(TSColor_t color)
 {
 	return m_colors[color];
+}
+
+void SDLTerminal::setKey(TSInput_t key, const char *cmd) {
+	m_keys[key] = std::string(cmd);
 }
 
 void SDLTerminal::setColor(TSColor_t color, int r, int g, int b)

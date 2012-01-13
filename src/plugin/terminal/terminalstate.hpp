@@ -135,6 +135,23 @@ typedef enum
 
 typedef enum
 {
+	TS_INPUT_F1 = 0,
+	TS_INPUT_F2,
+	TS_INPUT_F3,
+	TS_INPUT_F4,
+	TS_INPUT_F5,
+	TS_INPUT_F6,
+	TS_INPUT_F7,
+	TS_INPUT_F8,
+	TS_INPUT_F9,
+	TS_INPUT_F10,
+	TS_INPUT_F11,
+	TS_INPUT_F12,
+	TS_INPUT_MAX
+} TSInput_t;
+
+typedef enum
+{
 	TS_CS_NONE = 0,
 	TS_CS_G0_UK,
 	TS_CS_G0_ASCII,
