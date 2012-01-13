@@ -20,6 +20,7 @@ Features
 Contributors
 ------------
 
+* Stefan Bühler
 * Will Dietz
 * Ryan Hope (Project Lead)
 * Brian Kearney
