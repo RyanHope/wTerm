@@ -60,9 +60,9 @@ enyo.kind({
 		var key = inSender.symbols[0][1];
   		if (key != null) {
   			if (typeof key == 'number') {
-  				this.modstate = this.terminal.keyDown(key, null)
+  				this.modstate = this.terminal.keyUp(key, null)
   			} else if (typeof key == 'string') {
-  				this.modstate = this.terminal.keyDown(null, key)
+  				this.modstate = this.terminal.keyUp(null, key)
   			}
   		}
   		this.log('Modstate: '+ this.modstate)
