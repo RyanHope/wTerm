@@ -320,29 +320,6 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 
 	switch (event.type)
 	{
-		case SDL_KEYUP:
-			//Toggle modifiers.
-			if (sym == SDLK_RSHIFT || sym == SDLK_LSHIFT)
-			{
-				toggleKeyMod(TERM_KEYMOD_SHIFT);
-				redraw();
-			}
-			else if (sym == SDLK_RCTRL || sym == SDLK_LCTRL)
-			{
-				toggleKeyMod(TERM_KEYMOD_CTRL);
-				redraw();
-			}
-			else if (sym == SDLK_RALT || sym == SDLK_LALT)
-			{
-				toggleKeyMod(TERM_KEYMOD_ALT);
-				redraw();
-			}
-			else if (sym == SDLK_MODE)
-			{
-				toggleKeyMod(TERM_KEYMOD_FN);
-				redraw();
-			}
-			break;
 		case SDL_KEYDOWN:
 			if (sym == SDLK_UP)
 			{
