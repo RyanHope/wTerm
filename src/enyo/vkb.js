@@ -79,9 +79,10 @@ enyo.kind({
 		else
 			this.keyDown(inSender)
 	},
-  	
-  	keyUp: function(inSender) {
-  		var key = inSender.symbols[0][1];
+	
+	processKey: function(inSender) {
+		var ret = [null,null]
+		var key = inSender.symbols[0][1];
 		if (!inSender.modifier) {
 			if (this.modstate & this.KMOD_LSHIFT || this.modstate & this.KMOD_CAPS) {
 				if (inSender.symbols.length == 1)
@@ -92,30 +93,22 @@ enyo.kind({
 		}
   		if (key != null) {
   			if (typeof key == 'number') {
-  				this.modstate = this.terminal.keyUp(key, null)
+  				ret[0] = key
   			} else if (typeof key == 'string') {
-  				this.modstate = this.terminal.keyUp(null, key)
+  				ret[1] = key
   			}
   		}
+  		return ret
+	},
+  	
+  	keyUp: function(inSender) {
+  		var info = this.processKey(inSender)
+  		this.modstate = this.terminal.keyUp(info[0], info[1])
   	},
   	
   	keyDown: function(inSender) {
-  		var key = inSender.symbols[0][1];
-		if (!inSender.modifier) {
-			if (this.modstate & this.KMOD_LSHIFT || this.modstate & this.KMOD_CAPS) {
-				if (inSender.symbols.length == 1)
-					key = inSender.symbols[0][1].toUpperCase();
-				else if (inSender.symbols.length > 1)
-					key = inSender.symbols[1][1];
-			}
-		}
-  		if (key != null) {
-  			if (typeof key == 'number') {
-  				this.modstate = this.terminal.keyDown(key, null)
-  			} else if (typeof key == 'string') {
-  				this.modstate = this.terminal.keyDown(null, key)
-  			}
-  		}
+  		var info = this.processKey(inSender)
+  		this.modstate = this.terminal.keyDown(info[0], info[1])
   	}
 	
 })
