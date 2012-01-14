@@ -92,6 +92,13 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 	return PDL_TRUE;
 }
 
+PDL_bool cancelKeyRepeat(PDL_JSParameters *params) {
+
+	sdlTerminal->stopKeyRepeat();
+
+	return PDL_TRUE;
+}
+
 int main(int argc, const char* argv[])
 {
 
@@ -112,6 +119,8 @@ int main(int argc, const char* argv[])
 	PDL_RegisterJSHandler("getDimensions", getDimensions);
 	PDL_RegisterJSHandler("getFontSize", getFontSize);
 	PDL_RegisterJSHandler("setFontSize", setFontSize);
+	PDL_RegisterJSHandler("cancelKeyRepeat", cancelKeyRepeat);
+	
 
 	PDL_JSRegistrationComplete();
 	PDL_CallJS("ready", NULL, 0);

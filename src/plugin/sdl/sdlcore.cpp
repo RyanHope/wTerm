@@ -241,6 +241,7 @@ void SDLCore::eventLoop()
 	Uint32 lDelay;
 
 	while (isRunning()) {
+		// If a key repeat event is not active:
 		// Block for an event, and then handle all queued events.
 		// This is important since input events (particularly mouse events)
 		// shouldn't be synchronous with a redraw but especially because various
@@ -257,9 +258,8 @@ void SDLCore::eventLoop()
 		else
 			gotEvent = SDL_PollEvent(&event);
 
-		if (gotEvent)
+		while (gotEvent)
 		{
-		do {
 			switch (event.type)
 			{
 				case SDL_MOUSEMOTION:
@@ -291,7 +291,7 @@ void SDLCore::eventLoop()
 				default:
 					break;
 			}
-		} while (SDL_PollEvent(&event));
+			gotEvent = SDL_PollEvent(&event);
 		}
 		checkKeyRepeat();
 		
@@ -753,6 +753,11 @@ void SDLCore::resetGlyphCache()
 	setupFontGL(nFonts, (TTF_Font**)fnts, nCols, (SDL_Color*)&cols);
 }
 
+void SDLCore::stopKeyRepeat()
+{
+	m_keyRepeat.timestamp = 0;
+	return;
+}
 // pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
 void SDLCore::checkKeyRepeat()
 {

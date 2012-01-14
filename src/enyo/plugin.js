@@ -59,6 +59,9 @@ enyo.kind({
   		this.$.plugin.setHeight(height)
   	},
   	
+	cancelKeyRepeat: function() {
+		this.$.plugin.callPluginMethod('cancelKeyRepeat')
+	},
   	getDimensions: function() {
   		return enyo.json.parse(this.$.plugin.callPluginMethod('getDimensions'))
   	},

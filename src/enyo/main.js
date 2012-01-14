@@ -14,7 +14,7 @@ enyo.kind({
 			{name: 'vkbToggle', caption: "Hide Virtual Keyboard", onclick: 'toggleVKB'},
 			{caption: "Preferences", onclick: "openPrefs"}
 		]},
-		{kind: "ApplicationEvents", onWindowRotated: "setup"},
+		{kind: "ApplicationEvents", onWindowRotated: "setup", onWindowDeactivated: "cancelKeyRepeat", onBack: "logtestb"},
 		{
 			kind: 'Popup2',
 			name: 'about',
@@ -132,6 +132,10 @@ enyo.kind({
 			else
 				this.$.terminal.resize(window.innerWidth, window.innerHeight)
 		}
+	},
+
+	cancelKeyRepeat: function() {
+		this.$.terminal.cancelKeyRepeat();
 	}
 
 })

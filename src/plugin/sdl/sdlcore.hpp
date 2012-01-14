@@ -145,6 +145,7 @@ public:
 
 	virtual void updateDisplaySize();
 
+	void stopKeyRepeat();
 	void fakeKeyEvent(SDL_Event &event);
 };
 
