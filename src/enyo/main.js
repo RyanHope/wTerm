@@ -59,8 +59,6 @@ enyo.kind({
 		this.$.prefs.terminal = this.$.terminal
 		this.$.prefs.vkb = this.$.vkb
 		this.setup()
-		// fix the keyboard if orientation is locked
-		this.$.getPreferencesCall.call({"keys":["rotationLock"]});
 	},
 
 	prefCallSuccess: function(inSender, inResponse) {
@@ -132,6 +130,8 @@ enyo.kind({
 			else
 				this.$.terminal.resize(window.innerWidth, window.innerHeight)
 		}
+		// fix the keyboard if orientation is locked
+		this.$.getPreferencesCall.call({"keys":["rotationLock"]});
 	}
 
 })
