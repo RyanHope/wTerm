@@ -5,11 +5,7 @@ enyo.kind({
   	flex: 1,
   	width: '100%',
   	
-	shift: 1,
-	ctrl: 2,
-	alt: 4,
-	fn: 8,
-	caps: 16,
+	modstate: 0,
   	
   	published: {
 		terminal: null,
@@ -64,24 +60,24 @@ enyo.kind({
 		var key = inSender.symbols[0][1];
   		if (key != null) {
   			if (typeof key == 'number') {
-  				this.log('Modifier: '+ inSender.symbols[0][0])
-  				this.terminal.keyDown(key, null)
+  				this.modstate = this.terminal.keyDown(key, null)
   			} else if (typeof key == 'string') {
-  				this.terminal.keyDown(null, key)
+  				this.modstate = this.terminal.keyDown(null, key)
   			}
   		}
+  		this.log('Modstate: '+ this.modstate)
   	},
   	
   	keyDown: function(inSender) {
   		var key = inSender.symbols[0][1];
   		if (key != null) {
   			if (typeof key == 'number') {
-  				this.log('Modifier: '+ inSender.symbols[0][0])
-  				this.terminal.keyDown(key, null)
+  				this.modstate = this.terminal.keyDown(key, null)
   			} else if (typeof key == 'string') {
-  				this.terminal.keyDown(null, key)
+  				this.modstate = this.terminal.keyDown(null, key)
   			}
   		}
+  		this.log('Modstate: '+ this.modstate)
   	}
 	
 })

@@ -45,7 +45,7 @@ enyo.kind({
   	},
 
   	pushKeyEvent: function(type,state,sym,unicode) {
-  		this.$.plugin.callPluginMethod('pushKeyEvent',type,state,sym,unicode)
+  		return this.$.plugin.callPluginMethod('pushKeyEvent',type,state,sym,unicode)
   	},
   	keyDown: function(sym,unicode) {
   		this.pushKeyEvent(1,sym,unicode)

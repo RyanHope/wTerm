@@ -83,12 +83,16 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 
 	event.type = type ? SDL_KEYDOWN : SDL_KEYUP;
 	event.key.type = type ? SDL_KEYDOWN : SDL_KEYUP;
-	event.key.state = type ? SDL_PRESSED : SDL_RELEASED;
-	event.key.keysym.mod = SDL_GetModState();
 	event.key.keysym.sym = (SDLKey)PDL_GetJSParamInt(params, 1);
 	event.key.keysym.unicode = PDL_GetJSParamString(params, 2)[0];
 
 	sdlTerminal->fakeKeyEvent(event);
+
+	char *reply = 0;
+	asprintf(&reply, "%d", SDL_GetModState());
+	syslog(LOG_ERR, "MODSTATE: %s", reply);
+	PDL_JSReply(params, reply);
+	free(reply);
 
 	return PDL_TRUE;
 }
