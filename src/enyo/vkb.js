@@ -42,7 +42,7 @@ enyo.kind({
 				comps = [];
 				for (j = 0; j < row.length; j++) {
 					e = row[j];
-					if (e.content) {
+					if (e.content || e.symbols) {
 						c = enyo.mixin({kind: 'vkbKey', className: '', ontouchstart: 'keyDown', ontouchend: 'keyUp'}, e);
 					} else {
 						c = enyo.mixin({className: ''}, e); /* simple flex or custom */
@@ -61,11 +61,27 @@ enyo.kind({
 	},
   	
   	keyUp: function(inSender) {
-		this.terminal.keyUp(inSender.sym, null)
+		var key = inSender.symbols[0][1];
+  		if (key != null) {
+  			if (typeof key == 'number') {
+  				this.log('Modifier: '+ inSender.symbols[0][0])
+  				this.terminal.keyDown(key, null)
+  			} else if (typeof key == 'string') {
+  				this.terminal.keyDown(null, key)
+  			}
+  		}
   	},
   	
   	keyDown: function(inSender) {
-		this.terminal.keyDown(inSender.sym, inSender.unicode)
+  		var key = inSender.symbols[0][1];
+  		if (key != null) {
+  			if (typeof key == 'number') {
+  				this.log('Modifier: '+ inSender.symbols[0][0])
+  				this.terminal.keyDown(key, null)
+  			} else if (typeof key == 'string') {
+  				this.terminal.keyDown(null, key)
+  			}
+  		}
   	}
 	
 })
