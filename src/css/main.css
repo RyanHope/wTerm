@@ -1,112 +1,134 @@
+/* Base */
 .vkb .key {
 	margin: 1px;
 	padding: 0px;
 	font-weight: 700;
 }
-
 .vkb.small .key {
 	height: 37px;
 	width: 43px;
 	font-size: 60%;
 }
-
-.vkb.small .key.spacebar {
-	width: 320px;
+.vkb.large .key {
+	height: 58px;
+	width: 66px;
 }
 
-.vkb .key.small.escape {
-	background-color: #D2FFD6;
+/* Function Keys */
+.vkb .functionPadding {
+	height: 3px;
 }
-
-.vkb.small .key.alt {
-	width: 52px;
-}
-
-.vkb.small .key.meta {
-	width: 52px;
-}
-
-.vkb.small .key.ctrl-left {
-	width: 62px;
-}
-
-.vkb .key.arrow {
-	background-color: #FFFBD2;
-}
-.vkb.small .key.arrow {
-	width: 50px;
-}
-
-.vkb.small .key.shift-left {
-	width: 90px;
-}
-
 .vkb .key.small {
 	background-color: #FFD2F5;
 }
 .vkb.small .key.small {
 	height: 13px;
 }
+.vkb.large .key.small {
+	height: 29px;
+}
+
+/* Escape */
+.vkb .key.small.escape {
+	background-color: #D2FFD6;
+}
+
+/* Enter */
+.vkb.small .key.enter {
+	width: 80px;
+}
+.vkb.large .key.enter {
+	width: 158px;
+}
+
+/* Backspace */
+.vkb .key.backspace {
+	background-color: #FFFBD2;
+}
+.vkb.small .key.backspace {
+	width: 66px;
+}
+.vkb.large .key.backspace {
+	width: 138px;
+}
+
+/* Arrows */
+.vkb .key.arrow {
+	background-color: #FFFBD2;
+}
+/*.vkb.small .key.arrow {
+	width: 50px;
+}
+.vkb.large .key.arrow {
+	width: 68px;
+}*/
+
+/* Shift */
+.vkb .key.shift-left {
+	background-color: #D0D0D0;
+}
+.vkb.small .key.shift-left {
+	width: 90px;
+}
+.vkb.large .key.shift-left {
+	width: 138px;
+}
+
+/* Caps */
+.vkb .key.caps {
+	background-color: #D0D0D0;
+}
+.vkb.small .key.caps {
+	width: 80px;
+}
+.vkb.large .key.caps {
+	width: 114px;
+}
+
+/* Spacebar */
+.vkb.small .key.spacebar {
+	width: 320px;
+}
+.vkb.large .key.spacebar {
+	width: 412px;
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+.vkb.large .key.slash {
+	width: 110px;
+}
+
+.vkb.small .key.mod {
+	width: 52px;
+}
+.vkb.large .key.mod {
+	width: 79px;
+}
+
 
 .vkb.small .key.tab {
 	width: 66px;
 }
-
-.vkb.small .key.backspace {
-	width: 66px;
-}
-
-.vkb.small .key.enter {
-	width: 80px;
-}
-
-.vkb.small .key.caps {
-	width: 80px;
-}
-
-.vkb.large .key {
-	height: 50px;
-	width: 60px;
-}
-
-.vkb.large .key.arrow {
-	width: 70px;
-}
-
-.vkb .key.backspace {
-	background-color: #FFFBD2;
-}
-.vkb.large .key.backspace {
-	width: 100px;
-}
-
 .vkb.large .key.tab {
-	width: 100px;
+	width: 94px;
 }
 
-.vkb.large .key.enter {
-	width: 112px;
-}
-
-.vkb .key.caps {
+.vkb .key.mod.ctrl {
 	background-color: #D0D0D0;
 }
-.vkb.large .key.caps {
-	width: 120px;
+.vkb .key.mod.fn {
+	background-color: #D2D2FF;
+	color: #0000FF;
 }
-
-.vkb .key.shift-left {
+.vkb .key.mod.alt {
 	background-color: #D0D0D0;
 }
-.vkb.large .key.shift-left {
-	width: 140px;
+.vkb .key.mod.meta {
+	background-color: #D2D2FF;
 }
-
-.vkb .key.ctrl-left {
-	background-color: #D0D0D0;
-}
-.vkb.large .key.ctrl-left {
-	width: 100px;
+.vkb .key.mod.super {
+	background-color: #D2D2FF;
 }
 
 .vkb .fnBind {
@@ -114,44 +136,6 @@
 	font-size: 80%;
 	font-weight: 100;
 }
-
-.vkb .key.fn {
-	background-color: #D2D2FF;
-	color: #0000FF;
-}
-.vkb.small .key.fn {
-	width: 52px;
-}
-.vkb.large .key.fn {
-	width: 72px;
-}
-
-.vkb .key.alt {
-	background-color: #D0D0D0;
-}
-.vkb.large .key.alt {
-	width: 72px;
-}
-
-.vkb .key.meta {
-	background-color: #D2D2FF;
-}
-.vkb.large .key.meta {
-	width: 72px;
-}
-
-.vkb.large .key.spacebar {
-	width: 418px;
-}
-
-.vkb.large .key.small {
-	height: 22px;
-}
-
-.vkb.large .functionPadding {
-	height: 2px;
-}
-
 .vkb.large .keyImg {
 	height: 24px;
 }

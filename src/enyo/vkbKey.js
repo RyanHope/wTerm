@@ -3,6 +3,9 @@ enyo.kind({
 	kind: enyo.Button,
 	className: '',
 	allowHtml: true,
+	layoutKind: 'HFlexLayout',
+	pack: 'center',
+	align: 'center',
 	
 	published: {
 		down: false,
@@ -10,6 +13,7 @@ enyo.kind({
 		toggling: false,
 		disabled: false,
 		sym: -1,
+		symbols: null
 	},
 	
 	events: {
@@ -22,6 +26,50 @@ enyo.kind({
 		this.addClass('enyo-button');
 		this.addClass('key');
 	},
+	
+	initComponents: function() {
+    	this.inherited(arguments)
+    	if (this.symbols) {
+	    	switch(this.symbols.length) {
+	    		case 1:
+	    			this.createComponents([
+	    				{flex: 1, content: this.symbols[0][0]}
+    				]);
+	    			break;
+	    		case 2:
+	    			this.createComponents([
+	    				{flex: 1, kind: 'VFlexBox', components: [
+	    					{content: this.symbols[1][0]},
+	    					{content: this.symbols[0][0]},
+	    				]}
+	    			]);
+	    			break;
+	    		case 3:
+	    			this.createComponents([
+	    				{flex: 1, kind: 'VFlexBox', components: [
+	    					{content: this.symbols[1][0]},
+	    					{content: this.symbols[0][0]},
+	    				]},
+	    				{flex: 1, kind: 'VFlexBox', pack: 'start', components: [
+	    					{content: this.symbols[2][0], flex: 1}
+	    				]},
+    				]);
+	    			break;
+	    		case 4:
+	    			this.createComponents([
+	    				{flex: 1, kind: 'VFlexBox', components: [
+	    					{content: this.symbols[1][0]},
+	    					{content: this.symbols[0][0]},
+	    				]},
+	    				{flex: 1, kind: 'VFlexBox', components: [
+	    					{content: this.symbols[3][0]},
+	    					{content: this.symbols[2][0]}
+	    				]}
+    				]);
+	    			break;
+	    	}
+	    }
+   	},
 
   	rendered: function() {
 		this.inherited(arguments);

@@ -758,6 +758,7 @@ void SDLCore::stopKeyRepeat()
 	m_keyRepeat.timestamp = 0;
 	return;
 }
+
 // pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
 void SDLCore::checkKeyRepeat()
 {
@@ -794,26 +795,28 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 {
 	int repeatable = 0;
 	Uint16 modstate;
+	Uint8 state;
 
 	modstate = (Uint16)SDL_GetModState();
 
 	if (event.type == SDL_KEYDOWN) 
 	{
+		state = SDL_PRESSED;
 		event.key.keysym.mod = (SDLMod)modstate;
 		switch (event.key.keysym.sym) 
 		{
 			case SDLK_UNKNOWN:
 				break;
-/*			case SDLK_NUMLOCK:
+			case SDLK_NUMLOCK:
 				modstate ^= KMOD_NUM;
 				if ( ! (modstate&KMOD_NUM) )
 					state = SDL_RELEASED;
-				keysym->mod = (SDLMod)modstate;
+				event.key.keysym.mod = (SDLMod)modstate;
 				break;
-*/			case SDLK_CAPSLOCK:
+			case SDLK_CAPSLOCK:
 				modstate ^= KMOD_CAPS;
-//				if ( ! (modstate&KMOD_CAPS) )
-//					state = SDL_RELEASED;
+				if ( ! (modstate&KMOD_CAPS) )
+					state = SDL_RELEASED;
 				event.key.keysym.mod = (SDLMod)modstate;
 				break;
 			case SDLK_LCTRL:
@@ -850,6 +853,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 	} 
 	else  // key up
 	{
+		state = SDL_RELEASED;
 		switch (event.key.keysym.sym) 
 		{
 			case SDLK_UNKNOWN:
@@ -894,11 +898,12 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 	if (event.key.keysym.sym != SDLK_UNKNOWN) 
 	{
 		/* Drop events that don't change state */
-		//if ( SDL_KeyState[keysym->sym] == state )
-			//return;
+		Uint8 *keyState = SDL_GetKeyState(NULL);
+		if (keyState[event.key.keysym.sym] == state)
+			return;
 
 		/* Update internal keyboard state */
-		//SDL_KeyState[keysym->sym] = state;
+		keyState[event.key.keysym.sym] = state;
 		SDL_SetModState((SDLMod)modstate);
 	}
 
@@ -920,6 +925,6 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 //			syslog(LOG_ERR, "Added Repeat Event");
 		}
 	}
+
 	SDL_PushEvent(&event);
 }
-

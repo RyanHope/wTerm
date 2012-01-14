@@ -45,13 +45,13 @@ enyo.kind({
   	},
 
   	pushKeyEvent: function(type,state,sym,unicode) {
-  		this.$.plugin.callPluginMethod('pushKeyEvent',type,state,sym,unicode)
+  		return parseInt(this.$.plugin.callPluginMethod('pushKeyEvent',type,state,sym,unicode))
   	},
   	keyDown: function(sym,unicode) {
-  		this.pushKeyEvent(1,sym,unicode)
+  		return this.pushKeyEvent(1,sym,unicode)
   	},
   	keyUp: function(sym,unicode) {
-  		this.pushKeyEvent(0,sym,unicode)
+  		return this.pushKeyEvent(0,sym,unicode)
   	},
   	
   	resize: function(width, height) {
