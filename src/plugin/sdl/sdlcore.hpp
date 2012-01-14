@@ -129,6 +129,8 @@ public:
 	virtual SDL_Color getColor(TSColor_t color);
 	virtual void redraw();
 	virtual void updateDisplaySize();
+
+	void fakeKeyEvent(SDL_Event &event);
 };
 
 #endif
