@@ -14,7 +14,7 @@ enyo.kind({
 			{name: 'vkbToggle', caption: "Hide Virtual Keyboard", onclick: 'toggleVKB'},
 			{caption: "Preferences", onclick: "openPrefs"}
 		]},
-		{kind: "ApplicationEvents", onWindowRotated: "setup", onWindowDeactivated: "cancelKeyRepeat", onBack: "logtestb"},
+		{kind: "ApplicationEvents", onWindowRotated: "setup", onWindowDeactivated: "cancelKeyRepeat"},
 		{
 			kind: 'Popup2',
 			name: 'about',
