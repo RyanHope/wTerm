@@ -806,6 +806,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 		switch (event.key.keysym.sym) 
 		{
 			case SDLK_UNKNOWN:
+				repeatable = 1;
 				break;
 			case SDLK_NUMLOCK:
 				modstate ^= KMOD_NUM;
