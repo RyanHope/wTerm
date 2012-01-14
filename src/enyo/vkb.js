@@ -82,19 +82,32 @@ enyo.kind({
   	
   	keyUp: function(inSender) {
   		var key = inSender.symbols[0][1];
-  		if (inSender.modifier && typeof key == 'number') {
-			this.modstate = this.terminal.keyUp(key, null)
+		if (!inSender.modifier) {
+			if (this.modstate & this.KMOD_LSHIFT || this.modstate & this.KMOD_CAPS) {
+				if (inSender.symbols.length == 1)
+					key = inSender.symbols[0][1].toUpperCase();
+				else if (inSender.symbols.length > 1)
+					key = inSender.symbols[1][1];
+			}
+		}
+  		if (key != null) {
+  			if (typeof key == 'number') {
+  				this.modstate = this.terminal.keyUp(key, null)
+  			} else if (typeof key == 'string') {
+  				this.modstate = this.terminal.keyUp(null, key)
+  			}
   		}
-  		this.log('Modstate: '+ this.modstate)
   	},
   	
   	keyDown: function(inSender) {
   		var key = inSender.symbols[0][1];
-		if (!inSender.modifier && (this.modstate & this.KMOD_LSHIFT || this.modstate & this.KMOD_CAPS)) {
-			if (inSender.symbols.length == 1)
-				key = inSender.symbols[0][1].toUpperCase();
-			else if (inSender.symbols.length > 1)
-				key = inSender.symbols[1][1];
+		if (!inSender.modifier) {
+			if (this.modstate & this.KMOD_LSHIFT || this.modstate & this.KMOD_CAPS) {
+				if (inSender.symbols.length == 1)
+					key = inSender.symbols[0][1].toUpperCase();
+				else if (inSender.symbols.length > 1)
+					key = inSender.symbols[1][1];
+			}
 		}
   		if (key != null) {
   			if (typeof key == 'number') {
@@ -103,7 +116,6 @@ enyo.kind({
   				this.modstate = this.terminal.keyDown(null, key)
   			}
   		}
-  		this.log('Modstate: '+ this.modstate)
   	}
 	
 })
