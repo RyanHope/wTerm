@@ -14,7 +14,7 @@ enyo.kind({
 			{name: 'vkbToggle', caption: "Hide Virtual Keyboard", onclick: 'toggleVKB'},
 			{caption: "Preferences", onclick: "openPrefs"}
 		]},
-		{kind: "ApplicationEvents", onWindowRotated: "setup"},
+		{kind: "ApplicationEvents", onWindowRotated: "setup", onKeydown: "onBtKeyDown"},
 		{
 			kind: 'Popup2',
 			name: 'about',
@@ -131,6 +131,14 @@ enyo.kind({
 				this.$.terminal.resize(window.innerWidth, 722)
 			else
 				this.$.terminal.resize(window.innerWidth, window.innerHeight)
+		}
+	},
+
+	onBtKeyDown: function(context, event) {
+		if (this.$.terminal.$.plugin.hasNode())
+		{
+			this.$.terminal.$.plugin.node.focus();
+			this.$.terminal.$.plugin.node.dispatchEvent(event);
 		}
 	}
 
