@@ -25,6 +25,7 @@ enyo.kind({
 			onPluginReady: 'pluginReady',
 			onPluginConnected: 'pluginConnected',
 			onPluginDisconnected: 'pluginDisconnected',
+			allowKeyboardFocus: true,
 			width: this.width,
 			height: this.height,
 			params: [this.prefs.get('fontSize').toString(10)]
