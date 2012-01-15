@@ -82,12 +82,12 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 	event.type = PDL_GetJSParamInt(params, 0) ? SDL_KEYDOWN : SDL_KEYUP;
 	event.key.type = event.type;
 	event.key.keysym.sym = (SDLKey)PDL_GetJSParamInt(params, 1);
+	event.key.keysym.unicode = PDL_GetJSParamString(params, 2)[0];
 
 	sdlTerminal->fakeKeyEvent(event);
 
 	char *reply = 0;
 	asprintf(&reply, "%d", SDL_GetModState());
-	syslog(LOG_ERR, "MODSTATE: %s", reply);
 	PDL_JSReply(params, reply);
 	free(reply);
 
@@ -130,8 +130,6 @@ int main(int argc, const char* argv[])
 
 			sdlTerminal->setExtTerminal(terminal);
 			terminal->setExtTerminal(sdlTerminal);
-
-			sdlTerminal->FB_vgainitkeymaps();
 
 			sdlTerminal->run(); //Blocking.
 		}

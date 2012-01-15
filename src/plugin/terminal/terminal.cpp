@@ -282,6 +282,8 @@ int Terminal::sendCommand(const char *command)
 	unsigned bytes = strlen(command);
 	const char * buf = command;
 
+	syslog(LOG_DEBUG, "%d %s", bytes, buf);
+
 	while(bytes)
 	{
 		FD_ZERO(&writeFDSet);
@@ -440,7 +442,7 @@ void Terminal::flushOutputBuffer()
 			m_dataBuffer->copy(tmp, m_dataBuffer->size());
 			m_dataBuffer->clear();
 
-			getExtTerminal()->insertData(tmp, nTmpSize);
+			getExtTerminal()->insertData(tmp);
 
 			free(tmp);
 		}
@@ -602,21 +604,9 @@ int Terminal::setRaw()
 	return 0;
 }
 
-void Terminal::insertData(const char *data, size_t size)
+void Terminal::insertData(const char *data)
 {
-	if (size > 0)
-	{
-		/*
-		printf("Send command: ");
-		for (int i=0; i<strlen(data); i++)
-		{
-			printf("[%d]'%c'", data[i], data[i]);
-		}
-		printf("\n");
-		*/
-
-		sendCommand(data);
-	}
+	sendCommand(data);
 }
 
 const char *Terminal::getUser()

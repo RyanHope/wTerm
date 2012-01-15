@@ -27,12 +27,6 @@
 #include "terminal/vtterminalstate.hpp"
 #include "sdlfontgl.h"
 
-#include <linux/vt.h>
-#include <linux/kd.h>
-#include <linux/keyboard.h>
-
-#define NUM_VGAKEYMAPS	(1<<KG_CAPSSHIFT)
-
 /**
  * Initializer and basic 2D function for webOS SDL.
  */
@@ -60,10 +54,6 @@ protected:
 	SDL_RWops *file2;
 	SDL_RWops *file3;
 	SDL_RWops *file4;
-
-	Uint16 vga_keymap[NUM_VGAKEYMAPS][NR_KEYS];
-	SDLKey keymap[128];
-	Uint16 keymap_temp[128]; /* only used at startup */
 
 	pthread_t m_blinkThread;
 	static void *blinkThread(void *ptr);
@@ -141,7 +131,6 @@ public:
 	virtual void updateDisplaySize();
 
 	void fakeKeyEvent(SDL_Event &event);
-	void FB_vgainitkeymaps();
 };
 
 #endif

@@ -735,99 +735,6 @@ void SDLCore::resetGlyphCache()
 	setupFontGL(nFonts, (TTF_Font**)fnts, nCols, (SDL_Color*)&cols);
 }
 
-// pulled from SDL_fbevents.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
-void SDLCore::FB_vgainitkeymaps()
-{
-	int fd, dummy;
-
-	fd = open("/dev/tty", O_RDWR);
-	if (ioctl(fd, KDGKBMODE, &dummy) < 0 ) {
-		close(fd);
-		syslog(LOG_ERR, "Unable to open a console terminal");
-		return;
-	}
-
-	struct kbentry entry;
-	int map, i, ret;
-
-	// Don't do anything if we are passed a closed keyboard
-	if ( fd < 0 ) {
-		return;
-	}
-
-	syslog(LOG_INFO, "Initializing keymap with FD %d.", fd);
-
-	// Load all the keysym mappings
-	for ( map=0; map<NUM_VGAKEYMAPS; ++map ) {
-		SDL_memset(vga_keymap[map], 0, NR_KEYS*sizeof(Uint16));
-		for ( i=0; i<NR_KEYS; ++i ) {
-			entry.kb_table = map;
-			entry.kb_index = i;
-			if ( (ret=ioctl(fd, KDGKBENT, &entry)) == 0 ) {
-				// fill keytemp. This replaces SDL_fbkeys.h
-				if ( (map == 0) && (i<128) ) {
-					keymap_temp[i] = entry.kb_value;
-				}
-				// The "Enter" key is a special case
-				if ( entry.kb_value == K_ENTER ) {
-					entry.kb_value = K(KT_ASCII,13);
-				}
-				// Handle numpad specially as well
-				if ( KTYP(entry.kb_value) == KT_PAD ) {
-					switch ( entry.kb_value ) {
-					case K_P0:
-					case K_P1:
-					case K_P2:
-					case K_P3:
-					case K_P4:
-					case K_P5:
-					case K_P6:
-					case K_P7:
-					case K_P8:
-					case K_P9:
-						vga_keymap[map][i]=entry.kb_value;
-						vga_keymap[map][i]+= '0';
-						break;
-										case K_PPLUS:
-						vga_keymap[map][i]=K(KT_ASCII,'+');
-						break;
-										case K_PMINUS:
-						vga_keymap[map][i]=K(KT_ASCII,'-');
-						break;
-										case K_PSTAR:
-						vga_keymap[map][i]=K(KT_ASCII,'*');
-						break;
-										case K_PSLASH:
-						vga_keymap[map][i]=K(KT_ASCII,'/');
-						break;
-										case K_PENTER:
-						vga_keymap[map][i]=K(KT_ASCII,'\r');
-						break;
-										case K_PCOMMA:
-						vga_keymap[map][i]=K(KT_ASCII,',');
-						break;
-										case K_PDOT:
-						vga_keymap[map][i]=K(KT_ASCII,'.');
-						break;
-					default:
-						break;
-					}
-				}
-				// Do the normal key translation
-				if ( (KTYP(entry.kb_value) == KT_LATIN) ||
-					 (KTYP(entry.kb_value) == KT_ASCII) ||
-					 (KTYP(entry.kb_value) == KT_LETTER) ) {
-					vga_keymap[map][i] = entry.kb_value;
-				}
-			} else {
-				syslog(LOG_ERR, "KEYMAP FAIL: %d", ret);
-			}
-		}
-	}
-
-	close(fd);
-}
-
 // pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
 void SDLCore::fakeKeyEvent(SDL_Event &event)
 {
@@ -938,34 +845,6 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 		Uint8 *keyState = SDL_GetKeyState(NULL);
 		if (keyState[event.key.keysym.sym] == state)
 			return;
-
-		// Translate to Unicode
-		syslog(LOG_INFO, "Attempting to translate fakekey into unicode.");
-		map = 0;
-		if ( modstate & KMOD_SHIFT ) {
-			map |= (1<<KG_SHIFT);
-		}
-		if ( modstate & KMOD_CTRL ) {
-			map |= (1<<KG_CTRL);
-		}
-		if ( modstate & KMOD_LALT ) {
-			map |= (1<<KG_ALT);
-		}
-		if ( modstate & KMOD_RALT ) {
-			map |= (1<<KG_ALTGR);
-		}
-		if ( KTYP(vga_keymap[map][event.key.keysym.sym]) == KT_LETTER ) {
-			if ( modstate & KMOD_CAPS ) {
-				map ^= (1<<KG_SHIFT);
-			}
-		}
-		if ( KTYP(vga_keymap[map][event.key.keysym.sym]) == KT_PAD ) {
-			if ( modstate & KMOD_NUM ) {
-				event.key.keysym.unicode=KVAL(vga_keymap[map][event.key.keysym.sym]);
-			}
-		} else {
-			event.key.keysym.unicode = KVAL(vga_keymap[map][event.key.keysym.sym]);
-		}
 
 		/* Update internal keyboard state */
 		keyState[event.key.keysym.sym] = state;

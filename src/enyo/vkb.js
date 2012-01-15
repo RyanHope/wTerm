@@ -61,7 +61,7 @@ enyo.kind({
 					}
 					if (c.small) c.className += ' small';
 					if (c.extraClasses) c.className += ' ' + c.extraClasses;
-					if (!c.hasOwnProperty('modifier')) c.modifier = 0;
+					if (!c.hasOwnProperty('printable')) c.printable = false;
 					if (!c.hasOwnProperty('unicode') && c.content) c.unicode = c.content.toLowerCase();
 					comps.push(c);
 				}
@@ -80,17 +80,39 @@ enyo.kind({
 			this.keyDown(inSender)
 	},
 	
+	isShift: function() {
+		return ((this.modstate & this.KMOD_LSHIFT) || (this.modstate & this.KMOD_RSHIFT) || (this.modstate & this.KMOD_CAPS))
+	},
+	
 	processKey: function(inSender) {
-		var sym = inSender.symbols[0][1];
-		return sym
+		var sym = null
+		var unicode = null
+		var i = 0
+		if (inSender.printable) {
+			if (this.isShift()) {
+				if (inSender.symbols.length>1)
+					i = 1
+				unicode = inSender.symbols[i][0]
+			} else {
+				unicode = inSender.symbols[i][0].toLocaleLowerCase()
+			}
+			sym = inSender.symbols[i][1];
+		} else {
+			sym = inSender.symbols[i][1]
+		}
+		return [sym, unicode]
 	},
   	
   	keyUp: function(inSender) {
-  		this.modstate = this.terminal.keyUp(this.processKey(inSender))
+  		var k = this.processKey(inSender)
+  		this.modstate = this.terminal.keyUp(k[0], k[1])
+  		this.log('Keypres',0,k[0],k[1],this.modstate)
   	},
   	
   	keyDown: function(inSender) {
-  		this.modstate = this.terminal.keyDown(this.processKey(inSender))
+  		var k = this.processKey(inSender)
+  		this.modstate = this.terminal.keyDown(k[0], k[1])
+  		this.log('Keypres',1,k[0],k[1],this.modstate)
   	}
 	
 })

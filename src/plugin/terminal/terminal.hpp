@@ -70,7 +70,7 @@ public:
 	void setWindowSize(int nWidth, int nHeight);
 	int start();
 
-	void insertData(const char *data, size_t size);
+	void insertData(const char *data);
 
 	const char *getUser();
 	void setUser(const char *sUser);

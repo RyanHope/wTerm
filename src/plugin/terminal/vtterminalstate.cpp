@@ -471,14 +471,14 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			{
 				if (values[i] == 5)
 				{
-					extTerminal->insertData("\x1B[0n", 1);
+					extTerminal->insertData("\x1B[0n");
 				}
 				else if (values[i] == 6)
 				{
 					char buf[32];
 
 					sprintf(buf, "\x1B[%d;%dR", getCursorLocation().getY(), getCursorLocation().getX());
-					extTerminal->insertData(buf, 1);
+					extTerminal->insertData(buf);
 				}
 			}
 		}
@@ -486,24 +486,24 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_DEVICE_ATTR_PRIMARY_REQUEST: //ESC[<Value>c
 	case CS_DEVICE_ATTR_PRIMARY_RESPONSE: //ESC[?6c
 		if (extTerminal != NULL && extTerminal->isReady())
-			extTerminal->insertData("\x1B[?6c", 1);
+			extTerminal->insertData("\x1B[?6c");
 		break;
 	case CS_DEVICE_ATTR_SECONDARY_REQUEST: //ESC[><Value>c
 	case CS_DEVICE_ATTR_SECONDARY_RESPONSE: //ESC[>0;115;0c
 		if (extTerminal != NULL && extTerminal->isReady())
-			extTerminal->insertData("\x1B[>0;115;0c", 1);
+			extTerminal->insertData("\x1B[>0;115;0c");
 		break;
 	case CS_VT52_IDENTIFY:
 		syslog(LOG_ERR, "CS_VT52_IDENTIFY");
-		extTerminal->insertData("\x1B/Z", 1);
+		extTerminal->insertData("\x1B/Z");
 		break;
 	case CS_TERM_PARAM: //ESC[<Value>;...;<Value>x
 		if (values[0]) {
 			unsolicited = false;
-			extTerminal->insertData("\x1B[3;1;1;112,112;1;0x", 1);
+			extTerminal->insertData("\x1B[3;1;1;112,112;1;0x");
 		} else {
 			unsolicited = true;
-			extTerminal->insertData("\x1B[2;1;1;112,112;1;0x", 1);
+			extTerminal->insertData("\x1B[2;1;1;112,112;1;0x");
 		}
 		break;
 	case CS_TERM_RESET: //ESCc
@@ -586,60 +586,60 @@ void VTTerminalState::sendCursorCommand(VTTS_Cursor_t cursor, ExtTerminal *extTe
 		{
 			if (bVT52)
 			{
-				extTerminal->insertData("\033A", 1);
+				extTerminal->insertData("\033A");
 			}
 			else if (!bCursorKeys)
 			{
-				extTerminal->insertData("\x1B[A", 1);
+				extTerminal->insertData("\x1B[A");
 			}
 			else
 			{
-				extTerminal->insertData("\x1BOA", 1);
+				extTerminal->insertData("\x1BOA");
 			}
 		}
 		else if (cursor == VTTS_CURSOR_DOWN)
 		{
 			if (bVT52)
 			{
-				extTerminal->insertData("\033B", 1);
+				extTerminal->insertData("\033B");
 			}
 			else if (!bCursorKeys)
 			{
-				extTerminal->insertData("\x1B[B", 1);
+				extTerminal->insertData("\x1B[B");
 			}
 			else
 			{
-				extTerminal->insertData("\x1BOB", 1);
+				extTerminal->insertData("\x1BOB");
 			}
 		}
 		else if (cursor == VTTS_CURSOR_RIGHT)
 		{
 			if (bVT52)
 			{
-				extTerminal->insertData("\033C", 1);
+				extTerminal->insertData("\033C");
 			}
 			else if (!bCursorKeys)
 			{
-				extTerminal->insertData("\x1B[C", 1);
+				extTerminal->insertData("\x1B[C");
 			}
 			else
 			{
-				extTerminal->insertData("\x1BOC", 1);
+				extTerminal->insertData("\x1BOC");
 			}
 		}
 		else if (cursor == VTTS_CURSOR_LEFT)
 		{
 			if (bVT52)
 			{
-				extTerminal->insertData("\033D", 1);
+				extTerminal->insertData("\033D");
 			}
 			else if (!bCursorKeys)
 			{
-				extTerminal->insertData("\x1B[D", 1);
+				extTerminal->insertData("\x1B[D");
 			}
 			else
 			{
-				extTerminal->insertData("\x1BOD", 1);
+				extTerminal->insertData("\x1BOD");
 			}
 		}
 	}

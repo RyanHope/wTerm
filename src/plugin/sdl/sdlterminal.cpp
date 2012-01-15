@@ -307,7 +307,8 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 	SDLKey sym = event.key.keysym.sym;
 	SDLMod mod = event.key.keysym.mod;
 	Uint16 unicode = event.key.keysym.unicode;
-	char ch;
+
+	char c[2] = { '\0', '\0' };
 
 	ExtTerminal *extTerminal = getExtTerminal();
 
@@ -330,88 +331,110 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 		else if (sym == SDLK_RIGHT)
 		{
 			if (mod & KMOD_MODE)
-				extTerminal->insertData("\x1B[F",1);
+				extTerminal->insertData("\x1B[F");
 			else
 				m_terminalState->sendCursorCommand(VTTS_CURSOR_RIGHT, extTerminal);
 		}
 		else if (sym == SDLK_LEFT)
 		{
 			if (mod & KMOD_MODE)
-				extTerminal->insertData("\x1B[H",1);
+				extTerminal->insertData("\x1B[H");
 			else
 				m_terminalState->sendCursorCommand(VTTS_CURSOR_LEFT, extTerminal);
 		}
+		else if (sym == SDLK_ESCAPE)
+		{
+			extTerminal->insertData("\x1b");
+		}
 		else if (sym == SDLK_F1)
 		{
-			extTerminal->insertData(m_keys[TS_INPUT_F1].c_str(),1);
+			extTerminal->insertData(m_keys[TS_INPUT_F1].c_str());
 		}
 		else if (sym == SDLK_F2)
 		{
-			extTerminal->insertData(m_keys[TS_INPUT_F2].c_str(),1);
+			extTerminal->insertData(m_keys[TS_INPUT_F2].c_str());
 		}
 		else if (sym == SDLK_F3)
 		{
-			extTerminal->insertData(m_keys[TS_INPUT_F3].c_str(),1);
+			extTerminal->insertData(m_keys[TS_INPUT_F3].c_str());
 		}
 		else if (sym == SDLK_F4)
 		{
-			extTerminal->insertData(m_keys[TS_INPUT_F4].c_str(),1);
+			extTerminal->insertData(m_keys[TS_INPUT_F4].c_str());
 		}
 		else if (sym == SDLK_F5)
 		{
-			extTerminal->insertData(m_keys[TS_INPUT_F5].c_str(),1);
+			extTerminal->insertData(m_keys[TS_INPUT_F5].c_str());
 		}
 		else if (sym == SDLK_F6)
 		{
-			extTerminal->insertData(m_keys[TS_INPUT_F6].c_str(),1);
+			extTerminal->insertData(m_keys[TS_INPUT_F6].c_str());
 		}
 		else if (sym == SDLK_F7)
 		{
-			extTerminal->insertData(m_keys[TS_INPUT_F7].c_str(),1);
+			extTerminal->insertData(m_keys[TS_INPUT_F7].c_str());
 		}
 		else if (sym == SDLK_F8)
 		{
-			extTerminal->insertData(m_keys[TS_INPUT_F8].c_str(),1);
+			extTerminal->insertData(m_keys[TS_INPUT_F8].c_str());
 		}
 		else if (sym == SDLK_F9)
 		{
-			extTerminal->insertData(m_keys[TS_INPUT_F9].c_str(),1);
+			extTerminal->insertData(m_keys[TS_INPUT_F9].c_str());
 		}
 		else if (sym == SDLK_F10)
 		{
-			extTerminal->insertData(m_keys[TS_INPUT_F10].c_str(),1);
+			extTerminal->insertData(m_keys[TS_INPUT_F10].c_str());
 		}
 		else if (sym == SDLK_F11)
 		{
-			extTerminal->insertData(m_keys[TS_INPUT_F11].c_str(),1);
+			extTerminal->insertData(m_keys[TS_INPUT_F11].c_str());
 		}
 		else if (sym == SDLK_F12)
 		{
-			extTerminal->insertData(m_keys[TS_INPUT_F12].c_str(),1);
+			extTerminal->insertData(m_keys[TS_INPUT_F12].c_str());
+		}
+		else if (sym == SDLK_TAB)
+		{
+			extTerminal->insertData("\t");
 		}
 		else if (sym == SDLK_RETURN)
 		{
-			syslog(LOG_ERR, "RETURN");
 			if (m_terminalState->getTerminalModeFlags() & TS_TM_NEW_LINE)
-				extTerminal->insertData("\r\n", 2);
+				extTerminal->insertData("\r\n");
 			else
-				extTerminal->insertData("\r", 1);
+				extTerminal->insertData("\r");
 		}
 		else if (sym == SDLK_BACKSPACE)
 		{
-			syslog(LOG_ERR, "BACKSPACE");
 			if (m_terminalState->getTerminalModeFlags() & TS_TM_BACKSPACE)
-				extTerminal->insertData("\x08", 1);
+				extTerminal->insertData("\x08");
 			else
-				extTerminal->insertData("\x7F", 1);
+				extTerminal->insertData("\x7F");
 		}
-		else
+		else if (unicode)
 		{
 			if ((unicode & 0xFF80) == 0) {
-				ch = unicode & 0x7F;
-				syslog(LOG_ERR, "Keyboard Event: %d, %d, %s, %s", sym, mod, SDL_GetKeyName(sym), ch);
+				c[0] = unicode & 0x7F;
+				if (mod & KMOD_CTRL) {
+					if (c[0] > 96 && c[0] < 123)
+						c[0] -= 96;
+					else if (c[0] == 32 || c[0] == 64)
+						c[0] = 0;
+					else if (c[0] == 91)
+						c[0] = 27;
+					else if (c[0] == 92)
+						c[0] = 28;
+					else if (c[0] == 93)
+						c[0] = 29;
+					else if (c[0] == 94)
+						c[0] = 30;
+					else if (c[0] == 95)
+						c[0] = 31;
+				}
+				extTerminal->insertData(c);
 			} else {
-				syslog(LOG_DEBUG, "An International Character.\n");
+				syslog(LOG_INFO, "An International Character.");
 			}
 		}
 		break;
@@ -419,113 +442,6 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 		break;
 	}
 }
-
-/*void SDLTerminal::handleKeyboardEvent_OLD(SDL_Event &event)
-{
-	char c[2] = { '\0', '\0' };
-	int nKey;
-
-
-	bool bPrint = true;
-
-	ExtTerminal *extTerminal = getExtTerminal();
-
-	if (extTerminal == NULL || !extTerminal->isReady())
-	{
-		extTerminal = this;
-	}
-
-	switch (event.type)
-	{
-
-			//Printable characters.
-			else if ((unicode & 0xFF80) == 0 )
-			{
-				nKey = -1;
-				c[0] = (unicode & 0x7F);
-
-				//Screen area takes precedence over Sym key.
-				if (m_bCtrlKeyModHeld || m_keyMod == TERM_KEYMOD_CTRL)
-				{
-					nKey = m_config->getKeyBinding(TERM_KEYMOD_CTRL, c[0]);
-				}
-				else if ((mod & KMOD_MODE) || m_keyMod == TERM_KEYMOD_FN)
-				{
-					nKey = m_config->getKeyBinding(TERM_KEYMOD_FN, c[0]);
-				}
-				else if ((mod & KMOD_SHIFT) == 0 && m_keyMod == TERM_KEYMOD_SHIFT)
-				{
-					nKey = m_config->getKeyBinding(TERM_KEYMOD_SHIFT, c[0]);
-				}
-
-				if (nKey >= 0)
-				{
-					bPrint = false;
-
-					//WASD as arrow keys.
-					if (nKey == SDLK_UP)
-					{
-						m_terminalState->sendCursorCommand(VTTS_CURSOR_UP, extTerminal);
-					}
-					else if (nKey == SDLK_DOWN)
-					{
-						m_terminalState->sendCursorCommand(VTTS_CURSOR_DOWN, extTerminal);
-					}
-					else if (nKey == SDLK_RIGHT)
-					{
-						m_terminalState->sendCursorCommand(VTTS_CURSOR_RIGHT, extTerminal);
-					}
-					else if (nKey == SDLK_LEFT)
-					{
-						m_terminalState->sendCursorCommand(VTTS_CURSOR_LEFT, extTerminal);
-					}
-					else if (nKey < 256)
-					{
-						bPrint = true;
-						c[0] = nKey;
-					}
-				}
-
-				if (bPrint)
-				{
-					if ((mod & KMOD_ALT) == 0 && m_keyMod == TERM_KEYMOD_ALT)
-						extTerminal->insertData("\x1b", 1);
-					extTerminal->insertData(c, 1);
-				}
-			}
-			
-			if (sym == SDLK_RSHIFT || sym == SDLK_LSHIFT || sym == SDLK_RCTRL || sym == SDLK_LCTRL
-				|| sym == SDLK_RALT || sym == SDLK_LALT || sym == SDLK_MODE)
-			{
-				//Holding a key modifier while pressing a key modifier nullifies the current key modifier.
-				if ((mod & KMOD_ALT) || (mod & KMOD_CTRL) || (mod & KMOD_SHIFT) || (mod & KMOD_MODE) || m_bCtrlKeyModHeld)
-				{
-					if (m_keyMod != TERM_KEYMOD_NONE)
-					{
-						disableKeyMod();
-						redraw();
-					}
-
-					m_bKeyModUsed = true;
-				}
-				else
-				{
-					m_bKeyModUsed = false;
-				}
-			}
-			else if (!m_bKeyModLocked)
-			{
-				if (m_keyMod != TERM_KEYMOD_NONE)
-				{
-					disableKeyMod();
-					redraw();
-				}
-
-				m_bKeyModUsed = true;
-			}
-
-	}
-}*/
 
 void SDLTerminal::redraw()
 {
@@ -731,13 +647,10 @@ void SDLTerminal::refresh()
 /**
  * Accepts NULL terminating string.
  */
-void SDLTerminal::insertData(const char *data, size_t size)
+void SDLTerminal::insertData(const char *data)
 {
-	if (size > 0)
-	{
-		m_terminalState->insertString(data, getExtTerminal());
-		refresh();
-	}
+	m_terminalState->insertString(data, getExtTerminal());
+	refresh();
 }
 
 TerminalState *SDLTerminal::getTerminalState()
