@@ -79,12 +79,9 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 
 	SDL_Event event;
 
-	int type = PDL_GetJSParamInt(params, 0);
-
-	event.type = type ? SDL_KEYDOWN : SDL_KEYUP;
-	event.key.type = type ? SDL_KEYDOWN : SDL_KEYUP;
+	event.type = PDL_GetJSParamInt(params, 0) ? SDL_KEYDOWN : SDL_KEYUP;
+	event.key.type = event.type;
 	event.key.keysym.sym = (SDLKey)PDL_GetJSParamInt(params, 1);
-	event.key.keysym.unicode = PDL_GetJSParamString(params, 2)[0];
 
 	sdlTerminal->fakeKeyEvent(event);
 
@@ -133,6 +130,8 @@ int main(int argc, const char* argv[])
 
 			sdlTerminal->setExtTerminal(terminal);
 			terminal->setExtTerminal(sdlTerminal);
+
+			sdlTerminal->FB_vgainitkeymaps();
 
 			sdlTerminal->run(); //Blocking.
 		}

@@ -33,8 +33,6 @@
 class Terminal : public ExtTerminal, public ExtTerminalContainer
 {
 private:
-	int m_masterFD;
-	int m_slaveFD;
 	bool m_bDone;
 	int m_nWritePriority;
 	pid_t m_pid;
@@ -65,6 +63,9 @@ private:
 public:
 	Terminal();
 	virtual ~Terminal();
+
+	int m_masterFD;
+	int m_slaveFD;
 
 	void setWindowSize(int nWidth, int nHeight);
 	int start();

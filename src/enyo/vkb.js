@@ -81,34 +81,16 @@ enyo.kind({
 	},
 	
 	processKey: function(inSender) {
-		var ret = [null,null]
-		var key = inSender.symbols[0][1];
-		if (!inSender.modifier) {
-			if (this.modstate & this.KMOD_LSHIFT || this.modstate & this.KMOD_CAPS) {
-				if (inSender.symbols.length == 1)
-					key = inSender.symbols[0][1].toUpperCase();
-				else if (inSender.symbols.length > 1)
-					key = inSender.symbols[1][1];
-			}
-		}
-  		if (key != null) {
-  			if (typeof key == 'number') {
-  				ret[0] = key
-  			} else if (typeof key == 'string') {
-  				ret[1] = key
-  			}
-  		}
-  		return ret
+		var sym = inSender.symbols[0][1];
+		return sym
 	},
   	
   	keyUp: function(inSender) {
-  		var info = this.processKey(inSender)
-  		this.modstate = this.terminal.keyUp(info[0], info[1])
+  		this.modstate = this.terminal.keyUp(this.processKey(inSender))
   	},
   	
   	keyDown: function(inSender) {
-  		var info = this.processKey(inSender)
-  		this.modstate = this.terminal.keyDown(info[0], info[1])
+  		this.modstate = this.terminal.keyDown(this.processKey(inSender))
   	}
 	
 })

@@ -44,8 +44,8 @@ enyo.kind({
   		this.log('~~~~~ Terminal Plugin Disconnected ~~~~~')
   	},
 
-  	pushKeyEvent: function(type,state,sym,unicode) {
-  		return parseInt(this.$.plugin.callPluginMethod('pushKeyEvent',type,state,sym,unicode))
+  	pushKeyEvent: function(type,state,sym) {
+  		return parseInt(this.$.plugin.callPluginMethod('pushKeyEvent',type,state,sym))
   	},
   	keyDown: function(sym,unicode) {
   		return this.pushKeyEvent(1,sym,unicode)
