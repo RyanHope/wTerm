@@ -113,7 +113,7 @@ kbdLayouts.default.keys = [
 		{symbols: [['Fn',SDLK._MODE]], modifier: 1, extraClasses: 'mod fn'},
 		{symbols: [['Alt',SDLK._LALT]], modifier: 1, extraClasses: 'mod alt'},
 		{symbols: [[' ',SDLK._SPACE]], printable: true, extraClasses: 'spacebar'},
-		{symbols: [['Alt',SDLK._LALT]], modifier: 1, extraClasses: 'mod alt'},
+		{symbols: [['Alt',SDLK._RALT]], modifier: 1, extraClasses: 'mod alt'},
 		{symbols: [['Ctrl',SDLK._RCTRL]], modifier: 1, extraClasses: 'mod ctrl'},
 		{symbols: [['<img src="images/cursorLeft.png" class="keyImg"/>',SDLK._LEFT],['<span class="fnBind">Home</span>',SDLK._HOME]], extraClasses: 'arrow'},
 		{symbols: [['<img src="images/cursorRight.png" class="keyImg"/>',SDLK._RIGHT],['<span class="fnBind">End</span>',SDLK._END]], extraClasses: 'arrow'},
