@@ -38,20 +38,6 @@ static void stringify(char * str, size_t len) {
 SDLTerminal::SDLTerminal()
 {
 	m_terminalState = NULL;
-	m_keyMod = TERM_KEYMOD_NONE;
-	m_bCtrlKeyModHeld = false;
-	m_bKeyModUsed = true;
-	m_bKeyModLocked = false;
-	m_config = new TerminalConfigManager();
-
-	m_keyModShiftSurface = NULL;
-	m_keyModCtrlSurface = NULL;
-	m_keyModAltSurface = NULL;
-	m_keyModFnSurface = NULL;
-	m_keyModShiftLockedSurface = NULL;
-	m_keyModCtrlLockedSurface = NULL;
-	m_keyModAltLockedSurface = NULL;
-	m_keyModFnLockedSurface = NULL;
 
 	SDL_Color defaultColors[] = {
 		{ 0, 0, 0 }, // COLOR_BLACK
@@ -96,8 +82,6 @@ SDLTerminal::SDLTerminal()
 	m_keys.push_back("\033[23~");
 	m_keys.push_back("\033[24~");
 
-	m_config->parse("./terminal.config");
-
 	initCharsets();
 }
 
@@ -106,51 +90,6 @@ SDLTerminal::~SDLTerminal()
 	if (m_terminalState != NULL)
 	{
 		delete m_terminalState;
-	}
-
-	if (m_keyModShiftSurface != NULL)
-	{
-		SDL_FreeSurface(m_keyModShiftSurface);
-	}
-
-	if (m_keyModCtrlSurface != NULL)
-	{
-		SDL_FreeSurface(m_keyModCtrlSurface);
-	}
-
-	if (m_keyModAltSurface != NULL)
-	{
-		SDL_FreeSurface(m_keyModAltSurface);
-	}
-
-	if (m_keyModFnSurface != NULL)
-	{
-		SDL_FreeSurface(m_keyModFnSurface);
-	}
-
-	if (m_keyModShiftLockedSurface != NULL)
-	{
-		SDL_FreeSurface(m_keyModShiftLockedSurface);
-	}
-
-	if (m_keyModCtrlLockedSurface != NULL)
-	{
-		SDL_FreeSurface(m_keyModCtrlLockedSurface);
-	}
-
-	if (m_keyModAltLockedSurface != NULL)
-	{
-		SDL_FreeSurface(m_keyModAltLockedSurface);
-	}
-
-	if (m_keyModFnLockedSurface != NULL)
-	{
-		SDL_FreeSurface(m_keyModFnLockedSurface);
-	}
-
-	if (m_config != NULL)
-	{
-		delete m_config;
 	}
 }
 
@@ -220,68 +159,9 @@ int SDLTerminal::initCustom()
 		return -1;
 	}
 
-	m_keyModShiftSurface = IMG_Load("images/shkey.png");
-	m_keyModCtrlSurface = IMG_Load("images/ctrlkey.png");
-	m_keyModAltSurface = IMG_Load("images/altkey.png");
-	m_keyModFnSurface = IMG_Load("images/fnkey.png");
-	m_keyModShiftLockedSurface = IMG_Load("images/shkeylocked.png");
-	m_keyModCtrlLockedSurface = IMG_Load("images/ctrlkeylocked.png");
-	m_keyModAltLockedSurface = IMG_Load("images/altkeylocked.png");
-	m_keyModFnLockedSurface = IMG_Load("images/fnkeylocked.png");
-
-	if (m_keyModShiftSurface == NULL || m_keyModCtrlSurface == NULL
-		|| m_keyModAltSurface == NULL || m_keyModFnSurface == NULL)
-	{
-		syslog(LOG_ERR, "Cannot create keyboard modifier image.");
-		return -1;
-	}
-
-	if (m_keyModShiftLockedSurface == NULL || m_keyModCtrlLockedSurface == NULL
-		|| m_keyModAltLockedSurface == NULL || m_keyModFnLockedSurface == NULL)
-	{
-		syslog(LOG_ERR, "Cannot create keyboard modifier locked image.");
-		return -1;
-	}
-
-	SDL_SetAlpha(m_keyModShiftSurface, 0, 0);
-	SDL_SetAlpha(m_keyModCtrlSurface, 0, 0);
-	SDL_SetAlpha(m_keyModAltSurface, 0, 0);
-	SDL_SetAlpha(m_keyModFnSurface, 0, 0);
-	SDL_SetAlpha(m_keyModShiftLockedSurface, 0, 0);
-	SDL_SetAlpha(m_keyModCtrlLockedSurface, 0, 0);
-	SDL_SetAlpha(m_keyModAltLockedSurface, 0, 0);
-	SDL_SetAlpha(m_keyModFnLockedSurface, 0, 0);
-
 	setReady(true);
 
 	return 0;
-}
-
-void SDLTerminal::toggleKeyMod(Term_KeyMod_t keyMod)
-{
-	if (!m_bKeyModUsed)
-	{
-		if (m_keyMod == keyMod && !m_bKeyModLocked)
-		{
-			m_bKeyModLocked = true;
-		}
-		else if (m_keyMod == keyMod)
-		{
-			disableKeyMod();
-		}
-		else
-		{
-			m_keyMod = keyMod;
-			m_bKeyModLocked = false;
-		}
-	}
-}
-
-void SDLTerminal::disableKeyMod()
-{
-	m_keyMod = TERM_KEYMOD_NONE;
-	m_bKeyModUsed = false;
-	m_bKeyModLocked = false;
 }
 
 void SDLTerminal::handleMouseEvent(SDL_Event &event)
@@ -579,57 +459,6 @@ void SDLTerminal::redraw()
 
 	m_terminalState->unlock();
 
-	if (m_keyMod != TERM_KEYMOD_NONE)
-	{
-		int nY = m_surface->h - 32;
-
-		glColor4f(1.0f, 1.0f, 1.0f, 0.70f);
-
-		if (m_keyMod == TERM_KEYMOD_CTRL)
-		{
-			if (m_bKeyModLocked)
-			{
-				drawSurface(0, nY, m_keyModCtrlLockedSurface);
-			}
-			else
-			{
-				drawSurface(0, nY, m_keyModCtrlSurface);
-			}
-		}
-		else if (m_keyMod == TERM_KEYMOD_FN)
-		{
-			if (m_bKeyModLocked)
-			{
-				drawSurface(0, nY, m_keyModFnLockedSurface);
-			}
-			else
-			{
-				drawSurface(0, nY, m_keyModFnSurface);
-			}
-		}
-		else if (m_keyMod == TERM_KEYMOD_ALT)
-		{
-			if (m_bKeyModLocked)
-			{
-				drawSurface(0, nY, m_keyModAltLockedSurface);
-			}
-			else
-			{
-				drawSurface(0, nY, m_keyModAltSurface);
-			}
-		}
-		else if (m_keyMod == TERM_KEYMOD_SHIFT)
-		{
-			if (m_bKeyModLocked)
-			{
-				drawSurface(0, nY, m_keyModShiftLockedSurface);
-			}
-			else
-			{
-				drawSurface(0, nY, m_keyModShiftSurface);
-			}
-		}
-	}
 }
 
 void SDLTerminal::refresh()
