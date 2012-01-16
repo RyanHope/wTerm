@@ -188,7 +188,7 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 	SDLMod mod = event.key.keysym.mod;
 	Uint16 unicode = event.key.keysym.unicode;
 
-	char c[2] = { '\0', '\0' };
+	char c[3] = { '\0', '\0', '\0'};
 
 	ExtTerminal *extTerminal = getExtTerminal();
 
@@ -311,6 +311,9 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 						c[0] = 30;
 					else if (c[0] == 95)
 						c[0] = 31;
+				} else if (mod & KMOD_ALT) {
+					c[1] = c[0];
+					c[0] = '\x1b';
 				}
 				extTerminal->insertData(c);
 			} else {
