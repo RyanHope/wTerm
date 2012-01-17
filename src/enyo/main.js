@@ -14,7 +14,12 @@ enyo.kind({
 			{name: 'vkbToggle', caption: "Hide Virtual Keyboard", onclick: 'toggleVKB'},
 			{caption: "Preferences", onclick: "openPrefs"}
 		]},
-		{kind: "ApplicationEvents", onWindowRotated: "setup", onKeydown: "onBtKeyDown"},
+		{
+			kind: "ApplicationEvents",
+			onWindowRotated: "setup",
+			onKeydown: "onBtKeyDown",
+			onWindowActivated: 'windowActivated',
+			onWindowDeactivated: 'windowDeactivated'},
 		{
 			kind: 'Popup2',
 			name: 'about',
@@ -26,7 +31,14 @@ enyo.kind({
 			]
 		}
 	],
-
+	
+	windowActivated: function() {
+		this.$.terminal.setActive(1)
+	},
+	windowDeactivated: function() {
+		this.$.terminal.setActive(0)
+	},
+	
 	initComponents: function() {
     	this.inherited(arguments)
     	this.createComponent({
