@@ -282,8 +282,6 @@ int Terminal::sendCommand(const char *command)
 	unsigned bytes = strlen(command);
 	const char * buf = command;
 
-	syslog(LOG_DEBUG, "%d %s", bytes, buf);
-
 	while(bytes)
 	{
 		FD_ZERO(&writeFDSet);

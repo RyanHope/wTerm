@@ -256,9 +256,6 @@ void SDLCore::eventLoop()
 				case SDL_KEYDOWN:
 					handleKeyboardEvent(event);
 					break;
-				case SDL_ACTIVEEVENT:
-					// Remove old suspend stuff, maybe add back later. ~PTM
-					break;
 				case SDL_VIDEOEXPOSE:
 					redraw();
 					setDirty(BUFFER_DIRTY_BIT);
