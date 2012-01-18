@@ -265,8 +265,10 @@ void SDLCore::eventLoop()
 					handleKeyboardEvent(event);
 					break;
 				case SDL_VIDEOEXPOSE:
-					redraw();
-					setDirty(BUFFER_DIRTY_BIT);
+					if (active) {
+						redraw();
+						setDirty(BUFFER_DIRTY_BIT);
+					}
 					break;
 				case SDL_VIDEORESIZE:
 					closeFonts();
