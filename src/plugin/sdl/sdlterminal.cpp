@@ -35,6 +35,19 @@ static void stringify(char * str, size_t len) {
 	str[len] = '\0';
 }
 
+// Some HP BT keycodes
+#define HP_BT_LEFT 18
+#define HP_BT_UP 19
+#define HP_BT_RIGHT 20
+#define HP_BT_DOWN 21
+
+// These are different when used as a plugin.
+// Credit to Brybry for finding these.
+#define HP_BT_PLUGIN_UP    0xE0A0
+#define HP_BT_PLUGIN_DOWN  0xE0A1
+#define HP_BT_PLUGIN_LEFT  0xE0A2
+#define HP_BT_PLUGIN_RIGHT 0xE0A3
+
 SDLTerminal::SDLTerminal()
 {
 	m_terminalState = NULL;
@@ -200,125 +213,122 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 	switch (event.type)
 	{
 	case SDL_KEYDOWN:
-		if (sym == SDLK_UP)
+		switch(sym)
 		{
+		case HP_BT_UP:
+		case HP_BT_PLUGIN_UP:
+		case SDLK_UP:
 			m_terminalState->sendCursorCommand(VTTS_CURSOR_UP, extTerminal);
-		}
-		else if (sym == SDLK_DOWN)
-		{
+			break;
+		case HP_BT_DOWN:
+		case HP_BT_PLUGIN_DOWN:
+		case SDLK_DOWN:
 			m_terminalState->sendCursorCommand(VTTS_CURSOR_DOWN, extTerminal);
-		}
-		else if (sym == SDLK_RIGHT)
-		{
+			break;
+		case HP_BT_RIGHT:
+		case HP_BT_PLUGIN_RIGHT:
+		case SDLK_RIGHT:
 			if (mod & KMOD_MODE)
 				extTerminal->insertData("\x1B[F");
 			else
 				m_terminalState->sendCursorCommand(VTTS_CURSOR_RIGHT, extTerminal);
-		}
-		else if (sym == SDLK_LEFT)
-		{
+			break;
+		case HP_BT_LEFT:
+		case HP_BT_PLUGIN_LEFT:
+		case SDLK_LEFT:
 			if (mod & KMOD_MODE)
 				extTerminal->insertData("\x1B[H");
 			else
 				m_terminalState->sendCursorCommand(VTTS_CURSOR_LEFT, extTerminal);
-		}
-		else if (sym == SDLK_ESCAPE)
-		{
+			break;
+		case SDLK_ESCAPE:
 			extTerminal->insertData("\x1b");
-		}
-		else if (sym == SDLK_F1)
-		{
+			break;
+		case SDLK_F1:
 			extTerminal->insertData(m_keys[TS_INPUT_F1].c_str());
-		}
-		else if (sym == SDLK_F2)
-		{
+			break;
+		case SDLK_F2:
 			extTerminal->insertData(m_keys[TS_INPUT_F2].c_str());
-		}
-		else if (sym == SDLK_F3)
-		{
+			break;
+		case SDLK_F3:
 			extTerminal->insertData(m_keys[TS_INPUT_F3].c_str());
-		}
-		else if (sym == SDLK_F4)
-		{
+			break;
+		case SDLK_F4:
 			extTerminal->insertData(m_keys[TS_INPUT_F4].c_str());
-		}
-		else if (sym == SDLK_F5)
-		{
+			break;
+		case SDLK_F5:
 			extTerminal->insertData(m_keys[TS_INPUT_F5].c_str());
-		}
-		else if (sym == SDLK_F6)
-		{
+			break;
+		case SDLK_F6:
 			extTerminal->insertData(m_keys[TS_INPUT_F6].c_str());
-		}
-		else if (sym == SDLK_F7)
-		{
+			break;
+		case SDLK_F7:
 			extTerminal->insertData(m_keys[TS_INPUT_F7].c_str());
-		}
-		else if (sym == SDLK_F8)
-		{
+			break;
+		case SDLK_F8:
 			extTerminal->insertData(m_keys[TS_INPUT_F8].c_str());
-		}
-		else if (sym == SDLK_F9)
-		{
+			break;
+		case SDLK_F9:
 			extTerminal->insertData(m_keys[TS_INPUT_F9].c_str());
-		}
-		else if (sym == SDLK_F10)
-		{
+			break;
+		case SDLK_F10:
 			extTerminal->insertData(m_keys[TS_INPUT_F10].c_str());
-		}
-		else if (sym == SDLK_F11)
-		{
+			break;
+		case SDLK_F11:
 			extTerminal->insertData(m_keys[TS_INPUT_F11].c_str());
-		}
-		else if (sym == SDLK_F12)
-		{
+			break;
+		case SDLK_F12:
 			extTerminal->insertData(m_keys[TS_INPUT_F12].c_str());
-		}
-		else if (sym == SDLK_TAB)
-		{
+			break;
+		case SDLK_TAB:
 			extTerminal->insertData("\t");
-		}
-		else if (sym == SDLK_RETURN)
-		{
+			break;
+		case SDLK_RETURN:
 			if (m_terminalState->getTerminalModeFlags() & TS_TM_NEW_LINE)
 				extTerminal->insertData("\r\n");
 			else
 				extTerminal->insertData("\r");
-		}
-		else if (sym == SDLK_BACKSPACE)
-		{
+			break;
+		case SDLK_BACKSPACE:
 			if (m_terminalState->getTerminalModeFlags() & TS_TM_BACKSPACE)
 				extTerminal->insertData("\x08");
 			else
 				extTerminal->insertData("\x7F");
-		}
-		else if (unicode)
-		{
-			if ((unicode & 0xFF80) == 0) {
-				c[0] = unicode & 0x7F;
-				if (mod & KMOD_CTRL) {
-					if (c[0] > 96 && c[0] < 123)
-						c[0] -= 96;
-					else if (c[0] == 32 || c[0] == 64)
+			break;
+		default:
+			// Failed to handle based on 'sym', look to unicode:
+			// Accordingly, if no unicode value, we're done here.
+			if (!unicode) break;
+			// We don't yet handle international characters
+			if ((unicode & 0xFF80) != 0) {
+				syslog(LOG_INFO, "An International Character.");
+				break;
+			}
+
+			c[0] = unicode & 0x7F;
+
+			if (mod & KMOD_CTRL) {
+				if (c[0] > 96 && c[0] < 123) {
+					c[0] -= 96;
+				} else switch (c[0]) {
+					case 32:
+					case 64:
 						c[0] = 0;
-					else if (c[0] == 91)
-						c[0] = 27;
-					else if (c[0] == 92)
-						c[0] = 28;
-					else if (c[0] == 93)
-						c[0] = 29;
-					else if (c[0] == 94)
-						c[0] = 30;
-					else if (c[0] == 95)
-						c[0] = 31;
-				} else if (mod & KMOD_ALT) {
+						break;
+					case 91:
+					case 92:
+					case 93:
+					case 94:
+					case 95:
+						c[0] -= 34;
+						break;
+				}
+			} else if (mod & KMOD_ALT) {
 					c[1] = c[0];
 					c[0] = '\x1b';
-				}
-				extTerminal->insertData(c);
-			} else {
-				syslog(LOG_INFO, "An International Character.");
 			}
+			extTerminal->insertData(c);
+
 		}
 		break;
 	default:
