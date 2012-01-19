@@ -19,7 +19,8 @@ enyo.kind({
 			onWindowRotated: "setup",
 			onKeydown: "onBtKeyDown",
 			onWindowActivated: 'windowActivated',
-			onWindowDeactivated: 'windowDeactivated'},
+			onWindowDeactivated: 'windowDeactivated',
+			onApplicationRelaunch: "applicationRelaunchHandler"},
 		{
 			kind: 'Popup2',
 			name: 'about',
@@ -31,6 +32,15 @@ enyo.kind({
 			]
 		}
 	],
+	
+    applicationRelaunchHandler: function(inSender) {
+        enyo.windows.activateWindow(enyo.windows.getRootWindow(), null)
+        var params = enyo.windowParams;
+        if (params.dontLaunch) return true;
+		var f = function() {enyo.windows.openWindow("index.html", null, params)}
+		enyo.job('new', f, 100)
+		return true;
+    },
 	
 	windowActivated: function() {
 		this.$.terminal.setActive(1)
