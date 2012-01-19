@@ -5,6 +5,7 @@
 	"vendor": "Ryan Hope",
 	"type": "web",
 	"noDeprecatedStyles": true,
+	"keywords": ["terminal"],
 	"main": "index.html",
 	"icon": "images/icon-64.png",
 	"splashicon": "images/icon-128.png",
