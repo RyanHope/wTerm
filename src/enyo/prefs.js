@@ -72,7 +72,7 @@ enyo.kind({
 				]},
 				{name: 'grp3', showing: false, components: [
 					{kind: "RowGroup", flex :1, caption: 'Scroll Buffer', components: [
-						{kind: "Input", name: 'bufferlines', onChange: 'bufferlinesChanged', components: [{className: 'enyo-label', content: 'Lines'}]},
+						{kind: "Input", name: 'bufferlines', onChange: 'bufferlinesChanged', disabled: true, components: [{className: 'enyo-label', content: 'Lines'}]},
 					]},
 		  		]},
 	  		]},
@@ -186,7 +186,7 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.getColors()
-		this.$.bufferlines.setValue(this.prefs.get('bufferlines'))
+		this.$.bufferlines.setValue(0)//this.prefs.get('bufferlines'))
 		this.$.fontSize.setValue(this.prefs.get('fontSize'))
 		this.$.kbdLayouts.setItems(kbdLayoutList());
 		this.$.kbdLayouts.setValue(this.prefs.get('kbdLayout'))

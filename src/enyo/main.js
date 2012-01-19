@@ -10,9 +10,10 @@ enyo.kind({
 
 	components: [
 		{kind: "AppMenu", components: [
-			{caption: "About", onclick: "openAbout"},
+			{caption: "New Terminal", onclick: "newTerm"},
+			{caption: "Preferences", onclick: "openPrefs"},
 			{name: 'vkbToggle', caption: "Hide Virtual Keyboard", onclick: 'toggleVKB'},
-			{caption: "Preferences", onclick: "openPrefs"}
+			{caption: "About", onclick: "openAbout"}
 		]},
 		{
 			kind: "ApplicationEvents",
@@ -33,12 +34,21 @@ enyo.kind({
 		}
 	],
 	
+	newTerm: function(inSender, inEvent, params, reactivate) {
+		enyo.windows.openWindow("index.html", null, params)
+		var delay = 100
+		if (reactivate!=null) {
+			enyo.windows.activateWindow(enyo.windows.getRootWindow(), null)
+			delay = 0
+		}
+		var f = function() {}
+		enyo.job('new', f, delay)
+	},
+	
     applicationRelaunchHandler: function(inSender) {
-        enyo.windows.activateWindow(enyo.windows.getRootWindow(), null)
-        var params = enyo.windowParams;
-        if (params.dontLaunch) return true;
-		var f = function() {enyo.windows.openWindow("index.html", null, params)}
-		enyo.job('new', f, 100)
+        var params = enyo.windowParams
+        if (params.dontLaunch) return true
+        this.newTerm(null, null, params, true)
 		return true;
     },
 	
