@@ -35,13 +35,12 @@ enyo.kind({
 	],
 	
 	newTerm: function(inSender, inEvent, params, reactivate) {
-		enyo.windows.openWindow("index.html", null, params)
-		var delay = 100
-		if (reactivate!=null) {
+		var delay = 0
+		if (reactivate) {
 			enyo.windows.activateWindow(enyo.windows.getRootWindow(), null)
-			delay = 0
+			delay = 100
 		}
-		var f = function() {}
+		var f = function() {enyo.windows.openWindow("index.html", null, params)}
 		enyo.job('new', f, delay)
 	},
 	
