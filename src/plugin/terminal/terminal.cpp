@@ -329,13 +329,12 @@ int Terminal::start()
 	{
 		if (isChild())
 		{
-			const char *argv[5];
+			const char *argv[4];
 
 			argv[0] = "/bin/login";
-			argv[1] = "-p";
-			argv[2] = "-f";
-			argv[3] = getUser();
-			argv[4] = NULL;
+			argv[1] = "-f";
+			argv[2] = getUser();
+			argv[3] = NULL;
 
 			setWindowSize();
 			setTermMode();
