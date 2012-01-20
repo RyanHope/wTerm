@@ -1,7 +1,7 @@
 {
 	"title": "wTerm",
 	"id": "us.ryanhope.wterm",
-	"version": "0.3.2",
+	"version": "0.3.4",
 	"vendor": "Ryan Hope",
 	"type": "web",
 	"noDeprecatedStyles": true,
@@ -11,5 +11,12 @@
 	"splashicon": "images/icon-128.png",
 	"uiRevision": 2,
 	"plug-ins": true,
-	"processors": 2
+	"processors": 2,
+	"universalSearch": {
+		"action": {
+			"displayName": "Execute In Terminal",
+			"url": "us.ryanhope.wterm",
+			"launchParam": "command"
+		}
+	}
 }

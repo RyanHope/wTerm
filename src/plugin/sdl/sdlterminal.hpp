@@ -50,6 +50,7 @@ public:
 	void refresh();
 
 	void redraw();
+	void injectData(const char *data);
 	void insertData(const char *data);
 	TerminalState *getTerminalState();
 

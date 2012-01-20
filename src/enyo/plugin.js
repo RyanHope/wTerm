@@ -40,7 +40,7 @@ enyo.kind({
   		this.isReady = true
 		this.setColors()
 		this.setKeys()
-  		//this.doPluginReady()
+  		enyo.job('inject', enyo.bind(this, 'doPluginReady'), 1100)
   	},
   	pluginConnected: function(inSender, inResponse, inRequest) {
   		this.log('~~~~~ Terminal Plugin Connected ~~~~~')
@@ -172,6 +172,10 @@ enyo.kind({
   	setActive: function(active) {
   		if (this.isReady)
   			this.$.plugin.callPluginMethod('setActive', active);
+  	},
+  	
+  	inject: function(command) {
+  		this.$.plugin.callPluginMethod('inject', command)
   	}
   	
 })

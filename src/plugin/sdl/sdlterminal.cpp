@@ -195,6 +195,12 @@ void SDLTerminal::handleMouseEvent(SDL_Event &event)
 	}*/
 }
 
+void SDLTerminal::injectData(const char *data)
+{
+	ExtTerminal *extTerminal = getExtTerminal();
+	extTerminal->insertData(data);
+}
+
 void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 {
 	SDLKey sym = event.key.keysym.sym;

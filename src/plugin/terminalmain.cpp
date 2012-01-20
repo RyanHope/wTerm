@@ -27,6 +27,13 @@
 
 SDLTerminal *sdlTerminal;
 
+PDL_bool inject(PDL_JSParameters *params) {
+	const char *cmd = PDL_GetJSParamString(params, 0);
+	sdlTerminal->injectData(cmd);
+	sdlTerminal->injectData("\n");
+	return PDL_TRUE;
+}
+
 PDL_bool setActive(PDL_JSParameters *params) {
 	int active = PDL_GetJSParamInt(params, 0);
 	sdlTerminal->setActive(active);
@@ -114,6 +121,7 @@ int main(int argc, const char* argv[])
 	sdlTerminal->start();
 	sdlTerminal->setFontSize((argc > 1 && atoi(argv[1])) ? atoi(argv[1]) : 12);
 
+	PDL_RegisterJSHandler("inject", inject);
 	PDL_RegisterJSHandler("setActive", setActive);
 	PDL_RegisterJSHandler("setKey", setKey);
 	PDL_RegisterJSHandler("setColor", setColor);
@@ -123,7 +131,6 @@ int main(int argc, const char* argv[])
 	PDL_RegisterJSHandler("setFontSize", setFontSize);
 
 	PDL_JSRegistrationComplete();
-	PDL_CallJS("ready", NULL, 0);
 
 	if (sdlTerminal->isReady())
 	{
@@ -137,6 +144,8 @@ int main(int argc, const char* argv[])
 
 			sdlTerminal->setExtTerminal(terminal);
 			terminal->setExtTerminal(sdlTerminal);
+
+			PDL_CallJS("ready", NULL, 0);
 
 			sdlTerminal->run(); //Blocking.
 		}

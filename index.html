@@ -6,7 +6,11 @@
 </head>
 <body>
 <script type="text/javascript">
-	new wTerm().renderInto(document.body);
+	var app = new wTerm();
+	if (window.PalmSystem && enyo.windowParams){
+        app.setLaunchParams(enyo.windowParams);
+    }
+	app.renderInto(document.body);
 </script>
 </body>
 </html>

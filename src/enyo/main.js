@@ -3,6 +3,10 @@ enyo.kind({
 	name: "wTerm",
 	kind: enyo.VFlexBox,
 	align: 'center',
+	
+	published: {        
+	    launchParams: null
+	},
 
 	prefs: new Prefs(),
 	
@@ -33,7 +37,7 @@ enyo.kind({
 			]
 		}
 	],
-	
+		
 	newTerm: function(inSender, inEvent, params, reactivate) {
 		var delay = 0
 		if (reactivate) {
@@ -77,6 +81,7 @@ enyo.kind({
 			bgcolor: '000000',
 			width: window.innerWidth,
 			height: 400,
+			onPluginReady: 'pluginReady'
 		})
 		this.createComponent({
 			name : "getPreferencesCall",
@@ -90,6 +95,14 @@ enyo.kind({
 		this.$.prefs.terminal = this.$.terminal
 		this.$.prefs.vkb = this.$.vkb
 		this.setup()
+	},
+	
+	pluginReady: function() {
+		if (this.launchParams.command) {
+			this.$.terminal.inject(this.launchParams.command)
+		} else {
+			this.$.terminal.inject("htop")
+		}
 	},
 
 	prefCallSuccess: function(inSender, inResponse) {
