@@ -33,3 +33,4 @@ Screenshots
 <a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/irssi.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/irssi.png" width=25%></a><br>
 <a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/midnight_commander.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/midnight_commander.png" width=25%></a>
 <a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/vim.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/vim.png" width=25%></a>
+<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/emacs.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/emacs.png" width=25%></a>
