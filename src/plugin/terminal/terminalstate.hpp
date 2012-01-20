@@ -228,6 +228,7 @@ protected:
 
 	void removeGraphicsState(int nColumn, int nLine, bool bTrim, TSLineGraphicsState_t *resetState);
 	void removeGraphicsState(int nBeginColumn, int nBeginLine, int nEndColumn, int nEndLine, TSLineGraphicsState_t *resetState);
+	void removeGraphicsStates(int nLine, int nBeginColumn, int nEndColumn, TSLineGraphicsState_t *resetState);
 	int findGraphicsState(int nColumn, int nLine, bool bGetPrev);
 	void moveGraphicsState(int nLines, bool bUp);
 
