@@ -43,6 +43,7 @@ public:
 	int replace(int startIndex, const char *data, size_t size);
 	int append(const char *data, size_t size);
 	int fill(char c, size_t size);
+	int set(int startIndex, char c, size_t size, bool extend);
 	int copy(char *dest, size_t size);
 	int copy(int startIndex, char *dest, size_t size);
 	int insert(int startIndex, const char *data, size_t size);
