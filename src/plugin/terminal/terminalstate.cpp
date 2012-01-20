@@ -289,7 +289,7 @@ void TerminalState::erase(const Point &start, const Point &end)
 	TSLineGraphicsState_t resetState = {
 			m_currentGraphicsState.foregroundColor,
 			m_currentGraphicsState.backgroundColor,
-			0,0,0,0,0
+			0,0,0,TS_CS_NONE,TS_CS_NONE
 	};
 
 	removeGraphicsState(nStartX, nStartLine, nEndX, nEndLine, &resetState);
