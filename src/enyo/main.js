@@ -56,7 +56,6 @@ enyo.kind({
 		this.$.terminal.setActive(1)
 	},
 	windowDeactivated: function() {
-		this.cancelKeyRepeat()
 		this.$.terminal.setActive(0)
 	},
 	
@@ -165,10 +164,6 @@ enyo.kind({
 			else
 				this.$.terminal.resize(window.innerWidth, window.innerHeight)
 		}
-	},
-
-	cancelKeyRepeat: function() {
-		this.$.terminal.cancelKeyRepeat();
 	},
 
 	onBtKeyDown: function(context, event) {
