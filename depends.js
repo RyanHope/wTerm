@@ -4,6 +4,7 @@ enyo.depends(
 
 	"src/css/main.css",
 
+	"src/models/sdlk.js",
 	"src/models/prefs.js",
 	"src/models/vkblayout.js",
 

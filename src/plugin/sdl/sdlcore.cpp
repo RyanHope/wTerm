@@ -26,6 +26,8 @@
 #include <stdio.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
 
 const int SDLCore::BUFFER_DIRTY_BIT = 1;
 const int SDLCore::FONT_DIRTY_BIT = 2;
@@ -56,6 +58,9 @@ SDLCore::SDLCore()
 	m_fontBoldUnder = NULL;
 	m_nFontHeight = 0;
 	m_nFontWidth = 0;
+
+	active = true;
+	lCycleTimeSlot = 25;
 
 	clearDirty(0);
 }
@@ -222,6 +227,12 @@ SDL_Color SDLCore::getColor(TSColor_t color)
 {
 }
 
+void SDLCore::setActive(int active)
+{
+	this->active = active;
+	lCycleTimeSlot = this->active ? 25 : 1000;
+}
+
 /**
  * Main event loop. Does not return until the application exits.
  */
@@ -231,7 +242,6 @@ void SDLCore::eventLoop()
 	SDL_Event event;
 	Uint32 lOldTime = SDL_GetTicks();
 	Uint32 lCurrentTime = SDL_GetTicks();
-	Uint32 lCycleTimeSlot = 25;
 	Uint32 lDelay;
 
 	while (isRunning()) {
@@ -254,12 +264,11 @@ void SDLCore::eventLoop()
 				case SDL_KEYDOWN:
 					handleKeyboardEvent(event);
 					break;
-				case SDL_ACTIVEEVENT:
-					// Remove old suspend stuff, maybe add back later. ~PTM
-					break;
 				case SDL_VIDEOEXPOSE:
-					redraw();
-					setDirty(BUFFER_DIRTY_BIT);
+					if (active) {
+						redraw();
+						setDirty(BUFFER_DIRTY_BIT);
+					}
 					break;
 				case SDL_VIDEORESIZE:
 					closeFonts();
@@ -276,7 +285,7 @@ void SDLCore::eventLoop()
 			}
 		} while (SDL_PollEvent(&event));
 
-		if (isDirty(FONT_DIRTY_BIT))
+		if (isDirty(FONT_DIRTY_BIT) && active)
 		{
 			clearDirty(FONT_DIRTY_BIT);
 			resetGlyphCache();
@@ -284,7 +293,7 @@ void SDLCore::eventLoop()
 		}
 
 		// Redraw if needed
-		if (isDirty(BUFFER_DIRTY_BIT))
+		if (isDirty(BUFFER_DIRTY_BIT) && active)
 		{
 			clearDirty(BUFFER_DIRTY_BIT);
 			SDL_GL_SwapBuffers();
@@ -738,6 +747,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 {
 	Uint16 modstate;
 	Uint8 state;
+	int map;
 
 	modstate = (Uint16)SDL_GetModState();
 

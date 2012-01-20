@@ -27,6 +27,12 @@
 
 SDLTerminal *sdlTerminal;
 
+PDL_bool setActive(PDL_JSParameters *params) {
+	int active = PDL_GetJSParamInt(params, 0);
+	sdlTerminal->setActive(active);
+	return PDL_TRUE;
+}
+
 PDL_bool setKey(PDL_JSParameters *params) {
 	sdlTerminal->setKey((TSInput_t)PDL_GetJSParamInt(params, 0), PDL_GetJSParamString(params, 1));
 	return PDL_TRUE;
@@ -79,10 +85,8 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 
 	SDL_Event event;
 
-	int type = PDL_GetJSParamInt(params, 0);
-
-	event.type = type ? SDL_KEYDOWN : SDL_KEYUP;
-	event.key.type = type ? SDL_KEYDOWN : SDL_KEYUP;
+	event.type = PDL_GetJSParamInt(params, 0) ? SDL_KEYDOWN : SDL_KEYUP;
+	event.key.type = event.type;
 	event.key.keysym.sym = (SDLKey)PDL_GetJSParamInt(params, 1);
 	event.key.keysym.unicode = PDL_GetJSParamString(params, 2)[0];
 
@@ -90,7 +94,6 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 
 	char *reply = 0;
 	asprintf(&reply, "%d", SDL_GetModState());
-	syslog(LOG_ERR, "MODSTATE: %s", reply);
 	PDL_JSReply(params, reply);
 	free(reply);
 
@@ -111,6 +114,7 @@ int main(int argc, const char* argv[])
 	sdlTerminal->start();
 	sdlTerminal->setFontSize((argc > 1 && atoi(argv[1])) ? atoi(argv[1]) : 12);
 
+	PDL_RegisterJSHandler("setActive", setActive);
 	PDL_RegisterJSHandler("setKey", setKey);
 	PDL_RegisterJSHandler("setColor", setColor);
 	PDL_RegisterJSHandler("pushKeyEvent", pushKeyEvent);

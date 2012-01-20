@@ -166,15 +166,10 @@ void TerminalState::clearBufferLine(int nLine, int nStart, int nEnd)
 			nEnd = 0;
 		}
 
-		if (nEnd >= line->size())
-		{
-			nEnd = (line->size() < 1) ? 0 : (line->size() - 1);
-		}
-
 		if (nStart <= nEnd)
 		{
 			nSize = (nEnd - nStart + 1);
-			line->clear(nStart, nSize, false);
+			line->set(nStart, BLANK, nSize, true);
 		}
 	}
 
@@ -290,7 +285,14 @@ void TerminalState::erase(const Point &start, const Point &end)
 	int nStartLine = bDirection ? displayStart.getY() : displayEnd.getY();
 	int nEndLine = bDirection ? displayEnd.getY() : displayStart.getY();
 
-	removeGraphicsState(nStartX, nStartLine, nEndX, nEndLine, &m_currentGraphicsState);
+	int nLocator = findGraphicsState(m_cursorLoc.getX(), m_cursorLoc.getY(), false);
+	TSLineGraphicsState_t resetState = {
+			m_currentGraphicsState.foregroundColor,
+			m_currentGraphicsState.backgroundColor,
+			0,0,0,0,0
+	};
+
+	removeGraphicsState(nStartX, nStartLine, nEndX, nEndLine, &resetState);
 
 	//Change index variables to be relative to the buffer.
 	nStartX -= 1;
@@ -309,7 +311,7 @@ void TerminalState::erase(const Point &start, const Point &end)
 			}
 			else
 			{
-				clearBufferLine(i, nStartX, m_data[i]->size() - 1);
+				clearBufferLine(i, nStartX, m_displayScreenSize.getX());
 			}
 		}
 		//Process last line.
@@ -320,7 +322,7 @@ void TerminalState::erase(const Point &start, const Point &end)
 		//Clear lines in between.
 		else
 		{
-			m_data[i]->clear();
+			clearBufferLine(i, 0, m_displayScreenSize.getX());
 		}
 	}
 
@@ -1590,57 +1592,49 @@ void TerminalState::removeGraphicsState(int nColumn, int nLine, bool bTrim, TSLi
 	pthread_mutex_unlock(&m_rwLock);
 }
 
+void TerminalState::removeGraphicsStates(int nLine, int nBeginColumn, int nEndColumn, TSLineGraphicsState_t *resetState)
+{
+	int nLocator;
+
+	if (resetState != NULL)
+	{
+		for (int c=nBeginColumn; c<=nEndColumn; c++)
+		{
+			//syslog(LOG_ERR, "removeGraphicsStates() %d %d", nLine, c);
+			addGraphicsState(c, nLine, *resetState, TS_GM_OP_SET, false);
+		}
+	}
+}
+
 void TerminalState::removeGraphicsState(int nBeginColumn, int nBeginLine, int nEndColumn, int nEndLine, TSLineGraphicsState_t *resetState)
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	int nBeginLocator;
-	int nEndLocator;
-	std::vector<TSLineGraphicsState_t *>::iterator beginLocator = m_graphicsState.end();
-	std::vector<TSLineGraphicsState_t *>::iterator endLocator = m_graphicsState.end();
-	TSLineGraphicsState_t *tmpState;
-
-	nBeginLocator = findGraphicsState(nBeginColumn, nBeginLine, true);
-	nEndLocator = findGraphicsState(nEndColumn, nEndLine, true);
-
-	if (nBeginLocator >= 0 && nBeginLocator < m_graphicsState.size())
-	{
-		tmpState = m_graphicsState[nBeginLocator];
-
-		//Previous state was returned.
-		if (tmpState->nColumn != nBeginColumn || tmpState->nLine != nBeginLine)
-		{
-			nBeginLocator++;
-		}
-	}
-
-	for (int i = nBeginLocator; i <= nEndLocator; i++)
-	{
-		if (i >= 0 && i < m_graphicsState.size())
-		{
-			if (beginLocator == m_graphicsState.end())
-			{
-				beginLocator = m_graphicsState.begin() + i;
-			}
-
-			endLocator = m_graphicsState.begin() + i + 1;
-		}
-	}
-
-	freeGraphicsMode(beginLocator, endLocator);
-
-	//Insert a graphics state at the start if the erased block.
 	if (resetState != NULL)
 	{
-		nBeginLocator = findGraphicsState(nBeginColumn, nBeginLine, true);
-
-		if (nBeginLocator >= 0 && nBeginLocator < m_graphicsState.size())
+		for (int i = nBeginLine; i <= nEndLine; i++)
 		{
-			tmpState = m_graphicsState[nBeginLocator];
-
-			if (cmp_graphics_state(tmpState, resetState))
+			//Process first line.
+			if (i == nBeginLine)
 			{
-				addGraphicsState(nBeginColumn, nBeginLine, *resetState, TS_GM_OP_SET, false);
+				if (nBeginLine == nEndLine)
+				{
+					removeGraphicsStates(i, nBeginColumn, nEndColumn, resetState);
+				}
+				else
+				{
+					removeGraphicsStates(i, nBeginColumn, m_displayScreenSize.getX(), resetState);
+				}
+			}
+			//Process last line.
+			else if (i == nEndLine)
+			{
+				removeGraphicsStates(i, 1, nEndColumn, resetState);
+			}
+			//Clear lines in between.
+			else
+			{
+				removeGraphicsStates(i, 1, m_displayScreenSize.getX(), resetState);
 			}
 		}
 	}

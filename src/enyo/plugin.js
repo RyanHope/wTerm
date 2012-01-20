@@ -2,7 +2,7 @@ enyo.kind({
 	
 	name: 'Terminal',
 	kind: enyo.Control,
-		
+			
 	published: {
 		width: 0,
 		height: 0,
@@ -10,6 +10,7 @@ enyo.kind({
 		prefs: null,
 		currentColors: [],
 		currentKeys: [],
+		isReady: false,
 	},
 		
 	events: {
@@ -25,6 +26,9 @@ enyo.kind({
 			onPluginReady: 'pluginReady',
 			onPluginConnected: 'pluginConnected',
 			onPluginDisconnected: 'pluginDisconnected',
+			allowKeyboardFocus: true,
+			killTransparency: true,
+			passTouchEvents: true,
 			width: this.width,
 			height: this.height,
 			params: [this.prefs.get('fontSize').toString(10)]
@@ -33,6 +37,7 @@ enyo.kind({
 		
   	pluginReady: function(inSender, inResponse, inRequest) {
   		this.log('~~~~~ Terminal Plugin Ready ~~~~~')
+  		this.isReady = true
 		this.setColors()
 		this.setKeys()
   		//this.doPluginReady()
@@ -44,8 +49,8 @@ enyo.kind({
   		this.log('~~~~~ Terminal Plugin Disconnected ~~~~~')
   	},
 
-  	pushKeyEvent: function(type,state,sym,unicode) {
-  		return parseInt(this.$.plugin.callPluginMethod('pushKeyEvent',type,state,sym,unicode))
+  	pushKeyEvent: function(type,sym,unicode) {
+  		return parseInt(this.$.plugin.callPluginMethod('pushKeyEvent',type,sym,unicode))
   	},
   	keyDown: function(sym,unicode) {
   		return this.pushKeyEvent(1,sym,unicode)
@@ -162,6 +167,11 @@ enyo.kind({
 		this.currentKeys = inputSchemes[inputScheme]
 		for (i in this.currentKeys)
 			this.$.plugin.callPluginMethod('setKey', i, this.decodeEscape(this.currentKeys[i]))
+  	},
+  	
+  	setActive: function(active) {
+  		if (this.isReady)
+  			this.$.plugin.callPluginMethod('setActive', active);
   	}
   	
 })

@@ -217,6 +217,36 @@ int DataBuffer::fill(char c, size_t size)
 }
 
 /**
+ * Sets the specified by range to the given character.
+ */
+int DataBuffer::set(int startIndex, char c, size_t size, bool extend)
+{
+  int nResult = 0;
+	pthread_mutex_lock(&m_rwLock);
+
+	if (startIndex < 0 || startIndex > m_size)
+	{
+		nResult = -1;
+	}
+	else if ((startIndex + size) > m_size)
+	{
+    if (extend)
+      fill(c, startIndex + size - m_size);
+    else
+      size = m_size - startIndex;
+	}
+
+	if (nResult == 0 && size > 0)
+	{
+		memset(m_buffer + startIndex, c, size);
+	}
+
+	pthread_mutex_unlock(&m_rwLock);
+
+  return nResult;
+}
+
+/**
  * Copies specified amount of bytes from the data buffer to the destination.
  */
 int DataBuffer::copy(int startIndex, char *dest, size_t size)

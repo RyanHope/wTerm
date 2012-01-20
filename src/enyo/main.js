@@ -10,11 +10,18 @@ enyo.kind({
 
 	components: [
 		{kind: "AppMenu", components: [
-			{caption: "About", onclick: "openAbout"},
+			{caption: "New Terminal", onclick: "newTerm"},
+			{caption: "Preferences", onclick: "openPrefs"},
 			{name: 'vkbToggle', caption: "Hide Virtual Keyboard", onclick: 'toggleVKB'},
-			{caption: "Preferences", onclick: "openPrefs"}
+			{caption: "About", onclick: "openAbout"}
 		]},
-		{kind: "ApplicationEvents", onWindowRotated: "setup"},
+		{
+			kind: "ApplicationEvents",
+			onWindowRotated: "setup",
+			onKeydown: "onBtKeyDown",
+			onWindowActivated: 'windowActivated',
+			onWindowDeactivated: 'windowDeactivated',
+			onApplicationRelaunch: "applicationRelaunchHandler"},
 		{
 			kind: 'Popup2',
 			name: 'about',
@@ -26,7 +33,31 @@ enyo.kind({
 			]
 		}
 	],
-
+	
+	newTerm: function(inSender, inEvent, params, reactivate) {
+		var delay = 0
+		if (reactivate) {
+			enyo.windows.activateWindow(enyo.windows.getRootWindow(), null)
+			delay = 100
+		}
+		var f = function() {enyo.windows.openWindow("index.html", null, params)}
+		enyo.job('new', f, delay)
+	},
+	
+    applicationRelaunchHandler: function(inSender) {
+        var params = enyo.windowParams
+        if (params.dontLaunch) return true
+        this.newTerm(null, null, params, true)
+		return true;
+    },
+	
+	windowActivated: function() {
+		this.$.terminal.setActive(1)
+	},
+	windowDeactivated: function() {
+		this.$.terminal.setActive(0)
+	},
+	
 	initComponents: function() {
     	this.inherited(arguments)
     	this.createComponent({
@@ -130,8 +161,17 @@ enyo.kind({
 			else
 				this.$.terminal.resize(window.innerWidth, window.innerHeight)
 		}
+
 		// fix the keyboard if orientation is locked
 		this.$.getPreferencesCall.call({"keys":["rotationLock"]});
+	},
+
+	onBtKeyDown: function(context, event) {
+		if (this.$.terminal.$.plugin.hasNode())
+		{
+			this.$.terminal.$.plugin.node.focus();
+			this.$.terminal.$.plugin.node.dispatchEvent(event);
+		}
 	}
 
 })

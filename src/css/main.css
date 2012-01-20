@@ -5,8 +5,9 @@
 	font-weight: 700;
 }
 .vkb.small .key {
-	height: 37px;
-	width: 43px;
+	margin: 0px;
+	height: 48px;
+	width: 53px;
 	font-size: 60%;
 }
 .vkb.large .key {
@@ -22,7 +23,7 @@
 	background-color: #FFD2F5;
 }
 .vkb.small .key.small {
-	height: 13px;
+	height: 26px;
 }
 .vkb.large .key.small {
 	height: 29px;
@@ -35,7 +36,7 @@
 
 /* Enter */
 .vkb.small .key.enter {
-	width: 80px;
+	width: 94px;
 }
 .vkb.large .key.enter {
 	width: 158px;
@@ -46,7 +47,7 @@
 	background-color: #FFFBD2;
 }
 .vkb.small .key.backspace {
-	width: 66px;
+	width: 79px;
 }
 .vkb.large .key.backspace {
 	width: 138px;
@@ -58,9 +59,9 @@
 }
 /*.vkb.small .key.arrow {
 	width: 50px;
-}
-.vkb.large .key.arrow {
-	width: 68px;
+}*/
+/*.vkb.large .key.arrow {
+	width: 70px;
 }*/
 
 /* Shift */
@@ -68,10 +69,19 @@
 	background-color: #D0D0D0;
 }
 .vkb.small .key.shift-left {
-	width: 90px;
+	width: 106px;
 }
 .vkb.large .key.shift-left {
-	width: 138px;
+	width: 144px;
+}
+.vkb .key.shift-right {
+	background-color: #D0D0D0;
+}
+.vkb.small .key.shift-right {
+	width: 80px;
+}
+.vkb.large .key.shift-right {
+	width: 128px;
 }
 
 /* Caps */
@@ -79,7 +89,7 @@
 	background-color: #D0D0D0;
 }
 .vkb.small .key.caps {
-	width: 80px;
+	width: 91px;
 }
 .vkb.large .key.caps {
 	width: 114px;
@@ -87,10 +97,10 @@
 
 /* Spacebar */
 .vkb.small .key.spacebar {
-	width: 320px;
+	width: 300px;
 }
 .vkb.large .key.spacebar {
-	width: 412px;
+	width: 398px;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -100,15 +110,20 @@
 }
 
 .vkb.small .key.mod {
-	width: 52px;
+	width: 58px;
 }
 .vkb.large .key.mod {
-	width: 79px;
+	width: 76px;
+}
+.vkb.large .key.mod.ctrl {
+	width: 91px;
+}
+.vkb.small .key.mod.ctrl {
+	width: 68px;
 }
 
-
 .vkb.small .key.tab {
-	width: 66px;
+	width: 79px;
 }
 .vkb.large .key.tab {
 	width: 94px;
