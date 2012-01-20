@@ -59,6 +59,12 @@ SDLCore::SDLCore()
 	m_nFontHeight = 0;
 	m_nFontWidth = 0;
 
+	
+	m_keyRepeat.firsttime = 0;
+	m_keyRepeat.delay = 500; // 500
+	m_keyRepeat.interval = 35; // 35
+	m_keyRepeat.timestamp = 0;
+
 	active = true;
 	lCycleTimeSlot = 25;
 
@@ -245,14 +251,25 @@ void SDLCore::eventLoop()
 	Uint32 lDelay;
 
 	while (isRunning()) {
+		// If a key repeat event is not active:
 		// Block for an event, and then handle all queued events.
 		// This is important since input events (particularly mouse events)
 		// shouldn't be synchronous with a redraw but especially because various
 		// terminal-source events (a quickly scrolling buffer, for example) mark
 		// the screen as dirty and force a refresh.  We should never end up trying
 		// to draw faster than a controlled amount in all cases.
-		SDL_WaitEvent(&event);
-		do {
+
+		bool gotEvent = false;
+		if (!m_keyRepeat.timestamp)
+		{
+			SDL_WaitEvent(&event);
+			gotEvent = true;
+		}
+		else
+			gotEvent = SDL_PollEvent(&event);
+
+		while (gotEvent)
+		{
 			switch (event.type)
 			{
 				case SDL_MOUSEMOTION:
@@ -283,7 +300,10 @@ void SDLCore::eventLoop()
 				default:
 					break;
 			}
-		} while (SDL_PollEvent(&event));
+			gotEvent = SDL_PollEvent(&event);
+		}
+		checkKeyRepeat();
+		
 
 		if (isDirty(FONT_DIRTY_BIT) && active)
 		{
@@ -742,9 +762,47 @@ void SDLCore::resetGlyphCache()
 	setupFontGL(nFonts, (TTF_Font**)fnts, nCols, (SDL_Color*)&cols);
 }
 
+void SDLCore::stopKeyRepeat()
+{
+	m_keyRepeat.timestamp = 0;
+	return;
+}
+
+// pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
+void SDLCore::checkKeyRepeat()
+{
+	//syslog(LOG_ERR, "check ran %i", SDL_GetTicks());
+	if (m_keyRepeat.timestamp)
+	{
+		Uint32 now, interval;
+		now = SDL_GetTicks();
+		interval = (now - m_keyRepeat.timestamp);
+		//syslog(LOG_ERR, "Key Repeat Active [now,interval,delay,timestamp,first] %i - %i - %i - %i - %i",now,interval,m_keyRepeat.delay,m_keyRepeat.timestamp,m_keyRepeat.firsttime);
+		if (m_keyRepeat.firsttime) 
+		{
+			if (interval > (Uint32)m_keyRepeat.delay) 
+			{
+				m_keyRepeat.timestamp = now;
+				m_keyRepeat.firsttime = 0;
+				//syslog(LOG_ERR, "First time delay hit");
+			}
+		} 
+		else 
+		{
+			if (interval > (Uint32)m_keyRepeat.interval) 
+			{
+				m_keyRepeat.timestamp = now;
+				SDL_PushEvent(&m_keyRepeat.evt);
+				//syslog(LOG_ERR, "Pushed Repeat Event");
+			}
+		}
+	}
+}
+
 // pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
 void SDLCore::fakeKeyEvent(SDL_Event &event)
 {
+	int repeatable = 0;
 	Uint16 modstate;
 	Uint8 state;
 	int map;
@@ -758,6 +816,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 		switch (event.key.keysym.sym) 
 		{
 			case SDLK_UNKNOWN:
+				repeatable = 1;
 				break;
 			case SDLK_NUMLOCK:
 				modstate ^= KMOD_NUM;
@@ -799,6 +858,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 				modstate |= KMOD_MODE;
 				break;
 			default:
+				repeatable = 1;
 				break;
 		}
 	} 
@@ -856,6 +916,25 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 		/* Update internal keyboard state */
 		keyState[event.key.keysym.sym] = state;
 		SDL_SetModState((SDLMod)modstate);
+	}
+
+	if (event.type == SDL_KEYUP)
+	{
+		if (m_keyRepeat.timestamp && m_keyRepeat.evt.key.keysym.sym == event.key.keysym.sym) 
+		{
+			m_keyRepeat.timestamp = 0;
+//			syslog(LOG_ERR, "Removed Repeat Event");
+		}
+	}
+	else
+	{
+		if (repeatable && m_keyRepeat.delay != 0) 
+		{
+			m_keyRepeat.evt = event;
+			m_keyRepeat.firsttime = 1;
+			m_keyRepeat.timestamp = SDL_GetTicks();
+//			syslog(LOG_ERR, "Added Repeat Event");
+		}
 	}
 
 	SDL_PushEvent(&event);

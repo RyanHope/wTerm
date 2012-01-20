@@ -37,6 +37,8 @@ PDL_bool inject(PDL_JSParameters *params) {
 PDL_bool setActive(PDL_JSParameters *params) {
 	int active = PDL_GetJSParamInt(params, 0);
 	sdlTerminal->setActive(active);
+	if (active == 0)
+		sdlTerminal->stopKeyRepeat();
 	return PDL_TRUE;
 }
 
@@ -89,7 +91,6 @@ PDL_bool getDimensions(PDL_JSParameters *params) {
 }
 
 PDL_bool pushKeyEvent(PDL_JSParameters *params) {
-
 	SDL_Event event;
 
 	event.type = PDL_GetJSParamInt(params, 0) ? SDL_KEYDOWN : SDL_KEYUP;

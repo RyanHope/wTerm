@@ -25,7 +25,8 @@ enyo.kind({
 			onKeydown: "onBtKeyDown",
 			onWindowActivated: 'windowActivated',
 			onWindowDeactivated: 'windowDeactivated',
-			onApplicationRelaunch: "applicationRelaunchHandler"},
+			onApplicationRelaunch: "applicationRelaunchHandler"
+		},
 		{
 			kind: 'Popup2',
 			name: 'about',
