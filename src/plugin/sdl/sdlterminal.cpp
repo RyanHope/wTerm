@@ -308,21 +308,13 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			c[0] = unicode & 0x7F;
 
 			if (mod & KMOD_CTRL) {
-				if (c[0] > 96 && c[0] < 123) {
-					c[0] -= 96;
-				} else switch (c[0]) {
-					case 32:
-					case 64:
-						c[0] = 0;
-						break;
-					case 91:
-					case 92:
-					case 93:
-					case 94:
-					case 95:
-						c[0] -= 34;
-						break;
-				}
+        // SDL gives us capitalized alpha, make them lowercase
+        if (c[0] >= 'A' && c[0] <= 'Z') {
+          c[0] -= 'A' - 'a';
+        }
+
+        // Encode control by masking
+        c[0] &= 0x1f;
 			} else if (mod & KMOD_ALT) {
 					c[1] = c[0];
 					c[0] = '\x1b';
