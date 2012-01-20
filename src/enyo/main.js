@@ -98,11 +98,8 @@ enyo.kind({
 	},
 	
 	pluginReady: function() {
-		if (this.launchParams.command) {
+		if (this.launchParams.command)
 			this.$.terminal.inject(this.launchParams.command)
-		} else {
-			this.$.terminal.inject("htop")
-		}
 	},
 
 	prefCallSuccess: function(inSender, inResponse) {
