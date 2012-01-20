@@ -166,15 +166,10 @@ void TerminalState::clearBufferLine(int nLine, int nStart, int nEnd)
 			nEnd = 0;
 		}
 
-		if (nEnd >= line->size())
-		{
-			nEnd = (line->size() < 1) ? 0 : (line->size() - 1);
-		}
-
 		if (nStart <= nEnd)
 		{
 			nSize = (nEnd - nStart + 1);
-			line->clear(nStart, nSize, false);
+      line->set(nStart, BLANK, nSize, true);
 		}
 	}
 
@@ -309,7 +304,7 @@ void TerminalState::erase(const Point &start, const Point &end)
 			}
 			else
 			{
-				clearBufferLine(i, nStartX, m_data[i]->size() - 1);
+				clearBufferLine(i, nStartX, m_displayScreenSize.getX());
 			}
 		}
 		//Process last line.

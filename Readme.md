@@ -29,8 +29,9 @@ Contributors
 Screenshots
 -----------
 
-<a href="http://ompldr.org/vYnl6Mw/wterm_2011-29-12_152014.png"><img src="http://ompldr.org/vYnl6Mw/wterm_2011-29-12_152014.png" width=25%></a>
-<a href="http://ompldr.org/vYnV4MQ/wterm_2011-21-12_205004.png"><img src="http://ompldr.org/vYnV4MQ/wterm_2011-21-12_205004.png" width=25%></a>
-<a href="http://ompldr.org/vYzEwcQ/wterm_2012-02-01_183109.png"><img src="http://ompldr.org/vYzEwcQ/wterm_2012-02-01_183109.png" width=25%></a>
-<a href="http://ompldr.org/vYzdkaw/wterm_2012-11-01_170738.png"><img src="http://ompldr.org/vYzdkaw/wterm_2012-11-01_170738.png" width=25%></a>
-<a href="http://ompldr.org/vYzIzNw/wterm_2012-04-01_151716.png"><img src="http://ompldr.org/vYzIzNw/wterm_2012-04-01_151716.png" width=25%></a>
+<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/htop.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/htop.png" width=25%></a>
+<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/irssi.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/irssi.png" width=25%></a>
+<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/midnight_commander.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/midnight_commander.png" width=25%></a><br>
+<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/vim.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/vim.png" width=25%></a>
+<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/emacs.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/emacs.png" width=25%></a>
+<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/stack_of_wterms.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/stack_of_wterms.png" width=25%></a>

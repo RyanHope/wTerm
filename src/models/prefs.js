@@ -1,6 +1,7 @@
 function Prefs() {
 	
 	this.defaults = {
+		bufferlines: 1000,
 		fontSize: 12,
 		inputScheme: 'XFree86 xterm',
 		inputSchemes: {

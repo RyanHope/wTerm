@@ -329,13 +329,12 @@ int Terminal::start()
 	{
 		if (isChild())
 		{
-			const char *argv[5];
+			const char *argv[4];
 
 			argv[0] = "/bin/login";
-			argv[1] = "-p";
-			argv[2] = "-f";
-			argv[3] = getUser();
-			argv[4] = NULL;
+			argv[1] = "-f";
+			argv[2] = getUser();
+			argv[3] = NULL;
 
 			setWindowSize();
 			setTermMode();
@@ -440,7 +439,7 @@ void Terminal::flushOutputBuffer()
 			m_dataBuffer->copy(tmp, m_dataBuffer->size());
 			m_dataBuffer->clear();
 
-			getExtTerminal()->insertData(tmp, nTmpSize);
+			getExtTerminal()->insertData(tmp);
 
 			free(tmp);
 		}
@@ -602,21 +601,9 @@ int Terminal::setRaw()
 	return 0;
 }
 
-void Terminal::insertData(const char *data, size_t size)
+void Terminal::insertData(const char *data)
 {
-	if (size > 0)
-	{
-		/*
-		printf("Send command: ");
-		for (int i=0; i<strlen(data); i++)
-		{
-			printf("[%d]'%c'", data[i], data[i]);
-		}
-		printf("\n");
-		*/
-
-		sendCommand(data);
-	}
+	sendCommand(data);
 }
 
 const char *Terminal::getUser()

@@ -22,8 +22,6 @@
 
 #include "sdl/sdlcore.hpp"
 #include "terminal/extterminal.hpp"
-#include "terminal/vtterminalstate.hpp"
-#include "terminal/terminalconfigmanager.hpp"
 
 #include <vector>
 #include <string>
@@ -35,26 +33,10 @@ class SDLTerminal : public SDLCore, public ExtTerminal, public ExtTerminalContai
 {
 protected:
 	VTTerminalState *m_terminalState;
-	TerminalConfigManager *m_config;
-	Term_KeyMod_t m_keyMod;
-	bool m_bKeyModUsed;
-	bool m_bKeyModLocked;
-	bool m_bCtrlKeyModHeld;
-
-	SDL_Surface *m_keyModShiftSurface;
-	SDL_Surface *m_keyModCtrlSurface;
-	SDL_Surface *m_keyModAltSurface;
-	SDL_Surface *m_keyModFnSurface;
-	SDL_Surface *m_keyModShiftLockedSurface;
-	SDL_Surface *m_keyModCtrlLockedSurface;
-	SDL_Surface *m_keyModAltLockedSurface;
-	SDL_Surface *m_keyModFnLockedSurface;
 
 	void handleKeyboardEvent(SDL_Event &event);
 	void handleMouseEvent(SDL_Event &event);
 	int initCustom();
-	void toggleKeyMod(Term_KeyMod_t keyMod);
-	void disableKeyMod();
 	void initCharsets();
 
 private:
@@ -68,7 +50,7 @@ public:
 	void refresh();
 
 	void redraw();
-	void insertData(const char *data, size_t size);
+	void insertData(const char *data);
 	TerminalState *getTerminalState();
 
 	SDL_Color getColor(TSColor_t color);

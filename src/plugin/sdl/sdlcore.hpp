@@ -50,6 +50,9 @@ protected:
 
 	bool m_reverse;
 
+	bool active;
+	Uint32 lCycleTimeSlot;
+
 	SDL_RWops *file1;
 	SDL_RWops *file2;
 	SDL_RWops *file3;
@@ -147,6 +150,7 @@ public:
 
 	void stopKeyRepeat();
 	void fakeKeyEvent(SDL_Event &event);
+	void setActive(int active);
 };
 
 #endif

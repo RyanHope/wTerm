@@ -1,10 +1,11 @@
 {
 	"title": "wTerm",
 	"id": "us.ryanhope.wterm",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"vendor": "Ryan Hope",
 	"type": "web",
 	"noDeprecatedStyles": true,
+	"keywords": ["terminal"],
 	"main": "index.html",
 	"icon": "images/icon-64.png",
 	"splashicon": "images/icon-128.png",

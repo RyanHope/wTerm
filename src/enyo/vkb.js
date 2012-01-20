@@ -61,7 +61,7 @@ enyo.kind({
 					}
 					if (c.small) c.className += ' small';
 					if (c.extraClasses) c.className += ' ' + c.extraClasses;
-					if (!c.hasOwnProperty('modifier')) c.modifier = 0;
+					if (!c.hasOwnProperty('printable')) c.printable = false;
 					if (!c.hasOwnProperty('unicode') && c.content) c.unicode = c.content.toLowerCase();
 					comps.push(c);
 				}
@@ -79,43 +79,38 @@ enyo.kind({
 		else
 			this.keyDown(inSender)
 	},
+	
+	isShift: function() {
+		return ((this.modstate & this.KMOD_LSHIFT) || (this.modstate & this.KMOD_RSHIFT) || (this.modstate & this.KMOD_CAPS))
+	},
+	
+	processKey: function(inSender) {
+		var sym = null
+		var unicode = null
+		var i = 0
+		if (inSender.printable) {
+			if (this.isShift()) {
+				if (inSender.symbols.length>1)
+					i = 1
+				unicode = inSender.symbols[i][0]
+			} else {
+				unicode = inSender.symbols[i][0].toLocaleLowerCase()
+			}
+			sym = inSender.symbols[i][1];
+		} else {
+			sym = inSender.symbols[i][1]
+		}
+		return [sym, unicode]
+	},
   	
   	keyUp: function(inSender) {
-  		var key = inSender.symbols[0][1];
-		if (!inSender.modifier) {
-			if (this.modstate & this.KMOD_LSHIFT || this.modstate & this.KMOD_CAPS) {
-				if (inSender.symbols.length == 1)
-					key = inSender.symbols[0][1].toUpperCase();
-				else if (inSender.symbols.length > 1)
-					key = inSender.symbols[1][1];
-			}
-		}
-  		if (key != null) {
-  			if (typeof key == 'number') {
-  				this.modstate = this.terminal.keyUp(key, null)
-  			} else if (typeof key == 'string') {
-  				this.modstate = this.terminal.keyUp(null, key)
-  			}
-  		}
+  		var k = this.processKey(inSender)
+  		this.modstate = this.terminal.keyUp(k[0], k[1])
   	},
   	
   	keyDown: function(inSender) {
-  		var key = inSender.symbols[0][1];
-		if (!inSender.modifier) {
-			if (this.modstate & this.KMOD_LSHIFT || this.modstate & this.KMOD_CAPS) {
-				if (inSender.symbols.length == 1)
-					key = inSender.symbols[0][1].toUpperCase();
-				else if (inSender.symbols.length > 1)
-					key = inSender.symbols[1][1];
-			}
-		}
-  		if (key != null) {
-  			if (typeof key == 'number') {
-  				this.modstate = this.terminal.keyDown(key, null)
-  			} else if (typeof key == 'string') {
-  				this.modstate = this.terminal.keyDown(null, key)
-  			}
-  		}
+  		var k = this.processKey(inSender)
+  		this.modstate = this.terminal.keyDown(k[0], k[1])
   	}
 	
 })

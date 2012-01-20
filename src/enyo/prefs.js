@@ -13,8 +13,9 @@ enyo.kind({
 		{kind: "VFlexBox", height: "100%", components: [
 			{kind: "Header", pack: 'center', components: [
 				{kind: "RadioToolButtonGroup", name: 'grp', value: 'appearance', flex: 1, onChange: 'grpChanged', components: [
-	    	  		{caption: "Appearance", value: 'appearance'},
+	    	  		{caption: "Appearance", value: 'appearance', flex: 2},
 			      	{caption: "Input", value: 'input'},
+			      	{caption: "Misc", value: 'misc'},
 			  	]}
 			]},
 	  		{kind: "Scroller", flex: 1, components: [
@@ -68,7 +69,12 @@ enyo.kind({
 						{kind: "Input", name: 'inputF11', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F11'}]},
 						{kind: "Input", name: 'inputF12', onChange: 'inputSchemeChanged', components: [{className: 'enyo-label', content: 'F12'}]},
 					]}
-				]}
+				]},
+				{name: 'grp3', showing: false, components: [
+					{kind: "RowGroup", flex :1, caption: 'Scroll Buffer', components: [
+						{kind: "Input", name: 'bufferlines', onChange: 'bufferlinesChanged', disabled: true, components: [{className: 'enyo-label', content: 'Lines'}]},
+					]},
+		  		]},
 	  		]},
 			{kind: "Toolbar", className: 'enyo-toolbar-light', align: "center", showing: true, components: [
 				{name: "dragHandle", kind: "GrabButton", onclick: "close"},
@@ -175,8 +181,12 @@ enyo.kind({
 		this.$.inputSchemes.setItems(items)
 		this.$.inputSchemes.setValue(this.prefs.get('inputScheme'))
 	},
+	bufferlinesChanged: function() {
+		this.prefs.set('bufferlines', this.$.bufferlines.getValue())
+	},
 	rendered: function() {
 		this.getColors()
+		this.$.bufferlines.setValue(0)//this.prefs.get('bufferlines'))
 		this.$.fontSize.setValue(this.prefs.get('fontSize'))
 		this.$.kbdLayouts.setItems(kbdLayoutList());
 		this.$.kbdLayouts.setValue(this.prefs.get('kbdLayout'))
@@ -202,9 +212,15 @@ enyo.kind({
 		if (this.$.grp.getValue() == 'appearance') {
 			this.$.grp1.setShowing(true)
 			this.$.grp2.setShowing(false)
-		} else {
-			this.$.grp1.setShowing(false)
+			this.$.grp3.setShowing(false)
+		} else if (this.$.grp.getValue() == 'input') {
 			this.$.grp2.setShowing(true)
+			this.$.grp1.setShowing(false)
+			this.$.grp3.setShowing(false)
+		} else {
+			this.$.grp3.setShowing(true)
+			this.$.grp1.setShowing(false)
+			this.$.grp2.setShowing(false)
 		}
 	}
 })
