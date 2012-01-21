@@ -9,6 +9,17 @@ enyo.kind({
 	},
 	lazy: false,
 	components: [
+		{
+			kind: 'Popup2',
+			name: 'warningwarning',
+			modal: true,
+			scrim: true,
+			dismissWithClick: true,
+			components: [
+				{style: 'text-align: center; padding-bottom: 12px; font-size: 120%;', allowHtml: true, content: '<b><u>Warning!</u></b>'},
+				{allowHtml: true, style: 'text-align: center', content: 'Enabling this option will allow any trojan or virus to execute<br>destructive commands on your device without your knowledge!'},
+			]
+		},
 		{name: "shadow", className: "enyo-sliding-view-shadow"},
 		{kind: "VFlexBox", height: "100%", components: [
 			{kind: "Header", pack: 'center', components: [
@@ -192,6 +203,8 @@ enyo.kind({
 	},
 	launchParamWarn: function() {
 		this.prefs.set('launchParamsOK', this.$.justType.state)
+		if (this.$.justType.state)
+			this.$.warningwarning.openAtTopCenter()
 	},
 	rendered: function() {
 		this.getColors()

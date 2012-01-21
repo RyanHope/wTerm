@@ -47,7 +47,7 @@ enyo.kind({
 			autoClose: false,
 			dismissWithClick: false,
 			components: [
-				{style: 'text-align: center; padding-bottom: 12px; font-size: 120%;', allowHtml: true, content: '<b><u>Warning!</u></b>'},
+				{style: 'text-align: center; padding-bottom: 12px; font-size: 120%;', allowHtml: true, content: '<b><u>Notice!</u></b>'},
 				{name: 'warninig', allowHtml: true, content: 'Another application is trying to run the following command(s):'},
 				{name: 'command', allowHtml: true, style: 'font-family: monospace; padding-left: 1em; padding-bottom: 1em'},
 				{kind: 'HFlexBox', components: [
@@ -61,11 +61,23 @@ enyo.kind({
 					]}
 				]}				
 			]
+		},
+		{
+			kind: 'Popup2',
+			name: 'warningwarning',
+			modal: true,
+			scrim: true,
+			dismissWithClick: true,
+			components: [
+				{style: 'text-align: center; padding-bottom: 12px; font-size: 120%;', allowHtml: true, content: '<b><u>Warning!</u></b>'},
+				{allowHtml: true, style: 'text-align: center', content: 'Enabling this option will allow any trojan or virus to execute<br>destructive commands on your device without your knowledge!'},
+			]
 		}
 	],
 	launchParamWarn: function() {
 		this.prefs.set('launchParamsOK', this.$.launchParamsCheckbox.checked)
-		this.log('launchParamWarn', this.prefs.get('launchParamsOK'))
+		if (this.$.launchParamsCheckbox.checked)
+			this.$.warningwarning.openAtTopCenter()
 	},
 	warningCancel: function() {
 		this.$.launchWarning.close()
