@@ -138,14 +138,14 @@ int main(int argc, const char* argv[])
 		sdlTerminal->setExtTerminal(terminal);
 		terminal->setExtTerminal(sdlTerminal);
 
+		//Set defaults
+		sdlTerminal->getTerminalState()->resetTerminal();
+
 		//Must set window size before starting the terminal.
 		terminal->setWindowSize(sdlTerminal->getMaximumColumnsOfText(), sdlTerminal->getMaximumLinesOfText());
 
 		if (terminal->start() == 0) //Non-blocking, creates a thread to read and a child process for slave device.
 		{
-			//Set defaults
-			sdlTerminal->getTerminalState()->resetTerminal();
-
 			while (!terminal->isReady())
 				sched_yield();
 			PDL_CallJS("ready", NULL, 0);
