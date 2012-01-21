@@ -40,7 +40,7 @@ enyo.kind({
   		this.isReady = true
 		this.setColors()
 		this.setKeys()
-  		enyo.job('inject', enyo.bind(this, 'doPluginReady'), 1100)
+  		this.doPluginReady()
   	},
   	pluginConnected: function(inSender, inResponse, inRequest) {
   		this.log('~~~~~ Terminal Plugin Connected ~~~~~')

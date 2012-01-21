@@ -146,6 +146,8 @@ int main(int argc, const char* argv[])
 			//Set defaults
 			sdlTerminal->getTerminalState()->resetTerminal();
 
+			while (!terminal->isReady())
+				sched_yield();
 			PDL_CallJS("ready", NULL, 0);
 
 			sdlTerminal->run(); //Blocking.
