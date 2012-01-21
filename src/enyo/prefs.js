@@ -71,6 +71,12 @@ enyo.kind({
 					]}
 				]},
 				{name: 'grp3', showing: false, components: [
+					{kind: "RowGroup", flex :1, caption: 'Just Type Actions', components: [
+						{kind: "HFlexBox", components: [
+					        {content: "Execute Without Warning", flex: 1},
+					        {kind: "ToggleButton", name: 'justType', onChange: 'launchParamWarn', onLabel: 'True', offLabel: 'False'}
+					    ]}
+					]},
 					{kind: "RowGroup", flex :1, caption: 'Scroll Buffer', components: [
 						{kind: "Input", name: 'bufferlines', onChange: 'bufferlinesChanged', disabled: true, components: [{className: 'enyo-label', content: 'Lines'}]},
 					]},
@@ -184,8 +190,12 @@ enyo.kind({
 	bufferlinesChanged: function() {
 		this.prefs.set('bufferlines', this.$.bufferlines.getValue())
 	},
+	launchParamWarn: function() {
+		this.prefs.set('launchParamsOK', this.$.justType.state)
+	},
 	rendered: function() {
 		this.getColors()
+		this.$.justType.setState(this.prefs.get('launchParamsOK'))
 		this.$.bufferlines.setValue(0)//this.prefs.get('bufferlines'))
 		this.$.fontSize.setValue(this.prefs.get('fontSize'))
 		this.$.kbdLayouts.setItems(kbdLayoutList());

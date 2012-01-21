@@ -36,8 +36,43 @@ enyo.kind({
 				{name: 'fontsize', allowHtml: true, style: 'font-size: 80%;'},
 				{name: 'dimensions', allowHtml: true, style: 'font-size: 80%;'},
 			]
+		},
+		{
+			kind: 'Popup2',
+			name: 'launchWarning',
+			modal: true,
+			scrim: true,
+			autoClose: false,
+			dismissWithClick: false,
+			components: [
+				{style: 'text-align: center; padding-bottom: 12px; font-size: 120%;', allowHtml: true, content: '<b><u>Warning!</u></b>'},
+				{name: 'warninig', allowHtml: true, content: 'Another application is trying to run the following command(s):'},
+				{name: 'command', allowHtml: true, style: 'font-family: monospace; padding-left: 1em; padding-bottom: 1em'},
+				{kind: 'HFlexBox', components: [
+					{kind: 'HFlexBox', flex: 2, align: 'center', components: [
+						{kind: "CheckBox", name: 'launchParamsCheckbox', onChange: 'launchParamWarn'},
+						{style: 'font-size: 80%; padding-left: 1em;', content: 'Do not show this warning again.'},
+					]},
+					{kind: 'HFlexBox', flex: 1, components: [
+						{kind: 'Button', flex: 1, className: 'enyo-button-negative', content: 'Cancel', onclick: 'warningCancel'},
+						{kind: 'Button', flex: 1, className: 'enyo-button-affirmative ', content: 'Ok', onclick: 'warningOk'},
+					]}
+				]}				
+			]
 		}
 	],
+	launchParamWarn: function() {
+		this.prefs.set('launchParamsOK', this.$.launchParamsCheckbox.checked)
+		this.log('launchParamWarn', this.prefs.get('launchParamsOK'))
+	},
+	warningCancel: function() {
+		this.$.launchWarning.close()
+		window.close()
+	},
+	warningOk: function() {
+		this.$.launchWarning.close()
+		this.$.terminal.inject(this.launchParams.command)
+	},
 		
 	newTerm: function(inSender, inEvent, params, reactivate) {
 		var delay = 0
@@ -99,8 +134,14 @@ enyo.kind({
 	},
 	
 	pluginReady: function() {
-		if (this.launchParams.command)
-			this.$.terminal.inject(this.launchParams.command)
+		if (this.launchParams.command) {
+			if (this.prefs.get('launchParamsOK')) {
+				this.$.terminal.inject(this.launchParams.command)
+			} else {
+				this.$.launchWarning.openAtTopCenter()
+				this.$.command.setContent(this.launchParams.command)
+			}
+		}
 	},
 
 	prefCallSuccess: function(inSender, inResponse) {
