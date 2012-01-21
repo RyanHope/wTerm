@@ -173,6 +173,8 @@ typedef enum
 	CS_TERM_PARAM, //ESC[<Value>;...;<Value>x
 	CS_TERM_RESET, //ESCc
 
+	CS_OSC, // Operating System Controls
+
 	//Hardware debug sequences.
 	CS_SCREEN_ALIGN_DISPLAY, //ESC#8
 	CS_LED_LOAD, //ESC[<Value>;...;<Value>q

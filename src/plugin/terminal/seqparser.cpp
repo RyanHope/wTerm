@@ -170,6 +170,9 @@ void ControlSeqParser::buildLookup()
 	addLookupEntry("[", CS_TERM_PARAM, 0, 1, 0, 'x');
 	addLookupEntry("", CS_TERM_RESET, 0, 0, 1, 'c');
 
+	/* Operating System Controls */
+	addLookupEntry("]", CS_OSC, 2, 3, 0, '\007');
+
 	/* VT52 Compat */
 	addLookupEntry("", CS_VT52_ANSI_MODE, 0, 0, 0, '<');
 	addLookupEntry("", CS_VT52_CURSOR_UP, 0, 0, 1, 'A');
