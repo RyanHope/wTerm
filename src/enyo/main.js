@@ -32,9 +32,11 @@ enyo.kind({
 			name: 'about',
 			scrim: true,
 			components: [
-				{style: 'text-align: center; padding-bottom: 12px;', allowHtml: true, content: '<b><u>wTerm v'+enyo.fetchAppInfo().version+'</u></b>'},
-				{name: 'fontsize', allowHtml: true, style: 'font-size: 80%;'},
-				{name: 'dimensions', allowHtml: true, style: 'font-size: 80%;'},
+				{style: 'text-align: center; padding-bottom: 6px; font-size: 120%;', allowHtml: true, content: '<img src="images/icon-64.png"/ style="vertical-align: middle; padding-right: 1em;"><b><u>wTerm v'+enyo.fetchAppInfo().version+'</u></b>'},
+				{style: 'padding: 4px; text-align: center; font-size: 90%', content: '<a href="https://github.com/PuffTheMagic/wTerm">Project Home</a>'},
+				{style: 'padding: 4px; text-align: center; font-size: 90%', content: '<a href="https://github.com/PuffTheMagic/wTerm/issues">Issues</a>'},
+				{style: 'padding: 4px; text-align: center; font-size: 90%', content: '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VU4L7VTGSR5C2">Donate</a>'},
+				{style: 'text-align: center; padding-top: 24px; font-style: italic; font-size: 60%', allowHtml: true, content: '&copy; 2011-2012 WebOS Internals'}
 			]
 		},
 		{
@@ -181,9 +183,6 @@ enyo.kind({
 
 	openAbout: function() {
 		this.$.about.openAtTopCenter()
-		d = this.$.terminal.getDimensions()
-		this.$.dimensions.setContent('<b>Rows x Cols:</b>  '+d[0]+' x '+d[1])
-		this.$.fontsize.setContent('<b>Font Size:</b>  '+this.$.terminal.getFontSize())
 	},
 
 	openPrefs: function() {
