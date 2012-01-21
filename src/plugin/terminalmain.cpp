@@ -135,16 +135,16 @@ int main(int argc, const char* argv[])
 
 	if (sdlTerminal->isReady())
 	{
+		sdlTerminal->setExtTerminal(terminal);
+		terminal->setExtTerminal(sdlTerminal);
+
 		//Must set window size before starting the terminal.
 		terminal->setWindowSize(sdlTerminal->getMaximumColumnsOfText(), sdlTerminal->getMaximumLinesOfText());
 
 		if (terminal->start() == 0) //Non-blocking, creates a thread to read and a child process for slave device.
 		{
-			//Enable autowrap
+			//Set defaults
 			sdlTerminal->getTerminalState()->resetTerminal();
-
-			sdlTerminal->setExtTerminal(terminal);
-			terminal->setExtTerminal(sdlTerminal);
 
 			PDL_CallJS("ready", NULL, 0);
 
