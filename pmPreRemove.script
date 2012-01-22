@@ -12,7 +12,8 @@ sed -i -e "/${APPID}/d" /var/palm/data/jailusers
 
 rm -rf /etc/profile.d/${APPID}
 
-rm -rf /bin/sh
-ln -s /bin/busybox /bin/sh
+deluser wterm
+
+rm -rf /usr/local/bin/su
 
 exit 0

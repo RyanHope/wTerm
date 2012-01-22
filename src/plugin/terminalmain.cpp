@@ -110,7 +110,6 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 
 int main(int argc, const char* argv[])
 {
-
 	openlog("us.ryanhope.wterm.plugin", LOG_PID, LOG_USER);
 	setlogmask(LOG_UPTO((argc > 3 && atoi(argv[3])>=LOG_EMERG && atoi(argv[3])<=LOG_DEBUG) ? atoi(argv[3]) : LOGLEVEL));
 

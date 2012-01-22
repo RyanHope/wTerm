@@ -2,7 +2,7 @@ function Prefs() {
 	
 	this.defaults = {
 		firstUse: false,
-		exec: 'login -f root',
+		exec: 'login -f wterm',
 		launchParamsOK: false,
 		bufferlines: 1000,
 		fontSize: 12,
