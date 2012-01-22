@@ -26,6 +26,21 @@ Contributors
 * Ryan Hope (Project Lead)
 * Brian Kearney
 
+Safe Root Access
+----------------
+
+By default, wTerm logs into a non-root user (wterm). For safe root access follow the procedure below:
+
+1. Open the wTerm preferences dialog from the app menu.
+1. Click on the 'Misc' tab.
+1. Change the 'Default Exec Command' to 'login -f root'.
+1. Restart wTerm.
+1. Run 'passwd' to set a root password.
+1. Run 'vi /etc/group', add 'wterm' to the root group.
+1. Change the 'Default Exec Command' back to 'login -f wterm'.
+1. Restart wTerm.
+
+
 Screenshots
 -----------
 
