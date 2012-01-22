@@ -175,12 +175,10 @@ typedef struct
 {
 	TSColor_t foregroundColor;
 	TSColor_t backgroundColor;
-	int nColumn;
-	int nLine;
 	int nGraphicsMode;
 	TSCharset_t g0charset;
 	TSCharset_t g1charset;
-} TSLineGraphicsState_t;
+} TSCellGraphicsState_t;
 
 typedef enum
 {
@@ -190,6 +188,16 @@ typedef enum
 	TS_GM_OP_MAX
 } TSGraphicsModeOp_t;
 
+// For each cell on the screen, track its graphics and textual contents:
+typedef struct {
+	TSCellGraphicsState_t graphics;
+	char data;
+} TSCell_t;
+// Say that a line is a vector of cells.
+// For now, they don't have to be the same size as the screen,
+// in which case the unrepresented cells are empty using our bg color.
+typedef std::vector<TSCell_t> TSLine_t;
+
 /**
  * Terminal state information catered.
  */
@@ -198,9 +206,10 @@ class TerminalState
 protected:
 	int m_nTermModeFlags;
 
-	TSLineGraphicsState_t m_defaultGraphicsState;
-	TSLineGraphicsState_t m_currentGraphicsState;
-	TSLineGraphicsState_t m_savedGraphicsState;
+	TSCellGraphicsState_t m_defaultGraphicsState;
+	TSCellGraphicsState_t m_currentGraphicsState;
+	TSCellGraphicsState_t m_savedGraphicsState;
+	Point m_savedCursorLoc;
 
 	bool m_bShiftText;
 
@@ -209,8 +218,8 @@ protected:
 	Point m_cursorLoc; //Bound by the display screen size. Home location is (1, 1).
 	Point m_displayScreenSize; //The actual terminal screen size.
 
-	std::deque<DataBuffer *> m_data; //Each list entry represents a line in the console. Holds only printable characters.
-	std::vector<TSLineGraphicsState_t *> m_graphicsState;
+	// Our line buffer (including what's on-screen)
+	std::deque<TSLine_t> m_data;
 
 	pthread_mutexattr_t m_rwLockAttr;
 	pthread_mutex_t m_rwLock;
@@ -223,16 +232,10 @@ protected:
 	int m_nBottomMargin;
 
 	void freeBuffer();
-	void freeGraphicsMode();
-	void freeGraphicsMode(std::vector<TSLineGraphicsState_t *>::iterator start, std::vector<TSLineGraphicsState_t *>::iterator end);
 
-	void removeGraphicsState(int nColumn, int nLine, bool bTrim, TSLineGraphicsState_t *resetState);
-	void removeGraphicsState(int nBeginColumn, int nBeginLine, int nEndColumn, int nEndLine, TSLineGraphicsState_t *resetState);
-	void removeGraphicsStates(int nLine, int nBeginColumn, int nEndColumn, TSLineGraphicsState_t *resetState);
-	int findGraphicsState(int nColumn, int nLine, bool bGetPrev);
 	void moveGraphicsState(int nLines, bool bUp);
 
-	void clearBufferLine(int nLine, int nStartX, int nEndX);
+	void clearBufferLine(int nLine, int nStartX, int nEndX, TSCell_t & eraseTo);
 	void setBufferTopLine(int nLine);
 	void erase(const Point &start, const Point &end);
 
@@ -280,7 +283,6 @@ public:
 	void insertChar(char c, bool bAdvanceCursor);
 	void insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrintable);
 	void insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrintable, bool bShift);
-	void deleteChar(bool bAdvanceCursor, bool bShift);
 
 	void setDisplayScreenSize(int nWidth, int nHeight);
 	Point getDisplayScreenSize();
@@ -304,8 +306,8 @@ public:
 	TSColor_t getForegroundColor();
 	void setBackgroundColor(TSColor_t color);
 	TSColor_t getBackgroundColor();
-	TSLineGraphicsState_t getCurrentGraphicsState();
-	TSLineGraphicsState_t getDefaultGraphicsState();
+	TSCellGraphicsState_t getCurrentGraphicsState();
+	TSCellGraphicsState_t getDefaultGraphicsState();
 
 	void setG0Charset(TSCharset_t charset);
 	TSCharset_t getG0Charset();
@@ -313,7 +315,7 @@ public:
 	TSCharset_t getG1Charset();
 
 	int getBufferScreenHeight();
-	DataBuffer *getBufferLine(int nLineIndex);
+	TSLine_t * getBufferLine(int nLineIndex);
 	int getBufferTopLineIndex();
 	void setNumBufferLines(int nNumLines);
 
@@ -323,9 +325,12 @@ public:
 	void lock();
 	void unlock();
 
-	void getLineGraphicsState(int nLine, TSLineGraphicsState_t **states, int &nNumStates, int nMaxStates);
-	void addGraphicsState(int nColumn, int nLine, TSLineGraphicsState_t& state, TSGraphicsModeOp_t op, bool bTrim);
-	void addGraphicsState(int nColumn, int nLine, TSColor_t foregroundColor, TSColor_t backgroundColor, int nGraphicsMode, TSCharset_t g0charset, TSCharset_t g1charset, TSGraphicsModeOp_t op, bool bTrim);
+	TSCell_t getEmptyCell() {
+		TSCell_t cell;
+		cell.graphics = m_defaultGraphicsState;
+		cell.data = BLANK;
+		return cell;
+	}
 
 	void resetTerminal();
 	void insertLines(int nLines);

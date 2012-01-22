@@ -29,13 +29,6 @@
 #include <time.h>
 #include <syslog.h>
 
-// Convert mid-string null characters to blanks
-static void stringify(char * str, size_t len) {
-	for(unsigned i = 0; i < len; ++i)
-		if (!str[i]) str[i] = ' ';
-	str[len] = '\0';
-}
-
 // Some HP BT keycodes
 #define HP_BT_LEFT 18
 #define HP_BT_UP 19
@@ -353,135 +346,39 @@ void SDLTerminal::redraw()
 {
 	m_terminalState->lock();
 
-	char *sBuffer = NULL;
-	size_t size = (m_terminalState->getDisplayScreenSize().getX() + 1) * sizeof(char);
-	DataBuffer *databuffer;
 	int nTopLineIndex = m_terminalState->getBufferTopLineIndex();
 	int nEndLine = nTopLineIndex + m_terminalState->getDisplayScreenSize().getY();
-	int nLine = 1;
-	int nResult = 0;
 
-	TSLineGraphicsState_t **states = NULL;
-	TSLineGraphicsState_t *tmpState = NULL;
-	int nNumStates = 0;
-	int nMaxStates = m_terminalState->getDisplayScreenSize().getX();
-	int nStartIdx;
-	TSLineGraphicsState_t defState = m_terminalState->getDefaultGraphicsState();
+	TSCellGraphicsState_t defState = m_terminalState->getDefaultGraphicsState();
 
 	setGraphicsState(defState);
 	m_reverse = (m_terminalState->getTerminalModeFlags() & TS_TM_SCREEN);
+
+	// Clear the entire screen to the default background color
 	clearScreen(m_reverse ? defState.foregroundColor : defState.backgroundColor);
 
-	if (size <= 0)
+	startTextGL(m_terminalState->getDisplayScreenSize().getX(),
+			m_terminalState->getDisplayScreenSize().getY());
+
+	for (int i = nTopLineIndex; i < nEndLine; ++i)
 	{
-		nResult = -1;
-	}
+		TSLine_t * line = m_terminalState->getBufferLine(i);
 
-	if (nResult == 0)
-	{
-		sBuffer = (char *)malloc(size);
-
-		if (sBuffer == NULL)
+		int nCol = 1;
+		for(TSLine_t::iterator I = line->begin(), E = line->end(); I != E;
+				++I, ++nCol)
 		{
-			nResult = -1;
-		}
-
-		states = (TSLineGraphicsState_t **)malloc(nMaxStates * sizeof(TSLineGraphicsState_t *));
-
-		if (states == NULL)
-		{
-			nResult = -1;
+			// TODO: Refactor this, it's ridiculous :P
+			char c[2] = { I->data, 0 };
+			setGraphicsState(I->graphics);
+			printText(nCol, i - nTopLineIndex + 1, c);
 		}
 	}
 
-	if (nResult == 0)
-	{
+	endTextGL();
 
-		startTextGL(m_terminalState->getDisplayScreenSize().getX() + 1,
-				m_terminalState->getDisplayScreenSize().getY() + 1);
-
-		for (int i = nTopLineIndex; i < nEndLine; i++)
-		{
-			m_terminalState->getLineGraphicsState(nLine, states, nNumStates, nMaxStates);
-			databuffer = m_terminalState->getBufferLine(i);
-			memset(sBuffer, 0, size);
-			databuffer->copy(sBuffer, size - 1);
-			stringify(sBuffer, databuffer->size());
-
-			if (nNumStates > 0)
-			{
-				nStartIdx = 0;
-
-				for (int j = nNumStates - 1; j >= 0; j--)
-				{
-					if (j < nMaxStates)
-					{
-						tmpState = states[j];
-
-						if (tmpState->nLine != nLine)
-						{
-							nStartIdx = 0;
-						}
-						else
-						{
-							nStartIdx = tmpState->nColumn - 1;
-						}
-
-						if (nStartIdx < 0)
-						{
-							nStartIdx = 0;
-						}
-						else if (nStartIdx >= strlen(sBuffer))
-						{
-							continue;
-						}
-
-						setGraphicsState(*tmpState);
-					}
-					else
-					{
-						setGraphicsState(defState);
-						nStartIdx = 0;
-					}
-
-					if (strlen(sBuffer + nStartIdx) > 0)
-					{
-						printText(nStartIdx + 1, nLine, sBuffer + nStartIdx);
-						sBuffer[nStartIdx] = '\0';
-					}
-
-					if (nStartIdx == 0)
-					{
-						break;
-					}
-				}
-			}
-			else
-			{
-				if (strlen(sBuffer) > 0)
-				{
-					printText(1, nLine, sBuffer);
-				}
-			}
-
-			nLine++;
-		}
-
-		endTextGL();
-
-		if (m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR)
-			drawCursor(m_terminalState->getCursorLocation().getX(), m_terminalState->getCursorLocation().getY());
-	}
-
-	if (sBuffer != NULL)
-	{
-		free(sBuffer);
-	}
-
-	if (states != NULL)
-	{
-		free(states);
-	}
+	if (m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR)
+		drawCursor(m_terminalState->getCursorLocation().getX(), m_terminalState->getCursorLocation().getY());
 
 	m_terminalState->unlock();
 
@@ -549,7 +446,7 @@ void SDLTerminal::setBackgroundColor(TSColor_t color)
 	setDirty(BACKGROUND_COLOR_DIRTY_BIT);
 }
 
-void SDLTerminal::setGraphicsState(TSLineGraphicsState_t &state)
+void SDLTerminal::setGraphicsState(TSCellGraphicsState_t &state)
 {
 	if ((state.nGraphicsMode & TS_GM_NEGATIVE) > 0)
 	{
