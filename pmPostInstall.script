@@ -22,4 +22,9 @@ echo "${JUID}:5000:${APPID}:/dev/null:${APPDIR}/jail.conf" >> /var/palm/data/jai
 mkdir -p /etc/profile.d
 echo "PATH=\${PATH}:${APPDIR}/bin" > /etc/profile.d/${APPID}
 
+rm -rf /bin/su
+cp /bin/busybox /bin/su
+chmod 750 /bin/su
+chmod ug+s /bin/su
+
 exit 0
