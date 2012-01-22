@@ -27,6 +27,8 @@ cp /bin/busybox /usr/local/bin/su
 chmod 750 /usr/local/bin/su
 chmod ug+s /usr/local/bin/su
 
-adduser -D wterm
+adduser -D wterm -h /home/wterm -g "wTerm User"
+mkdir /home/wterm
+chown wterm /home/wterm
 
 exit 0
