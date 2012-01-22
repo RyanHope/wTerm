@@ -325,7 +325,7 @@ void TerminalState::deleteCharacters(int nChars)
 	// TODO: Is this right?
 	int nY = cursor.getY() - 1;
 	int nX = cursor.getX() - 1;
-	int nEnd = nX + nChars + 1;
+	int nEnd = nX + nChars;
 	if (nEnd > m_data[nY].size())
 		nEnd = m_data[nY].size();
 	for(int i = nX; i < nEnd; ++i)
