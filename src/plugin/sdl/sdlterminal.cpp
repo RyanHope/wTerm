@@ -20,6 +20,7 @@
 #include "sdl/sdlterminal.hpp"
 #include "util/databuffer.hpp"
 #include "terminal/terminal.hpp"
+#include "util/utf8.hpp"
 
 #include <GLES/gl.h>
 #include <SDL/SDL_image.h>
@@ -207,7 +208,7 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 	SDLMod mod = event.key.keysym.mod;
 	Uint16 unicode = event.key.keysym.unicode;
 
-	char c[3] = { '\0', '\0', '\0'};
+	char c[4];
 
 	ExtTerminal *extTerminal = getExtTerminal();
 
@@ -224,28 +225,50 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 		case HP_BT_UP:
 		case HP_BT_PLUGIN_UP:
 		case SDLK_UP:
-			m_terminalState->sendCursorCommand(VTTS_CURSOR_UP, extTerminal);
+			if (!(mod & KMOD_MODE)) {
+				m_terminalState->sendCursorCommand(VTTS_CURSOR_UP, extTerminal);
+				break;
+			}
+		case SDLK_PAGEUP:
+			extTerminal->insertData("\x1B[5~");
 			break;
 		case HP_BT_DOWN:
 		case HP_BT_PLUGIN_DOWN:
 		case SDLK_DOWN:
-			m_terminalState->sendCursorCommand(VTTS_CURSOR_DOWN, extTerminal);
+			if (!(mod & KMOD_MODE)) {
+				m_terminalState->sendCursorCommand(VTTS_CURSOR_DOWN, extTerminal);
+				break;
+			}
+		case SDLK_PAGEDOWN:
+			extTerminal->insertData("\x1B[6~");
 			break;
 		case HP_BT_RIGHT:
 		case HP_BT_PLUGIN_RIGHT:
 		case SDLK_RIGHT:
-			if (mod & KMOD_MODE)
-				extTerminal->insertData("\x1B[F");
-			else
+			if (!(mod & KMOD_MODE)) {
 				m_terminalState->sendCursorCommand(VTTS_CURSOR_RIGHT, extTerminal);
+				break;
+			}
+			/* fall through for KMOD_MODE */
+		case SDLK_END:
+			extTerminal->insertData("\x1B[F");
 			break;
 		case HP_BT_LEFT:
 		case HP_BT_PLUGIN_LEFT:
 		case SDLK_LEFT:
-			if (mod & KMOD_MODE)
-				extTerminal->insertData("\x1B[H");
-			else
+			if (!(mod & KMOD_MODE)) {
 				m_terminalState->sendCursorCommand(VTTS_CURSOR_LEFT, extTerminal);
+				break;
+			}
+			/* fall through for KMOD_MODE */
+		case SDLK_HOME:
+			extTerminal->insertData("\x1B[H");
+			break;
+		case SDLK_INSERT:
+			extTerminal->insertData("\x1B[2~");
+			break;
+		case SDLK_DELETE:
+			extTerminal->insertData("\x1B[3~");
 			break;
 		case SDLK_ESCAPE:
 			extTerminal->insertData("\x1b");
@@ -301,29 +324,21 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			else
 				extTerminal->insertData("\x7F");
 			break;
-		default:
+		case 0:
 			// Failed to handle based on 'sym', look to unicode:
 			// Accordingly, if no unicode value, we're done here.
 			if (!unicode) break;
-			// We don't yet handle international characters
-			if ((unicode & 0xFF80) != 0) {
-				syslog(LOG_INFO, "An International Character.");
-				break;
-			}
 
-			c[0] = unicode & 0x7F;
-
-			if (mod & KMOD_CTRL) {
-        // SDL gives us capitalized alpha, make them lowercase
-        if (c[0] >= 'A' && c[0] <= 'Z') {
-          c[0] -= 'A' - 'a';
-        }
-
-        // Encode control by masking
-        c[0] &= 0x1f;
-			} else if (mod & KMOD_ALT) {
-					c[1] = c[0];
-					c[0] = '\x1b';
+			if (0 != (mod & KMOD_CTRL) && unicode < 0x80) {
+				// Encode control by masking (lowercase/uppercase only differs in 0x20 bit)
+				c[0] = 0x1f & unicode;
+				c[1] = 0;
+			} else if (0 != (mod & KMOD_ALT) && unicode < 0x80) {
+				c[0] = '\x1b';
+				c[1] = unicode;
+				c[2] = 0;
+			} else {
+				writeUtf8Char(c, unicode);
 			}
 			extTerminal->insertData(c);
 
