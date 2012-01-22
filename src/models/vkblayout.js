@@ -43,6 +43,6 @@ function kbdLayoutLoad(name, keys) {
 	layout.onload = null;
 }
 
-kbdLayouts.default = { caption: 'Default (en-US)' };
+kbdLayouts.default = { caption: 'QWERTY (en-US)' };
 kbdLayouts.dvorak = { caption: 'Dvorak Simplified (en-US)' };
 kbdLayouts.german = { caption: 'QWERTZ (german)' };
