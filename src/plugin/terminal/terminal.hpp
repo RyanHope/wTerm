@@ -30,6 +30,9 @@
 #include "extterminal.hpp"
 #include "util/databuffer.hpp"
 
+#include <string>
+#include <vector>
+
 class Terminal : public ExtTerminal, public ExtTerminalContainer
 {
 private:
@@ -39,6 +42,8 @@ private:
 	char *m_slaveName;
 	char *m_sUser;
 	DataBuffer *m_dataBuffer;
+
+	std::vector<std::string> m_exec;
 
 	pthread_t m_readerThread;
 	struct winsize m_winSize;
@@ -74,6 +79,7 @@ public:
 
 	const char *getUser();
 	void setUser(const char *sUser);
+	void setExec(const char *exec);
 };
 
 #endif

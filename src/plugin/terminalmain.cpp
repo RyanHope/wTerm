@@ -122,6 +122,9 @@ int main(int argc, const char* argv[])
 	sdlTerminal->start();
 	sdlTerminal->setFontSize((argc > 1 && atoi(argv[1])) ? atoi(argv[1]) : 12);
 
+	if (argc > 3)
+		terminal->setExec(argv[3]);
+
 	PDL_RegisterJSHandler("inject", inject);
 	PDL_RegisterJSHandler("setActive", setActive);
 	PDL_RegisterJSHandler("setKey", setKey);

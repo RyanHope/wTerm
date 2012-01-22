@@ -67,6 +67,8 @@ Terminal::Terminal()
 	m_nWritePriority = 0;
 	m_sUser = NULL;
 
+	setExec("login -f root");
+
 	setUser("root");
 	memset(&m_winSize, 0, sizeof(m_winSize));
 }
@@ -329,12 +331,12 @@ int Terminal::start()
 	{
 		if (isChild())
 		{
-			const char *argv[4];
-
-			argv[0] = "/bin/login";
-			argv[1] = "-f";
-			argv[2] = getUser();
-			argv[3] = NULL;
+			const char *argv[m_exec.size()+1];
+			int i=0;
+			for (; i<m_exec.size(); i++) {
+				argv[i] = m_exec[i].c_str();
+			}
+			argv[i] = NULL;
 
 			setWindowSize();
 			setTermMode();
@@ -620,4 +622,18 @@ void Terminal::setUser(const char *sUser)
 		m_sUser = (char *)realloc(m_sUser, userSize);
 		memcpy(m_sUser, sUser, userSize);
 	}
+}
+
+void Terminal::setExec(const char *exec)
+{
+	char *str = strdup(exec);
+	m_exec.clear();
+	char *pch;
+	pch = strtok((char*)str, " ");
+	while (pch != NULL)
+	{
+		m_exec.push_back(pch);
+		pch = strtok(NULL, " ");
+	}
+	free(str);
 }
