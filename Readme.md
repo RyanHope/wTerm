@@ -24,6 +24,7 @@ Contributors
 * Stefan Bühler
 * Will Dietz
 * Ryan Hope (Project Lead)
+* Chris Jowett
 * Brian Kearney
 
 Safe Root Access
