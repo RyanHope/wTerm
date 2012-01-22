@@ -21,6 +21,7 @@
 #include "sdl/sdlterminal.hpp"
 #include "terminal/terminal.hpp"
 #include "terminal/vtterminalstate.hpp"
+#include "util/utf8.hpp"
 
 #include <syslog.h>
 #include <PDL.h>
@@ -96,7 +97,7 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 	event.type = PDL_GetJSParamInt(params, 0) ? SDL_KEYDOWN : SDL_KEYUP;
 	event.key.type = event.type;
 	event.key.keysym.sym = (SDLKey)PDL_GetJSParamInt(params, 1);
-	event.key.keysym.unicode = PDL_GetJSParamString(params, 2)[0];
+	event.key.keysym.unicode = parseUtf8Char(PDL_GetJSParamString(params, 2));
 
 	sdlTerminal->fakeKeyEvent(event);
 
