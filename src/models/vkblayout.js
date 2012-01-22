@@ -154,7 +154,7 @@ kbdLayouts.dvorak.keys = [
 		{symbols: [['8',SDLK._8],['*',SDLK._ASTERISK]], printable: true},
 		{symbols: [['9',SDLK._9],['(',SDLK._LEFTPAREN]], printable: true},
 		{symbols: [['0',SDLK._0],[')',SDLK._RIGHTPAREN]], printable: true},
-		{symbols: [['[',SDLK._LEFTBRACKET],['{',SDLK._LEFTBRACKET]]], printable: true},
+		{symbols: [['[',SDLK._LEFTBRACKET],['{',SDLK._LEFTBRACKET]], printable: true},
 		{symbols: [[']',SDLK._RIGHTBRACKET],['}',SDLK._RIGHTBRACKET]], printable: true},
 		{symbols: [['Bksp<br><img src="images/key_backspace.png" class="keyImg"/>',SDLK._BACKSPACE]], extraClasses: 'backspace'},
 	],
