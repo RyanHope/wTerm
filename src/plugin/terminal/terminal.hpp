@@ -77,8 +77,6 @@ public:
 
 	void insertData(const char *data);
 
-	const char *getUser();
-	void setUser(const char *sUser);
 	void setExec(const char *exec);
 };
 

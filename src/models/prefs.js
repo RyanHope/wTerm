@@ -1,6 +1,8 @@
 function Prefs() {
 	
 	this.defaults = {
+		firstUse: false,
+		exec: 'login -f root',
 		launchParamsOK: false,
 		bufferlines: 1000,
 		fontSize: 12,

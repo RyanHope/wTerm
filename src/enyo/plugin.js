@@ -31,7 +31,7 @@ enyo.kind({
 			passTouchEvents: true,
 			width: this.width,
 			height: this.height,
-			params: [this.prefs.get('fontSize').toString(10)]
+			params: [this.prefs.get('fontSize').toString(10), this.prefs.get('exec')]
 		})
 	},
 		

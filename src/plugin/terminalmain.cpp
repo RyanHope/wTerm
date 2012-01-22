@@ -112,7 +112,7 @@ int main(int argc, const char* argv[])
 {
 
 	openlog("us.ryanhope.wterm.plugin", LOG_PID, LOG_USER);
-	setlogmask(LOG_UPTO((argc > 2 && atoi(argv[2])>=LOG_EMERG && atoi(argv[2])<=LOG_DEBUG) ? atoi(argv[2]) : LOGLEVEL));
+	setlogmask(LOG_UPTO((argc > 3 && atoi(argv[3])>=LOG_EMERG && atoi(argv[3])<=LOG_DEBUG) ? atoi(argv[3]) : LOGLEVEL));
 
 	PDL_Init(0);
 
@@ -122,8 +122,10 @@ int main(int argc, const char* argv[])
 	sdlTerminal->start();
 	sdlTerminal->setFontSize((argc > 1 && atoi(argv[1])) ? atoi(argv[1]) : 12);
 
-	if (argc > 3)
-		terminal->setExec(argv[3]);
+	if (argc > 2)
+		terminal->setExec(argv[2]);
+	else
+		terminal->setExec("login -f root");
 
 	PDL_RegisterJSHandler("inject", inject);
 	PDL_RegisterJSHandler("setActive", setActive);

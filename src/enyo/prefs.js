@@ -82,14 +82,17 @@ enyo.kind({
 					]}
 				]},
 				{name: 'grp3', showing: false, components: [
+					{kind: "RowGroup", flex :1, caption: 'Default Exec Command', components: [
+						{kind: "Input", name: 'exec', changeOnInput: true, onchange: 'execChanged'},
+					]},
 					{kind: "RowGroup", flex :1, caption: 'Just Type Actions', components: [
 						{kind: "HFlexBox", components: [
 					        {content: "Execute Without Warning", flex: 1},
 					        {kind: "ToggleButton", name: 'justType', onChange: 'launchParamWarn', onLabel: 'True', offLabel: 'False'}
 					    ]}
 					]},
-					{kind: "RowGroup", flex :1, caption: 'Scroll Buffer', components: [
-						{kind: "Input", name: 'bufferlines', onChange: 'bufferlinesChanged', disabled: true, components: [{className: 'enyo-label', content: 'Lines'}]},
+					{kind: "RowGroup", flex :1, caption: 'Scroll Buffer Lines', components: [
+						{kind: "Input", name: 'bufferlines', changeOnInput: true, onchange: 'bufferlinesChanged', disabled: true},
 					]},
 		  		]},
 	  		]},
@@ -198,6 +201,9 @@ enyo.kind({
 		this.$.inputSchemes.setItems(items)
 		this.$.inputSchemes.setValue(this.prefs.get('inputScheme'))
 	},
+	execChanged: function() {
+		this.prefs.set('exec', this.$.exec.getValue())
+	},
 	bufferlinesChanged: function() {
 		this.prefs.set('bufferlines', this.$.bufferlines.getValue())
 	},
@@ -208,6 +214,7 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.getColors()
+		this.$.exec.setValue(this.prefs.get('exec'))
 		this.$.justType.setState(this.prefs.get('launchParamsOK'))
 		this.$.bufferlines.setValue(0)//this.prefs.get('bufferlines'))
 		this.$.fontSize.setValue(this.prefs.get('fontSize'))

@@ -67,9 +67,6 @@ Terminal::Terminal()
 	m_nWritePriority = 0;
 	m_sUser = NULL;
 
-	setExec("login -f root");
-
-	setUser("root");
 	memset(&m_winSize, 0, sizeof(m_winSize));
 }
 
@@ -606,22 +603,6 @@ int Terminal::setRaw()
 void Terminal::insertData(const char *data)
 {
 	sendCommand(data);
-}
-
-const char *Terminal::getUser()
-{
-	return m_sUser;
-}
-
-void Terminal::setUser(const char *sUser)
-{
-	if (sUser != NULL)
-	{
-		size_t userSize = (strlen(sUser) + 1) * sizeof(char);
-
-		m_sUser = (char *)realloc(m_sUser, userSize);
-		memcpy(m_sUser, sUser, userSize);
-	}
 }
 
 void Terminal::setExec(const char *exec)
