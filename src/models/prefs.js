@@ -241,3 +241,9 @@ Prefs.prototype.get = function(key) {
 Prefs.prototype.clear = function() {
 	localStorage.clear()
 }
+
+Prefs.prototype.reset = function() {
+	for (key in this.defaults) {
+		this.set(key, this.defaults[key])
+	}
+}

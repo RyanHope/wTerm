@@ -98,10 +98,19 @@ enyo.kind({
 	  		]},
 			{kind: "Toolbar", className: 'enyo-toolbar-light', align: "center", showing: true, components: [
 				{name: "dragHandle", kind: "GrabButton", onclick: "close"},
-				{kind: 'Button', caption: 'Restore Defaults', disabled: true}
+				{kind: 'Button', caption: 'Restore Defaults', onclick: "restore"}
 			]}
 		]}
 	],
+	
+	restore: function() {
+		this.prefs.reset()
+		this.rendered()
+		this.terminal.setFontSize(this.prefs.get('fontSize'))
+		this.terminal.setColors()
+		this.terminal.setKeys()
+		this.vkb.loadLayout(this.$.kbdLayouts.getValue());
+	},
 	
 	flyInFromChanged: function() {
 		this.inherited(arguments);
