@@ -7,5 +7,5 @@ wterm
 *.la
 *.a
 .directory
-bin
+bin/vttest
 ipk

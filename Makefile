@@ -21,14 +21,11 @@ ipk/$(IPK): wterm bin/vttest clean-package
 clean-package:
 	- rm -rf ipk
 
-bin:
-	- mkdir -p bin
-
-wterm: bin
+wterm:
 	- cd src/plugin; $(MAKE)
 	- mv src/plugin/wterm wterm
 
-bin/vttest: bin
+bin/vttest:
 	- cd src/vttest; $(MAKE)
 	- mv src/vttest/vttest bin/vttest
 
@@ -43,7 +40,7 @@ test: install
 
 clean:
 	- rm -rf ipk
-	- rm -rf bin
+	- rm -rf bin/vttest
 	- rm -rf wterm
 	- cd src/plugin; make clean
 	- cd src/vttest; make clean
