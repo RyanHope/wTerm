@@ -1,3 +1,15 @@
+
+function vbkKeyContent(symbol) {
+	if (!symbol) return '';
+	return (3 <= symbol.length) ? symbol[2] : symbol[0];
+}
+
+function arrayRemoveNull(l) {
+	var r = [], i;
+	for (i = 0; i < l.length; i++) if (l[i] !== null) r.push(l[i]);
+	return r;
+}
+
 enyo.kind({
 	name: 'vkbKey',
 	kind: enyo.Button,
@@ -30,40 +42,41 @@ enyo.kind({
 	initComponents: function() {
     	this.inherited(arguments)
     	if (this.symbols) {
-	    	switch(this.symbols.length) {
+			if (!this.visual) this.visual = arrayRemoveNull(this.symbols);
+	    	switch(this.visual.length) {
 	    		case 1:
 	    			this.createComponents([
-	    				{flex: 1, content: this.symbols[0][0]}
+	    				{flex: 1, content: vbkKeyContent(this.visual[0])}
     				]);
 	    			break;
 	    		case 2:
 	    			this.createComponents([
 	    				{flex: 1, kind: 'VFlexBox', components: [
-	    					{content: this.symbols[1][0]},
-	    					{content: this.symbols[0][0]},
+	    					{content: vbkKeyContent(this.visual[1])},
+	    					{content: vbkKeyContent(this.visual[0])},
 	    				]}
 	    			]);
 	    			break;
 	    		case 3:
 	    			this.createComponents([
 	    				{flex: 1, kind: 'VFlexBox', components: [
-	    					{content: this.symbols[1][0]},
-	    					{content: this.symbols[0][0]},
+	    					{content: vbkKeyContent(this.visual[1])},
+	    					{content: vbkKeyContent(this.visual[0])},
 	    				]},
 	    				{flex: 1, kind: 'VFlexBox', pack: 'start', components: [
-	    					{content: this.symbols[2][0], flex: 1}
+	    					{content: vbkKeyContent(this.visual[2]), flex: 1}
 	    				]},
     				]);
 	    			break;
 	    		case 4:
 	    			this.createComponents([
 	    				{flex: 1, kind: 'VFlexBox', components: [
-	    					{content: this.symbols[1][0]},
-	    					{content: this.symbols[0][0]},
+	    					{content: vbkKeyContent(this.visual[1])},
+	    					{content: vbkKeyContent(this.visual[0])},
 	    				]},
 	    				{flex: 1, kind: 'VFlexBox', components: [
-	    					{content: this.symbols[3][0]},
-	    					{content: this.symbols[2][0]}
+	    					{content: vbkKeyContent(this.visual[3])},
+	    					{content: vbkKeyContent(this.visual[2])}
 	    				]}
     				]);
 	    			break;
@@ -71,13 +84,14 @@ enyo.kind({
 	    }
    	},
 
-  	rendered: function() {
+	rendered: function() {
 		this.inherited(arguments);
-  		this.hasNode();
-        this.node.ontouchstart = enyo.bind(this,'handleTouchstart')
-        //this.node.ontouchmove = this.doTouchMove;
-        this.node.ontouchend = enyo.bind(this,'handleTouchend')
-  	},
+		if (this.hasNode()) {
+			this.node.ontouchstart = enyo.bind(this,'handleTouchstart')
+			//this.node.ontouchmove = this.doTouchMove;
+			this.node.ontouchend = enyo.bind(this,'handleTouchend')
+		}
+	},
   	
   	handleTouchstart: function() {
   		if (!this.disabled) {

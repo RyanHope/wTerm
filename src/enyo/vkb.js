@@ -26,6 +26,7 @@ enyo.kind({
   	},
 
 	create: function() {
+		this._layoutName = '';
 		this.inherited(arguments);
 		this.addClass('vkb');
 		this.large();
@@ -44,7 +45,9 @@ enyo.kind({
 	},
 
 	loadLayout: function(name) {
+		this._layoutName = name;
 		getKbdLayout(name, function (layout) {
+			if (name != this._layoutName) return;
 			var components = [], i, j, comps, c, e;
 			for (i = 0; i < layout.length; i++) {
 				row = layout[i];
@@ -83,22 +86,30 @@ enyo.kind({
 	isShift: function() {
 		return ((this.modstate & this.KMOD_LSHIFT) || (this.modstate & this.KMOD_RSHIFT) || (this.modstate & this.KMOD_CAPS))
 	},
+	isMode: function() {
+		return (this.modstate & this.KMOD_MODE)
+	},
 	
 	processKey: function(inSender) {
+		var symbols = inSender.symbols
+		var symbol = null
 		var sym = null
-		var unicode = null
-		var i = 0
-		if (inSender.printable) {
-			if (this.isShift()) {
-				if (inSender.symbols.length>1)
-					i = 1
-				unicode = inSender.symbols[i][0]
-			} else {
-				unicode = inSender.symbols[i][0].toLocaleLowerCase()
+		var unicode = ''
+		if (this.isShift()) {
+			if (this.isMode()) {
+				symbol = symbols[3] ? symbols[3] : symbols[2];
 			}
-			sym = inSender.symbols[i][1];
+			if (!symbol) symbol = symbols[1] ? symbols[1] : symbols[0];
+		} else if (this.isMode()) {
+			symbol = symbols[2] ? symbols[2] : symbols[0];
 		} else {
-			sym = inSender.symbols[i][1]
+			symbol = symbols[0];
+		}
+		sym = symbol[1]
+		if (!sym) {
+			sym = 0
+			unicode = symbol[0]
+			if (!this.isShift()) unicode = unicode.toLocaleLowerCase();
 		}
 		return [sym, unicode]
 	},
