@@ -24,6 +24,7 @@
 #include <SDL/SDL_ttf.h>
 
 #define MAX_CHARSETS 12
+#define RENDER_BUFFER_SIZE (1 << 12)
 
 // OpenGL Font Rendering
 class SDLFontGL {
@@ -52,10 +53,9 @@ private:
 	SDL_Color* cols;
 	int nWidth, nHeight;
 
-	int screenCols, screenRows;
-	GLfloat * colorValues;
-	GLfloat * texValues;
-	GLfloat * vtxValues;
+	GLfloat colorValues[RENDER_BUFFER_SIZE*24];
+	GLfloat texValues[RENDER_BUFFER_SIZE*12];
+	GLfloat vtxValues[RENDER_BUFFER_SIZE*12];
 	int numChars;
 
 	// Encodings
@@ -69,11 +69,12 @@ private:
 	Uint16 lookupChar(char c);
 	void initializeCharMapping();
 	void getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, Uint16 c, int &x, int &y);
+	void flushGLBuffer();
 
 public:
 	SDLFontGL() : GlyphCache(0), texW(0), texH(0), haveCacheLine(0),
-	nFonts(0), nCols(0), fnts(0), cols(0), screenCols(0), screenRows(0),
-	colorValues(0), texValues(0), vtxValues(0) {
+	nFonts(0), nCols(0), fnts(0), cols(0)
+	{
 		memset(charMappings,0, sizeof(charMappings));
 	}
 	~SDLFontGL();
@@ -85,8 +86,8 @@ public:
 	// Define a character set
 	void setCharMapping(int index, CharMapping_t map);
 
-	// Begin drawing text to the screen, assuming the given screen size
-	void startTextGL(int cols, int rows);
+	// Begin drawing text to the screen
+	void startTextGL();
 	void drawTextGL(TextGraphicsInfo_t & graphicsInfo, int x, int y, Uint16 cChar);
 	// Done drawing text, commit!
 	void endTextGL();

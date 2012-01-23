@@ -358,8 +358,7 @@ void SDLTerminal::redraw()
 	// Clear the entire screen to the default background color
 	clearScreen(m_reverse ? defState.foregroundColor : defState.backgroundColor);
 
-	startTextGL(m_terminalState->getDisplayScreenSize().getX(),
-			m_terminalState->getDisplayScreenSize().getY());
+	startTextGL();
 
 	for (int i = nTopLineIndex; i < nEndLine; ++i)
 	{
