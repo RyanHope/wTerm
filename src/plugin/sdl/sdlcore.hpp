@@ -47,6 +47,7 @@ protected:
 	bool m_bUnderline;
 	bool m_bBlink;
 	bool doBlink;
+	bool m_bNeedsBlink;
 
 	bool m_reverse;
 
