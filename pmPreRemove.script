@@ -14,7 +14,8 @@ sed -i -e "/${APPID}/d" /var/palm/data/jailusers
 
 rm -rf /etc/profile.d/${APPID}
 
-deluser wterm
+sed -i -e '/^wterm:/d' /etc/passwd
+sed -i -e '/^wterm:/d' /etc/group
 
 rm -rf /usr/local/bin/su
 
