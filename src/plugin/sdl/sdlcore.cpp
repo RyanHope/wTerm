@@ -47,6 +47,7 @@ SDLCore::SDLCore()
 	m_bUnderline = false;
 	m_bBlink = false;
 	doBlink = false;
+	m_bNeedsBlink = false;
 	m_slot1 = TS_CS_G0_ASCII;
 	m_slot2 = TS_CS_G1_ASCII;
 
@@ -352,7 +353,9 @@ void *SDLCore::blinkThread(void *ptr)
 	SDLCore *core = (SDLCore *)ptr;
 	while (core->isRunning()) {
 		core->doBlink = !core->doBlink;
-		SDL_PushEvent(&event);
+		// Only bother redrawing if we have any blink text on-screen
+		if (core->m_bNeedsBlink)
+			SDL_PushEvent(&event);
 		usleep(500000);
 	}
 	pthread_exit(NULL);
