@@ -20,7 +20,7 @@
 #ifndef EXTTERMINAL_HPP__
 #define EXTTERMINAL_HPP__
 
-#include <stdio.h>
+#include <string.h>
 
 /**
  * Interface for external terminals to transfer data.
@@ -39,7 +39,10 @@ public:
 	/**
 	 * Insert data into this terminal.
 	 */
-	virtual void insertData(const char *data) {}
+	virtual void insertData(const char *data, int len) = 0;
+	virtual void insertData(const char *data) {
+		insertData(data, strlen(data));
+	}
 
 	bool isReady()
 	{

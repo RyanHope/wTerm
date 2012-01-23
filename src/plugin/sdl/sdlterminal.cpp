@@ -400,9 +400,9 @@ void SDLTerminal::refresh()
 /**
  * Accepts NULL terminating string.
  */
-void SDLTerminal::insertData(const char *data)
+void SDLTerminal::insertData(const char *data, int len)
 {
-	m_terminalState->insertString(data, getExtTerminal());
+	m_terminalState->insertString(data, len, getExtTerminal());
 	refresh();
 }
 

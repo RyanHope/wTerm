@@ -47,7 +47,7 @@ public:
 	VTTerminalState();
 	virtual ~VTTerminalState();
 
-	void insertString(const char *sStr, ExtTerminal *extTerminal);
+	void insertString(const char *sStr, int len, ExtTerminal *extTerminal);
 	void sendCursorCommand(VTTS_Cursor_t cursor, ExtTerminal *extTerminal);
 };
 

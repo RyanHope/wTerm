@@ -242,6 +242,7 @@ private:
 	enum { ST_START, ST_ESCAPE, ST_ESCAPE_TRIE, ST_CSI, ST_CSI_VALUES, ST_CSI_INVALID, ST_OSC, ST_OSC_ESC, ST_ESCY } m_state;
 
 	const unsigned char *m_seq;
+	int m_len;
 
 	Mode m_mode;
 	unsigned int m_utf8_seqlen, m_utf8_remlen;
@@ -265,7 +266,7 @@ public:
 	~ControlSeqParser();
 
 	/* don't free seq or call again until next() returned false */
-	void addInput(const char *seq);
+	void addInput(const char *seq, int len);
 
 	bool next(); /* returns false if more input is needed */
 

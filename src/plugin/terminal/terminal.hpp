@@ -76,6 +76,7 @@ public:
 	void setWindowSize(int nWidth, int nHeight);
 	int start();
 
+	void insertData(const char *data, int len);
 	void insertData(const char *data);
 
 	void setExec(const char *exec);

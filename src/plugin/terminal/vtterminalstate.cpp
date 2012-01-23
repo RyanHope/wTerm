@@ -517,15 +517,15 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
  * The string may contain VT100 control sequences, which will invoke
  * the underlying commands.
  */
-void VTTerminalState::insertString(const char *sStr, ExtTerminal *extTerminal)
+void VTTerminalState::insertString(const char *sStr, int len, ExtTerminal *extTerminal)
 {
-	pthread_mutex_lock(&m_rwLock);
-
-	if (sStr == NULL) {
+	if (sStr == NULL || !len) {
 		return;
 	}
 
-	m_parser->addInput(sStr);
+	pthread_mutex_lock(&m_rwLock);
+
+	m_parser->addInput(sStr, len);
 
 	while (m_parser->next()) {
 		if (m_parser->token() != CS_UNKNOWN) {

@@ -413,21 +413,26 @@ bool ControlSeqParser::parseChar() {
 	}
 }
 
-void ControlSeqParser::addInput(const char *seq) {
+void ControlSeqParser::addInput(const char *seq, int len) {
 	/* assert(NULL == m_seq); */
 	m_seq = (const unsigned char*) seq;
+	m_len = len;
 }
 
 unsigned char ControlSeqParser::nextByte() {
 	unsigned char c;
 	if (!m_seq) return 0;
 
-	c = *m_seq++;
-	if (!c) {
-		/* end of input for now */
-		m_seq = NULL;
-		return 0;
-	}
+	do {
+		if (0 == m_len) {
+			/* end of input for now */
+			m_seq = NULL;
+			return 0;
+		}
+		c = *m_seq++;
+		--m_len;
+	} while (!c);
+
 	return c;
 }
 
