@@ -369,10 +369,8 @@ void SDLTerminal::redraw()
 		for(TSLine_t::iterator I = line->begin(), E = line->end(); I != E;
 				++I, ++nCol)
 		{
-			// TODO: Refactor this, it's ridiculous :P
-			char c[2] = { I->data, 0 };
 			setGraphicsState(I->graphics);
-			printText(nCol, i - nTopLineIndex + 1, c);
+			printCharacter(nCol, i - nTopLineIndex + 1, I->data);
 		}
 	}
 

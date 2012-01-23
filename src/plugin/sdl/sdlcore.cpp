@@ -467,14 +467,14 @@ int SDLCore::setFontSize(int nSize)
  * Draws a string on the display. Given the monospaced font, assumes that the display is a grid of text.
  * The top left corner of the screen is (1, 1). If the give location is out of bounds, then no action is taken.
  */
-void SDLCore::printText(int nColumn, int nLine, const char *sText)
+void SDLCore::printCharacter(int nColumn, int nLine, CellCharacter cChar)
 {
 	if (nColumn < 1 || nLine < 1 || nColumn > m_nMaxColumnsOfText || nLine > m_nMaxLinesOfText)
 	{
 		return;
 	}
 
-	drawText((nColumn - 1) * m_nFontWidth, (nLine - 1) * m_nFontHeight, sText);
+	drawCharacter((nColumn - 1) * m_nFontWidth, (nLine - 1) * m_nFontHeight, cChar);
 }
 
 void SDLCore::drawRect(int nX, int nY, int nWidth, int nHeight, SDL_Color color, float fAlpha)
@@ -622,13 +622,8 @@ void SDLCore::drawImage(int nX, int nY, const char *sImage)
 /**
  * Draws a string on an arbiturary location of the screen.
  */
-void SDLCore::drawText(int nX, int nY, const char *sText)
+void SDLCore::drawCharacter(int nX, int nY, CellCharacter cChar)
 {
-	if (sText == NULL)
-	{
-		return;
-	}
-	
 	// Match mapping in resetGlyphCache
 	int fnt = 0;
 	if (m_bBold && m_bUnderline)
@@ -652,7 +647,7 @@ void SDLCore::drawText(int nX, int nY, const char *sText)
 	graphicsInfo.slot1 = (int)m_slot1;
 	graphicsInfo.slot2 = (int)m_slot2;
 
-	drawTextGL(graphicsInfo, nX, nY, sText);
+	drawTextGL(graphicsInfo, nX, nY, cChar);
 
 	setDirty(BUFFER_DIRTY_BIT);
 }

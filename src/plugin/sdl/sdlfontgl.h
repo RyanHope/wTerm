@@ -68,7 +68,7 @@ private:
 	void drawBackground(int color, int X, int Y, int cells);
 	Uint16 lookupChar(char c);
 	void initializeCharMapping();
-	void getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, char c, int &x, int &y);
+	void getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, Uint16 c, int &x, int &y);
 
 public:
 	SDLFontGL() : GlyphCache(0), texW(0), texH(0), haveCacheLine(0),
@@ -87,7 +87,7 @@ public:
 
 	// Begin drawing text to the screen, assuming the given screen size
 	void startTextGL(int cols, int rows);
-	void drawTextGL(TextGraphicsInfo_t & graphicsInfo, int x, int y, const char * text);
+	void drawTextGL(TextGraphicsInfo_t & graphicsInfo, int x, int y, Uint16 cChar);
 	// Done drawing text, commit!
 	void endTextGL();
 };

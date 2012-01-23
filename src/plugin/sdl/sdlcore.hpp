@@ -127,10 +127,10 @@ public:
 	int getFontSize();
 	int setFontSize(int nSize);
 
-	void printText(int nColumn, int nLine, const char *sText);
+	void printCharacter(int nColumn, int nLine, CellCharacter cChar);
 	void drawCursor(int nColumn, int nLine);
 	void drawRect(int nX, int nY, int nWidth, int nHeight, SDL_Color color, float fAlpha);
-	void drawText(int nX, int nY, const char *sText);
+	void drawCharacter(int nX, int nY, CellCharacter cChar);
 	void drawSurface(int nX, int nY, SDL_Surface *surface);
 	void drawImage(int nX, int nY, const char *sImage);
 
