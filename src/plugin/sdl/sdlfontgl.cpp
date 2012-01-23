@@ -287,7 +287,7 @@ void SDLFontGL::drawBackground(int color, int nX, int nY, int cells) {
 			((float)bgc.r)/255.f,
 			((float)bgc.g)/255.f,
 			((float)bgc.b)/255.f,
-			1.f,
+			1.f
 	};
 
 	for(unsigned i = 0; i < 6; ++i) {
@@ -372,8 +372,8 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
 	int x,y;
 	getTextureCoordinates(graphicsInfo, cChar, x, y);
 
-	float x_offset = ((float)x) / texW;
-	float y_offset = ((float)y) / texH;
+	float x_offset = ((float)x) / (float)texW;
+	float y_offset = ((float)y) / (float)texH;
 
 	for(unsigned j = 0; j < stride; j += 2) {
 		tex[j] += x_offset;
@@ -387,22 +387,21 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
 	memcpy(clrs, colorCopy, sizeof(colorCopy));
 }
 
-void SDLFontGL::startTextGL(int rows, int cols) {
+void SDLFontGL::startTextGL(int cols, int rows) {
 	// If this is a new screen dimension, reset our data:
-	if (rows != screenRows || cols != screenCols) {
+	if (cols != screenCols || rows != screenRows) {
 		free(colorValues);
 		free(texValues);
 		free(vtxValues);
 
-		screenRows = rows;
 		screenCols = cols;
+		screenRows = rows;
 
 		// (at most) 2 operations per cell: background, foreground text
 		int nCells = screenRows * screenCols * 2;
 		colorValues = (GLfloat*)malloc(nCells*sizeof(GLfloat)*24);
 		texValues = (GLfloat*)malloc(nCells*sizeof(GLfloat)*12);
 		vtxValues = (GLfloat*)malloc(nCells*sizeof(GLfloat)*12);
-
 	}
 
 	// Start over
@@ -424,7 +423,14 @@ void SDLFontGL::endTextGL() {
 	glTexCoordPointer(2, GL_FLOAT, 0, texValues);
 	glVertexPointer(2, GL_FLOAT, 0, vtxValues);
 	// Go!
-	glDrawArrays(GL_TRIANGLES, 0, 6*numChars);
+	
+	// Split this into two calls, if we do it all at once
+	// then despite no error being given, there are
+	// rendering glitches when fullscreen portrait.
+	// ... I don't know why.
+	// (Limitation of GLES 1.0 -> 2.0 translator? No idea.)
+	glDrawArrays(GL_TRIANGLES, 0, 3*numChars);
+	glDrawArrays(GL_TRIANGLES, 3*numChars, 3*numChars);
 	glFlush();
 	glDisableClientState(GL_COLOR_ARRAY);
 }
