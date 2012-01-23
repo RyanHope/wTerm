@@ -6,6 +6,8 @@ APPS=/media/cryptofs/apps
 
 [ -d ${APPS} ] || { echo "Requires webOS 1.3.5 or later" ; exit 1 ; }
 
+mount -o remount,rw /
+
 APPDIR=${APPS}/usr/palm/applications/${APPID}
 
 mv ${APPDIR}/fonts/* ${APPDIR}/
@@ -27,8 +29,8 @@ cp /bin/busybox /usr/local/bin/su
 chmod 750 /usr/local/bin/su
 chmod ug+s /usr/local/bin/su
 
-adduser -D wterm -h /home/wterm -g "wTerm User"
-mkdir /home/wterm
-chown wterm /home/wterm
+adduser -D wterm -h /var/home/wterm -g "wTerm User"
+mkdir /var/home/wterm
+chown wterm /var/home/wterm
 
 exit 0
