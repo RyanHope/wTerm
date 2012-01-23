@@ -24,7 +24,7 @@
 #include <string.h>
 #include <syslog.h>
 
-const char TerminalState::BLANK = '\x20';
+const CellCharacter TerminalState::BLANK = ' ';
 
 TerminalState::TerminalState()
 {
@@ -80,7 +80,7 @@ void TerminalState::freeBuffer()
 	pthread_mutex_unlock(&m_rwLock);
 }
 
-bool TerminalState::isPrintable(char c)
+bool TerminalState::isPrintable(CellCharacter c)
 {
 	return !((c >= 0 && c < 32) || c == 127);
 }
@@ -1033,7 +1033,7 @@ TSCellGraphicsState_t TerminalState::getDefaultGraphicsState()
  * character may change its value.
  * Returns true to attempt to print the character.
  */
-bool TerminalState::processNonPrintableChar(char &c)
+bool TerminalState::processNonPrintableChar(CellCharacter &c)
 {
 	if (isPrintable(c))
 	{
@@ -1074,26 +1074,18 @@ bool TerminalState::processNonPrintableChar(char &c)
 /**
  * Inserts a character at the current cursor position. Non-printable characters are ignored.
  */
-void TerminalState::insertChar(char c, bool bAdvanceCursor)
+void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor)
 {
-	pthread_mutex_lock(&m_rwLock);
-
 	insertChar(c, bAdvanceCursor, true);
-
-	pthread_mutex_unlock(&m_rwLock);
 }
 
 /**
  * Inserts a character at the current cursor position. Any character at this location
  * will be replaced.
  */
-void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrintable)
+void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnoreNonPrintable)
 {
-	pthread_mutex_lock(&m_rwLock);
-
 	insertChar(c, bAdvanceCursor, bIgnoreNonPrintable, false);
-
-	pthread_mutex_unlock(&m_rwLock);
 }
 
 /**
@@ -1103,7 +1095,7 @@ void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrint
  * be processed. If shift is specified, then all subsequent characters are shifted forward.
  * Otherwise, the current character is replaced.
  */
-void TerminalState::insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrintable, bool bShift)
+void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnoreNonPrintable, bool bShift)
 {
 	pthread_mutex_lock(&m_rwLock);
 

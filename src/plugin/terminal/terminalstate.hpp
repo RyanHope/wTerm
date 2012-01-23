@@ -23,6 +23,7 @@
 #include "util/databuffer.hpp"
 #include "util/point.hpp"
 
+#include <stdint.h>
 #include <pthread.h>
 
 #include <deque>
@@ -188,10 +189,12 @@ typedef enum
 	TS_GM_OP_MAX
 } TSGraphicsModeOp_t;
 
+typedef uint16_t CellCharacter;
+
 // For each cell on the screen, track its graphics and textual contents:
 typedef struct {
 	TSCellGraphicsState_t graphics;
-	char data;
+	CellCharacter data;
 } TSCell_t;
 // Say that a line is a vector of cells.
 // For now, they don't have to be the same size as the screen,
@@ -242,12 +245,12 @@ protected:
 	Point convertToDisplayLocation(const Point &loc);
 	Point boundLocation(const Point &loc);
 
-	virtual bool processNonPrintableChar(char &c);
+	virtual bool processNonPrintableChar(CellCharacter &c);
 
 	std::vector<int> tabs;
 
 public:
-	static const char BLANK;
+	static const CellCharacter BLANK;
 
 	TerminalState();
 	virtual ~TerminalState();
@@ -262,7 +265,7 @@ public:
 	Point getSavedCursorLocation();
 	int getSavedGraphicsModeFlags();
 
-	bool isPrintable(char c);
+	static bool isPrintable(CellCharacter c);
 
 	void moveCursorUp(int nPos);
 	void moveCursorDown(int nPos);
@@ -280,9 +283,9 @@ public:
 	void eraseBeginOfScreenToCursor();
 	void eraseScreen();
 
-	void insertChar(char c, bool bAdvanceCursor);
-	void insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrintable);
-	void insertChar(char c, bool bAdvanceCursor, bool bIgnoreNonPrintable, bool bShift);
+	void insertChar(CellCharacter c, bool bAdvanceCursor);
+	void insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnoreNonPrintable);
+	void insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnoreNonPrintable, bool bShift);
 
 	void setDisplayScreenSize(int nWidth, int nHeight);
 	Point getDisplayScreenSize();

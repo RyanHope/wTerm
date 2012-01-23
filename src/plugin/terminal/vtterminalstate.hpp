@@ -20,7 +20,6 @@
 #ifndef ANSITERMINALSTATE_HPP__
 #define ANSITERMINALSTATE_HPP__
 
-#include "seqparser.hpp"
 #include "terminalstate.hpp"
 #include "extterminal.hpp"
 
@@ -32,6 +31,8 @@ typedef enum
 	VTTS_CURSOR_RIGHT
 } VTTS_Cursor_t;
 
+class ControlSeqParser;
+
 /**
  * Terminal state information catered to VT100.
  */
@@ -41,7 +42,6 @@ protected:
 	ControlSeqParser *m_parser;
 
 	void processControlSeq(int nToken, int *values, int numValues, ExtTerminal *extTerminal);
-	bool processNonPrintableChar(char &c);
 
 public:
 	VTTerminalState();

@@ -36,19 +36,6 @@ VTTerminalState::~VTTerminalState()
 	delete m_parser;
 }
 
-bool VTTerminalState::processNonPrintableChar(char &c)
-{
-	bool bPrint = false;
-
-	pthread_mutex_lock(&m_rwLock);
-
-	bPrint = TerminalState::processNonPrintableChar(c);
-
-	pthread_mutex_unlock(&m_rwLock);
-
-	return bPrint;
-}
-
 void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, ExtTerminal *extTerminal)
 {
 	int i, len;
@@ -204,6 +191,9 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				}
 			}
 		}
+		break;
+	case CS_VT52_CURSOR_POSITION:
+		setCursorLocation(values[1], values[0]);
 		break;
 	case CS_GRAPHICS_MODE_SET: //ESC[<Value>;...;<Value>m
 		if (numValues == 0)
@@ -531,50 +521,32 @@ void VTTerminalState::insertString(const char *sStr, ExtTerminal *extTerminal)
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	if (sStr == NULL)
-	{
+	if (sStr == NULL) {
 		return;
 	}
 
-	size_t size = ControlSeqParser::MAX_NUM_VALUES * sizeof(int);
-	int nValues = 0;
-	int *values = (int *)malloc(size);
-	int nSeqLength = 0;
-	int nToken = 0;
-	int nLength = strlen(sStr);
-	int nCurrentIndex = 0;
+	m_parser->addInput(sStr);
 
-	while (nCurrentIndex < nLength)
-	{
-		memset(values, 0, size);
-		nToken = m_parser->parse(sStr + nCurrentIndex, values, &nValues, &nSeqLength);
-
-		if (nToken != CS_UNKNOWN)
-		{
-			processControlSeq(nToken, values, nValues, extTerminal);
+	while (m_parser->next()) {
+		if (m_parser->token() != CS_UNKNOWN) {
+			processControlSeq(m_parser->token(), m_parser->values(), m_parser->numValues(), extTerminal);
+		} else {
+			switch (m_parser->character()) {
+			case 0x09: // '\t'
+				tabForward(1);
+				break;
+			case 0x0E: // shift out (use G0 character set, default)
+				setShift(false);
+				break;
+			case 0x0F: // shift in (use G1 character set)
+				setShift(true);
+				break;
+			default:
+				insertChar(m_parser->character(), true, false, isShiftText());
+				break;
+			}
 		}
-		else if (sStr[nCurrentIndex] == '\t')
-		{
-			tabForward(1);
-		}
-		else if (sStr[nCurrentIndex] == 14)
-		{
-			setShift(false);
-		}
-		else if (sStr[nCurrentIndex] == 15)
-		{
-			setShift(true);
-		}
-		else
-		{
-			//Treat as text.
-			insertChar(sStr[nCurrentIndex], true, false, isShiftText());
-		}
-
-		nCurrentIndex += (nSeqLength > 0) ? nSeqLength : 1;
 	}
-
-	free(values);
 
 	pthread_mutex_unlock(&m_rwLock);
 }

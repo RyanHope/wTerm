@@ -26,6 +26,7 @@
 #include <map>
 
 #include "util/strcmp.hpp"
+#include "terminalstate.hpp"
 
 typedef enum
 {
@@ -94,7 +95,7 @@ typedef enum
 
 typedef enum
 {
-	CS_UNKNOWN,
+	CS_UNKNOWN, // normal character
 
 	//ANSI
 	CS_CURSOR_POSITION_REPORT, //ESC[<Line>;<Column>R
@@ -200,49 +201,70 @@ typedef enum
 	CS_MAX
 } CSToken_t;
 
-typedef struct
-{
-	const char *m_sCSI;
-	CSToken_t m_token;
-	int m_nMinParams; //Minimum number of parameters should be 0.
-	int m_nMaxParams; //-1 for variable parameters.
-	int m_nDefaultVal; //-1 for not applicable.
-	char m_cFinal;
-} CSEntry_t;
-
 class ControlSeqParser
 {
 private:
-	static const char ESC_CHAR;
-	static const char DELIMITER_CHAR;
+	static const unsigned char ESC_CHAR;
+	static const unsigned char DELIMITER_CHAR;
+	static const unsigned int MAX_NUM_VALUES = 20;
 
-	std::map<const char *, std::list<CSEntry_t *> *, cmp_str> m_csLookup;
-	int *m_values;
+	struct CSI_Entry {
+		CSToken_t token;
+
+		unsigned char parameter;
+		unsigned char function;
+		int minParams; //Minimum number of parameters should be 0.
+		int maxParams; //-1 for variable parameters.
+		int defaultVal; //-1 for not applicable.
+	};
+
+	typedef std::map<unsigned char, std::list<CSI_Entry> > CSI_Lookup;
+	CSI_Lookup m_csiLookup; /* map by final function */
+
+	struct CS_Fixed_Entry {
+		CSToken_t token;
+		unsigned char fixed[4];
+	};
+
+	typedef std::map<unsigned char, std::list<CS_Fixed_Entry> > CS_Fixed_Lookup;
+	CS_Fixed_Lookup m_csFixedLookup; /* map by first char */
+
+	int m_values[MAX_NUM_VALUES];
 	int m_numValues;
-	int m_savedPos;
-	int m_currentPos;
-	char m_currentChar;
-	const char *m_seq;
 
-	int parsePositiveInt(int *values, int numMaxValues);
-	int parseSeq();
+	CellCharacter m_currentChar;
+	CSToken_t m_token;
+	unsigned char m_prefix[4];
+	int m_prefixlen;
+	enum { ST_START, ST_ESCAPE, ST_ESCAPE_TRIE, ST_CSI, ST_CSI_VALUES, ST_CSI_INVALID, ST_OSC, ST_OSC_ESC, ST_ESCY } m_state;
 
-	int match(char *prefix, char suffix, int *values, int numValues);
-	bool isPartialMatch(char *prefix);
-	bool isPartialMatch(char *prefix, int *values, int numValues);
+	const unsigned char *m_seq;
 
-	void freeLookup();
 	void buildLookup();
-	void addLookupEntry(const char *sCSI, CSToken_t token, int nMinParam, int nMaxParam, int nDefaultVal, char cFinal);
 
-	void nextChar();
-	void reset();
+	void addFixedLookup(const char *str, CSToken_t token);
+	void addCSILookup(const char parameter, CSToken_t token, int nMinParam, int nMaxParam, int nDefaultVal, char cFinal);
+
+	bool tryFixedEscape();
+
+	void parseCSIValue();
+	bool matchCSI();
+
+	bool nextChar(); /* returns true if token complete */
 public:
-	static const int MAX_NUM_VALUES;
-
 	ControlSeqParser();
 	~ControlSeqParser();
-	int parse(const char *seq, int *values, int *numValues, int *seqLength);
+
+	/* don't free seq or call again until next() returned false */
+	void addInput(const char *seq);
+
+	bool next(); /* returns false if more input is needed */
+
+	CSToken_t token() const { return m_token; }
+	CellCharacter character() const { return m_currentChar; }
+	unsigned int numValues() const { return m_numValues; }
+	int value(unsigned int idx) const { return m_values[idx]; }
+	int* values() { return m_values; }
 };
 
 #endif
