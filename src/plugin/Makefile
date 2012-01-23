@@ -3,7 +3,7 @@ include ../../Makefile.inc
 CXXFLAGS	:=	$(MARCH_TUNE) -I. -I$(ROOT)/include -I$(ROOT)/include/SDL
 LDFLAGS		:=	-L$(ROOT)/lib -Wl,--allow-shlib-undefined -lpdl -lSDL -lSDL_ttf -lSDL_image -lGLES_CM -lpthread
 
-OBJECTS		:=	sdl/sdlfontgl.o sdl/sdlcore.o sdl/sdlterminal.o util/databuffer.o util/point.o util/utf8.o \
+OBJECTS		:=	sdl/sdlfontgl.o sdl/sdlcore.o sdl/sdlterminal.o util/point.o util/utf8.o \
 				terminal/seqparser.o terminal/terminal.o terminal/terminalstate.o terminal/vtterminalstate.o terminalmain.o
 
 wterm: $(OBJECTS)

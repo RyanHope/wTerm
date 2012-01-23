@@ -20,7 +20,6 @@
 #ifndef TERMINALSTATE_HPP__
 #define TERMINALSTATE_HPP__
 
-#include "util/databuffer.hpp"
 #include "util/point.hpp"
 
 #include <stdint.h>
@@ -340,7 +339,7 @@ public:
 	void deleteLines(int nLines);
 	void deleteCharacters(int nChars);
 	void insertBlanks(int nBlanks);
-	void tabForward(int nTabs);
+	void tabForward(unsigned int nTabs);
 	void tabBackward(int nTabs);
 	void setShift(bool shift);
 	bool getShift();

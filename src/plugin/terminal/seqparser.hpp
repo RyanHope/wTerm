@@ -25,7 +25,6 @@
 #include <list>
 #include <map>
 
-#include "util/strcmp.hpp"
 #include "terminalstate.hpp"
 
 typedef enum

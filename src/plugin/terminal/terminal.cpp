@@ -85,7 +85,6 @@ Terminal::Terminal()
 	m_masterFD = -1;
 	m_slaveFD = -1;
 	m_bDone = false;
-	m_dataBuffer = new DataBuffer();
 	m_nWritePriority = 0;
 	m_sUser = NULL;
 
@@ -114,7 +113,6 @@ Terminal::~Terminal()
 	}
 
 	free(m_sUser);
-	delete m_dataBuffer;
 }
 
 int Terminal::openPTYMaster()
@@ -449,8 +447,7 @@ void Terminal::newLogin()
 
 int Terminal::runReader()
 {
-	char dataBuffer[256];
-	size_t dataBufferSize = sizeof(dataBuffer);
+	char dataBuffer[4096];
 	ssize_t readResult;
 	struct timeval timeout;
 	fd_set readFDSet;
@@ -476,34 +473,26 @@ int Terminal::runReader()
 			continue;
 
 		// Read all available data:
-		while(true)
+		for ( ;; )
 		{
-			readResult = read(m_masterFD, dataBuffer, dataBufferSize);
+			readResult = read(m_masterFD, dataBuffer, sizeof(dataBuffer));
 
 			if (readResult < 0)
 			{
 				// If we've read all we can, leave this loop
-				if (errno == EWOULDBLOCK)
+				if (errno == EWOULDBLOCK || errno == EAGAIN || errno == EINTR)
 					break;
 
-				syslog(LOG_ERR, "Cannot read pseudo terminal.");
+				syslog(LOG_ERR, "Cannot read pseudo terminal: %s", strerror(errno));
 				return -1;
 			}
 
 			// If EOF, we're done
 			if (readResult == 0)
 				break;
-			
-			// We got data!  Add to our buffer
-			m_dataBuffer->append(dataBuffer, readResult);
 
-			// Flush buffer if it gets too large
-			if (m_dataBuffer->size() > (1 << 20))
-				flushOutputBuffer();
+			getExtTerminal()->insertData(dataBuffer, readResult);
 		}
-
-		// Flush since we've read all that's available.
-		flushOutputBuffer();
 
 		// Old terminal child process died, make a new one
 		if (gotSIGCHLD == 1)
@@ -519,33 +508,6 @@ int Terminal::runReader()
 
 	// Indicate we exited neatly.
 	return 0;
-}
-
-void Terminal::flushOutputBuffer()
-{
-	// Not thread-safe, meant to only be called from
-	// the reader thread.
-	char *tmp;
-	int nTmpSize;
-
-	//Transfer buffer to terminal state then flush buffer.
-	if (m_dataBuffer->size() > 0 && getExtTerminal() != NULL)
-	{
-		if (getExtTerminal()->isReady())
-		{
-			//Add a null terminating character.
-			nTmpSize = (m_dataBuffer->size() + 1) * sizeof(char);
-			tmp = (char *)malloc(nTmpSize);
-			memset(tmp, 0, nTmpSize);
-
-			m_dataBuffer->copy(tmp, m_dataBuffer->size());
-			m_dataBuffer->clear();
-
-			getExtTerminal()->insertData(tmp, nTmpSize - 1);
-
-			free(tmp);
-		}
-	}
 }
 
 int Terminal::startReaderThread()

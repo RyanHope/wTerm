@@ -122,6 +122,20 @@ void ControlSeqParser::buildLookup()
 	addFixedLookup(")1", CS_CHARSET_ALT_G1_SET);
 	addFixedLookup(")2", CS_CHARSET_ALT_SPEC_G1_SET);
 
+	/* ignore G2 charset */
+	addFixedLookup("*A", CS_UNKNOWN);
+	addFixedLookup("*B", CS_UNKNOWN);
+	addFixedLookup("*0", CS_UNKNOWN);
+	addFixedLookup("*1", CS_UNKNOWN);
+	addFixedLookup("*2", CS_UNKNOWN);
+
+	/* ignore G3 charset */
+	addFixedLookup("+A", CS_UNKNOWN);
+	addFixedLookup("+B", CS_UNKNOWN);
+	addFixedLookup("+0", CS_UNKNOWN);
+	addFixedLookup("+1", CS_UNKNOWN);
+	addFixedLookup("+2", CS_UNKNOWN);
+
 	addCSILookup(0, CS_VPA, 0, 1, 1, 'd');
 	addCSILookup(0, CS_CHA, 0, 1, 1, 'G');
 	addCSILookup(0, CS_ECH, 0, 1, 1, 'X');
@@ -191,7 +205,7 @@ bool ControlSeqParser::tryFixedEscape() {
 				/* sequence complete */
 				m_token = i->token;
 				m_state = ST_START;
-				return true;
+				return (m_token != CS_UNKNOWN); /* skip CS_UNKOWN tokens */
 			} else {
 				/* need more */
 				return false;
@@ -257,7 +271,7 @@ bool ControlSeqParser::matchCSI() {
 			/* invalid numberof parameters */
 			if (m_numValues < i->minParams || (-1 != i->maxParams && m_numValues > i->maxParams)) continue;
 
-			unsigned int k;
+			int k;
 			for (k = 0; k < m_numValues; k++) {
 				if (-1 == m_values[k]) {
 					if (-1 != i->defaultVal) {
