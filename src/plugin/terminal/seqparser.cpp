@@ -407,6 +407,9 @@ bool ControlSeqParser::parseChar() {
 			m_token = CS_VT52_CURSOR_POSITION;
 			return true;
 		}
+	default:
+		m_state = ST_START;
+		return true;
 	}
 }
 
@@ -432,10 +435,6 @@ bool ControlSeqParser::nextChar() {
 	unsigned char c;
 	while (0 != (c = nextByte())) {
 		switch (m_mode) {
-		case MODE_7BIT:
-		case MODE_8BIT:
-			m_currentChar = c;
-			return true;
 		case MODE_UTF8:
 			if (0 == m_utf8_remlen) {
 				m_currentChar = 0;
@@ -462,6 +461,11 @@ bool ControlSeqParser::nextChar() {
 				return true;
 			}
 			return false;
+		case MODE_7BIT:
+		case MODE_8BIT:
+		default:
+			m_currentChar = c;
+			return true;
 		}
 	}
 	return false;

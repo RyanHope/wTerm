@@ -170,7 +170,7 @@ void SDLFontGL::clearGL() {
 	numChars = 0;
 }
 
-void SDLFontGL::ensureCacheLine(int fnt, int slot)
+void SDLFontGL::ensureCacheLine(unsigned int fnt, unsigned int slot)
 {
 
 	assert(fnt >= 0 && fnt < nFonts);
@@ -299,9 +299,9 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
 													 int nX, int nY, const char * text) {
 	if (!GlyphCache) createTexture();
 
-	int fnt = graphicsInfo.font;
-	int fg = graphicsInfo.fg;
-	int bg = graphicsInfo.bg;
+	unsigned int fnt = graphicsInfo.font;
+	unsigned int fg = graphicsInfo.fg;
+	unsigned int bg = graphicsInfo.bg;
 	int blink = graphicsInfo.blink;
 
 	assert(fnt >= 0 && fnt < nFonts);
@@ -315,7 +315,7 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
 	ensureCacheLine(fnt, graphicsInfo.slot1);
 	ensureCacheLine(fnt, graphicsInfo.slot2);
 
-	const int stride = 12; // GL_TRIANGLE_STRIP 2*6
+	const unsigned int stride = 12; // GL_TRIANGLE_STRIP 2*6
 
 	drawBackground(bg, nX, nY, len);
 
@@ -427,6 +427,8 @@ void SDLFontGL::endTextGL() {
 	// We've built up commands for the entire screen!
 	// Tell GL where all the information is, and render!
 
+	glClear(GL_COLOR_BUFFER_BIT);
+
 	// Bind the master font texture
 	glBindTexture(GL_TEXTURE_2D, GlyphCache);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -460,6 +462,6 @@ void SDLFontGL::getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, char c,
 	y = (slot*nFonts + graphicsInfo.font)*nHeight;
 }
 
-bool &SDLFontGL::hasCacheLine(int font, int slot) {
+bool &SDLFontGL::hasCacheLine(unsigned int font, unsigned int slot) {
 	return haveCacheLine[slot*nFonts + font];
 }

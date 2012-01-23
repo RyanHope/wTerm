@@ -209,7 +209,7 @@ public:
 private:
 	static const unsigned char ESC_CHAR;
 	static const unsigned char DELIMITER_CHAR;
-	static const unsigned int MAX_NUM_VALUES = 20;
+	static const int MAX_NUM_VALUES = 20;
 
 	struct CSI_Entry {
 		CSToken_t token;

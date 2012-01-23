@@ -32,11 +32,11 @@ public:
 		Uint16 map[128];
 	} CharMapping_t;
 	typedef struct {
-		int font;
-		int fg;
-		int bg;
-		int slot1;
-		int slot2;
+		unsigned int font;
+		unsigned int fg;
+		unsigned int bg;
+		unsigned int slot1;
+		unsigned int slot2;
 		int blink;
 	} TextGraphicsInfo_t;
 private:
@@ -47,7 +47,7 @@ private:
 	// Dirty bit for each cache line
 	bool * haveCacheLine;
 
-	int nFonts, nCols;
+	unsigned int nFonts, nCols;
 	TTF_Font** fnts;
 	SDL_Color* cols;
 	int nWidth, nHeight;
@@ -62,8 +62,8 @@ private:
 	CharMapping_t charMappings[MAX_CHARSETS];
 
 	void clearGL();
-	void ensureCacheLine(int font, int slot);
-	bool &hasCacheLine(int font, int slot);
+	void ensureCacheLine(unsigned int font, unsigned int slot);
+	bool &hasCacheLine(unsigned int font, unsigned int slot);
 	void createTexture();
 	void drawBackground(int color, int X, int Y, int cells);
 	Uint16 lookupChar(char c);

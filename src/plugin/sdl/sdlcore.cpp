@@ -221,18 +221,6 @@ void SDLCore::handleMouseEvent(SDL_Event &event)
 {
 }
 
-void SDLCore::redraw()
-{
-}
-
-void SDLCore::updateDisplaySize()
-{
-}
-
-SDL_Color SDLCore::getColor(TSColor_t color)
-{
-}
-
 void SDLCore::setActive(int active)
 {
 	this->active = active;
@@ -756,7 +744,7 @@ void SDLCore::resetGlyphCache()
 	fnts[3] = m_fontBold;
 
 	int nCols = TS_COLOR_MAX;
-	SDL_Color cols[nCols];
+	SDL_Color cols[TS_COLOR_MAX];
 	for(unsigned i = 0; i < TS_COLOR_MAX; ++i)
 		cols[i] = getColor((TSColor_t)i);
 
@@ -806,7 +794,6 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 	int repeatable = 0;
 	Uint16 modstate;
 	Uint8 state;
-	int map;
 
 	modstate = (Uint16)SDL_GetModState();
 

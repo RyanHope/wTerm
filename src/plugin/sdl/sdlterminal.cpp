@@ -72,7 +72,7 @@ SDLTerminal::SDLTerminal()
 	size_t mcolorCount = sizeof(m_colors)/sizeof(m_colors[0]);
 
 	memset(m_colors, 0, sizeof(m_colors));
-	for (int i = 0; i < colorCount && i < mcolorCount; ++i)
+	for (unsigned int i = 0; i < colorCount && i < mcolorCount; ++i)
 		m_colors[i] = defaultColors[i];
 
 	m_keys.clear();

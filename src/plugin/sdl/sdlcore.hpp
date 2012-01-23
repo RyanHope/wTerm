@@ -141,10 +141,10 @@ public:
 	int getMaximumLinesOfText();
 	int getMaximumColumnsOfText();
 
-	virtual SDL_Color getColor(TSColor_t color);
-	virtual void redraw();
+	virtual SDL_Color getColor(TSColor_t color) = 0;
+	virtual void redraw() = 0;
 
-	virtual void updateDisplaySize();
+	virtual void updateDisplaySize() = 0;
 
 	void stopKeyRepeat();
 	void fakeKeyEvent(SDL_Event &event);

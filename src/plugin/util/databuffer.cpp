@@ -63,7 +63,7 @@ int DataBuffer::replace(int startIndex, const char *data, size_t size)
 
 	pthread_mutex_lock(&m_rwLock);
 
-	if (startIndex < 0 || startIndex >= m_size)
+	if (startIndex < 0 || ((unsigned int) startIndex) >= m_size)
 	{
 		nResult = -1;
 	}
