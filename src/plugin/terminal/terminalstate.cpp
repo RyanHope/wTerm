@@ -93,7 +93,7 @@ void TerminalState::clearBufferLine(int nLine, int nStart, int nEnd, TSCell_t & 
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	if (nLine >= 0 && nLine < m_data.size())
+	if (nLine >= 0 && (unsigned int) nLine < m_data.size())
 	{
 		TSLine_t &line = m_data[nLine];
 
@@ -112,7 +112,7 @@ void TerminalState::clearBufferLine(int nLine, int nStart, int nEnd, TSCell_t & 
 			// If our line buffer isn't long enough, extend it
 			// TODO: I'm not sure we don't wanna just make all lines
 			// always the full size, but will revisit this later.
-			if (line.size() <= nEnd) line.resize(nEnd + 1);
+			if (line.size() <= (unsigned int) nEnd) line.resize(nEnd + 1);
 
 			// Set the desired region to 'eraseTo'...
 			// NOTE: Fill doesn't set the element pointed to by the 2nd iterator
@@ -163,7 +163,7 @@ void TerminalState::setBufferTopLine(int nLine)
 
 		m_nTopBufferLine = 0;
 	}
-	else if (nLine >= m_data.size())
+	else if ((unsigned int) nLine >= m_data.size())
 	{
 		nLine = nLine - m_data.size() + 1;
 
@@ -323,12 +323,12 @@ void TerminalState::deleteCharacters(int nChars)
 
 	Point cursor = convertToDisplayLocation(m_cursorLoc);
 	// TODO: Is this right?
-	int nY = cursor.getY() - 1;
-	int nX = cursor.getX() - 1;
-	int nEnd = nX + nChars;
+	unsigned int nY = cursor.getY() - 1;
+	unsigned int nX = cursor.getX() - 1;
+	unsigned int nEnd = nX + nChars;
 	if (nEnd > m_data[nY].size())
 		nEnd = m_data[nY].size();
-	for(int i = nX; i < nEnd; ++i)
+	for(unsigned int i = nX; i < nEnd; ++i)
 		m_data[nY].erase(m_data[nY].begin() + nX);
 
 	pthread_mutex_unlock(&m_rwLock);
@@ -549,7 +549,7 @@ TSLine_t * TerminalState::getBufferLine(int nLineIndex)
 
 	TSLine_t *buffer = NULL;
 
-	if (nLineIndex >= 0 && nLineIndex < m_data.size())
+	if (nLineIndex >= 0 && (unsigned int) nLineIndex < m_data.size())
 	{
 		buffer = &m_data[nLineIndex];
 	}
@@ -646,7 +646,7 @@ void TerminalState::setNumBufferLines(int nNumLines)
 	m_nNumBufferLines = nNumLines;
 
 	//Removes excess old buffered lines.
-	while (m_data.size() > m_nNumBufferLines && m_nTopBufferLine > 0)
+	while (m_nTopBufferLine > 0 && (unsigned int) m_nNumBufferLines < m_data.size())
 	{
 		m_data.pop_front();
 
@@ -654,26 +654,26 @@ void TerminalState::setNumBufferLines(int nNumLines)
 	}
 
 	//Removes excess overflow buffered lines.
-	while (m_data.size() > m_nNumBufferLines && getBufferScreenHeight() > m_displayScreenSize.getY())
+	while ((int) m_data.size() > m_nNumBufferLines && getBufferScreenHeight() > m_displayScreenSize.getY())
 	{
 		m_data.pop_back();
 	}
 
 	//Expand buffer if necessary.
-	while (m_data.size() < m_nNumBufferLines)
+	while ((int) m_data.size() < m_nNumBufferLines)
 	{
 		m_data.push_back(TSLine_t());
 	}
 
-	assert(m_data.size() == m_nNumBufferLines);
+	assert((int) m_data.size() == m_nNumBufferLines);
 
 	int nScreenWidth = m_displayScreenSize.getX();
 
 	//Trim data.
-	for (int i = 0; i < m_data.size(); i++)
+	for (unsigned int i = 0; i < m_data.size(); i++)
 	{
 		// Truncate all characters beyond screen boundary
-		if (m_data[i].size() > nScreenWidth)
+		if (m_data[i].size() > (unsigned int) nScreenWidth)
 			m_data[i].resize(nScreenWidth);
 	}
 
@@ -1101,7 +1101,7 @@ void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnor
 
 	Point displayLoc = getDisplayCursorLocation();
 	int nLine;
-	int nPos;
+	unsigned int nPos;
 	TSLine_t *line;
 	bool bPrint = true;
 
@@ -1157,10 +1157,10 @@ void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnor
 			// TODO: AFAICT the code didn't do the above preivously,
 			// so I'm preserving the old code's behavior.
 			// Which is correct?
-			for (int i = nLine; i < m_data.size(); i++)
+			for (unsigned int i = nLine; i < m_data.size(); i++)
 			{
 				line = getBufferLine(i);
-				if (line->size() > nCols)
+				if ((int) line->size() > nCols)
 					line->resize(nCols);
 			}
 
@@ -1255,11 +1255,11 @@ bool TerminalState::isShiftText()
 }
 
 
-void TerminalState::tabForward(int nTabs) {
-	if (tabs.size()==0 || nTabs>tabs.size())
+void TerminalState::tabForward(unsigned int nTabs) {
+	if (tabs.size()==0 || nTabs > tabs.size())
 		setCursorLocation((getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80, m_cursorLoc.getY());
 	else {
-		int i = 0, t = 0;
+		unsigned int i = 0, t = 0;
 		while (t!=nTabs) {
 			if (tabs[i]>m_cursorLoc.getX())
 				t++;

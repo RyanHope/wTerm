@@ -257,7 +257,7 @@ bool ControlSeqParser::matchCSI() {
 			/* invalid numberof parameters */
 			if (m_numValues < i->minParams || (-1 != i->maxParams && m_numValues > i->maxParams)) continue;
 
-			unsigned int k;
+			int k;
 			for (k = 0; k < m_numValues; k++) {
 				if (-1 == m_values[k]) {
 					if (-1 != i->defaultVal) {
