@@ -7,7 +7,7 @@ APPID 		:= $(VENDOR).$(APP)
 VERSION		:= $(shell cat appinfo.json | grep version | cut -f 2 -d ":" | cut -f 2 -d "\"")
 IPK			:= $(APPID)_$(VERSION)_$(ARCH).ipk
 
-.PHONY: package install clean
+.PHONY: wterm package install clean
 
 package: clean-package ipk/$(IPK)
 
@@ -22,25 +22,25 @@ clean-package:
 	- rm -rf ipk
 
 wterm:
-	- cd src/plugin; $(MAKE)
-	- mv src/plugin/wterm wterm
+	$(MAKE) -C src/plugin
+	mv src/plugin/wterm wterm
 
 bin/vttest:
-	- cd src/vttest; $(MAKE)
-	- mv src/vttest/vttest bin/vttest
+	$(MAKE) -C src/vttest
+	mv src/vttest/vttest bin/vttest
 
 uninstall:
 	- palm-install -r $(APPID)
 
 install: package
-	- palm-install ipk/$(IPK)
-	
+	palm-install ipk/$(IPK)
+
 test: install
-	- palm-launch $(APPID)
+	palm-launch $(APPID)
 
 clean:
 	- rm -rf ipk
 	- rm -rf bin/vttest
 	- rm -rf wterm
-	- cd src/plugin; make clean
-	- cd src/vttest; make clean
+	- $(MAKE) -C src/plugin clean
+	- $(MAKE) -C src/vttest clean
