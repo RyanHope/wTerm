@@ -512,6 +512,9 @@ int Terminal::runReader()
 		if (gotSIGCHLD == 1)
 		{
 			gotSIGCHLD = 0;
+			getExtTerminal()->insertData("Terminal closed.");
+			getExtTerminal()->insertData("\033c"); // Reset
+			getExtTerminal()->insertData("Attempting to start a new terminal...\033E");
 			newLogin();
 			sleep(1);
 		}
