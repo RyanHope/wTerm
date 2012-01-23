@@ -248,7 +248,7 @@ bool ControlSeqParser::matchCSI() {
 	end = it->second.end();
 
 	/* empty param string should represent a default value. we ignore this here. */
-	/* if (m_numValues == 0) { m_values[m_numValues++] = -1; */
+	/* if (m_numValues == 0) { m_values[m_numValues++] = -1; } */
 
 	for (; i != end; ++i) {
 		if (i->parameter == (m_prefixlen ? m_prefix[0] : 0)) {
@@ -257,7 +257,8 @@ bool ControlSeqParser::matchCSI() {
 			/* invalid numberof parameters */
 			if (m_numValues < i->minParams || (-1 != i->maxParams && m_numValues > i->maxParams)) continue;
 
-			for (unsigned int k = 0; k < m_numValues; k++) {
+			unsigned int k;
+			for (k = 0; k < m_numValues; k++) {
 				if (-1 == m_values[k]) {
 					if (-1 != i->defaultVal) {
 						m_values[k] = i->defaultVal;
@@ -267,6 +268,10 @@ bool ControlSeqParser::matchCSI() {
 						return false;
 					}
 				}
+			}
+			for (; k < MAX_NUM_VALUES; k++) {
+				/* reset all other values */
+				m_values[k] = -1;
 			}
 
 			m_token = i->token;
@@ -281,9 +286,14 @@ bool ControlSeqParser::matchCSI() {
 }
 
 bool ControlSeqParser::nextChar() {
-	if (ESC_CHAR != m_currentChar && m_currentChar < 0x20) {
+	switch (m_currentChar) {
+	case 0x08: // backspace
+	case 0x09: // \t
+	case 0x0A: // \n
+	case 0x0B: // vertical tab
+	case 0x0D: // \r
 		/* return control character and resume parsing afterwards */
-		// return true;
+		return true;
 	}
 	switch (m_state) {
 	case ST_START:
