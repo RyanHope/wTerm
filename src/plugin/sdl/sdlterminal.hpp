@@ -51,7 +51,7 @@ public:
 
 	void redraw();
 	void injectData(const char *data);
-	void insertData(const char *data);
+	void insertData(const char *data, int len);
 	TerminalState *getTerminalState();
 
 	SDL_Color getColor(TSColor_t color);

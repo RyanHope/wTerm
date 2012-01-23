@@ -544,7 +544,7 @@ void Terminal::flushOutputBuffer()
 			m_dataBuffer->copy(tmp, m_dataBuffer->size());
 			m_dataBuffer->clear();
 
-			getExtTerminal()->insertData(tmp);
+			getExtTerminal()->insertData(tmp, nTmpSize - 1);
 
 			free(tmp);
 		}
@@ -706,6 +706,10 @@ int Terminal::setRaw()
 	return 0;
 }
 
+void Terminal::insertData(const char *data, int len)
+{
+	sendCommand(data);
+}
 void Terminal::insertData(const char *data)
 {
 	sendCommand(data);
