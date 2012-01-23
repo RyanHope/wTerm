@@ -28,7 +28,7 @@ const unsigned char ControlSeqParser::ESC_CHAR = 27;
 const unsigned char ControlSeqParser::DELIMITER_CHAR = ';';
 
 ControlSeqParser::ControlSeqParser()
-: m_seq(NULL), m_state(ST_START)
+: m_state(ST_START), m_seq(NULL), m_mode(MODE_8BIT), m_utf8_remlen(0)
 {
 	buildLookup();
 }
@@ -285,7 +285,7 @@ bool ControlSeqParser::matchCSI() {
 	return false;
 }
 
-bool ControlSeqParser::nextChar() {
+bool ControlSeqParser::parseChar() {
 	switch (m_currentChar) {
 	case 0x08: // backspace
 	case 0x09: // \t
@@ -302,6 +302,13 @@ bool ControlSeqParser::nextChar() {
 			m_prefixlen = 0;
 			m_numValues = 0;
 			return false;
+		}
+		if (MODE_7BIT != m_mode && m_currentChar >= 0x80 && m_currentChar < 0xA0) {
+			m_state = ST_ESCAPE;
+			m_prefixlen = 0;
+			m_numValues = 0;
+			m_currentChar = m_currentChar - 0x40;
+			return parseChar();
 		}
 		return true;
 	case ST_ESCAPE:
@@ -320,7 +327,7 @@ bool ControlSeqParser::nextChar() {
 			return false;
 		} else {
 			m_state = ST_ESCAPE_TRIE;
-			return nextChar();
+			return parseChar();
 		}
 		break;
 	case ST_CSI:
@@ -408,20 +415,71 @@ void ControlSeqParser::addInput(const char *seq) {
 	m_seq = (const unsigned char*) seq;
 }
 
+unsigned char ControlSeqParser::nextByte() {
+	unsigned char c;
+	if (!m_seq) return 0;
+
+	c = *m_seq++;
+	if (!c) {
+		/* end of input for now */
+		m_seq = NULL;
+		return 0;
+	}
+	return c;
+}
+
+bool ControlSeqParser::nextChar() {
+	unsigned char c;
+	while (0 != (c = nextByte())) {
+		switch (m_mode) {
+		case MODE_7BIT:
+		case MODE_8BIT:
+			m_currentChar = c;
+			return true;
+		case MODE_UTF8:
+			if (0 == m_utf8_remlen) {
+				m_currentChar = 0;
+				/* new char */
+				if (0 == (c & 0x80)) { m_utf8_seqlen = 1; m_currentChar = c & 0x7f; }
+				else if (0xC0 == (c & 0xFE)) { return false; /* 0xCO / 0xC1 overlong */ }
+				else if (0xC0 == (c & 0xE0)) { m_utf8_seqlen = 2; m_currentChar = c & 0x1f; }
+				else if (0xE0 == (c & 0xF0)) { m_utf8_seqlen = 3; m_currentChar = c & 0x0f; }
+				/* only 16-bit, seqlen 4 not supported */
+				/* else if (0xF0 == (c & 0xF8)) { m_utf8_seqlen = 4; code = c & 0x07; } */
+				else return false; /* skip invalid byte */
+				m_utf8_remlen = m_utf8_seqlen - 1;
+			} else {
+				if (0x80 != (c & 0xC0)) {
+					m_utf8_remlen = 0; /* skip invalid bytes */
+					return false;
+				}
+				m_currentChar = (m_currentChar << 6) | (c & 0x3f);
+				--m_utf8_remlen;
+			}
+			if (0 == m_utf8_remlen) {
+				/* char complete */
+				if ((3 == m_utf8_seqlen) && (m_currentChar < 0x800)) return false; /* overlong */
+				return true;
+			}
+			return false;
+		}
+	}
+	return false;
+}
+
 bool ControlSeqParser::next() {
 	if (!m_seq) return false;
 	m_token = CS_UNKNOWN;
 
-	for (;;) {
-		/* TODO: decode UTF-8 */
-		m_currentChar = *m_seq++;
-		if (0 == m_currentChar) {
-			/* end of input for now */
-			m_seq = NULL;
-			return false;
-		}
-		if (nextChar()) {
-			return true;
-		}
+	while (nextChar()) {
+		if (parseChar()) return true;
+	}
+	return false;
+}
+
+void ControlSeqParser::setMode(Mode mode) {
+	if (mode != m_mode) {
+		m_mode = mode;
+		m_utf8_remlen = 0; /* reset utf-8 state */
 	}
 }
