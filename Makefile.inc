@@ -11,8 +11,8 @@ ifdef DEVICE
 		ROOT=/opt/PalmPDK/device
 	else
 		MARCH_TUNE=-O2 -march=armv7-a -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp
-		CC=$(BUILD_ROOT)/toolchain/cs07q3armel/build/arm-2007q3/bin/arm-none-linux-gnueabi-gcc
-		CXX=$(BUILD_ROOT)/toolchain/cs07q3armel/build/arm-2007q3/bin/arm-none-linux-gnueabi-g++
+		CC=$(BUILD_ROOT)/toolchain/cs09q1armel/build/arm-2009q1/bin/arm-none-linux-gnueabi-gcc
+		CXX=$(BUILD_ROOT)/toolchain/cs09q1armel/build/arm-2009q1/bin/arm-none-linux-gnueabi-g++
 		ROOT=$(BUILD_ROOT)/staging/armv7/usr
 	endif
 else
