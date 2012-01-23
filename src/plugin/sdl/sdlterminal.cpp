@@ -317,7 +317,8 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			else
 				extTerminal->insertData("\x7F");
 			break;
-		case 0:
+		case SDLK_UNKNOWN:
+		default:
 			// Failed to handle based on 'sym', look to unicode:
 			// Accordingly, if no unicode value, we're done here.
 			if (!unicode) break;
@@ -334,7 +335,7 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 				writeUtf8Char(c, unicode);
 			}
 			extTerminal->insertData(c);
-
+			break;
 		}
 		break;
 	default:
