@@ -154,19 +154,12 @@ void SDLFontGL::clearGL() {
 	free(haveCacheLine);
 	free(fnts);
 	free(cols);
-	free(colorValues);
-	free(texValues);
-	free(vtxValues);
 
 	haveCacheLine = 0;
 	fnts = NULL;
 	cols = NULL;
-	colorValues = NULL;
-	texValues = NULL;
-	vtxValues = NULL;
 
 	nFonts = nCols = 0;
-	screenRows = screenCols = 0;
 	numChars = 0;
 }
 
@@ -287,7 +280,7 @@ void SDLFontGL::drawBackground(int color, int nX, int nY, int cells) {
 			((float)bgc.r)/255.f,
 			((float)bgc.g)/255.f,
 			((float)bgc.b)/255.f,
-			1.f,
+			1.f
 	};
 
 	for(unsigned i = 0; i < 6; ++i) {
@@ -310,6 +303,11 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
 	assert(fnts && cols && GlyphCache);
 
 	const unsigned int stride = 12; // GL_TRIANGLE_STRIP 2*6
+
+	// Is our operation buffer full?
+	// If so, flush it now.
+	if (numChars > RENDER_BUFFER_SIZE-2)
+		flushGLBuffer();
 
 	drawBackground(bg, nX, nY, 1);
 
@@ -372,8 +370,8 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
 	int x,y;
 	getTextureCoordinates(graphicsInfo, cChar, x, y);
 
-	float x_offset = ((float)x) / texW;
-	float y_offset = ((float)y) / texH;
+	float x_offset = ((float)x) / (float)texW;
+	float y_offset = ((float)y) / (float)texH;
 
 	for(unsigned j = 0; j < stride; j += 2) {
 		tex[j] += x_offset;
@@ -387,31 +385,9 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
 	memcpy(clrs, colorCopy, sizeof(colorCopy));
 }
 
-void SDLFontGL::startTextGL(int rows, int cols) {
-	// If this is a new screen dimension, reset our data:
-	if (rows != screenRows || cols != screenCols) {
-		free(colorValues);
-		free(texValues);
-		free(vtxValues);
-
-		screenRows = rows;
-		screenCols = cols;
-
-		// (at most) 2 operations per cell: background, foreground text
-		int nCells = screenRows * screenCols * 2;
-		colorValues = (GLfloat*)malloc(nCells*sizeof(GLfloat)*24);
-		texValues = (GLfloat*)malloc(nCells*sizeof(GLfloat)*12);
-		vtxValues = (GLfloat*)malloc(nCells*sizeof(GLfloat)*12);
-
-	}
-
-	// Start over
+void SDLFontGL::startTextGL() {
+	// Start over in buffer
 	numChars = 0;
-}
-
-void SDLFontGL::endTextGL() {
-	// We've built up commands for the entire screen!
-	// Tell GL where all the information is, and render!
 
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -423,10 +399,19 @@ void SDLFontGL::endTextGL() {
 	glColorPointer(4, GL_FLOAT, 0, colorValues);
 	glTexCoordPointer(2, GL_FLOAT, 0, texValues);
 	glVertexPointer(2, GL_FLOAT, 0, vtxValues);
-	// Go!
+}
+
+void SDLFontGL::flushGLBuffer() {
+	// Render what we've gathered so far
 	glDrawArrays(GL_TRIANGLES, 0, 6*numChars);
-	glFlush();
+	numChars = 0;
+}
+
+void SDLFontGL::endTextGL() {
+	flushGLBuffer();
+
 	glDisableClientState(GL_COLOR_ARRAY);
+	glFlush();
 }
 
 void SDLFontGL::setCharMapping(int index, CharMapping_t map) {
