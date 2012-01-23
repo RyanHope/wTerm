@@ -39,7 +39,10 @@ public:
 	/**
 	 * Insert data into this terminal.
 	 */
-	virtual void insertData(const char *data) {}
+	virtual void insertData(const char *data, int len) = 0;
+	virtual void insertData(const char *data) {
+		insertData(data, strlen(data));
+	}
 
 	bool isReady()
 	{
