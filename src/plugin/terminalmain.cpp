@@ -119,8 +119,8 @@ int main(int argc, const char* argv[])
 	sdlTerminal = new SDLTerminal();
 	Terminal *terminal = new Terminal();
 
-	sdlTerminal->start();
 	sdlTerminal->setFontSize((argc > 1 && atoi(argv[1])) ? atoi(argv[1]) : 12);
+	sdlTerminal->start();
 
 	if (argc > 2)
 		terminal->setExec(argv[2]);

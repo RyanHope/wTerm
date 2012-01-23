@@ -680,11 +680,16 @@ void TerminalState::setNumBufferLines(int nNumLines)
 	pthread_mutex_unlock(&m_rwLock);
 }
 
-void TerminalState::cursorHome() {
+void TerminalState::cursorHome()
+{
+	pthread_mutex_lock(&m_rwLock);
+
 	if ((m_nTermModeFlags & TS_TM_ORIGIN) > 0)
 		setCursorLocation(1,m_nTopMargin);
 	else
 		setCursorLocation(1,1);
+
+	pthread_mutex_unlock(&m_rwLock);
 }
 
 /**
@@ -987,12 +992,20 @@ TSColor_t TerminalState::getBackgroundColor()
 
 void TerminalState::setG0Charset(TSCharset_t charset)
 {
+	pthread_mutex_lock(&m_rwLock);
+
 	m_currentGraphicsState.g0charset = charset;
+
+	pthread_mutex_unlock(&m_rwLock);
 }
 
 TSCharset_t TerminalState::getG0Charset()
 {
+	pthread_mutex_lock(&m_rwLock);
+
 	return m_currentGraphicsState.g0charset;
+
+	pthread_mutex_unlock(&m_rwLock);
 }
 
 void TerminalState::setG1Charset(TSCharset_t charset)
@@ -1269,7 +1282,8 @@ void TerminalState::tabBackward(int nTabs) {
 	setCursorLocation(maxX-nTabs*8, m_cursorLoc.getY());
 }
 
-void TerminalState::resetTerminal() {
+void TerminalState::resetTerminal()
+{
 	setTerminalModeFlags(TS_TM_AUTO_REPEAT|TS_TM_AUTO_WRAP|TS_TM_COLUMN|TS_TM_CURSOR);
 	eraseScreen();
 	setMargin(1,getDisplayScreenSize().getY());
@@ -1281,8 +1295,13 @@ void TerminalState::resetTerminal() {
 	unsolicited = false;
 }
 
-void TerminalState::setShift(bool shift) {
+void TerminalState::setShift(bool shift)
+{
+	pthread_mutex_lock(&m_rwLock);
+
 	m_shift = shift;
+
+	pthread_mutex_unlock(&m_rwLock);
 }
 
 bool TerminalState::getShift() {

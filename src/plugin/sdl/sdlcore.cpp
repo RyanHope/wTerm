@@ -459,12 +459,15 @@ int SDLCore::setFontSize(int nSize)
 		nSize = 1;
 	}
 
-	closeFonts();
-
-	if (createFonts(nSize) != 0)
+	if (isRunning())
 	{
-		syslog(LOG_ERR, "Cannot set new font size.");
-		return -1;
+		closeFonts();
+
+		if (createFonts(nSize) != 0)
+		{
+			syslog(LOG_ERR, "Cannot set new font size.");
+			return -1;
+		}
 	}
 
 	m_nFontSize = nSize;
