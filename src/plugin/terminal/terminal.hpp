@@ -28,7 +28,6 @@
 #endif
 
 #include "extterminal.hpp"
-#include "util/databuffer.hpp"
 
 #include <string>
 #include <vector>
@@ -41,7 +40,6 @@ private:
 	pid_t m_pid;
 	char *m_slaveName;
 	char *m_sUser;
-	DataBuffer *m_dataBuffer;
 
 	std::vector<std::string> m_exec;
 
