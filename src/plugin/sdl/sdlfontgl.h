@@ -32,11 +32,11 @@ public:
 		Uint16 map[128];
 	} CharMapping_t;
 	typedef struct {
-		int font;
-		int fg;
-		int bg;
-		int slot1;
-		int slot2;
+		unsigned int font;
+		unsigned int fg;
+		unsigned int bg;
+		unsigned int slot1;
+		unsigned int slot2;
 		int blink;
 	} TextGraphicsInfo_t;
 private:
@@ -47,7 +47,7 @@ private:
 	// Dirty bit for each cache line
 	bool * haveCacheLine;
 
-	int nFonts, nCols;
+	unsigned int nFonts, nCols;
 	TTF_Font** fnts;
 	SDL_Color* cols;
 	int nWidth, nHeight;
@@ -62,13 +62,13 @@ private:
 	CharMapping_t charMappings[MAX_CHARSETS];
 
 	void clearGL();
-	void ensureCacheLine(int font, int slot);
-	bool &hasCacheLine(int font, int slot);
+	void ensureCacheLine(unsigned int font, unsigned int slot);
+	bool &hasCacheLine(unsigned int font, unsigned int slot);
 	void createTexture();
 	void drawBackground(int color, int X, int Y, int cells);
 	Uint16 lookupChar(char c);
 	void initializeCharMapping();
-	void getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, char c, int &x, int &y);
+	void getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, Uint16 c, int &x, int &y);
 
 public:
 	SDLFontGL() : GlyphCache(0), texW(0), texH(0), haveCacheLine(0),
@@ -87,7 +87,7 @@ public:
 
 	// Begin drawing text to the screen, assuming the given screen size
 	void startTextGL(int cols, int rows);
-	void drawTextGL(TextGraphicsInfo_t & graphicsInfo, int x, int y, const char * text);
+	void drawTextGL(TextGraphicsInfo_t & graphicsInfo, int x, int y, Uint16 cChar);
 	// Done drawing text, commit!
 	void endTextGL();
 };

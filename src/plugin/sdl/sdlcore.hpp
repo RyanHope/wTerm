@@ -95,8 +95,6 @@ private:
 	int m_nMaxColumnsOfText;
 
 
-	std::map<int, int> m_powerOfTwoLookup;
-
 	// pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
 	struct {
 		int firsttime;    /* if we check against the delay or repeat value */
@@ -129,10 +127,10 @@ public:
 	int getFontSize();
 	int setFontSize(int nSize);
 
-	void printText(int nColumn, int nLine, const char *sText);
+	void printCharacter(int nColumn, int nLine, CellCharacter cChar);
 	void drawCursor(int nColumn, int nLine);
 	void drawRect(int nX, int nY, int nWidth, int nHeight, SDL_Color color, float fAlpha);
-	void drawText(int nX, int nY, const char *sText);
+	void drawCharacter(int nX, int nY, CellCharacter cChar);
 	void drawSurface(int nX, int nY, SDL_Surface *surface);
 	void drawImage(int nX, int nY, const char *sImage);
 
@@ -143,10 +141,10 @@ public:
 	int getMaximumLinesOfText();
 	int getMaximumColumnsOfText();
 
-	virtual SDL_Color getColor(TSColor_t color);
-	virtual void redraw();
+	virtual SDL_Color getColor(TSColor_t color) = 0;
+	virtual void redraw() = 0;
 
-	virtual void updateDisplaySize();
+	virtual void updateDisplaySize() = 0;
 
 	void stopKeyRepeat();
 	void fakeKeyEvent(SDL_Event &event);
