@@ -27,6 +27,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <syslog.h>
+#include <sys/wait.h>
 
 #include "terminal.hpp"
 
@@ -55,6 +56,27 @@ void terminal_save_settings(int slaveFD)
 			terminal_global_slave_fd = -1;
 			syslog(LOG_ERR, "Cannot save initial terminal settings.");
 		}
+	}
+}
+
+volatile sig_atomic_t gotSIGCHLD = 0;
+
+void signalHandler(int signal, siginfo_t* info, void *context)
+{
+	switch (signal)
+	{
+		case SIGCHLD:
+			gotSIGCHLD = 1;
+			if (info != NULL)
+			{
+				syslog(LOG_DEBUG,"THWACK ZOMBIE %i", info->si_pid);
+				waitpid(info->si_pid, NULL, WNOHANG);
+			}
+			syslog(LOG_DEBUG, "Caught SIGCHLD PID: %i", info->si_pid);
+			break;
+		default:
+			syslog(LOG_DEBUG, "Unknown signal: %i", signal);
+			break;
 	}
 }
 
@@ -363,6 +385,71 @@ int Terminal::start()
 	return result;
 }
 
+void Terminal::newLogin()
+{
+	// terminal_save_settings(m_slaveFD);
+	m_pid = fork();
+
+	if (isChild())
+	{
+		syslog(LOG_INFO, "Initializing new child terminal process.");
+
+		// Child process.
+		if (setsid() < 0)
+		{
+			syslog(LOG_ERR, "Cannot set child session.");
+			_exit(0);
+		}
+
+		// Unsure if need to close FDs here, didn't work when I did
+
+		// Acquire controlling of terminal.
+		if (openPTYSlave() != 0)
+		{
+			syslog(LOG_ERR, "Cannot acquire slave as controlling terminal.");
+			_exit(0);
+		}
+		
+		if (dup2(m_slaveFD, STDIN_FILENO) != STDIN_FILENO)
+		{
+			syslog(LOG_ERR, "Cannot duplicate slave into stdin.");
+			_exit(0);
+		}
+
+		if (dup2(m_slaveFD, STDOUT_FILENO) != STDOUT_FILENO)
+		{
+			syslog(LOG_ERR, "Cannot duplicate slave into stdout.");
+			_exit(0);
+		}
+
+		if (dup2(m_slaveFD, STDERR_FILENO) != STDERR_FILENO)
+		{
+			syslog(LOG_ERR, "Cannot duplicate slave into stderr.");
+			_exit(0);
+		}
+
+		/*if (atexit(terminal_restore_settings) != 0)
+		{
+			syslog(LOG_INFO, "Cannot set terminal restore state function at exit.");
+			_exit(0);
+		}*/
+
+		const char *argv[m_exec.size()+1];
+		int i=0;
+		for (; i<m_exec.size(); i++) {
+			argv[i] = m_exec[i].c_str();
+		}
+		argv[i] = NULL;
+		
+		if (execvp(((char **)argv)[0], ((char **)argv)) < 0)
+		{
+			syslog(LOG_ERR, "Cannot execute child shell.");
+		}		
+		_exit(0);
+	}
+	syslog(LOG_INFO, "Created new child terminal process with PID %i", m_pid);
+}
+
 int Terminal::runReader()
 {
 	char dataBuffer[256];
@@ -370,6 +457,14 @@ int Terminal::runReader()
 	ssize_t readResult;
 	struct timeval timeout;
 	fd_set readFDSet;
+
+	// Set up SIGCHLD handling
+	struct sigaction act;
+	act.sa_sigaction = signalHandler;
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = SA_SIGINFO;
+
+	sigaction(SIGCHLD, &act, NULL);
 
 	// Loop until m_bDone is set (elsewhere)
 	while (!m_bDone)
@@ -412,6 +507,14 @@ int Terminal::runReader()
 
 		// Flush since we've read all that's available.
 		flushOutputBuffer();
+
+		// Old terminal child process died, make a new one
+		if (gotSIGCHLD == 1)
+		{
+			gotSIGCHLD = 0;
+			newLogin();
+			sleep(1);
+		}
 	}
 
 	// Indicate we exited neatly.
