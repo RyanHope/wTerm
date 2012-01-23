@@ -1142,7 +1142,11 @@ void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnor
 			int size = line->size();
 			line->resize(nPos + 1);
 			std::fill(line->begin()+size,line->end(),getEmptyCell());
+		} else if (TS_TM_INSERT & m_nTermModeFlags) {
+			line->insert(line->begin() + nPos, TSCell_t());
 		}
+
+
 
 		// Populate the line with the the specified character, using cur graphics
 		(*line)[nPos].graphics = m_currentGraphicsState;
