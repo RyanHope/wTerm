@@ -282,10 +282,7 @@ void SDLCore::eventLoop()
 					handleKeyboardEvent(event);
 					break;
 				case SDL_VIDEOEXPOSE:
-					if (active) {
-						redraw();
-						setDirty(BUFFER_DIRTY_BIT);
-					}
+					setDirty(BUFFER_DIRTY_BIT);
 					break;
 				case SDL_VIDEORESIZE:
 					closeFonts();
@@ -293,7 +290,7 @@ void SDLCore::eventLoop()
 					createFonts(m_nFontSize);
 					initOpenGL();
 					updateDisplaySize();
-					redraw();
+					setDirty(BUFFER_DIRTY_BIT);
 					break;
 				case SDL_QUIT:
 					return;
@@ -309,13 +306,14 @@ void SDLCore::eventLoop()
 		{
 			clearDirty(FONT_DIRTY_BIT);
 			resetGlyphCache();
-			redraw();
+			setDirty(BUFFER_DIRTY_BIT);
 		}
 
 		// Redraw if needed
 		if (isDirty(BUFFER_DIRTY_BIT) && active)
 		{
 			clearDirty(BUFFER_DIRTY_BIT);
+			redraw();
 			SDL_GL_SwapBuffers();
 		}
 
