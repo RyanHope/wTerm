@@ -5,12 +5,12 @@ enyo.kind({
 	align: 'center',
 	
 	published: {        
-	    launchParams: null
+	    launchParams: null,
 	},
+	
+	showVKB: false,
 
 	prefs: new Prefs(),
-	
-	showVKB: true,
 
 	components: [
 		{kind: "AppMenu", components: [
@@ -25,7 +25,8 @@ enyo.kind({
 			onKeydown: "onBtKeyDown",
 			onWindowActivated: 'windowActivated',
 			onWindowDeactivated: 'windowDeactivated',
-			onApplicationRelaunch: "applicationRelaunchHandler"
+			onApplicationRelaunch: "applicationRelaunchHandler",
+			//onLoad:"loadHandler"
 		},
 		{
 			kind: 'Popup2',
@@ -113,37 +114,53 @@ enyo.kind({
 	},
 	
 	initComponents: function() {
-    	this.inherited(arguments)
-    	this.createComponent({
-			name: "prefs", 
-			kind: "Preferences", 
-			style: "width: 320px; top: 0px; bottom: 0; margin-bottom: 0px;", //width: 384px
-			className: "enyo-bg",
-			flyInFrom: "right",
-			onOpen: "pulloutToggle",
-			onClose: "closeRightPullout",
-			prefs: this.prefs
-		})
-		this.createComponent({
-    		name: 'terminal',
-			kind: 'Terminal',
-			prefs: this.prefs,
-			bgcolor: '000000',
-			width: window.innerWidth,
-			height: 400,
-			onPluginReady: 'pluginReady'
-		})
-		this.createComponent({
+  	this.inherited(arguments)
+  	this.createComponent({
 			name : "getPreferencesCall",
 			kind : "PalmService",
 			service : "palm://com.palm.systemservice/",
 			method : "getPreferences",
 			onSuccess : "prefCallSuccess",
 		})
-		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, prefs: this.prefs, showing: true})
-		this.$.terminal.vkb = this.$.vkb
-		this.$.prefs.terminal = this.$.terminal
-		this.$.prefs.vkb = this.$.vkb
+		if (this.launchParams.dockMode) {
+			this.createComponent({
+    		name: 'terminal',
+				kind: 'Terminal',
+				prefs: this.prefs,
+				bgcolor: '000000',
+				width: window.innerWidth,
+				height: window.innerHeight,
+				onPluginReady: 'pluginReady',
+				exec: '/media/cryptofs/apps/usr/palm/applications/us.ryanhope.wterm/bin/cmatrix'
+			})
+			enyo.setFullScreen(true)
+		} else {
+			this.showVKB = true
+			this.createComponent({
+				name: "prefs", 
+				kind: "Preferences", 
+				style: "width: 320px; top: 0px; bottom: 0; margin-bottom: 0px;", //width: 384px
+				className: "enyo-bg",
+				flyInFrom: "right",
+				onOpen: "pulloutToggle",
+				onClose: "closeRightPullout",
+				prefs: this.prefs
+			})
+			this.createComponent({
+    		name: 'terminal',
+				kind: 'Terminal',
+				prefs: this.prefs,
+				bgcolor: '000000',
+				width: window.innerWidth,
+				height: 400,
+				onPluginReady: 'pluginReady',
+				exec: this.prefs.get('exec')
+			})
+			this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, prefs: this.prefs, showing: true})
+			this.$.terminal.vkb = this.$.vkb
+			this.$.prefs.terminal = this.$.terminal
+			this.$.prefs.vkb = this.$.vkb
+		}
 		this.setup()
 	},
 	
@@ -165,7 +182,8 @@ enyo.kind({
 				break;
 			case 3: // up
 			case 4: // down
-				this.$.vkb.large()
+				if (!this.launchParams.dockMode)
+					this.$.vkb.large()
 				if (this.showVKB)
 					this.$.terminal.resize(window.innerWidth, 400)
 				else
@@ -173,7 +191,8 @@ enyo.kind({
 				break;
 			case 5: // left
 			case 6: // right
-				this.$.vkb.small()
+				if (!this.launchParams.dockMode)
+					this.$.vkb.small()
 				if (this.showVKB)
 					this.$.terminal.resize(window.innerWidth, 722)
 				else
@@ -212,13 +231,15 @@ enyo.kind({
 	setup: function() {
 		var o = enyo.getWindowOrientation()
 		if (o == 'up' || o == 'down') {
-			this.$.vkb.large()
+			if (!this.launchParams.dockMode)
+				this.$.vkb.large()
 			if (this.showVKB)
 				this.$.terminal.resize(window.innerWidth, 400)
 			else
 				this.$.terminal.resize(window.innerWidth, window.innerHeight)
 		} else {
-			this.$.vkb.small()
+			if (!this.launchParams.dockMode)
+				this.$.vkb.small()
 			if (this.showVKB)
 				this.$.terminal.resize(window.innerWidth, 722)
 			else
@@ -234,6 +255,16 @@ enyo.kind({
 		{
 			this.$.terminal.$.plugin.node.focus();
 			this.$.terminal.$.plugin.node.dispatchEvent(event);
+		}
+	},
+	
+	startDockmode: function() {
+		enyo.setFullScreen(true)
+	},
+	
+	loadHandler: function() {
+		if (enyo.windowParams.dockMode) {
+			this.startDockMode()
 		}
 	}
 

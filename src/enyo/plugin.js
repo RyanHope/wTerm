@@ -11,6 +11,7 @@ enyo.kind({
 		currentColors: [],
 		currentKeys: [],
 		isReady: false,
+		exec: null,
 	},
 		
 	events: {
@@ -31,7 +32,7 @@ enyo.kind({
 			passTouchEvents: true,
 			width: this.width,
 			height: this.height,
-			params: [this.prefs.get('fontSize').toString(10), this.prefs.get('exec')]
+			params: [this.prefs.get('fontSize').toString(10), this.exec]
 		})
 	},
 		

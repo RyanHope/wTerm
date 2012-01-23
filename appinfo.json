@@ -18,5 +18,6 @@
 			"url": "us.ryanhope.wterm",
 			"launchParam": "command"
 		}
-	}
+	},
+	"dockMode": true
 }
