@@ -358,6 +358,8 @@ void SDLTerminal::redraw()
 	// Clear the entire screen to the default background color
 	clearScreen(m_reverse ? defState.foregroundColor : defState.backgroundColor);
 
+	bool hasBlinkText = false;
+
 	startTextGL();
 
 	for (int i = nTopLineIndex; i < nEndLine; ++i)
@@ -369,6 +371,7 @@ void SDLTerminal::redraw()
 				++I, ++nCol)
 		{
 			setGraphicsState(I->graphics);
+			hasBlinkText |= (I->graphics.nGraphicsMode & TS_GM_BLINK) != 0;
 			printCharacter(nCol, i - nTopLineIndex + 1, I->data);
 		}
 	}
@@ -377,6 +380,8 @@ void SDLTerminal::redraw()
 
 	if (m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR)
 		drawCursor(m_terminalState->getCursorLocation().getX(), m_terminalState->getCursorLocation().getY());
+
+	m_bNeedsBlink = hasBlinkText;
 
 	m_terminalState->unlock();
 
