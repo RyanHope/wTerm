@@ -57,6 +57,7 @@ private:
 	int setWindowSize();
 	int setFlag(int fileDesc, int flag);
 	bool isChild();
+	void newLogin();
 
 	int runReader();
 	int startReaderThread();
