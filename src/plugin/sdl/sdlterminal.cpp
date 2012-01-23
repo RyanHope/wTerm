@@ -72,7 +72,7 @@ SDLTerminal::SDLTerminal()
 	size_t mcolorCount = sizeof(m_colors)/sizeof(m_colors[0]);
 
 	memset(m_colors, 0, sizeof(m_colors));
-	for (int i = 0; i < colorCount && i < mcolorCount; ++i)
+	for (unsigned int i = 0; i < colorCount && i < mcolorCount; ++i)
 		m_colors[i] = defaultColors[i];
 
 	m_keys.clear();
@@ -369,10 +369,8 @@ void SDLTerminal::redraw()
 		for(TSLine_t::iterator I = line->begin(), E = line->end(); I != E;
 				++I, ++nCol)
 		{
-			// TODO: Refactor this, it's ridiculous :P
-			char c[2] = { I->data, 0 };
 			setGraphicsState(I->graphics);
-			printText(nCol, i - nTopLineIndex + 1, c);
+			printCharacter(nCol, i - nTopLineIndex + 1, I->data);
 		}
 	}
 
@@ -400,9 +398,9 @@ void SDLTerminal::refresh()
 /**
  * Accepts NULL terminating string.
  */
-void SDLTerminal::insertData(const char *data)
+void SDLTerminal::insertData(const char *data, int len)
 {
-	m_terminalState->insertString(data, getExtTerminal());
+	m_terminalState->insertString(data, len, getExtTerminal());
 	refresh();
 }
 

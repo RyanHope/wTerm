@@ -294,11 +294,8 @@ int Terminal::setFlag(int fileDesc, int flags)
 
 int Terminal::sendCommand(const char *command)
 {
-	int cmdCharIndex = 0;
-	char dataBuffer[4];
 	struct timeval timeout;
 	fd_set writeFDSet;
-	bool bDone = false;
 
 	unsigned bytes = strlen(command);
 	const char * buf = command;
@@ -350,8 +347,8 @@ int Terminal::start()
 	{
 		if (isChild())
 		{
-			const char *argv[m_exec.size()+1];
-			int i=0;
+			const char **argv = new const char*[m_exec.size()+1];
+			unsigned int i=0;
 			for (; i<m_exec.size(); i++) {
 				argv[i] = m_exec[i].c_str();
 			}
@@ -434,8 +431,8 @@ void Terminal::newLogin()
 			_exit(0);
 		}*/
 
-		const char *argv[m_exec.size()+1];
-		int i=0;
+		const char **argv = new const char*[m_exec.size()+1];
+		unsigned int i=0;
 		for (; i<m_exec.size(); i++) {
 			argv[i] = m_exec[i].c_str();
 		}
@@ -544,7 +541,7 @@ void Terminal::flushOutputBuffer()
 			m_dataBuffer->copy(tmp, m_dataBuffer->size());
 			m_dataBuffer->clear();
 
-			getExtTerminal()->insertData(tmp);
+			getExtTerminal()->insertData(tmp, nTmpSize - 1);
 
 			free(tmp);
 		}
@@ -706,6 +703,10 @@ int Terminal::setRaw()
 	return 0;
 }
 
+void Terminal::insertData(const char *data, int len)
+{
+	sendCommand(data);
+}
 void Terminal::insertData(const char *data)
 {
 	sendCommand(data);

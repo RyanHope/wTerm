@@ -203,10 +203,13 @@ typedef enum
 
 class ControlSeqParser
 {
+public:
+	typedef enum { MODE_7BIT, MODE_8BIT, MODE_UTF8 } Mode;
+
 private:
 	static const unsigned char ESC_CHAR;
 	static const unsigned char DELIMITER_CHAR;
-	static const unsigned int MAX_NUM_VALUES = 20;
+	static const int MAX_NUM_VALUES = 20;
 
 	struct CSI_Entry {
 		CSToken_t token;
@@ -239,6 +242,10 @@ private:
 	enum { ST_START, ST_ESCAPE, ST_ESCAPE_TRIE, ST_CSI, ST_CSI_VALUES, ST_CSI_INVALID, ST_OSC, ST_OSC_ESC, ST_ESCY } m_state;
 
 	const unsigned char *m_seq;
+	int m_len;
+
+	Mode m_mode;
+	unsigned int m_utf8_seqlen, m_utf8_remlen;
 
 	void buildLookup();
 
@@ -250,13 +257,16 @@ private:
 	void parseCSIValue();
 	bool matchCSI();
 
-	bool nextChar(); /* returns true if token complete */
+	bool parseChar(); /* returns true if token complete */
+
+	unsigned char nextByte();
+	bool nextChar(); /* tries to build next "char" - may need to decode multiple bytes */
 public:
 	ControlSeqParser();
 	~ControlSeqParser();
 
 	/* don't free seq or call again until next() returned false */
-	void addInput(const char *seq);
+	void addInput(const char *seq, int len);
 
 	bool next(); /* returns false if more input is needed */
 
@@ -265,6 +275,9 @@ public:
 	unsigned int numValues() const { return m_numValues; }
 	int value(unsigned int idx) const { return m_values[idx]; }
 	int* values() { return m_values; }
+
+	void setMode(Mode mode);
+	Mode getMode() const { return m_mode; }
 };
 
 #endif

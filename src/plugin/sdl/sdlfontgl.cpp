@@ -68,10 +68,16 @@ static int getGLFormat() {
 static unsigned nextPowerOfTwo(int n) {
 	assert(n > 0);
 
-	unsigned res = 1;
-	while (res < (unsigned)n) res <<= 1;
+	unsigned res = n;
 
-	return res;
+	/* http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2 */
+	--res;
+	res |= res >> 1;
+	res |= res >> 2;
+	res |= res >> 4;
+	res |= res >> 8;
+	res |= res >> 16;
+	return (res+1); /* warning: overflow possible */
 }
 
 void SDLFontGL::setupFontGL(int fnCount, TTF_Font** fnts, int colCount, SDL_Color *cols) {
@@ -164,7 +170,7 @@ void SDLFontGL::clearGL() {
 	numChars = 0;
 }
 
-void SDLFontGL::ensureCacheLine(int fnt, int slot)
+void SDLFontGL::ensureCacheLine(unsigned int fnt, unsigned int slot)
 {
 
 	assert(fnt >= 0 && fnt < nFonts);
@@ -290,12 +296,12 @@ void SDLFontGL::drawBackground(int color, int nX, int nY, int cells) {
 }
 
 void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
-													 int nX, int nY, const char * text) {
+													 int nX, int nY, Uint16 cChar) {
 	if (!GlyphCache) createTexture();
 
-	int fnt = graphicsInfo.font;
-	int fg = graphicsInfo.fg;
-	int bg = graphicsInfo.bg;
+	unsigned int fnt = graphicsInfo.font;
+	unsigned int fg = graphicsInfo.fg;
+	unsigned int bg = graphicsInfo.bg;
 	int blink = graphicsInfo.blink;
 
 	assert(fnt >= 0 && fnt < nFonts);
@@ -303,22 +309,16 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
 	assert(bg >= 0 && bg < nCols);
 	assert(fnts && cols && GlyphCache);
 
-	unsigned len = strlen(text);
+	const unsigned int stride = 12; // GL_TRIANGLE_STRIP 2*6
 
-	// Ensure we have the needed font/slots:
-	ensureCacheLine(fnt, graphicsInfo.slot1);
-	ensureCacheLine(fnt, graphicsInfo.slot2);
-
-	const int stride = 12; // GL_TRIANGLE_STRIP 2*6
-
-	drawBackground(bg, nX, nY, len);
+	drawBackground(bg, nX, nY, 1);
 
 	if (blink) return;
 
 	GLfloat *tex = &texValues[stride*numChars];
 	GLfloat *vtx = &vtxValues[stride*numChars];
 	GLfloat *clrs = &colorValues[2*stride*numChars];
-	numChars += len;
+	numChars += 1;
 
 	float x_scale = ((float)nWidth) / (float)texW;
 	float y_scale = ((float)nHeight) / (float)texH;
@@ -366,33 +366,25 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
 			1.f
 	};
 
-	for (unsigned i = 0; i < len; ++i)
-	{
-		// Populate texture coordinates
-		memcpy(&tex[i*stride],texCopy,sizeof(texCopy));
+	// Populate texture coordinates
+	memcpy(tex, texCopy, sizeof(texCopy));
 
-		char c = text[i];
+	int x,y;
+	getTextureCoordinates(graphicsInfo, cChar, x, y);
 
-		int x,y;
-		getTextureCoordinates(graphicsInfo, c, x, y);
+	float x_offset = ((float)x) / texW;
+	float y_offset = ((float)y) / texH;
 
-		float x_offset = ((float)x) / texW;
-		float y_offset = ((float)y) / texH;
-
-		for(unsigned j = 0; j < stride; j += 2) {
-			tex[i*stride+j] += x_offset;
-			tex[i*stride+j+1] += y_offset;
-		}
-
-		// Populate vertex coordinates
-		memcpy(&vtx[i*stride],vtxCopy,sizeof(vtxCopy));
-		for(unsigned j = 0; j < stride; j += 2) {
-			vtxCopy[j] += nWidth;
-		}
-
-		// Populate color coodinates
-		memcpy(&clrs[i*2*stride], colorCopy, sizeof(colorCopy));
+	for(unsigned j = 0; j < stride; j += 2) {
+		tex[j] += x_offset;
+		tex[j+1] += y_offset;
 	}
+
+	// Populate vertex coordinates
+	memcpy(vtx,vtxCopy,sizeof(vtxCopy));
+
+	// Populate color coodinates
+	memcpy(clrs, colorCopy, sizeof(colorCopy));
 }
 
 void SDLFontGL::startTextGL(int rows, int cols) {
@@ -421,6 +413,8 @@ void SDLFontGL::endTextGL() {
 	// We've built up commands for the entire screen!
 	// Tell GL where all the information is, and render!
 
+	glClear(GL_COLOR_BUFFER_BIT);
+
 	// Bind the master font texture
 	glBindTexture(GL_TEXTURE_2D, GlyphCache);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -444,16 +438,18 @@ void SDLFontGL::setCharMapping(int index, CharMapping_t map) {
 		hasCacheLine(i, index) = false;
 }
 
-void SDLFontGL::getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, char c, int &x, int &y) {
-	int slot = c > 127 ? graphicsInfo.slot1 : graphicsInfo.slot2;
+void SDLFontGL::getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, Uint16 c, int &x, int &y) {
+	/* TODO: handle unicode chars */
+	if (c > 0x100) c = '?';
 
-	assert(hasCacheLine(graphicsInfo.font, slot));
+	int slot = c > 127 ? graphicsInfo.slot1 : graphicsInfo.slot2;
+	ensureCacheLine(graphicsInfo.font, slot);
 
 	// Set by reference
 	x = (c % 128)*nWidth;
 	y = (slot*nFonts + graphicsInfo.font)*nHeight;
 }
 
-bool &SDLFontGL::hasCacheLine(int font, int slot) {
+bool &SDLFontGL::hasCacheLine(unsigned int font, unsigned int slot) {
 	return haveCacheLine[slot*nFonts + font];
 }

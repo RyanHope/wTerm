@@ -77,7 +77,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_TAB_CLEAR: //ESCH TAB CLEAR
 		switch (values[0]) {
 			case 0:
-				for (int i=0; i < tabs.size(); ++i)
+				for (unsigned int i=0; i < tabs.size(); ++i)
 					if (tabs[i] == m_cursorLoc.getX())
 						tabs.erase(tabs.begin()+i);
 				break;
@@ -449,11 +449,11 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_SINGLE_WIDTH_LINE: //ESC#5
 	case CS_DOUBLE_WIDTH_LINE: //ESC#6
 		//FIXME Not implemented.
-		syslog(LOG_ERR, "VT100 Control Sequence: DOUBLE CELL not implemented.", nToken);
+		syslog(LOG_ERR, "VT100 Control Sequence: DOUBLE CELL not implemented. (%i)", nToken);
 		break;
 	case CS_OSC: // Operating System Controls
 		//FIXME Not implemented.
-		syslog(LOG_ERR, "Operating System Controls not implemented.", nToken);
+		syslog(LOG_ERR, "Operating System Controls not implemented. (%i)", nToken);
 		break;
 	case CS_SCREEN_ALIGNMENT_DISPLAY: //ESC#8
 		displayScreenAlignmentPattern();
@@ -501,7 +501,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		}
 		break;
 	case CS_TERM_RESET: //ESCc
-		syslog(LOG_WARNING, "VT100 Control Sequence: TERM RESET partially implemented.", nToken);
+		syslog(LOG_WARNING, "VT100 Control Sequence: TERM RESET partially implemented. (%i)", nToken);
 		resetTerminal();
 		break;
 	default:
@@ -517,15 +517,15 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
  * The string may contain VT100 control sequences, which will invoke
  * the underlying commands.
  */
-void VTTerminalState::insertString(const char *sStr, ExtTerminal *extTerminal)
+void VTTerminalState::insertString(const char *sStr, int len, ExtTerminal *extTerminal)
 {
-	pthread_mutex_lock(&m_rwLock);
-
-	if (sStr == NULL) {
+	if (sStr == NULL || !len) {
 		return;
 	}
 
-	m_parser->addInput(sStr);
+	pthread_mutex_lock(&m_rwLock);
+
+	m_parser->addInput(sStr, len);
 
 	while (m_parser->next()) {
 		if (m_parser->token() != CS_UNKNOWN) {

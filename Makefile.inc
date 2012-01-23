@@ -34,7 +34,7 @@ ifeq ($(DEBUG),1)
 else ifeq ($(DEBUG),2)
 	MARCH_TUNE+=-g -Wall
 else ifeq ($(DEBUG),3)
-	MARCH_TUNE+=-g -Wall -pendantic
+	MARCH_TUNE+=-g -Wall -pedantic
 endif
 
 ifdef LOGLEVEL
