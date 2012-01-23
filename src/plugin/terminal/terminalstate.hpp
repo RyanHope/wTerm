@@ -20,7 +20,6 @@
 #ifndef TERMINALSTATE_HPP__
 #define TERMINALSTATE_HPP__
 
-#include "util/databuffer.hpp"
 #include "util/point.hpp"
 
 #include <stdint.h>

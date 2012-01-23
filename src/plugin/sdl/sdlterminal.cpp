@@ -18,7 +18,6 @@
  */
 
 #include "sdl/sdlterminal.hpp"
-#include "util/databuffer.hpp"
 #include "terminal/terminal.hpp"
 #include "util/utf8.hpp"
 
