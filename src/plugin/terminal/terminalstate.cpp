@@ -684,10 +684,7 @@ void TerminalState::cursorHome()
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	if ((m_nTermModeFlags & TS_TM_ORIGIN) > 0)
-		setCursorLocation(1,m_nTopMargin);
-	else
-		setCursorLocation(1,1);
+	setCursorLocation(1,1);
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -886,11 +883,6 @@ void TerminalState::setTerminalModeFlags(int nFlags)
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	if ((nFlags & TS_TM_ORIGIN) != (m_nTermModeFlags & TS_TM_ORIGIN))
-	{
-		setCursorLocation(1, 1);
-	}
-
 	m_nTermModeFlags = nFlags;
 
 	pthread_mutex_unlock(&m_rwLock);
@@ -901,11 +893,6 @@ void TerminalState::addTerminalModeFlags(int nFlags)
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	if ((nFlags & TS_TM_ORIGIN) > 0 && (m_nTermModeFlags & TS_TM_ORIGIN) == 0)
-	{
-		setCursorLocation(1, 1);
-	}
-
 	m_nTermModeFlags |= nFlags;
 
 	pthread_mutex_unlock(&m_rwLock);
@@ -914,11 +901,6 @@ void TerminalState::addTerminalModeFlags(int nFlags)
 void TerminalState::removeTerminalModeFlags(int nFlags)
 {
 	pthread_mutex_lock(&m_rwLock);
-
-	if ((nFlags & TS_TM_ORIGIN) == (m_nTermModeFlags & TS_TM_ORIGIN) && (nFlags & TS_TM_ORIGIN) > 0)
-	{
-		setCursorLocation(1, 1);
-	}
 
 	m_nTermModeFlags &= ~nFlags;
 

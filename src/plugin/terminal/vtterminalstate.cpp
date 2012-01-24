@@ -296,6 +296,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			else if (values[i] == 6)
 			{
 				addTerminalModeFlags(TS_TM_ORIGIN);
+				cursorHome();
 			}
 			else if (values[i] == 7)
 			{
@@ -382,6 +383,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			else if (values[i] == 6)
 			{
 				removeTerminalModeFlags(TS_TM_ORIGIN);
+				cursorHome();
 			}
 			else if (values[i] == 7)
 			{
