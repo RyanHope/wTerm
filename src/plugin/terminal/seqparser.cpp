@@ -28,7 +28,7 @@ const unsigned char ControlSeqParser::ESC_CHAR = 27;
 const unsigned char ControlSeqParser::DELIMITER_CHAR = ';';
 
 ControlSeqParser::ControlSeqParser()
-: m_state(ST_START), m_seq(NULL), m_mode(MODE_8BIT), m_utf8_remlen(0)
+: m_state(ST_START), m_seq(NULL), m_mode(MODE_UTF8), m_utf8_remlen(0)
 {
 	buildLookup();
 }
@@ -508,29 +508,30 @@ bool ControlSeqParser::nextChar() {
 		case MODE_UTF8:
 			if (0 == m_utf8_remlen) {
 				m_currentChar = 0;
+				m_utf8_seqlen = 1;
 				/* new char */
-				if (0 == (c & 0x80)) { m_utf8_seqlen = 1; m_currentChar = c & 0x7f; }
-				else if (0xC0 == (c & 0xFE)) { return false; /* 0xCO / 0xC1 overlong */ }
+				if (0 == (c & 0x80)) { m_currentChar = c; }
+				else if (0xC0 == (c & 0xFE)) { continue; /* 0xCO / 0xC1 overlong */ }
 				else if (0xC0 == (c & 0xE0)) { m_utf8_seqlen = 2; m_currentChar = c & 0x1f; }
 				else if (0xE0 == (c & 0xF0)) { m_utf8_seqlen = 3; m_currentChar = c & 0x0f; }
 				/* only 16-bit, seqlen 4 not supported */
 				/* else if (0xF0 == (c & 0xF8)) { m_utf8_seqlen = 4; code = c & 0x07; } */
-				else return false; /* skip invalid byte */
+				else continue; /* skip invalid byte */
 				m_utf8_remlen = m_utf8_seqlen - 1;
 			} else {
 				if (0x80 != (c & 0xC0)) {
 					m_utf8_remlen = 0; /* skip invalid bytes */
-					return false;
+					continue;
 				}
 				m_currentChar = (m_currentChar << 6) | (c & 0x3f);
 				--m_utf8_remlen;
 			}
 			if (0 == m_utf8_remlen) {
 				/* char complete */
-				if ((3 == m_utf8_seqlen) && (m_currentChar < 0x800)) return false; /* overlong */
+				// if ((3 == m_utf8_seqlen) && (m_currentChar < 0x800)) return false; /* overlong */
 				return true;
 			}
-			return false;
+			break;
 		case MODE_7BIT:
 		case MODE_8BIT:
 		default:

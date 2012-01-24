@@ -54,12 +54,12 @@ void writeUtf8Char(char *buf, Uint16 code) {
 		b[1] = '\0';
 	} else if (code < 0x0800) {
 		b[0] = 0xC0 | (code >> 6);
-		b[1] = 0x80 | (code & 0x7F);
+		b[1] = 0x80 | (code & 0x3F);
 		b[2] = '\0';
 	} else {
 		b[0] = 0xE0 | (code >> 12);
-		b[1] = 0x80 | ((code >> 6) & 0x7F);
-		b[2] = 0x80 | (code & 0x7F);
+		b[1] = 0x80 | ((code >> 6) & 0x3F);
+		b[2] = 0x80 | (code & 0x3F);
 		b[3] = '\0';
 	}
 }

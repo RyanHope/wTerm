@@ -147,6 +147,22 @@ int Terminal::openPTYMaster()
 		return -4;
 	}
 
+	struct termios settings;
+
+	if (tcgetattr(m_masterFD, &settings) < 0)
+	{
+		syslog(LOG_ERR, "Cannot read master terminal settings.");
+		return -5;
+	}
+
+	settings.c_iflag |= IUTF8;
+
+	if (tcsetattr(m_masterFD, TCSANOW, &settings) < 0)
+	{
+		syslog(LOG_ERR, "Cannot write default master terminal settings.");
+		return -6;
+	}
+
 	syslog(LOG_INFO, "Initialized master with FD %d.", m_masterFD);
 
 	return 0;
@@ -613,7 +629,7 @@ int Terminal::setTermMode()
 	settings.c_lflag |= (ECHOCTL | IEXTEN);
 #endif
 
-	settings.c_iflag = (ICRNL | IXON);
+	settings.c_iflag = (ICRNL | IXON | IUTF8);
 	settings.c_cflag = (CS8 | CREAD | PARENB | HUPCL);
 
 #ifdef TAB3
@@ -629,6 +645,9 @@ int Terminal::setTermMode()
 	settings.c_cc[VMIN] = 1;
 	settings.c_cc[VTIME] = 0;
 
+	cfsetispeed(&settings, B38400);
+	cfsetospeed(&settings, B38400);
+
 	if (tcsetattr(m_slaveFD, TCSANOW, &settings) < 0)
 	{
 		syslog(LOG_ERR, "Cannot write default terminal settings.");
@@ -638,6 +657,7 @@ int Terminal::setTermMode()
 	return 0;
 }
 
+/* unused */
 int Terminal::setRaw()
 {
 	struct termios settings;
