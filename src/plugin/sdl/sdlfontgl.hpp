@@ -23,22 +23,16 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 
-#define MAX_CHARSETS 12
 #define RENDER_BUFFER_SIZE (1 << 12)
 
 // OpenGL Font Rendering
 class SDLFontGL {
 public:
 	typedef struct {
-		Uint16 map[128];
-	} CharMapping_t;
-	typedef struct {
 		unsigned int font;
 		unsigned int fg;
 		unsigned int bg;
-		unsigned int slot1;
-		unsigned int slot2;
-		int blink;
+		bool blink;
 	} TextGraphicsInfo_t;
 private:
 	// Master font rendering texture.
@@ -58,8 +52,8 @@ private:
 	GLfloat vtxValues[RENDER_BUFFER_SIZE*12];
 	int numChars;
 
-	// Encodings
-	CharMapping_t charMappings[MAX_CHARSETS];
+	/* map slots: from (unicode >> 7) to slot index (or -1 if unsupported) */
+	int m_slotMap[512];
 
 	void clearGL();
 	void ensureCacheLine(unsigned int font, unsigned int slot);
@@ -72,19 +66,12 @@ private:
 	void flushGLBuffer();
 
 public:
-	SDLFontGL() : GlyphCache(0), texW(0), texH(0), haveCacheLine(0),
-	nFonts(0), nCols(0), fnts(0), cols(0)
-	{
-		memset(charMappings,0, sizeof(charMappings));
-	}
+	SDLFontGL();
 	~SDLFontGL();
 
 	// Indicate what fonts and colors to use
 	// This invalidates the cache, so only call when things change.
 	void setupFontGL(int fnCount, TTF_Font** fnts, int colCount, SDL_Color *cols);
-
-	// Define a character set
-	void setCharMapping(int index, CharMapping_t map);
 
 	// Begin drawing text to the screen
 	void startTextGL();

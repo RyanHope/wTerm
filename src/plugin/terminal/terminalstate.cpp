@@ -31,8 +31,6 @@ TerminalState::TerminalState()
 	m_nTermModeFlags = 0;
 	m_bShiftText = false;
 
-	m_shift = false;
-
 	unsolicited = false;
 
 	m_nTopBufferLine = 0;
@@ -43,8 +41,9 @@ TerminalState::TerminalState()
 	memset(&m_defaultGraphicsState, 0, sizeof(m_defaultGraphicsState));
 	m_defaultGraphicsState.foregroundColor = TS_COLOR_FOREGROUND;
 	m_defaultGraphicsState.backgroundColor = TS_COLOR_BACKGROUND;
-	m_defaultGraphicsState.g0charset = TS_CS_G0_ASCII;
-	m_defaultGraphicsState.g1charset = TS_CS_G1_ASCII;
+	m_defaultGraphicsState.charset = 'B';
+	m_defaultGraphicsState.charset_ndx = 0;
+	memset(m_defaultGraphicsState.charsets, 'B', sizeof(m_defaultGraphicsState.charsets));
 
 	memcpy(&m_currentGraphicsState, &m_defaultGraphicsState, sizeof(m_currentGraphicsState));
 	memcpy(&m_savedGraphicsState, &m_defaultGraphicsState, sizeof(m_savedGraphicsState));
@@ -89,13 +88,13 @@ bool TerminalState::isPrintable(CellCharacter c)
  * Erases the data from a specific line in the data buffer. Start index must be
  * less than end index.
  */
-void TerminalState::clearBufferLine(int nLine, int nStart, int nEnd, TSCell_t & eraseTo)
+void TerminalState::clearBufferLine(int nLine, int nStart, int nEnd, TSCell & eraseTo)
 {
 	pthread_mutex_lock(&m_rwLock);
 
 	if (nLine >= 0 && (unsigned int) nLine < m_data.size())
 	{
-		TSLine_t &line = m_data[nLine];
+		TSLine &line = m_data[nLine];
 
 		if (nStart < 0)
 		{
@@ -134,7 +133,7 @@ void TerminalState::setBufferTopLine(int nLine)
 	// TODO: Rewrite this to copy less
 
 	//Retain buffer outside of scroll region.
-	std::deque<TSLine_t> tmp;
+	std::deque<TSLine> tmp;
 	int nSizeTopMargin = getTopMargin() - 1;
 	int nSizeBottomMargin = getDisplayScreenSize().getY() - getBottomMargin();
 
@@ -158,7 +157,7 @@ void TerminalState::setBufferTopLine(int nLine)
 		//Insert empty lines to the top of the buffer.
 		for (int i = 0; i < nLine; i++)
 		{
-			m_data.push_front(TSLine_t());
+			m_data.push_front(TSLine());
 		}
 
 		m_nTopBufferLine = 0;
@@ -170,7 +169,7 @@ void TerminalState::setBufferTopLine(int nLine)
 		//Insert empty lines to the end of the buffer.
 		for (int i = 0; i < nLine; i++)
 		{
-			m_data.push_back(TSLine_t());
+			m_data.push_back(TSLine());
 		}
 
 		m_nTopBufferLine = (m_data.size() - 1);
@@ -224,7 +223,7 @@ void TerminalState::erase(const Point &start, const Point &end)
 
 	// When erasing, set the erase chars to use our fg/bg, but
 	// reset the character attributes.
-	TSCell_t eraseTo = getEmptyCell();
+	TSCell eraseTo = getEmptyCell();
 	eraseTo.graphics.foregroundColor = m_currentGraphicsState.foregroundColor;
 	eraseTo.graphics.backgroundColor = m_currentGraphicsState.backgroundColor;
 
@@ -346,7 +345,7 @@ void TerminalState::insertLines(int nLines)
 		for (int i=0; i<nLines; i++) {
 			if (curLine-1+i < m_nBottomMargin) {
 				m_data.erase(m_data.begin()+m_nBottomMargin-1);
-				m_data.insert(m_data.begin()+curLine-1+i, TSLine_t());
+				m_data.insert(m_data.begin()+curLine-1+i, TSLine());
 			}
 		}
 	}
@@ -365,7 +364,7 @@ void TerminalState::deleteLines(int nLines)
 		for (int i=0; i<nLines; i++) {
 			if (curLine-1+i < m_nBottomMargin) {
 				m_data.erase(m_data.begin()+curLine-1+i);
-				m_data.insert(m_data.begin()+m_nBottomMargin-1, TSLine_t());
+				m_data.insert(m_data.begin()+m_nBottomMargin-1, TSLine());
 			}
 		}
 	}
@@ -543,11 +542,11 @@ int TerminalState::getBufferScreenHeight()
  * Caller to this method should never modify the contents.
  * Returns NULL if the specified line is out of bounds.
  */
-TSLine_t * TerminalState::getBufferLine(int nLineIndex)
+TSLine * TerminalState::getBufferLine(int nLineIndex)
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	TSLine_t *buffer = NULL;
+	TSLine *buffer = NULL;
 
 	if (nLineIndex >= 0 && (unsigned int) nLineIndex < m_data.size())
 	{
@@ -640,7 +639,7 @@ void TerminalState::setNumBufferLines(int nNumLines)
 	//Makes sure the virtual buffer screen can at least hold the display screen size.
 	while (getBufferScreenHeight() < m_displayScreenSize.getY())
 	{
-		m_data.push_back(TSLine_t());
+		m_data.push_back(TSLine());
 	}
 
 	m_nNumBufferLines = nNumLines;
@@ -662,7 +661,7 @@ void TerminalState::setNumBufferLines(int nNumLines)
 	//Expand buffer if necessary.
 	while ((int) m_data.size() < m_nNumBufferLines)
 	{
-		m_data.push_back(TSLine_t());
+		m_data.push_back(TSLine());
 	}
 
 	assert((int) m_data.size() == m_nNumBufferLines);
@@ -812,8 +811,8 @@ void TerminalState::insertBlanks(int nBlanks)
 	int nX = cursor.getX() - 1;
 	int nY = cursor.getY() - 1;
 
-	TSLine_t * line = getBufferLine(nY);
-	TSCell_t empty = getEmptyCell(); // TODO: What graphics?
+	TSLine * line = getBufferLine(nY);
+	TSCell empty = getEmptyCell(); // TODO: What graphics?
 	for (int i=0; i<nBlanks; i++)
 		line->insert(line->begin()+nX, empty);
 
@@ -990,40 +989,75 @@ TSColor_t TerminalState::getBackgroundColor()
 	return m_currentGraphicsState.backgroundColor;
 }
 
-void TerminalState::setG0Charset(TSCharset_t charset)
+void TerminalState::setCharset(unsigned int ndx, unsigned char charset)
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	m_currentGraphicsState.g0charset = charset;
+	m_currentGraphicsState.charsets[ndx & 0x3] = charset;
+	m_currentGraphicsState.charset = m_currentGraphicsState.charsets[m_currentGraphicsState.charset_ndx];
 
 	pthread_mutex_unlock(&m_rwLock);
 }
 
-TSCharset_t TerminalState::getG0Charset()
+void TerminalState::useCharset(unsigned int ndx)
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	return m_currentGraphicsState.g0charset;
+	m_currentGraphicsState.charset_ndx = ndx & 0x3;
+	m_currentGraphicsState.charset = m_currentGraphicsState.charsets[ndx & 0x3];
 
 	pthread_mutex_unlock(&m_rwLock);
 }
 
-void TerminalState::setG1Charset(TSCharset_t charset)
-{
-	m_currentGraphicsState.g1charset = charset;
+CellCharacter TerminalState::applyCharset(CellCharacter cChar) {
+	/* map offset 0x5F (to 0x7E) */
+	static const CellCharacter vt100_mapping[32] = {
+		// 0/8     1/9    2/10    3/11    4/12    5/13    6/14    7/15
+/*
+ * from kde konsole
+		// needs (128-char) slots: 0x0000, 0x0080, 0x0380, 0x2200, 0x2400, 0x2500, 0x2580, 0xF800
+		0x0020, 0x25C6, 0x2592, 0x2409, 0x240c, 0x240d, 0x240a, 0x00b0,
+		0x00b1, 0x2424, 0x240b, 0x2518, 0x2510, 0x250c, 0x2514, 0x253c,
+		0xF800, 0xF801, 0x2500, 0xF803, 0xF804, 0x251c, 0x2524, 0x2534,
+		0x252c, 0x2502, 0x2264, 0x2265, 0x03C0, 0x2260, 0x00A3, 0x00b7
+*/
+
+		// needs (128-char) slots: 0x0000, 0x0080, 0x0380, 0x2200, 0x2500, 0x2580, 0x2600
+		0x0020, 0x2666, 0x2592, 0x2595, 0x2595, 0x2595, 0x2595, 0x00B0,
+		0x00B1, 0x2595, 0x2595, 0x2518, 0x2510, 0x250C, 0x2514, 0x253C,
+		0x2595, 0x2595, 0x2500, 0x2595, 0x2595, 0x251C, 0x2524, 0x2534,
+		0x252C, 0x2502, 0x2264, 0x2265, 0x03C0, 0x2260, 0x00A3, 0x00B7
+	};
+
+	pthread_mutex_lock(&m_rwLock);
+
+	switch (m_currentGraphicsState.charset) {
+	case '0': // SPEC
+		if (0x5F <= cChar && cChar <= 0x7E) cChar = vt100_mapping[cChar - 0x5F];
+		break;
+	case 'A':
+		if ('#' == cChar) cChar = 0x00A3;
+		break;
+	default:
+		break;
+	}
+
+	pthread_mutex_unlock(&m_rwLock);
+
+	return cChar;
 }
 
-TSCharset_t TerminalState::getG1Charset()
+unsigned char TerminalState::charset()
 {
-	return m_currentGraphicsState.g1charset;
+	return m_currentGraphicsState.charset;
 }
 
-TSCellGraphicsState_t TerminalState::getCurrentGraphicsState()
+TSGraphicsState TerminalState::getCurrentGraphicsState()
 {
 	return m_currentGraphicsState;
 }
 
-TSCellGraphicsState_t TerminalState::getDefaultGraphicsState()
+TSGraphicsState TerminalState::getDefaultGraphicsState()
 {
 	return m_defaultGraphicsState;
 }
@@ -1102,8 +1136,10 @@ void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnor
 	Point displayLoc = getDisplayCursorLocation();
 	int nLine;
 	unsigned int nPos;
-	TSLine_t *line;
+	TSLine *line;
 	bool bPrint = true;
+
+	c = applyCharset(c);
 
 	int nCols = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
 
@@ -1115,7 +1151,7 @@ void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnor
 	if (isPrintable(c) || bPrint)
 	{
 		// TODO: Should mappings be applied to parsing too, not just rendering?
-		if (getShift()) c += 128;
+		// if (getShift()) c += 128;
 
 		if (displayLoc.getX() > nCols)
 		{
@@ -1143,7 +1179,7 @@ void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnor
 			line->resize(nPos + 1);
 			std::fill(line->begin()+size,line->end(),getEmptyCell());
 		} else if (TS_TM_INSERT & m_nTermModeFlags) {
-			line->insert(line->begin() + nPos, TSCell_t());
+			line->insert(line->begin() + nPos, TSCell());
 		}
 
 
@@ -1193,7 +1229,7 @@ void TerminalState::saveScreen()
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	m_savedScreen.m_data = std::deque<TSLine_t>(m_data);
+	m_savedScreen.m_data = std::deque<TSLine>(m_data);
 	m_savedScreen.m_savedCursorLoc = Point(m_savedCursorLoc.getX(), m_savedCursorLoc.getY());
 
 	pthread_mutex_unlock(&m_rwLock);
@@ -1203,7 +1239,7 @@ void TerminalState::restoreScreen()
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	m_data = std::deque<TSLine_t>(m_savedScreen.m_data);
+	m_data = std::deque<TSLine>(m_savedScreen.m_data);
 	m_savedCursorLoc = Point(m_savedScreen.m_savedCursorLoc.getX(), m_savedScreen.m_savedCursorLoc.getY());
 
 	pthread_mutex_unlock(&m_rwLock);
@@ -1216,11 +1252,7 @@ void TerminalState::saveCursor()
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	m_savedGraphicsState.nGraphicsMode = m_currentGraphicsState.nGraphicsMode;
-	m_savedGraphicsState.foregroundColor = m_currentGraphicsState.foregroundColor;
-	m_savedGraphicsState.backgroundColor = m_currentGraphicsState.backgroundColor;
-	m_savedGraphicsState.g0charset = m_currentGraphicsState.g0charset;
-	m_savedGraphicsState.g1charset = m_currentGraphicsState.g1charset;
+	m_savedGraphicsState = m_currentGraphicsState;
 	m_savedCursorLoc = m_cursorLoc;
 
 	pthread_mutex_unlock(&m_rwLock);
@@ -1233,11 +1265,7 @@ void TerminalState::restoreCursor()
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	m_currentGraphicsState.nGraphicsMode = m_savedGraphicsState.nGraphicsMode;
-	m_currentGraphicsState.foregroundColor = m_savedGraphicsState.foregroundColor;
-	m_currentGraphicsState.backgroundColor = m_savedGraphicsState.backgroundColor;
-	m_currentGraphicsState.g0charset = m_savedGraphicsState.g0charset;
-	m_currentGraphicsState.g1charset = m_savedGraphicsState.g1charset;
+	m_currentGraphicsState = m_savedGraphicsState;
 	m_cursorLoc = m_savedCursorLoc;
 
 	pthread_mutex_unlock(&m_rwLock);
@@ -1303,21 +1331,8 @@ void TerminalState::resetTerminal()
 	setMargin(1,getDisplayScreenSize().getY());
 	cursorHome();
 	tabs.clear();
-	setShift(true);
-	setG0Charset(TS_CS_G0_ASCII);
-	setG1Charset(TS_CS_G1_ASCII);
+	memset(m_currentGraphicsState.charsets, 'B', sizeof(m_currentGraphicsState.charsets));
+	m_currentGraphicsState.charset = 'B';
+	m_defaultGraphicsState.charset_ndx = 0;
 	unsolicited = false;
-}
-
-void TerminalState::setShift(bool shift)
-{
-	pthread_mutex_lock(&m_rwLock);
-
-	m_shift = shift;
-
-	pthread_mutex_unlock(&m_rwLock);
-}
-
-bool TerminalState::getShift() {
-	return m_shift;
 }

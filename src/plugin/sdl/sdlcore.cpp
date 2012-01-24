@@ -31,8 +31,6 @@
 
 const int SDLCore::BUFFER_DIRTY_BIT = 1;
 const int SDLCore::FONT_DIRTY_BIT = 2;
-const int SDLCore::FOREGROUND_COLOR_DIRTY_BIT = 4;
-const int SDLCore::BACKGROUND_COLOR_DIRTY_BIT = 8;
 
 SDLCore::SDLCore()
 {
@@ -41,15 +39,8 @@ SDLCore::SDLCore()
 	m_surface = NULL;
 	m_nFontSize = 12;
 
-	m_foregroundColor = TS_COLOR_FOREGROUND;
-	m_backgroundColor = TS_COLOR_BACKGROUND;
-	m_bBold = false;
-	m_bUnderline = false;
-	m_bBlink = false;
 	doBlink = false;
 	m_bNeedsBlink = false;
-	m_slot1 = TS_CS_G0_ASCII;
-	m_slot2 = TS_CS_G1_ASCII;
 
 	m_reverse = false;
 
@@ -138,7 +129,7 @@ int SDLCore::initOpenGL()
 {
 	const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
 
-	clearScreen(m_backgroundColor);
+	clearScreen(TS_COLOR_BACKGROUND);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -470,14 +461,14 @@ int SDLCore::setFontSize(int nSize)
  * Draws a string on the display. Given the monospaced font, assumes that the display is a grid of text.
  * The top left corner of the screen is (1, 1). If the give location is out of bounds, then no action is taken.
  */
-void SDLCore::printCharacter(int nColumn, int nLine, CellCharacter cChar)
+void SDLCore::printCharacter(int nColumn, int nLine, TSCell cell)
 {
 	if (nColumn < 1 || nLine < 1 || nColumn > m_nMaxColumnsOfText || nLine > m_nMaxLinesOfText)
 	{
 		return;
 	}
 
-	drawCharacter((nColumn - 1) * m_nFontWidth, (nLine - 1) * m_nFontHeight, cChar);
+	drawCharacter((nColumn - 1) * m_nFontWidth, (nLine - 1) * m_nFontHeight, cell);
 }
 
 void SDLCore::drawRect(int nX, int nY, int nWidth, int nHeight, SDL_Color color, float fAlpha)
@@ -625,32 +616,38 @@ void SDLCore::drawImage(int nX, int nY, const char *sImage)
 /**
  * Draws a string on an arbiturary location of the screen.
  */
-void SDLCore::drawCharacter(int nX, int nY, CellCharacter cChar)
+void SDLCore::drawCharacter(int nX, int nY, TSCell cell)
 {
 	// Match mapping in resetGlyphCache
-	int fnt = 0;
-	if (m_bBold && m_bUnderline)
-		fnt = 1;
-	else if (m_bUnderline)
-		fnt = 2;
-	else if (m_bBold)
-		fnt = 3;
+	int fnt = (cell.graphics.bold() ? 3 : 0) ^ (cell.graphics.underline() ? 2 : 0);
+
+	TSColor_t fg, bg;
+
+	if (cell.graphics.negative()) {
+		fg = cell.graphics.backgroundColor;
+		bg = cell.graphics.foregroundColor;
+		if (bg > 7 && bg < 16) {
+			bg = (TSColor_t) (bg - 8);
+		} else if (bg > 17) {
+			bg = (TSColor_t) (bg - 2);
+		}
+	} else {
+		fg = cell.graphics.foregroundColor;
+		bg = cell.graphics.backgroundColor;
+	}
 
 	SDLFontGL::TextGraphicsInfo_t graphicsInfo;
 	graphicsInfo.font = fnt;
 	if (m_reverse) {
-		graphicsInfo.bg = (int)m_foregroundColor;
-		graphicsInfo.fg = (int)m_backgroundColor;
+		graphicsInfo.bg = (int)fg;
+		graphicsInfo.fg = (int)bg;
 	} else {
-		graphicsInfo.fg = (int)m_foregroundColor;
-		graphicsInfo.bg = (int)m_backgroundColor;
+		graphicsInfo.fg = (int)fg;
+		graphicsInfo.bg = (int)bg;
 	}
-	graphicsInfo.blink = ((int)m_bBlink && !(int)doBlink) ? 1 : 0;
+	graphicsInfo.blink = (cell.graphics.blink() && !(int)doBlink);
 
-	graphicsInfo.slot1 = (int)m_slot1;
-	graphicsInfo.slot2 = (int)m_slot2;
-
-	drawTextGL(graphicsInfo, nX, nY, cChar);
+	m_fontgl.drawTextGL(graphicsInfo, nX, nY, cell.data);
 
 	setDirty(BUFFER_DIRTY_BIT);
 }
@@ -746,7 +743,7 @@ void SDLCore::resetGlyphCache()
 	for(unsigned i = 0; i < TS_COLOR_MAX; ++i)
 		cols[i] = getColor((TSColor_t)i);
 
-	setupFontGL(nFonts, (TTF_Font**)fnts, nCols, (SDL_Color*)&cols);
+	m_fontgl.setupFontGL(nFonts, (TTF_Font**)fnts, nCols, (SDL_Color*)&cols);
 }
 
 void SDLCore::stopKeyRepeat()

@@ -37,7 +37,6 @@ protected:
 	void handleKeyboardEvent(SDL_Event &event);
 	void handleMouseEvent(SDL_Event &event);
 	int initCustom();
-	void initCharsets();
 
 private:
 	SDL_Color m_colors[TS_COLOR_MAX];
@@ -59,7 +58,6 @@ public:
 	void setKey(TSInput_t key, const char *command);
 	void setForegroundColor(TSColor_t color);
 	void setBackgroundColor(TSColor_t color);
-	void setGraphicsState(TSCellGraphicsState_t &state);
 
 	void updateDisplaySize();
 };

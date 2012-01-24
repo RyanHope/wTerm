@@ -16,9 +16,31 @@
  * along with SDLTerminal.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sdl/sdlfontgl.h"
+#include "sdl/sdlfontgl.hpp"
+
+#include "terminal/terminalstate.hpp"
 
 #include <syslog.h>
+
+/* 128-byte long slots */
+static const Uint16 unicode_slots[] = {
+	0x0000, // C0 Controls and Basic Latin
+	0x0080, // C1 Controls and Latin-1 Supplement
+	0x0100, // Latin Extended-A
+	0x0180, // Latin Extended-B
+	0x0200, // Latin Extended-B (+ part of IPA Extensions)
+
+	0x0380, // Greek and Coptic (contains PI)
+
+	0x2200, // Mathematical Operators
+	0x2500,
+	0x2580, // Block elements + Geometric shapes
+	0x2600
+};
+
+#define NSLOTS (sizeof(unicode_slots)/sizeof(unicode_slots[0]))
+#define SLOTSIZE (128u)
+
 
 // Log assertion failures to syslog
 #define assert(c) \
@@ -35,9 +57,6 @@
 		if (err) syslog(LOG_ERR, "GL Error %x at %s:%d", \
 				err, __FILE__, __LINE__); \
 	} while(0)
-
-// How many characters do we support?
-static const int nChars = 128;
 
 // Helper functions
 static void getRGBAMask(Uint32 &rmask, Uint32 &gmask,
@@ -97,8 +116,8 @@ void SDLFontGL::setupFontGL(int fnCount, TTF_Font** fnts, int colCount, SDL_Colo
 
 	GlyphCache = 0;
 
-	haveCacheLine = (bool*)malloc(nFonts*MAX_CHARSETS*sizeof(bool));
-	memset(haveCacheLine, 0, nFonts*MAX_CHARSETS*sizeof(bool));
+	haveCacheLine = (bool*)malloc(nFonts*NSLOTS*sizeof(bool));
+	memset(haveCacheLine, 0, nFonts*NSLOTS*sizeof(bool));
 
 	const Uint16 OStr[] = {'O', 0};
 	if (TTF_SizeUNICODE(fnts[0], OStr, &nWidth, &nHeight) != 0)
@@ -118,8 +137,8 @@ void SDLFontGL::createTexture() {
 	// We want 1 extra row of pixel data
 	// so we can draw solid colors as part
 	// of the same operations.
-	texW = nextPowerOfTwo(nChars*nWidth);
-	texH = nextPowerOfTwo(nFonts*MAX_CHARSETS*nHeight + 1);
+	texW = nextPowerOfTwo(SLOTSIZE*nWidth);
+	texH = nextPowerOfTwo(nFonts*NSLOTS*nHeight + 1);
 	int nMode = getGLFormat();
 	glTexImage2D(GL_TEXTURE_2D,
 			0, nMode,
@@ -135,10 +154,23 @@ void SDLFontGL::createTexture() {
 	char whitepixel[] = { 255, 255, 255, 255 };
 	assert(nFonts && nHeight);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
-			0,nFonts*MAX_CHARSETS*nHeight,
+			0,nFonts*NSLOTS*nHeight,
 			1, 1,
 			GL_RGBA, GL_UNSIGNED_BYTE, whitepixel);
 	checkGLError();
+}
+
+SDLFontGL::SDLFontGL()
+: GlyphCache(0), texW(0), texH(0), haveCacheLine(0), nFonts(0), nCols(0), fnts(0), cols(0)
+{
+	for (unsigned int i = 0; i < 512; i++) {
+		m_slotMap[i] = -1;
+	}
+
+	for (unsigned int i = 0; i < NSLOTS; i++) {
+		Uint16 slot = unicode_slots[i] >> 7;
+		m_slotMap[slot] = i;
+	}
 }
 
 SDLFontGL::~SDLFontGL() {
@@ -167,7 +199,7 @@ void SDLFontGL::ensureCacheLine(unsigned int fnt, unsigned int slot)
 {
 
 	assert(fnt >= 0 && fnt < nFonts);
-	assert(slot >= 0 && slot < MAX_CHARSETS);
+	assert(slot >= 0 && slot < NSLOTS);
 	assert(fnts && cols && GlyphCache && haveCacheLine);
 
 	bool & have = hasCacheLine(fnt, slot);
@@ -190,7 +222,7 @@ void SDLFontGL::ensureCacheLine(unsigned int fnt, unsigned int slot)
 	getRGBAMask(rmask, gmask, bmask, amask);
 	SDL_Surface* mainSurface =
 		SDL_CreateRGBSurface(SDL_SWSURFACE,
-				nChars*nWidth, nHeight,
+				SLOTSIZE*nWidth, nHeight,
 				videoSurface->format->BitsPerPixel,
 				rmask, gmask, bmask, amask);
 	assert(mainSurface);
@@ -204,11 +236,10 @@ void SDLFontGL::ensureCacheLine(unsigned int fnt, unsigned int slot)
 	SDL_FillRect(mainSurface, NULL, fillColor);
 
 	// For each character, render the glyph, and put in the appropriate location
-	for(int i = 0; i < nChars; ++i)
+	for(Uint16 i = 0; i < SLOTSIZE; ++i)
 	{
 		// Lookup this character, and make a single-char string out of it.
-		Uint16 C = charMappings[slot].map[i];
-		if (!C) C = (Uint16)i;
+		Uint16 C = unicode_slots[slot] + i;
 		Uint16 buf[2] = { C, 0 };
 
 		SDL_Surface* surface = TTF_RenderUNICODE_Blended(font, (const Uint16*)buf, fg);
@@ -261,7 +292,7 @@ void SDLFontGL::drawBackground(int color, int nX, int nY, int cells) {
 	};
 	memcpy(vtx, vtxCopy, sizeof(vtxCopy));
 
-	float y_offset = ((float)nFonts*MAX_CHARSETS*nHeight)/(float)texH;
+	float y_offset = ((float)nFonts*NSLOTS*nHeight)/(float)texH;
 	float x1 = ((float)1)/(float)texW;
 	float y1 = ((float)1)/(float)texH;
 	GLfloat texCopy[] = {
@@ -414,20 +445,18 @@ void SDLFontGL::endTextGL() {
 	glFlush();
 }
 
-void SDLFontGL::setCharMapping(int index, CharMapping_t map) {
-	assert(index >= 0 && index < MAX_CHARSETS);
-	memcpy(&charMappings[index], &map, sizeof(CharMapping_t));
-
-	// Invalidate the appropriate cache lines
-	for(unsigned i = 0; i < nFonts; ++i)
-		hasCacheLine(i, index) = false;
-}
 
 void SDLFontGL::getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, Uint16 c, int &x, int &y) {
-	/* TODO: handle unicode chars */
-	if (c > 0x100) c = '?';
+	int slot = m_slotMap[c >> 7];
+	if (slot == -1) {
+		c = 0x2595;
+		slot = m_slotMap[c >> 7];
+		if (slot == -1) {
+			slot = 0;
+			c = '?';
+		}
+	}
 
-	int slot = c > 127 ? graphicsInfo.slot1 : graphicsInfo.slot2;
 	ensureCacheLine(graphicsInfo.font, slot);
 
 	// Set by reference
