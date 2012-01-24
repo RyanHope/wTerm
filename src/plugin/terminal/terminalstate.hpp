@@ -200,6 +200,11 @@ typedef struct {
 // in which case the unrepresented cells are empty using our bg color.
 typedef std::vector<TSCell_t> TSLine_t;
 
+typedef struct {
+	std::deque<TSLine_t> m_data;
+	Point m_savedCursorLoc;
+} TSScreen_t;
+
 /**
  * Terminal state information catered.
  */
@@ -225,6 +230,8 @@ protected:
 
 	pthread_mutexattr_t m_rwLockAttr;
 	pthread_mutex_t m_rwLock;
+
+	TSScreen_t m_savedScreen;
 
 	bool unsolicited;
 
@@ -258,6 +265,9 @@ public:
 	void cursorHome();
 	Point getCursorLocation();
 	Point getDisplayCursorLocation();
+
+	void saveScreen();
+	void restoreScreen();
 
 	void saveCursor();
 	void restoreCursor();

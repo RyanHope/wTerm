@@ -318,6 +318,26 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			{
 				addTerminalModeFlags(TS_TM_BACKSPACE);
 			}
+			else if (values[i] == 47)
+			{
+				saveScreen();
+				eraseScreen();
+			}
+			else if (values[i] == 1047)
+			{
+				saveScreen();
+				eraseScreen();
+			}
+			else if (values[i] == 1048)
+			{
+				saveCursor();
+			}
+			else if (values[i] == 1049)
+			{
+				saveCursor();
+				saveScreen();
+				eraseScreen();
+			}
 		}
 		break;
 	case CS_MODE_RESET: //ESC[<Value>;...;<Value>l
@@ -383,6 +403,22 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			else if (values[i] == 67)
 			{
 				removeTerminalModeFlags(TS_TM_BACKSPACE);
+			}
+			else if (values[i] == 47)
+			{
+				restoreScreen();
+			}
+			else if (values[i] == 1047)
+			{
+				restoreScreen();
+			}
+			else if (values[i] == 1048)
+			{
+				restoreCursor();
+			}
+			else if (values[i] == 1049)
+			{
+				restoreScreen();
 			}
 		}
 		break;

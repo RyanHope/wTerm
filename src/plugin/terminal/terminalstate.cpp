@@ -1189,6 +1189,26 @@ void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnor
 	pthread_mutex_unlock(&m_rwLock);
 }
 
+void TerminalState::saveScreen()
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	m_savedScreen.m_data = std::deque<TSLine_t>(m_data);
+	m_savedScreen.m_savedCursorLoc = Point(m_savedCursorLoc.getX(), m_savedCursorLoc.getY());
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
+void TerminalState::restoreScreen()
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	m_data = std::deque<TSLine_t>(m_savedScreen.m_data);
+	m_savedCursorLoc = Point(m_savedScreen.m_savedCursorLoc.getX(), m_savedScreen.m_savedCursorLoc.getY());
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
 /**
  * Saves current cursor location, graphics mode, and character set.
  */
@@ -1196,14 +1216,14 @@ void TerminalState::saveCursor()
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	Point displayLoc = getDisplayCursorLocation();
-
 	m_savedGraphicsState.nGraphicsMode = m_currentGraphicsState.nGraphicsMode;
 	m_savedGraphicsState.foregroundColor = m_currentGraphicsState.foregroundColor;
 	m_savedGraphicsState.backgroundColor = m_currentGraphicsState.backgroundColor;
 	m_savedGraphicsState.g0charset = m_currentGraphicsState.g0charset;
 	m_savedGraphicsState.g1charset = m_currentGraphicsState.g1charset;
-	m_savedCursorLoc = displayLoc;
+	m_savedCursorLoc = m_cursorLoc;
+
+	syslog(LOG_ERR, "saveCursor() %d,%d", m_cursorLoc.getX(), m_cursorLoc.getY());
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -1215,12 +1235,14 @@ void TerminalState::restoreCursor()
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	setCursorLocation(m_savedCursorLoc.getX(), m_savedCursorLoc.getY());
 	m_currentGraphicsState.nGraphicsMode = m_savedGraphicsState.nGraphicsMode;
 	m_currentGraphicsState.foregroundColor = m_savedGraphicsState.foregroundColor;
 	m_currentGraphicsState.backgroundColor = m_savedGraphicsState.backgroundColor;
 	m_currentGraphicsState.g0charset = m_savedGraphicsState.g0charset;
 	m_currentGraphicsState.g1charset = m_savedGraphicsState.g1charset;
+	m_cursorLoc = m_savedCursorLoc;
+
+	syslog(LOG_ERR, "restoreCursor() %d,%d", m_cursorLoc.getX(), m_cursorLoc.getY());
 
 	pthread_mutex_unlock(&m_rwLock);
 }
