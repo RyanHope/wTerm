@@ -87,8 +87,6 @@ SDLTerminal::SDLTerminal()
 	m_keys.push_back("\033[21~");
 	m_keys.push_back("\033[23~");
 	m_keys.push_back("\033[24~");
-
-	initCharsets();
 }
 
 SDLTerminal::~SDLTerminal()
@@ -109,46 +107,6 @@ void SDLTerminal::updateDisplaySize()
 		if (extTerminal != NULL)
 			extTerminal->setWindowSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
 	}
-}
-
-void SDLTerminal::initCharsets()
-{
-	CharMapping_t lineDrawing;
-	memset(&lineDrawing, 0, sizeof(lineDrawing));
-	lineDrawing.map[96] = 9830;
-	lineDrawing.map[97] = 9618;
-	lineDrawing.map[98] = 9621;
-	lineDrawing.map[99] = 9621;
-	lineDrawing.map[100] = 9621;
-	lineDrawing.map[101] = 9621;
-	lineDrawing.map[102] = 176;
-	lineDrawing.map[103] = 177;
-	lineDrawing.map[104] = 9621;
-	lineDrawing.map[105] = 9621;
-	lineDrawing.map[106] = 9496;
-	lineDrawing.map[107] = 9488;
-	lineDrawing.map[108] = 9484;
-	lineDrawing.map[109] = 9492;
-	lineDrawing.map[110] = 9532;
-	lineDrawing.map[111] = 9621;
-	lineDrawing.map[112] = 9621;
-	lineDrawing.map[113] = 9472;
-	lineDrawing.map[114] = 9621;
-	lineDrawing.map[115] = 9621;
-	lineDrawing.map[116] = 9500;
-	lineDrawing.map[117] = 9508;
-	lineDrawing.map[118] = 9524;
-	lineDrawing.map[119] = 9516;
-	lineDrawing.map[120] = 9474;
-	lineDrawing.map[121] = 8804;
-	lineDrawing.map[122] = 8805;
-	lineDrawing.map[123] = 960;
-	lineDrawing.map[124] = 8800;
-	lineDrawing.map[125] = 163;
-	lineDrawing.map[126] = 183;
-	lineDrawing.map[127] = 0;
-	setCharMapping(TS_CS_G0_SPEC, lineDrawing);
-	setCharMapping(TS_CS_G1_SPEC, lineDrawing);
 }
 
 int SDLTerminal::initCustom()
@@ -349,9 +307,8 @@ void SDLTerminal::redraw()
 	int nTopLineIndex = m_terminalState->getBufferTopLineIndex();
 	int nEndLine = nTopLineIndex + m_terminalState->getDisplayScreenSize().getY();
 
-	TSCellGraphicsState_t defState = m_terminalState->getDefaultGraphicsState();
+	TSGraphicsState defState = m_terminalState->getDefaultGraphicsState();
 
-	setGraphicsState(defState);
 	m_reverse = (m_terminalState->getTerminalModeFlags() & TS_TM_SCREEN);
 
 	// Clear the entire screen to the default background color
@@ -359,23 +316,22 @@ void SDLTerminal::redraw()
 
 	bool hasBlinkText = false;
 
-	startTextGL();
+	m_fontgl.startTextGL();
 
 	for (int i = nTopLineIndex; i < nEndLine; ++i)
 	{
-		TSLine_t * line = m_terminalState->getBufferLine(i);
+		TSLine * line = m_terminalState->getBufferLine(i);
 
 		int nCol = 1;
-		for(TSLine_t::iterator I = line->begin(), E = line->end(); I != E;
+		for(TSLine::iterator I = line->begin(), E = line->end(); I != E;
 				++I, ++nCol)
 		{
-			setGraphicsState(I->graphics);
 			hasBlinkText |= (I->graphics.nGraphicsMode & TS_GM_BLINK) != 0;
-			printCharacter(nCol, i - nTopLineIndex + 1, I->data);
+			printCharacter(nCol, i - nTopLineIndex + 1, *I);
 		}
 	}
 
-	endTextGL();
+	m_fontgl.endTextGL();
 
 	if (m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR)
 		drawCursor(m_terminalState->getCursorLocation().getX(), m_terminalState->getCursorLocation().getY());
@@ -434,49 +390,4 @@ void SDLTerminal::setColor(TSColor_t color, int r, int g, int b)
 	m_colors[color].g = g;
 	m_colors[color].b = b;
 	setDirty(FONT_DIRTY_BIT);
-}
-
-void SDLTerminal::setForegroundColor(TSColor_t color)
-{
-	m_foregroundColor = color;
-	setDirty(FOREGROUND_COLOR_DIRTY_BIT);
-}
-
-void SDLTerminal::setBackgroundColor(TSColor_t color)
-{
-	m_backgroundColor = color;
-	setDirty(BACKGROUND_COLOR_DIRTY_BIT);
-}
-
-void SDLTerminal::setGraphicsState(TSCellGraphicsState_t &state)
-{
-	if ((state.nGraphicsMode & TS_GM_NEGATIVE) > 0)
-	{
-		setForegroundColor(state.backgroundColor);
-	}
-	else
-	{
-		setForegroundColor(state.foregroundColor);
-	}
-
-	if ((state.nGraphicsMode & TS_GM_NEGATIVE) > 0)
-	{
-		if (state.foregroundColor>7 && state.foregroundColor<16)
-			setBackgroundColor((TSColor_t)(state.foregroundColor-8));
-		else if (state.foregroundColor>17)
-			setBackgroundColor((TSColor_t)(state.foregroundColor-2));
-		else
-			setBackgroundColor(state.foregroundColor);
-	}
-	else
-	{
-		setBackgroundColor(state.backgroundColor);
-	}
-
-	m_bBold = ((state.nGraphicsMode & TS_GM_BOLD) > 0);
-	m_bUnderline = ((state.nGraphicsMode & TS_GM_UNDERSCORE) > 0);
-	m_bBlink = ((state.nGraphicsMode & TS_GM_BLINK) > 0);
-
-	m_slot1 = state.g0charset;
-	m_slot2 = state.g1charset;
 }

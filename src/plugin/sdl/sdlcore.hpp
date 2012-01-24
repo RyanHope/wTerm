@@ -25,27 +25,20 @@
 #include <map>
 
 #include "terminal/vtterminalstate.hpp"
-#include "sdlfontgl.h"
+#include "sdlfontgl.hpp"
 
 /**
  * Initializer and basic 2D function for webOS SDL.
  */
-class SDLCore : protected SDLFontGL
+class SDLCore
 {
 protected:
 	static const int BUFFER_DIRTY_BIT;
 	static const int FONT_DIRTY_BIT;
-	static const int FOREGROUND_COLOR_DIRTY_BIT;
-	static const int BACKGROUND_COLOR_DIRTY_BIT;
+
+	SDLFontGL m_fontgl;
 
 	SDL_Surface *m_surface;
-	TSColor_t m_foregroundColor;
-	TSColor_t m_backgroundColor;
-	TSCharset_t m_slot1;
-	TSCharset_t m_slot2;
-	bool m_bBold;
-	bool m_bUnderline;
-	bool m_bBlink;
 	bool doBlink;
 	bool m_bNeedsBlink;
 
@@ -128,10 +121,10 @@ public:
 	int getFontSize();
 	int setFontSize(int nSize);
 
-	void printCharacter(int nColumn, int nLine, CellCharacter cChar);
+	void printCharacter(int nColumn, int nLine, TSCell cCell);
 	void drawCursor(int nColumn, int nLine);
 	void drawRect(int nX, int nY, int nWidth, int nHeight, SDL_Color color, float fAlpha);
-	void drawCharacter(int nX, int nY, CellCharacter cChar);
+	void drawCharacter(int nX, int nY, TSCell cell);
 	void drawSurface(int nX, int nY, SDL_Surface *surface);
 	void drawImage(int nX, int nY, const char *sImage);
 
