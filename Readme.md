@@ -18,14 +18,19 @@ Features
 * Customizable color schemes
 * Customizable key bindings
 
-Contributors
-------------
+Main Contributors
+-----------------
 
 * Stefan Bühler
 * Will Dietz
 * Ryan Hope (Project Lead)
-* Chris Jowett
 * Brian Kearney
+
+VKB Layout Contributors
+-----------------------
+
+* Chris Jowett (Dvorak)
+* Yohan Dubanchet (French)
 
 Safe Root Access
 ----------------

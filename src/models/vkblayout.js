@@ -46,3 +46,4 @@ function kbdLayoutLoad(name, keys) {
 kbdLayouts.default = { caption: 'QWERTY (en-US)' };
 kbdLayouts.dvorak = { caption: 'Dvorak Simplified (en-US)' };
 kbdLayouts.german = { caption: 'QWERTZ (german)' };
+kbdLayouts.french = { caption: 'AZERTY (french)' };
