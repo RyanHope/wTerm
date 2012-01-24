@@ -6,6 +6,7 @@ function Prefs() {
 		launchParamsOK: false,
 		bufferlines: 1000,
 		fontSize: 12,
+		showVKB: true,
 		inputScheme: 'XFree86 xterm',
 		inputSchemes: {
 			'X11R6 xterm': [

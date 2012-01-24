@@ -13,12 +13,6 @@ enyo.kind({
 	prefs: new Prefs(),
 
 	components: [
-		{kind: "AppMenu", components: [
-			{caption: "New Terminal", onclick: "newTerm"},
-			{caption: "Preferences", onclick: "openPrefs"},
-			{name: 'vkbToggle', caption: "Hide Virtual Keyboard", onclick: 'toggleVKB'},
-			{caption: "About", onclick: "openAbout"}
-		]},
 		{
 			kind: "ApplicationEvents",
 			onWindowRotated: "setup",
@@ -114,8 +108,8 @@ enyo.kind({
 	},
 	
 	initComponents: function() {
-  	this.inherited(arguments)
-  	this.createComponent({
+  		this.inherited(arguments)
+  		this.createComponent({
 			name : "getPreferencesCall",
 			kind : "PalmService",
 			service : "palm://com.palm.systemservice/",
@@ -135,7 +129,7 @@ enyo.kind({
 			})
 			enyo.setFullScreen(true)
 		} else {
-			this.showVKB = true
+			this.showVKB = this.prefs.get('showVKB')
 			this.createComponent({
 				name: "prefs", 
 				kind: "Preferences", 
@@ -160,6 +154,14 @@ enyo.kind({
 			this.$.terminal.vkb = this.$.vkb
 			this.$.prefs.terminal = this.$.terminal
 			this.$.prefs.vkb = this.$.vkb
+			this.createComponent({
+				kind: "AppMenu", components: [
+					{caption: "New Terminal", onclick: "newTerm"},
+					{caption: "Preferences", onclick: "openPrefs"},
+					{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
+					{caption: "About", onclick: "openAbout"}
+				]
+			})
 		}
 		this.setup()
 	},
@@ -202,13 +204,19 @@ enyo.kind({
 				break;
 		}
 	},
+	
+	getVKBMenuText: function() {
+		return this.showVKB ? 'Hide Virtual Keyboard' : 'Show Virtual Keyboard'
+	},
+	
+	setVKBMenu: function() {
+		this.$.vkbToggle.setCaption(this.getVKBMenuText())
+	},
 
 	toggleVKB: function() {
 		this.showVKB = !this.showVKB
-		if (this.showVKB)
-			this.$.vkbToggle.setCaption('Hide Virtual Keyboard')
-		else
-			this.$.vkbToggle.setCaption('Show Virtual Keyboard')
+		this.prefs.set('showVKB', this.showVKB)
+		this.setVKBMenu()
 		this.setup()
 	},
 
