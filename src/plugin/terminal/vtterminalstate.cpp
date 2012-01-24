@@ -428,34 +428,76 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		syslog(LOG_ERR, "VT100 Control Sequence: KEYPAD not implemented.");
 		break;
 	case CS_CHARSET_UK_G0_SET: //ESC(A
-		setG0Charset(TS_CS_G0_UK);
+		setCharset(0, 'A');
 		break;
-	case CS_CHARSET_UK_G1_SET: //ESC)A
-		setG1Charset(TS_CS_G1_UK);
-		break;
-	case CS_CHARSET_US_G0_SET: //ESC(B
-		setG0Charset(TS_CS_G0_ASCII);
-		break;
-	case CS_CHARSET_US_G1_SET: //ESC)B
-		setG1Charset(TS_CS_G1_ASCII);
+	case CS_CHARSET_ASCII_G0_SET: //ESC(B
+		setCharset(0, 'B');
 		break;
 	case CS_CHARSET_SPEC_G0_SET: //ESC(0
-		setG0Charset(TS_CS_G0_SPEC);
-		break;
-	case CS_CHARSET_SPEC_G1_SET: //ESC)0
-		setG1Charset(TS_CS_G1_SPEC);
+		setCharset(0, '0');
 		break;
 	case CS_CHARSET_ALT_G0_SET: //ESC(1
-		setG0Charset(TS_CS_G0_ALT_STD);
-		break;
-	case CS_CHARSET_ALT_G1_SET: //ESC)1
-		setG1Charset(TS_CS_G1_ALT_STD);
+		setCharset(0, '1');
 		break;
 	case CS_CHARSET_ALT_SPEC_G0_SET: //ESC(2
-		setG0Charset(TS_CS_G0_ALT_SPEC);
+		setCharset(0, '2');
+		break;
+	case CS_CHARSET_USE_G0: //ESCO
+		useCharset(0);
+		break;
+	case CS_CHARSET_UK_G1_SET: //ESC)A
+		setCharset(1, 'A');
+		break;
+	case CS_CHARSET_ASCII_G1_SET: //ESC)B
+		setCharset(1, 'B');
+		break;
+	case CS_CHARSET_SPEC_G1_SET: //ESC)0
+		setCharset(1, '0');
+		break;
+	case CS_CHARSET_ALT_G1_SET: //ESC)1
+		setCharset(1, '1');
 		break;
 	case CS_CHARSET_ALT_SPEC_G1_SET: //ESC)2
-		setG1Charset(TS_CS_G1_ALT_SPEC);
+		setCharset(1, '2');
+		break;
+	case CS_CHARSET_USE_G1: //ESCN
+		useCharset(1);
+		break;
+	case CS_CHARSET_UK_G2_SET: //ESC*A
+		setCharset(2, 'A');
+		break;
+	case CS_CHARSET_ASCII_G2_SET: //ESC*B
+		setCharset(2, 'B');
+		break;
+	case CS_CHARSET_SPEC_G2_SET: //ESC*0
+		setCharset(2, '0');
+		break;
+	case CS_CHARSET_ALT_G2_SET: //ESC*1
+		setCharset(2, '1');
+		break;
+	case CS_CHARSET_ALT_SPEC_G2_SET: //ESC*2
+		setCharset(2, '2');
+		break;
+	case CS_CHARSET_USE_G2: //ESCn
+		useCharset(2);
+		break;
+	case CS_CHARSET_UK_G3_SET: //ESC+A
+		setCharset(3, 'A');
+		break;
+	case CS_CHARSET_ASCII_G3_SET: //ESC+B
+		setCharset(3, 'B');
+		break;
+	case CS_CHARSET_SPEC_G3_SET: //ESC+0
+		setCharset(3, '0');
+		break;
+	case CS_CHARSET_ALT_G3_SET: //ESC+1
+		setCharset(3, '1');
+		break;
+	case CS_CHARSET_ALT_SPEC_G3_SET: //ESC+2
+		setCharset(3, '2');
+		break;
+	case CS_CHARSET_USE_G3: //ESCo
+		useCharset(3);
 		break;
 	case CS_MARGIN_SET: //ESC[<Top>;<Bottom>r
 		values[0] = (values[0] <= 0) ? 1 : values[0];
@@ -571,12 +613,6 @@ void VTTerminalState::insertString(const char *sStr, int len, ExtTerminal *extTe
 			switch (m_parser->character()) {
 			case 0x09: // '\t'
 				tabForward(1);
-				break;
-			case 0x0E: // shift out (use G0 character set, default)
-				setShift(false);
-				break;
-			case 0x0F: // shift in (use G1 character set)
-				setShift(true);
 				break;
 			default:
 				insertChar(m_parser->character(), true, false, isShiftText());
