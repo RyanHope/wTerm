@@ -1223,8 +1223,6 @@ void TerminalState::saveCursor()
 	m_savedGraphicsState.g1charset = m_currentGraphicsState.g1charset;
 	m_savedCursorLoc = m_cursorLoc;
 
-	syslog(LOG_ERR, "saveCursor() %d,%d", m_cursorLoc.getX(), m_cursorLoc.getY());
-
 	pthread_mutex_unlock(&m_rwLock);
 }
 
@@ -1241,8 +1239,6 @@ void TerminalState::restoreCursor()
 	m_currentGraphicsState.g0charset = m_savedGraphicsState.g0charset;
 	m_currentGraphicsState.g1charset = m_savedGraphicsState.g1charset;
 	m_cursorLoc = m_savedCursorLoc;
-
-	syslog(LOG_ERR, "restoreCursor() %d,%d", m_cursorLoc.getX(), m_cursorLoc.getY());
 
 	pthread_mutex_unlock(&m_rwLock);
 }
