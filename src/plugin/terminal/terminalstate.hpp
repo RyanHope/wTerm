@@ -171,14 +171,24 @@ typedef enum
 	TS_CS_MAX
 } TSCharset_t;
 
-typedef struct
+struct TSCellGraphicsState
 {
 	TSColor_t foregroundColor;
 	TSColor_t backgroundColor;
 	int nGraphicsMode;
-	TSCharset_t g0charset;
-	TSCharset_t g1charset;
-} TSCellGraphicsState_t;
+
+	bool bold() const { return nGraphicsMode & TS_GM_BOLD; }
+	bool underline() const { return nGraphicsMode & TS_GM_UNDERSCORE; }
+	bool blink() const { return nGraphicsMode & TS_GM_BLINK; }
+	bool negative() const { return nGraphicsMode & TS_GM_NEGATIVE; }
+	bool italic() const { return nGraphicsMode & TS_GM_ITALIC; }
+};
+
+struct TSGraphicsState : public TSCellGraphicsState
+{
+	unsigned char charsets[4], charset;
+	unsigned int charset_ndx;
+};
 
 typedef enum
 {
@@ -191,17 +201,17 @@ typedef enum
 typedef uint16_t CellCharacter;
 
 // For each cell on the screen, track its graphics and textual contents:
-typedef struct {
-	TSCellGraphicsState_t graphics;
+struct TSCell {
+	TSCellGraphicsState graphics;
 	CellCharacter data;
-} TSCell_t;
+};
 // Say that a line is a vector of cells.
 // For now, they don't have to be the same size as the screen,
 // in which case the unrepresented cells are empty using our bg color.
-typedef std::vector<TSCell_t> TSLine_t;
+typedef std::vector<TSCell> TSLine;
 
 typedef struct {
-	std::deque<TSLine_t> m_data;
+	std::deque<TSLine> m_data;
 	Point m_savedCursorLoc;
 } TSScreen_t;
 
@@ -213,20 +223,18 @@ class TerminalState
 protected:
 	int m_nTermModeFlags;
 
-	TSCellGraphicsState_t m_defaultGraphicsState;
-	TSCellGraphicsState_t m_currentGraphicsState;
-	TSCellGraphicsState_t m_savedGraphicsState;
+	TSGraphicsState m_defaultGraphicsState;
+	TSGraphicsState m_currentGraphicsState;
+	TSGraphicsState m_savedGraphicsState;
 	Point m_savedCursorLoc;
 
 	bool m_bShiftText;
-
-	bool m_shift;
 
 	Point m_cursorLoc; //Bound by the display screen size. Home location is (1, 1).
 	Point m_displayScreenSize; //The actual terminal screen size.
 
 	// Our line buffer (including what's on-screen)
-	std::deque<TSLine_t> m_data;
+	std::deque<TSLine> m_data;
 
 	pthread_mutexattr_t m_rwLockAttr;
 	pthread_mutex_t m_rwLock;
@@ -244,7 +252,7 @@ protected:
 
 	void moveGraphicsState(int nLines, bool bUp);
 
-	void clearBufferLine(int nLine, int nStartX, int nEndX, TSCell_t & eraseTo);
+	void clearBufferLine(int nLine, int nStartX, int nEndX, TSCell & eraseTo);
 	void setBufferTopLine(int nLine);
 	void erase(const Point &start, const Point &end);
 
@@ -318,16 +326,16 @@ public:
 	TSColor_t getForegroundColor();
 	void setBackgroundColor(TSColor_t color);
 	TSColor_t getBackgroundColor();
-	TSCellGraphicsState_t getCurrentGraphicsState();
-	TSCellGraphicsState_t getDefaultGraphicsState();
+	TSGraphicsState getCurrentGraphicsState();
+	TSGraphicsState getDefaultGraphicsState();
 
-	void setG0Charset(TSCharset_t charset);
-	TSCharset_t getG0Charset();
-	void setG1Charset(TSCharset_t charset);
-	TSCharset_t getG1Charset();
+	void setCharset(unsigned int ndx, unsigned char charset);
+	void useCharset(unsigned int ndx);
+	CellCharacter applyCharset(CellCharacter cChar);
+	unsigned char charset();
 
 	int getBufferScreenHeight();
-	TSLine_t * getBufferLine(int nLineIndex);
+	TSLine * getBufferLine(int nLineIndex);
 	int getBufferTopLineIndex();
 	void setNumBufferLines(int nNumLines);
 
@@ -337,8 +345,8 @@ public:
 	void lock();
 	void unlock();
 
-	TSCell_t getEmptyCell() {
-		TSCell_t cell;
+	TSCell getEmptyCell() {
+		TSCell cell;
 		cell.graphics = m_defaultGraphicsState;
 		cell.data = BLANK;
 		return cell;

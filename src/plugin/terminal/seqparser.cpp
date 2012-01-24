@@ -111,30 +111,35 @@ void ControlSeqParser::buildLookup()
 
 	addFixedLookup("(K", CS_USER_MAPPING);
 
+	/* G0 charset */
 	addFixedLookup("(A", CS_CHARSET_UK_G0_SET);
-	addFixedLookup("(B", CS_CHARSET_US_G0_SET);
+	addFixedLookup("(B", CS_CHARSET_ASCII_G0_SET);
 	addFixedLookup("(0", CS_CHARSET_SPEC_G0_SET);
 	addFixedLookup("(1", CS_CHARSET_ALT_G0_SET);
 	addFixedLookup("(2", CS_CHARSET_ALT_SPEC_G0_SET);
+
+	/* G1 charset */
 	addFixedLookup(")A", CS_CHARSET_UK_G1_SET);
-	addFixedLookup(")B", CS_CHARSET_US_G1_SET);
+	addFixedLookup(")B", CS_CHARSET_ASCII_G1_SET);
 	addFixedLookup(")0", CS_CHARSET_SPEC_G1_SET);
 	addFixedLookup(")1", CS_CHARSET_ALT_G1_SET);
 	addFixedLookup(")2", CS_CHARSET_ALT_SPEC_G1_SET);
 
-	/* ignore G2 charset */
-	addFixedLookup("*A", CS_UNKNOWN);
-	addFixedLookup("*B", CS_UNKNOWN);
-	addFixedLookup("*0", CS_UNKNOWN);
-	addFixedLookup("*1", CS_UNKNOWN);
-	addFixedLookup("*2", CS_UNKNOWN);
+	/* G2 charset */
+	addFixedLookup("*A", CS_CHARSET_UK_G2_SET);
+	addFixedLookup("*B", CS_CHARSET_ASCII_G2_SET);
+	addFixedLookup("*0", CS_CHARSET_SPEC_G2_SET);
+	addFixedLookup("*1", CS_CHARSET_ALT_G2_SET);
+	addFixedLookup("*2", CS_CHARSET_ALT_SPEC_G2_SET);
+	addFixedLookup("n", CS_CHARSET_USE_G2); /* use g2 */
 
-	/* ignore G3 charset */
-	addFixedLookup("+A", CS_UNKNOWN);
-	addFixedLookup("+B", CS_UNKNOWN);
-	addFixedLookup("+0", CS_UNKNOWN);
-	addFixedLookup("+1", CS_UNKNOWN);
-	addFixedLookup("+2", CS_UNKNOWN);
+	/* G3 charset */
+	addFixedLookup("+A", CS_CHARSET_UK_G3_SET);
+	addFixedLookup("+B", CS_CHARSET_ASCII_G3_SET);
+	addFixedLookup("+0", CS_CHARSET_SPEC_G3_SET);
+	addFixedLookup("+1", CS_CHARSET_ALT_G3_SET);
+	addFixedLookup("+2", CS_CHARSET_ALT_SPEC_G3_SET);
+	addFixedLookup("o", CS_CHARSET_USE_G3); /* use g3 */
 
 	addCSILookup(0, CS_VPA, 0, 1, 1, 'd');
 	addCSILookup(0, CS_CHA, 0, 1, 1, 'G');
@@ -301,13 +306,59 @@ bool ControlSeqParser::matchCSI() {
 
 bool ControlSeqParser::parseChar() {
 	switch (m_currentChar) {
-	case 0x08: // backspace
-	case 0x09: // \t
-	case 0x0A: // \n
-	case 0x0B: // vertical tab
-	case 0x0D: // \r
-		/* return control character and resume parsing afterwards */
+	case 0x00: // ^@ NUL
+	case 0x01: // ^A SOH
+	case 0x02: // ^B STX
+	case 0x03: // ^C ETX
+	case 0x04: // ^D EOT
+		return false; /* ignore */
+	case 0x05: // ^E ENQ
+		return true; // return character
+	case 0x06: // ^F ACK
+		return false; /* ignore */
+	case 0x07: // ^G BEL
+		break; // terminator for OSC
+	case 0x08: // ^H BS \b backspace
+	case 0x09: // ^I HT \t
+	case 0x0A: // ^J LF \n
+	case 0x0B: // ^K VT \v
+	case 0x0C: // ^L FF \f
+	case 0x0D: // ^M CR \r
+		return true; // return character
+	case 0x0E: // ^N SO (shift out)
+		m_token = CS_CHARSET_USE_G1;
 		return true;
+	case 0x0F: // ^O SI (shift in)
+		m_token = CS_CHARSET_USE_G0;
+		return true;
+	case 0x10: // ^P DLE
+	case 0x11: // ^Q DC1
+	case 0x12: // ^R DC2
+	case 0x13: // ^S DC3
+	case 0x14: // ^T DC4
+	case 0x15: // ^U NAK
+	case 0x16: // ^B SYN
+	case 0x17: // ^W ETB
+		return false;  /* ignore */
+	case 0x18: // ^X CAN
+		m_state = ST_START;
+		m_currentChar = 0x2592;
+		return true;
+	case 0x19: // ^Y EM
+		return false;  /* ignore */
+	case 0x1A: // ^Z SUB
+		m_state = ST_START;
+		m_currentChar = 0x2592;
+		return true;
+	case 0x1B: // ^[ ESC
+		m_state = ST_START;
+		break;
+	case 0x1C: // ^\\ FS
+	case 0x1D: // ^] GS
+	case 0x1E: // ^^ RS
+	case 0x1F: // ^_ US
+	case 0x7F: // DEL
+		return false;  /* ignore */
 	}
 	switch (m_state) {
 	case ST_START:
