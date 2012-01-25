@@ -17,7 +17,8 @@ enyo.depends(
 	"src/enyo/prefs.js",
 	"src/enyo/vkbKey.js",
 	"src/enyo/vkb.js",
-	"src/enyo/wterm.js",
+	"src/enyo/wterm_dock.js",
+	"src/enyo/wterm_app.js",
 	"src/enyo/main.js"
 
 )

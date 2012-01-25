@@ -1,12 +1,8 @@
 enyo.kind({
 
-	name: "wTerm",
+	name: "wTermApp",
 	kind: enyo.VFlexBox,
 	align: 'center',
-	
-	published: {        
-	    launchParams: null,
-	},
 	
 	showVKB: false,
 
@@ -17,8 +13,13 @@ enyo.kind({
 			onKeydown: "onBtKeyDown",
 			onWindowActivated: 'windowActivated',
 			onWindowDeactivated: 'windowDeactivated',
-			onApplicationRelaunch: "applicationRelaunchHandler",
-			//onLoad:"loadHandler"
+		},
+		{
+			name : "getPreferencesCall",
+			kind : "PalmService",
+			service : "palm://com.palm.systemservice/",
+			method : "getPreferences",
+			onSuccess : "prefCallSuccess",
 		},
 		{
 			kind: 'Popup2',
@@ -78,129 +79,94 @@ enyo.kind({
 	},
 	warningOk: function() {
 		this.$.launchWarning.close()
-		this.$.terminal.inject(this.launchParams.command)
+		this.$.terminal.inject(enyo.windowParams.command)
 	},
 		
 	newTerm: function(inSender, inEvent, params, reactivate) {
-		var delay = 0
-		if (reactivate) {
-			enyo.windows.activateWindow(enyo.windows.getRootWindow(), null)
-			delay = 100
-		}
-		var f = function() {enyo.windows.openWindow("index.html", null, params)}
-		enyo.job('new', f, delay)
+		enyo.application.m.launch(true)
 	},
-	
-    applicationRelaunchHandler: function(inSender) {
-        var params = enyo.windowParams
-        if (params.dontLaunch) return true
-        this.newTerm(null, null, params, true)
-		return true;
-    },
-	
+
 	windowActivated: function() {
 		this.$.terminal.setActive(1)
-		if (this.launchParams.dockMode)
-			this.$.terminal.inject('\x11')
 	},
 	windowDeactivated: function() {
 		this.$.terminal.setActive(0)
-		if (this.launchParams.dockMode)
-			this.$.terminal.inject('\x13')
 	},
 	
 	initComponents: function() {
   		this.inherited(arguments)
-  		this.createComponent({
-			name : "getPreferencesCall",
-			kind : "PalmService",
-			service : "palm://com.palm.systemservice/",
-			method : "getPreferences",
-			onSuccess : "prefCallSuccess",
+		this.showVKB = enyo.application.prefs.get('showVKB')
+		this.createComponent({
+			name: "prefs", 
+			kind: "Preferences", 
+			style: "width: 320px; top: 0px; bottom: 0; margin-bottom: 0px;", //width: 384px
+			className: "enyo-bg",
+			flyInFrom: "right",
+			onOpen: "pulloutToggle",
+			onClose: "closeRightPullout"
 		})
-		if (this.launchParams.dockMode) {
-			this.createComponent({
-    		name: 'terminal',
-				kind: 'Terminal',
-				bgcolor: '000000',
-				width: window.innerWidth,
-				height: window.innerHeight,
-				onPluginReady: 'pluginReady',
-				exec: '/media/cryptofs/apps/usr/palm/applications/us.ryanhope.wterm/bin/cmatrix'
-			})
-			enyo.setFullScreen(true)
-		} else {
-			this.showVKB = enyo.application.prefs.get('showVKB')
-			this.createComponent({
-				name: "prefs", 
-				kind: "Preferences", 
-				style: "width: 320px; top: 0px; bottom: 0; margin-bottom: 0px;", //width: 384px
-				className: "enyo-bg",
-				flyInFrom: "right",
-				onOpen: "pulloutToggle",
-				onClose: "closeRightPullout"
-			})
-			this.createComponent({
-    		name: 'terminal',
-				kind: 'Terminal',
-				bgcolor: '000000',
-				width: window.innerWidth,
-				height: 400,
-				onPluginReady: 'pluginReady',
-				exec: enyo.application.prefs.get('exec')
-			})
-			this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
-			this.$.terminal.vkb = this.$.vkb
-			this.$.prefs.terminal = this.$.terminal
-			this.$.prefs.vkb = this.$.vkb
-			this.createComponent({
-				kind: "AppMenu", components: [
-					{caption: "New Terminal", onclick: "newTerm"},
-					{caption: "Preferences", onclick: "openPrefs"},
-					{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
-					{caption: "About", onclick: "openAbout"}
-				]
-			})
-		}
+		this.createComponent({
+		name: 'terminal',
+			kind: 'Terminal',
+			bgcolor: '000000',
+			width: window.innerWidth,
+			height: 400,
+			onPluginReady: 'pluginReady',
+			exec: enyo.application.prefs.get('exec')
+		})
+		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
+		this.$.terminal.vkb = this.$.vkb
+		this.$.prefs.terminal = this.$.terminal
+		this.$.prefs.vkb = this.$.vkb
+		this.createComponent({
+			kind: "AppMenu", components: [
+				{caption: "New Terminal", onclick: "newTerm"},
+				{caption: "Preferences", onclick: "openPrefs"},
+				{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
+				{caption: "About", onclick: "openAbout"}
+			]
+		})
 		this.setup()
 	},
 	
 	pluginReady: function() {
-		if (this.launchParams.command) {
+		if (enyo.windowParams.command) {
 			if (enyo.application.prefs.get('launchParamsOK')) {
-				this.$.terminal.inject(this.launchParams.command)
+				this.$.terminal.inject(enyo.windowParams.command)
 			} else {
 				this.$.launchWarning.openAtTopCenter()
-				this.$.command.setContent(this.launchParams.command)
+				this.$.command.setContent(enyo.windowParams.command)
 			}
+		}
+	},
+	
+	setupKeyboard: function(portrait) {
+		if (portrait) {
+			this.$.vkb.small()
+			if (this.showVKB)
+				this.$.terminal.resize(window.innerWidth, 722)
+			else
+				this.$.terminal.resize(window.innerWidth, window.innerHeight)
+		} else {
+			this.$.vkb.large()
+			if (this.showVKB)
+				this.$.terminal.resize(window.innerWidth, 400)
+			else
+				this.$.terminal.resize(window.innerWidth, window.innerHeight)
 		}
 	},
 
 	prefCallSuccess: function(inSender, inResponse) {
-		switch (inResponse.rotationLock)
-		{
-			case 0:  // not locked
-				break;
-			case 3: // up
-			case 4: // down
-				if (!this.launchParams.dockMode)
-					this.$.vkb.large()
-				if (this.showVKB)
-					this.$.terminal.resize(window.innerWidth, 400)
-				else
-					this.$.terminal.resize(window.innerWidth, window.innerHeight)
-				break;
-			case 5: // left
-			case 6: // right
-				if (!this.launchParams.dockMode)
-					this.$.vkb.small()
-				if (this.showVKB)
-					this.$.terminal.resize(window.innerWidth, 722)
-				else
-					this.$.terminal.resize(window.innerWidth, window.innerHeight)
-				break;
-			default:
-				break;
+		if (inResponse.rotationLock == 3 || inResponse.rotationLock == 4)
+			this.setupKeyboard(true)
+		else if (inResponse.rotationLock == 5 || inResponse.rotationLock == 6)
+			this.setupKeyboard(false)
+		else {
+			var o = enyo.getWindowOrientation()
+			if (o == 'up' || o == 'down')
+				this.setupKeyboard(false)
+			else
+				this.setupKeyboard(true)
 		}
 	},
 	
@@ -224,36 +190,13 @@ enyo.kind({
 	},
 
 	openPrefs: function() {
-		//this.$.preferences.openAtTopCenter()
 		if (this.$.prefs.showing)
 			this.$.prefs.close();
-		else {
-			//this.$.messages.hasNode();
-			//this.$.prefs.domStyles['height'] = this.$.messages.node.clientHeight + 'px';
+		else
 			this.$.prefs.open();
-			//this.$.nicks.render();
-		}
 	},
 	
 	setup: function() {
-		var o = enyo.getWindowOrientation()
-		if (o == 'up' || o == 'down') {
-			if (!this.launchParams.dockMode)
-				this.$.vkb.large()
-			if (this.showVKB)
-				this.$.terminal.resize(window.innerWidth, 400)
-			else
-				this.$.terminal.resize(window.innerWidth, window.innerHeight)
-		} else {
-			if (!this.launchParams.dockMode)
-				this.$.vkb.small()
-			if (this.showVKB)
-				this.$.terminal.resize(window.innerWidth, 722)
-			else
-				this.$.terminal.resize(window.innerWidth, window.innerHeight)
-		}
-
-		// fix the keyboard if orientation is locked
 		this.$.getPreferencesCall.call({"keys":["rotationLock"]});
 	},
 
@@ -262,16 +205,6 @@ enyo.kind({
 		{
 			this.$.terminal.$.plugin.node.focus();
 			this.$.terminal.$.plugin.node.dispatchEvent(event);
-		}
-	},
-	
-	startDockmode: function() {
-		enyo.setFullScreen(true)
-	},
-	
-	loadHandler: function() {
-		if (enyo.windowParams.dockMode) {
-			this.startDockMode()
 		}
 	}
 

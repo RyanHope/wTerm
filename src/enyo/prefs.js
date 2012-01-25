@@ -104,11 +104,11 @@ enyo.kind({
 	],
 	
 	restore: function() {
-		this.prefs.reset()
+		enyo.application.prefs.reset()
 		this.rendered()
-		this.terminal.setFontSize(this.prefs.get('fontSize'))
+		this.terminal.setFontSize(enyo.application.prefs.get('fontSize'))
 		this.terminal.setColors()
-		//this.terminal.setKeys()
+		this.terminal.setKeys()
 		this.vkb.loadLayout(this.$.kbdLayouts.getValue());
 	},
 	
@@ -123,7 +123,7 @@ enyo.kind({
 		}
 	},
 	updateColors: function() {
-		var colorSchemes = this.prefs.get('colorSchemes')
+		var colorSchemes = enyo.application.prefs.get('colorSchemes')
 		var colors = [
 			this.$.color1.getValue(),
 			this.$.color2.getValue(),
@@ -147,8 +147,8 @@ enyo.kind({
 			this.$.backgroundBright.getValue(),
 		]
 		colorSchemes['Custom'] = colors
-		this.prefs.set('colorSchemes', colorSchemes)
-		this.prefs.set('colorScheme', 'Custom')
+		enyo.application.prefs.set('colorSchemes', colorSchemes)
+		enyo.application.prefs.set('colorScheme', 'Custom')
 		this.terminal.setColors()
 		this.getColorSchemes()
 	},
@@ -191,60 +191,60 @@ enyo.kind({
 		this.$.backgroundBright.setValue(colors[19])
 	},
 	fontSizeChanged: function() {
-		this.prefs.set('fontSize',this.$.fontSize.value)
-		this.terminal.setFontSize(this.prefs.get('fontSize'))
+		enyo.application.prefs.set('fontSize',this.$.fontSize.value)
+		this.terminal.setFontSize(enyo.application.prefs.get('fontSize'))
 	},
 	getColorSchemes: function() {
-		var colorSchemes = this.prefs.get('colorSchemes')
+		var colorSchemes = enyo.application.prefs.get('colorSchemes')
 		var items = []
 		for (var colorScheme in colorSchemes)
 			items.push(colorScheme)
 		this.$.colorSchemes.setItems(items)
-		this.$.colorSchemes.setValue(this.prefs.get('colorScheme'))
+		this.$.colorSchemes.setValue(enyo.application.prefs.get('colorScheme'))
 	},
 	getInputSchemes: function() {
-		var inputSchemes = this.prefs.get('inputSchemes')
+		var inputSchemes = enyo.application.prefs.get('inputSchemes')
 		var items = []
 		for (var inputScheme in inputSchemes)
 			items.push(inputScheme)
 		this.$.inputSchemes.setItems(items)
-		this.$.inputSchemes.setValue(this.prefs.get('inputScheme'))
+		this.$.inputSchemes.setValue(enyo.application.prefs.get('inputScheme'))
 	},
 	execChanged: function() {
-		this.prefs.set('exec', this.$.exec.getValue())
+		enyo.application.prefs.set('exec', this.$.exec.getValue())
 	},
 	bufferlinesChanged: function() {
-		this.prefs.set('bufferlines', this.$.bufferlines.getValue())
+		enyo.application.prefs.set('bufferlines', this.$.bufferlines.getValue())
 	},
 	launchParamWarn: function() {
-		this.prefs.set('launchParamsOK', this.$.justType.state)
+		enyo.application.prefs.set('launchParamsOK', this.$.justType.state)
 		if (this.$.justType.state)
 			this.$.warningwarning.openAtTopCenter()
 	},
 	rendered: function() {
 		this.getColors()
-		this.$.exec.setValue(this.prefs.get('exec'))
-		this.$.justType.setState(this.prefs.get('launchParamsOK'))
-		this.$.bufferlines.setValue(0)//this.prefs.get('bufferlines'))
-		this.$.fontSize.setValue(this.prefs.get('fontSize'))
+		this.$.exec.setValue(enyo.application.prefs.get('exec'))
+		this.$.justType.setState(enyo.application.prefs.get('launchParamsOK'))
+		this.$.bufferlines.setValue(0)//enyo.application.prefs.get('bufferlines'))
+		this.$.fontSize.setValue(enyo.application.prefs.get('fontSize'))
 		this.$.kbdLayouts.setItems(kbdLayoutList());
-		this.$.kbdLayouts.setValue(this.prefs.get('kbdLayout'))
+		this.$.kbdLayouts.setValue(enyo.application.prefs.get('kbdLayout'))
 		this.getColorSchemes()
 		this.getKeys()
 		this.getInputSchemes()
 	},
 	colorSchemeChanged: function() {
-		this.prefs.set('colorScheme', this.$.colorSchemes.getValue())
+		enyo.application.prefs.set('colorScheme', this.$.colorSchemes.getValue())
 		this.terminal.setColors()
 		this.getColors()
 	},
 	kbdLayoutChanged: function() {
-		this.prefs.set('kbdLayout', this.$.kbdLayouts.getValue());
+		enyo.application.prefs.set('kbdLayout', this.$.kbdLayouts.getValue());
 		this.vkb.loadLayout(this.$.kbdLayouts.getValue());
 	},
 	inputSchemeChanged: function() {
-		this.prefs.set('inputScheme', this.$.inputSchemes.getValue())
-		//this.terminal.setKeys()
+		enyo.application.prefs.set('inputScheme', this.$.inputSchemes.getValue())
+		this.terminal.setKeys()
 		this.getKeys()
 	},
 	grpChanged: function() {

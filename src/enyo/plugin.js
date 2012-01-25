@@ -39,7 +39,7 @@ enyo.kind({
   		this.log('~~~~~ Terminal Plugin Ready ~~~~~')
   		this.isReady = true
 		this.setColors()
-		//this.setKeys()
+		this.setKeys()
   		this.doPluginReady()
   	},
   	pluginConnected: function(inSender, inResponse, inRequest) {

@@ -4,17 +4,12 @@
 	<head>
 	    <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="viewport" content="width=device-width initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>wTerm Headless Window</title>
+        <title>wTerm Dock</title>
         <script src="/usr/palm/frameworks/enyo/0.10/framework/enyo.js" launch="nobridge" type="text/javascript"></script>
     </head>
 	<body>
 		<script type="text/javascript">
-			(function () {
-				var wTermLauncher = enyo.create({
-					kind: "wTermLauncher"
-				});
-	    		wTermLauncher.launch(false);
-			})();
+			enyo.create({kind: "wTermDock"}).renderInto(document.body);
 		</script>
 	</body>
 </html>
