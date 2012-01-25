@@ -20,8 +20,8 @@
 #include "sdl/sdlterminal.hpp"
 #include "terminal/terminal.hpp"
 #include "util/utf8.hpp"
+#include "util/utils.hpp"
 
-#include <GLES/gl.h>
 #include <SDL/SDL_image.h>
 #include <PDL.h>
 #include <string.h>
@@ -101,11 +101,13 @@ void SDLTerminal::updateDisplaySize()
 {
 	if (m_terminalState != NULL) 
 	{
-		m_terminalState->setDisplayScreenSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
-		m_terminalState->setMargin(1,m_terminalState->getDisplayScreenSize().getY());
+		unsigned int cols = m_fontgl.cols(), rows = m_fontgl.rows();
+
+		m_terminalState->setDisplayScreenSize(cols, rows);
+		m_terminalState->setMargin(1, rows);
 		Terminal *extTerminal = (Terminal *)getExtTerminal();
 		if (extTerminal != NULL)
-			extTerminal->setWindowSize(getMaximumColumnsOfText(), getMaximumLinesOfText());
+			extTerminal->setWindowSize(cols, rows);
 	}
 }
 
@@ -349,7 +351,7 @@ void SDLTerminal::redraw()
 
 	bool hasBlinkText = false;
 
-	m_fontgl.startTextGL();
+	m_fontgl.clearText();
 
 	for (int i = nTopLineIndex; i < nEndLine; ++i)
 	{
@@ -364,15 +366,37 @@ void SDLTerminal::redraw()
 		}
 	}
 
-	m_fontgl.endTextGL();
+	m_fontgl.setCursor(m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR && (m_terminalState->getScollOffset() == 0),
+		 m_terminalState->getCursorLocation().getY()-1,
+		m_terminalState->getCursorLocation().getX()-1,
+		m_reverse ? TS_COLOR_BACKGROUND : TS_COLOR_FOREGROUND);
 
-	if ((m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR) && (m_terminalState->getScollOffset() == 0))
-		drawCursor(m_terminalState->getCursorLocation().getX(), m_terminalState->getCursorLocation().getY());
+	m_fontgl.drawGL(doBlink);
 
 	m_bNeedsBlink = hasBlinkText;
 
 	m_terminalState->unlock();
+}
 
+void SDLTerminal::redrawBlinked()
+{
+	m_terminalState->lock();
+
+	TSGraphicsState defState = m_terminalState->getDefaultGraphicsState();
+
+	m_reverse = (m_terminalState->getTerminalModeFlags() & TS_TM_SCREEN);
+
+	// Clear the entire screen to the default background color
+	clearScreen(m_reverse ? defState.foregroundColor : defState.backgroundColor);
+
+	m_fontgl.setCursor(m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR,
+		 m_terminalState->getCursorLocation().getY()-1,
+		m_terminalState->getCursorLocation().getX()-1,
+		m_reverse ? TS_COLOR_BACKGROUND : TS_COLOR_FOREGROUND);
+
+	m_fontgl.drawGL(doBlink);
+
+	m_terminalState->unlock();
 }
 
 void SDLTerminal::refresh()
@@ -422,7 +446,7 @@ void SDLTerminal::setColor(TSColor_t color, int r, int g, int b)
 	m_colors[color].r = r;
 	m_colors[color].g = g;
 	m_colors[color].b = b;
-	setDirty(FONT_DIRTY_BIT);
+	setDirty(COLOR_DIRTY_BIT);
 }
 
 void SDLTerminal::setScrollBufferLines(int lines)

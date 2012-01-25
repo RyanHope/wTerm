@@ -1198,6 +1198,10 @@ void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnor
 		nPos = displayLoc.getX() - 1;
 		nLine = getBufferTopLineIndex() + displayLoc.getY() - 1;
 		line = getBufferLine(nLine);
+		if (!line) {
+			syslog(LOG_ERR, "TerminalState::insertChar fatal error: couldn't access line %i, %i", nLine, displayLoc.getY());
+			abort();
+		}
 
 		// Insert padding if our line isn't long enough already
 		if (line->size() <= nPos)
@@ -1207,6 +1211,8 @@ void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnor
 			std::fill(line->begin()+size,line->end(),getEmptyCell());
 		} else if (TS_TM_INSERT & m_nTermModeFlags) {
 			line->insert(line->begin() + nPos, TSCell());
+			if ((int) line->size() > nCols)
+				line->resize(nCols);
 		}
 
 
@@ -1214,24 +1220,6 @@ void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnor
 		// Populate the line with the the specified character, using cur graphics
 		(*line)[nPos].graphics = m_currentGraphicsState;
 		(*line)[nPos].data = c;
-
-		if (bShift)
-		{
-
-			//Move the overflow character of each line to the
-			//beginning of the next line. If no overflow, just insert
-			//a blank character.
-			// TODO: AFAICT the code didn't do the above preivously,
-			// so I'm preserving the old code's behavior.
-			// Which is correct?
-			for (unsigned int i = nLine; i < m_data.size(); i++)
-			{
-				line = getBufferLine(i);
-				if ((int) line->size() > nCols)
-					line->resize(nCols);
-			}
-
-		}
 
 		if (bAdvanceCursor)
 		{
@@ -1256,7 +1244,7 @@ void TerminalState::saveScreen()
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	m_savedScreen.m_data = std::deque<TSLine>(m_data);
+	m_savedScreen.m_data = m_data;
 	m_savedScreen.m_savedCursorLoc = Point(m_savedCursorLoc.getX(), m_savedCursorLoc.getY());
 
 	pthread_mutex_unlock(&m_rwLock);
@@ -1268,6 +1256,7 @@ void TerminalState::restoreScreen()
 
 	m_data = std::deque<TSLine>(m_savedScreen.m_data);
 	m_savedCursorLoc = Point(m_savedScreen.m_savedCursorLoc.getX(), m_savedScreen.m_savedCursorLoc.getY());
+	setNumBufferLines(m_displayScreenSize.getY());
 
 	pthread_mutex_unlock(&m_rwLock);
 }

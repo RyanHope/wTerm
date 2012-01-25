@@ -34,7 +34,9 @@ class SDLCore
 {
 protected:
 	static const int BUFFER_DIRTY_BIT;
-	static const int FONT_DIRTY_BIT;
+	static const int FONT_SIZE_DIRTY_BIT;
+	static const int COLOR_DIRTY_BIT;
+	static const int BLINK_DIRTY_BIT;
 
 	SDLFontGL m_fontgl;
 
@@ -47,25 +49,16 @@ protected:
 	bool active;
 	Uint32 lCycleTimeSlot;
 
-	SDL_RWops *file1;
-	SDL_RWops *file2;
-	SDL_RWops *file3;
-	SDL_RWops *file4;
-
 	pthread_t m_blinkThread;
 	static void *blinkThread(void *ptr);
 	int startBlinkThread();
-
-	int createFonts(int nSize);
 
 	bool isDirty();
 	bool isDirty(int nDirtyBits);
 	void setDirty(int nDirtyBits);
 	void clearDirty(int nDirtyBits);
 
-	int getNextPowerOfTwo(int n);
-
-	virtual int initCustom();
+	virtual int initCustom() = 0;
 	virtual void handleKeyboardEvent(SDL_Event &event);
 	virtual void handleMouseEvent(SDL_Event &event);
 
@@ -77,18 +70,9 @@ private:
 
 	int m_nDirtyBits;
 
-	int m_nFontSize;
+	unsigned int m_fontSize;
 
-	TTF_Font *m_fontNormal;
-	TTF_Font *m_fontBold;
-	TTF_Font *m_fontUnder;
-	TTF_Font *m_fontBoldUnder;
-	int m_nFontHeight;
-	int m_nFontWidth;
-	int m_nMaxLinesOfText;
-	int m_nMaxColumnsOfText;
-
-
+private:
 	// pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
 	struct {
 		int firsttime;    /* if we check against the delay or repeat value */
@@ -104,8 +88,9 @@ private:
 	void shutdown();
 	void eventLoop();
 
-	void closeFonts();
-	void resetGlyphCache();
+	void pushColors();
+	void pushFontStyles();
+
 	void checkKeyRepeat();
 
 public:
@@ -116,20 +101,11 @@ public:
 	void run();
 	bool isRunning();
 
-	void setResolution(int nWidth, int nHeight);
-
-	int getFontSize();
-	int setFontSize(int nSize);
+	unsigned int getFontSize();
+	void setFontSize(unsigned int nSize);
 
 	void printCharacter(int nColumn, int nLine, TSCell cCell);
-	void drawCursor(int nColumn, int nLine);
-	void drawRect(int nX, int nY, int nWidth, int nHeight, SDL_Color color, float fAlpha);
-	void drawCharacter(int nX, int nY, TSCell cell);
-	void drawSurface(int nX, int nY, SDL_Surface *surface);
-	void drawImage(int nX, int nY, const char *sImage);
 
-	void setForegroundColor(unsigned char nRed, unsigned char nGreen, unsigned char nBlue);
-	void setBackgroundColor(unsigned char nRed, unsigned char nGreen, unsigned char nBlue);
 	void clearScreen(TSColor_t color);
 
 	int getMaximumLinesOfText();
@@ -137,6 +113,7 @@ public:
 
 	virtual SDL_Color getColor(TSColor_t color) = 0;
 	virtual void redraw() = 0;
+	virtual void redrawBlinked() = 0;
 
 	virtual void updateDisplaySize() = 0;
 

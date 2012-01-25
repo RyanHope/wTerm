@@ -19,11 +19,12 @@
 #ifndef _SDLFONTGL_H_
 #define _SDLFONTGL_H_
 
-#include <GLES/gl.h>
+#include <GLES2/gl2.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 
-#define RENDER_BUFFER_SIZE (1 << 12)
+#include <vector>
+#include <string>
 
 // OpenGL Font Rendering
 class SDLFontGL {
@@ -35,49 +36,112 @@ public:
 		bool blink;
 	} TextGraphicsInfo_t;
 private:
-	// Master font rendering texture.
-	GLuint GlyphCache;
+	// font/glyph data
+	// --------------
+	std::string m_fontFilename;
+	unsigned int m_fontptsize;
+	std::vector<int> m_fontStyles;
+
+	bool m_fontsLoaded;
+	std::vector<TTF_Font*> m_fonts;
+
+	GLuint m_glyphTex;
 	int texW, texH;
 
-	// Dirty bit for each cache line
-	bool * haveCacheLine;
+	bool * haveCacheLine; // Dirty bit for each cache line
 
-	unsigned int nFonts, nCols;
-	TTF_Font** fnts;
-	SDL_Color* cols;
-	int nWidth, nHeight;
-
-	GLfloat colorValues[RENDER_BUFFER_SIZE*24];
-	GLfloat texValues[RENDER_BUFFER_SIZE*12];
-	GLfloat vtxValues[RENDER_BUFFER_SIZE*12];
-	int numChars;
+	int nWidth, nHeight; /* (font) character width/height in pixels */
 
 	/* map slots: from (unicode >> 7) to slot index (or -1 if unsupported) */
 	int m_slotMap[512];
 
-	void clearGL();
-	void ensureCacheLine(unsigned int font, unsigned int slot);
-	bool &hasCacheLine(unsigned int font, unsigned int slot);
-	void createTexture();
-	void drawBackground(int color, int X, int Y, int cells);
-	Uint16 lookupChar(char c);
-	void initializeCharMapping();
-	void getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, Uint16 c, int &x, int &y);
-	void flushGLBuffer();
+
+	// character data
+	// --------------
+	GLuint m_cellsTex;
+	unsigned int m_cellsWidth, m_cellsHeight;
+	unsigned char *m_cellData;
+
+	struct {
+		GLuint program;
+
+		GLuint aDim, aPos, aCells, aGlyphs, aColors, aCellsize, aGlyphsize, aColorsize, aBlink;
+	} m_charShader;
+
+	unsigned int m_rows, m_cols;
+
+
+	// color data
+	// --------------
+	GLuint m_colorTex;
+	std::vector<SDL_Color> m_colors;
+
+
+	// cursor data
+	// --------------
+	struct {
+		GLuint program;
+
+		GLuint aDim, aPos, aCursorpos, aCursorcolor;
+	} m_cursorShader;
+
+	bool m_cursorEnabled;
+	unsigned int m_cursorColor, m_cursorCol, m_cursorRow;
+
+
+	// misc data
+	// --------------
+
+	// pixels on output window to use
+	// specified values
+	unsigned int m_dimX, m_dimY, m_dimW, m_dimH;
+	// calculated centered values with current font size
+	unsigned int m_curdimX, m_curdimY, m_curdimW, m_curdimH;
+
+	bool m_openglActive;
+
+
+
+	// private funcs
+	// --------------
+
+	void updateFonts();
+	void clearFonts();
+	void clearGLFonts();
+	void openFonts();
+	unsigned int getGlyphSlot(unsigned int font, unsigned int slot);
+
+	void updateColors();
+	void clearGLColors();
+
+	void updateCursor();
+
+	void updateCells();
+	void clearGLCells();
+	void updateDimensions();
 
 public:
-	SDLFontGL();
+	SDLFontGL(const char *fontfilename, unsigned int fontptsize);
 	~SDLFontGL();
 
-	// Indicate what fonts and colors to use
-	// This invalidates the cache, so only call when things change.
-	void setupFontGL(int fnCount, TTF_Font** fnts, int colCount, SDL_Color *cols);
+	void initGL(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
+	void clearGL();
+	void setDimension(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
+	void setCursor(bool enabled, unsigned int row, unsigned int col, unsigned int color);
+	void drawGL(bool blink);
 
-	// Begin drawing text to the screen
-	void startTextGL();
-	void drawTextGL(TextGraphicsInfo_t & graphicsInfo, int x, int y, Uint16 cChar);
-	// Done drawing text, commit!
-	void endTextGL();
+	unsigned int rows() const { return m_rows; }
+	unsigned int cols() const { return m_cols; }
+
+	void setFontSize(unsigned int ptsize);
+	void setFontStyles(std::vector<int> styles);
+	unsigned int getFontSize() const { return m_fontptsize; }
+
+	void setupColors(std::vector<SDL_Color> colors);
+
+	void clearText();
+	// col/row start at 0/0
+	void drawTextGL(TextGraphicsInfo_t & graphicsInfo, unsigned int col, unsigned int row, Uint16 cChar);
 };
 
 #endif // _SDLFONTGL_H_

@@ -49,6 +49,8 @@ public:
 	void refresh();
 
 	void redraw();
+	void redrawBlinked();
+
 	void injectData(const char *data);
 	void insertData(const char *data, int len);
 	TerminalState *getTerminalState();
@@ -56,8 +58,6 @@ public:
 	SDL_Color getColor(TSColor_t color);
 	void setColor(TSColor_t color, int r, int g, int b);
 	void setKey(TSInput_t key, const char *command);
-	void setForegroundColor(TSColor_t color);
-	void setBackgroundColor(TSColor_t color);
 	void setScrollBufferLines(int lines);
 	int getScrollBufferLines();
 

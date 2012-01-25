@@ -182,6 +182,8 @@ struct TSCellGraphicsState
 	bool blink() const { return nGraphicsMode & TS_GM_BLINK; }
 	bool negative() const { return nGraphicsMode & TS_GM_NEGATIVE; }
 	bool italic() const { return nGraphicsMode & TS_GM_ITALIC; }
+
+	TSCellGraphicsState() : foregroundColor(TS_COLOR_FOREGROUND), backgroundColor(TS_COLOR_BACKGROUND), nGraphicsMode(0) { }
 };
 
 struct TSGraphicsState : public TSCellGraphicsState
@@ -204,6 +206,8 @@ typedef uint16_t CellCharacter;
 struct TSCell {
 	TSCellGraphicsState graphics;
 	CellCharacter data;
+
+	TSCell() : data(0) { }
 };
 // Say that a line is a vector of cells.
 // For now, they don't have to be the same size as the screen,
