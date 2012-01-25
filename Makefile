@@ -11,7 +11,7 @@ IPK			:= $(APPID)_$(VERSION)_$(ARCH).ipk
 
 package: clean-package ipk/$(IPK)
 
-ipk/$(IPK): wterm bin/vttest clean-package
+ipk/$(IPK): wterm bin/vttest bin/cmatrix clean-package
 	- mkdir -p ipk
 	- palm-package -X excludes.txt .
 	- mv $(APPID)_*.ipk ipk/$(IPK)
@@ -29,6 +29,10 @@ bin/vttest:
 	$(MAKE) -C src/vttest
 	mv src/vttest/vttest bin/vttest
 
+bin/cmatrix:
+	$(MAKE) -C src/cmatrix
+	mv src/cmatrix/cmatrix bin/cmatrix
+
 uninstall:
 	- palm-install -r $(APPID)
 
@@ -40,7 +44,8 @@ test: install
 
 clean:
 	- rm -rf ipk
-	- rm -rf bin/vttest
+	- rm -rf bin/*
 	- rm -rf wterm
 	- $(MAKE) -C src/plugin clean
 	- $(MAKE) -C src/vttest clean
+	- $(MAKE) -C src/cmatrix clean
