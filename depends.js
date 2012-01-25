@@ -10,11 +10,14 @@ enyo.depends(
 
 	"src/enyo/wi/depends.js",
 
+	"src/enyo/utils.js",
+
 	"src/enyo/plugin.js",
 	"src/enyo/popup2.js",
 	"src/enyo/prefs.js",
 	"src/enyo/vkbKey.js",
 	"src/enyo/vkb.js",
+	"src/enyo/wterm.js",
 	"src/enyo/main.js"
 
 )

@@ -19,5 +19,7 @@
 			"launchParam": "command"
 		}
 	},
-	"dockMode": true
+	"dockMode": true,
+	"touchstoneMode": "enabled",
+	"noWindow": true
 }

@@ -1,12 +1,20 @@
-<!doctype html>
-<html>
-<head>
-<title>wTerm</title>
-<script src="/usr/palm/frameworks/enyo/1.0/framework/enyo.js" type="text/javascript"></script>
-</head>
-<body>
-<script type="text/javascript">
-	enyo.create({kind: "wTerm", launchParams: enyo.windowParams}).renderInto(document.body);
-</script>
-</body>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+	    <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="viewport" content="width=device-width initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>wTerm Headless Window</title>
+        <script src="/usr/palm/frameworks/enyo/0.10/framework/enyo.js" launch="nobridge" type="text/javascript"></script>
+    </head>
+	<body>
+		<script type="text/javascript">
+			(function () {
+				var wTermLauncher = enyo.create({
+					kind: "wTermLauncher"
+				});
+	    		wTermLauncher.run();
+			})();
+		</script>
+	</body>
 </html>

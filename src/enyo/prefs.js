@@ -108,7 +108,7 @@ enyo.kind({
 		this.rendered()
 		this.terminal.setFontSize(this.prefs.get('fontSize'))
 		this.terminal.setColors()
-		this.terminal.setKeys()
+		//this.terminal.setKeys()
 		this.vkb.loadLayout(this.$.kbdLayouts.getValue());
 	},
 	
@@ -244,7 +244,7 @@ enyo.kind({
 	},
 	inputSchemeChanged: function() {
 		this.prefs.set('inputScheme', this.$.inputSchemes.getValue())
-		this.terminal.setKeys()
+		//this.terminal.setKeys()
 		this.getKeys()
 	},
 	grpChanged: function() {

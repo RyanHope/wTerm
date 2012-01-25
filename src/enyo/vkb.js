@@ -30,7 +30,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.addClass('vkb');
 		this.large();
-		this.loadLayout(this.prefs.get('kbdLayout'));
+		this.loadLayout(enyo.application.prefs.get('kbdLayout'));
 	},
 
 	large: function() {
