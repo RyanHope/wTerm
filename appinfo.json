@@ -19,5 +19,5 @@
 			"launchParam": "command"
 		}
 	},
-	"dockMode": false
+	"dockMode": true
 }

@@ -102,9 +102,13 @@ enyo.kind({
 	
 	windowActivated: function() {
 		this.$.terminal.setActive(1)
+		if (this.launchParams.dockMode)
+			this.$.terminal.inject('\x11')
 	},
 	windowDeactivated: function() {
 		this.$.terminal.setActive(0)
+		if (this.launchParams.dockMode)
+			this.$.terminal.inject('\x13')
 	},
 	
 	initComponents: function() {
