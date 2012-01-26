@@ -6,6 +6,12 @@ enyo.kind({
 
 	components: [
 		{
+			kind: 'ApplicationEvents',
+			onApplicationRelaunch: 'onRelaunch',
+			onWindowActivated: 'windowActivated',
+			onWindowDeactivated: 'windowDeactivated'
+		},
+		{
 			kind: 'Terminal',
     		name: 'terminal',
 			width: window.innerWidth,
