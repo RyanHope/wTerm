@@ -113,6 +113,8 @@ Terminal::~Terminal()
 	}
 
 	free(m_sUser);
+
+	free(path);
 }
 
 int Terminal::openPTYMaster()
@@ -370,6 +372,12 @@ int Terminal::start()
 
 			setWindowSize();
 			setTermMode();
+
+			char *newPath = 0;
+			syslog(LOG_ERR, "%s", getenv("PATH"));
+			asprintf(&newPath, "%s:/opt/bin:%s/bin", getenv("PATH"), path);
+			syslog(LOG_ERR, "%s", newPath);
+			setenv("PATH", newPath, 1);
 
 			if (execvp(((char **)argv)[0], ((char **)argv)) < 0)
 			{

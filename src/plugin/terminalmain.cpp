@@ -118,6 +118,9 @@ int main(int argc, const char* argv[])
 
 	sdlTerminal = new SDLTerminal();
 	Terminal *terminal = new Terminal();
+	terminal->path = strdup(argv[0]);
+	char *e = strrchr(terminal->path, '/');
+	*e = 0;
 
 	sdlTerminal->setFontSize((argc > 1 && atoi(argv[1])) ? atoi(argv[1]) : 12);
 	sdlTerminal->start();

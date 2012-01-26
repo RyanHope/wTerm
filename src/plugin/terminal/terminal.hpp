@@ -71,6 +71,8 @@ public:
 	int m_masterFD;
 	int m_slaveFD;
 
+	char *path;
+
 	void setWindowSize(int nWidth, int nHeight);
 	int start();
 
