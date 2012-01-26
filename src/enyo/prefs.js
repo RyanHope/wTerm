@@ -85,6 +85,9 @@ enyo.kind({
 					{kind: "RowGroup", flex :1, caption: 'Default Exec Command', components: [
 						{kind: "Input", name: 'exec', changeOnInput: true, onchange: 'execChanged'},
 					]},
+					{kind: "RowGroup", flex :1, caption: 'Exhibition Mode Command', components: [
+						{kind: "Input", name: 'exhibition', changeOnInput: true, onchange: 'exhibitionChanged'},
+					]},
 					{kind: "RowGroup", flex :1, caption: 'Just Type Actions', components: [
 						{kind: "HFlexBox", components: [
 					        {content: "Execute Without Warning", flex: 1},
@@ -210,6 +213,11 @@ enyo.kind({
 		this.$.inputSchemes.setItems(items)
 		this.$.inputSchemes.setValue(enyo.application.prefs.get('inputScheme'))
 	},
+	exhibitionChanged: function() {
+		enyo.application.prefs.set('exhibition', this.$.exhibition.getValue())
+		var windows = enyo.windows.getWindows()
+		if (windows['dock']) windows['dock'].close()
+	},
 	execChanged: function() {
 		enyo.application.prefs.set('exec', this.$.exec.getValue())
 	},
@@ -223,6 +231,7 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.getColors()
+		this.$.exhibition.setValue(enyo.application.prefs.get('exhibition'))
 		this.$.exec.setValue(enyo.application.prefs.get('exec'))
 		this.$.justType.setState(enyo.application.prefs.get('launchParamsOK'))
 		this.$.bufferlines.setValue(0)//enyo.application.prefs.get('bufferlines'))

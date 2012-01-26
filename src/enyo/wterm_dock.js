@@ -10,7 +10,7 @@ enyo.kind({
     		name: 'terminal',
 			width: window.innerWidth,
 			height: window.innerHeight,
-			exec: '/media/cryptofs/apps/usr/palm/applications/us.ryanhope.wterm/bin/cmatrix',
+			exec: enyo.application.prefs.get('exhibition'),
 		}
 	],
 	

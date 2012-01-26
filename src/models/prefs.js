@@ -3,6 +3,7 @@ function Prefs() {
 	this.defaults = {
 		firstUse: false,
 		exec: 'login -f wterm',
+		exhibition: 'cmatrix',
 		launchParamsOK: false,
 		bufferlines: 1000,
 		fontSize: 12,
