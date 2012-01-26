@@ -18,7 +18,6 @@ enyo.kind({
 	},
 
 	initComponents: function() {
-		this.warn('Creating plugin')
 		this.createComponent({
 			name: 'plugin',
 			kind: enyo.Hybrid,
@@ -36,17 +35,15 @@ enyo.kind({
 	},
 		
   	pluginReady: function(inSender, inResponse, inRequest) {
-  		this.log('~~~~~ Terminal Plugin Ready ~~~~~')
   		this.isReady = true
 		this.setColors()
 		this.setKeys()
   		this.doPluginReady()
   	},
   	pluginConnected: function(inSender, inResponse, inRequest) {
-  		this.log('~~~~~ Terminal Plugin Connected ~~~~~')
   	},
   	pluginDisconnected: function(inSender, inResponse, inRequest) {
-  		this.log('~~~~~ Terminal Plugin Disconnected ~~~~~')
+  		this.error('Terminal Plugin Disconnected')
   	},
 
   	pushKeyEvent: function(type,sym,unicode) {
@@ -165,7 +162,7 @@ enyo.kind({
   		var inputScheme = enyo.application.prefs.get('inputScheme')
 		var inputSchemes = enyo.application.prefs.get('inputSchemes')
 		this.currentKeys = inputSchemes[inputScheme]
-		for (i in this.currentKeys)
+		for (var i=0; i<this.currentKeys.length; i++)
 			this.$.plugin.callPluginMethod('setKey', i, this.decodeEscape(this.currentKeys[i]))
   	},
   	
