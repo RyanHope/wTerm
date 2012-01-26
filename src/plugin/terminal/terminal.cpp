@@ -353,6 +353,28 @@ bool Terminal::isChild()
 	return (m_pid == 0);
 }
 
+void Terminal::spawn()
+{
+	const char **argv = new const char*[m_exec.size()+1];
+	unsigned int i=0;
+	for (; i<m_exec.size(); i++) {
+		argv[i] = m_exec[i].c_str();
+	}
+	argv[i] = NULL;
+
+	char *newPath = 0;
+	asprintf(&newPath, "%s:/opt/bin:%s/bin", getenv("PATH"), path);
+	setenv("PATH", newPath, 1);
+	if (newPath) free(newPath);
+
+	if (execvp(((char **)argv)[0], ((char **)argv)) < 0)
+	{
+		syslog(LOG_ERR, "Cannot execute child shell.");
+	}
+
+	_exit(0);
+}
+
 int Terminal::start()
 {
 	syslog(LOG_INFO, "Starting pseudo terminal.");
@@ -363,30 +385,9 @@ int Terminal::start()
 	{
 		if (isChild())
 		{
-			const char **argv = new const char*[m_exec.size()+1];
-			unsigned int i=0;
-			for (; i<m_exec.size(); i++) {
-				argv[i] = m_exec[i].c_str();
-			}
-			argv[i] = NULL;
-
 			setWindowSize();
 			setTermMode();
-
-			char *newPath = 0;
-			asprintf(&newPath, "%s:/opt/bin:%s/bin", getenv("PATH"), path);
-			char *term = getenv("TERM");
-			clearenv();
-			setenv("PATH", newPath, 0);
-			setenv("TERM", term, 0);
-			if (newPath) free(newPath);
-
-			if (execvp(((char **)argv)[0], ((char **)argv)) < 0)
-			{
-				syslog(LOG_ERR, "Cannot execute child shell.");
-			}
-
-			_exit(0);
+			spawn();
 		}
 
 		sleep(1);
@@ -455,18 +456,7 @@ void Terminal::newLogin()
 			_exit(0);
 		}*/
 
-		const char **argv = new const char*[m_exec.size()+1];
-		unsigned int i=0;
-		for (; i<m_exec.size(); i++) {
-			argv[i] = m_exec[i].c_str();
-		}
-		argv[i] = NULL;
-		
-		if (execvp(((char **)argv)[0], ((char **)argv)) < 0)
-		{
-			syslog(LOG_ERR, "Cannot execute child shell.");
-		}		
-		_exit(0);
+		spawn();
 	}
 	syslog(LOG_INFO, "Created new child terminal process with PID %i", m_pid);
 }

@@ -57,6 +57,8 @@ private:
 	bool isChild();
 	void newLogin();
 
+	void spawn();
+
 	int runReader();
 	int startReaderThread();
 	static void *readerThread(void *terminal);
