@@ -18,6 +18,7 @@ enyo.kind({
 			name : "getPreferencesCall",
 			kind : "PalmService",
 			service : "palm://com.palm.systemservice/",
+			subscribe: true,
 			method : "getPreferences",
 			onSuccess : "prefCallSuccess",
 		},
@@ -158,9 +159,9 @@ enyo.kind({
 
 	prefCallSuccess: function(inSender, inResponse) {
 		if (inResponse.rotationLock == 3 || inResponse.rotationLock == 4)
-			this.setupKeyboard(true)
-		else if (inResponse.rotationLock == 5 || inResponse.rotationLock == 6)
 			this.setupKeyboard(false)
+		else if (inResponse.rotationLock == 5 || inResponse.rotationLock == 6)
+			this.setupKeyboard(true)
 		else {
 			var o = enyo.getWindowOrientation()
 			if (o == 'up' || o == 'down')
