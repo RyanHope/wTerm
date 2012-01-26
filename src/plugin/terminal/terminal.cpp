@@ -390,8 +390,6 @@ int Terminal::start()
 			spawn();
 		}
 
-		sleep(1);
-
 		if (startReaderThread() == 0)
 		{
 			syslog(LOG_INFO, "Started pseudo terminal.");
@@ -514,11 +512,8 @@ int Terminal::runReader()
 		if (gotSIGCHLD == 1)
 		{
 			gotSIGCHLD = 0;
-			getExtTerminal()->insertData("Terminal closed.");
-			getExtTerminal()->insertData("\033c"); // Reset
-			getExtTerminal()->insertData("Attempting to start a new terminal...\033E");
+			getExtTerminal()->insertData("\033c");
 			newLogin();
-			sleep(1);
 		}
 	}
 
