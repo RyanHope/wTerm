@@ -428,6 +428,7 @@ void SDLTerminal::setColor(TSColor_t color, int r, int g, int b)
 void SDLTerminal::setScrollBufferLines(int lines)
 {
 	m_terminalState->setScrollBufferLines(lines);
+	refresh();
 }
 
 int SDLTerminal::getScrollBufferLines()

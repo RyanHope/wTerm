@@ -651,9 +651,12 @@ void TerminalState::setScrollBufferLines(int lines)
 {
 	pthread_mutex_lock(&m_rwLock);
 
+	if (lines < 0) return;
+
 	m_nScrollBufferLines = lines;
 	setNumBufferLines(m_displayScreenSize.getY()+m_nScrollBufferLines);
-	setScollOffset(getScollOffset());
+
+	setScollOffset(0);
 
 	pthread_mutex_unlock(&m_rwLock);
 }

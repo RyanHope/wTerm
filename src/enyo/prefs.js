@@ -83,10 +83,10 @@ enyo.kind({
 				]},
 				{name: 'grp3', showing: false, components: [
 					{kind: "RowGroup", flex :1, caption: 'Default Exec Command', components: [
-						{kind: "Input", name: 'exec', changeOnInput: true, onchange: 'execChanged'},
+						{kind: "Input", name: 'exec', onchange: 'execChanged'},
 					]},
 					{kind: "RowGroup", flex :1, caption: 'Exhibition Mode Command', components: [
-						{kind: "Input", name: 'exhibition', changeOnInput: true, onchange: 'exhibitionChanged'},
+						{kind: "Input", name: 'exhibition', onchange: 'exhibitionChanged'},
 					]},
 					{kind: "RowGroup", flex :1, caption: 'Just Type Actions', components: [
 						{kind: "HFlexBox", components: [
@@ -95,7 +95,7 @@ enyo.kind({
 					    ]}
 					]},
 					{kind: "RowGroup", flex :1, caption: 'Scroll Buffer Lines', components: [
-						{kind: "Input", name: 'bufferlines', changeOnInput: true, onchange: 'bufferlinesChanged'},
+						{kind: "Input", name: 'bufferlines', onchange: 'bufferlinesChanged'},
 					]},
 		  		]},
 	  		]},
@@ -222,8 +222,13 @@ enyo.kind({
 		enyo.application.prefs.set('exec', this.$.exec.getValue())
 	},
 	bufferlinesChanged: function() {
-		enyo.application.prefs.set('bufferlines', this.$.bufferlines.getValue())
-		this.terminal.setScrollBufferLines(enyo.application.prefs.get('bufferlines'))
+		var lines = parseInt(this.$.bufferlines.getValue())
+		if (lines>=0) {
+			enyo.application.prefs.set('bufferlines', lines)
+			this.terminal.setScrollBufferLines(lines)
+		} else {
+			this.$.bufferlines.setValue(enyo.application.prefs.get('bufferlines'))
+		}
 	},
 	launchParamWarn: function() {
 		enyo.application.prefs.set('launchParamsOK', this.$.justType.state)
