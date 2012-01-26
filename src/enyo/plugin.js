@@ -38,6 +38,7 @@ enyo.kind({
   		this.isReady = true
 		this.setColors()
 		this.setKeys()
+		this.setScrollBufferLines(enyo.application.prefs.get('bufferlines'))
   		this.doPluginReady()
   	},
   	pluginConnected: function(inSender, inResponse, inRequest) {
@@ -61,6 +62,10 @@ enyo.kind({
   		this.$.plugin.setHeight(height)
   	},
   	
+	setScrollBufferLines: function(lines) {
+		this.$.plugin.callPluginMethodDeferred(null, 'setScrollBufferLines', lines)
+	},
+
   	getDimensions: function() {
   		return enyo.json.parse(this.$.plugin.callPluginMethodDeferred(null, 'getDimensions'))
   	},

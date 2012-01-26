@@ -35,8 +35,10 @@ TerminalState::TerminalState()
 
 	m_nTopBufferLine = 0;
 	m_nNumBufferLines = 0;
+	m_nScrollBufferLines = 0;
 	m_nTopMargin = 0;
 	m_nBottomMargin = 0;
+	m_nScollOffset = 0;
 
 	memset(&m_defaultGraphicsState, 0, sizeof(m_defaultGraphicsState));
 	m_defaultGraphicsState.foregroundColor = TS_COLOR_FOREGROUND;
@@ -51,11 +53,6 @@ TerminalState::TerminalState()
 	pthread_mutexattr_init(&m_rwLockAttr);
 	pthread_mutexattr_settype(&m_rwLockAttr, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&m_rwLock, &m_rwLockAttr);
-
-	setDisplayScreenSize(80, 40);
-	setMargin(1, 40);
-	cursorHome();
-	saveCursor();
 }
 
 TerminalState::~TerminalState()
@@ -566,6 +563,12 @@ int TerminalState::getBufferTopLineIndex()
 	return m_nTopBufferLine;
 }
 
+int TerminalState::getNumBufferLines()
+{
+	return m_nNumBufferLines;
+}
+
+
 /**
  * Bound the location within the display window.
  * If the origin mode is set, the location is converted to be relative to the display first.
@@ -620,6 +623,44 @@ Point TerminalState::convertToDisplayLocation(const Point &loc)
 	pthread_mutex_unlock(&m_rwLock);
 
 	return result;
+}
+
+void TerminalState::setScollOffset(int offset)
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	if (getBufferTopLineIndex() > 0)
+	{
+		if (offset < 0)
+			m_nScollOffset = 0;
+		else if (offset > getBufferTopLineIndex())
+			m_nScollOffset = getBufferTopLineIndex();
+		else
+			m_nScollOffset = offset;
+	}
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
+int TerminalState::getScollOffset()
+{
+	return m_nScollOffset;
+}
+
+void TerminalState::setScrollBufferLines(int lines)
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	m_nScrollBufferLines = lines;
+	setNumBufferLines(m_displayScreenSize.getY()+m_nScrollBufferLines);
+	setScollOffset(getScollOffset());
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
+int TerminalState::getScrollBufferLines()
+{
+	return m_nScrollBufferLines;
 }
 
 /**
@@ -787,7 +828,8 @@ void TerminalState::setDisplayScreenSize(int nWidth, int nHeight)
 
 	//Reset affected attributes to fix cases where location is out of bounds after setting the display.
 	setCursorLocation(m_cursorLoc.getX(), m_cursorLoc.getY());
-	setNumBufferLines(nHeight);
+
+	setNumBufferLines(nHeight+m_nScrollBufferLines);
 
 	setMargin(m_nTopMargin, m_nBottomMargin);
 
@@ -1312,6 +1354,7 @@ void TerminalState::resetTerminal()
 	eraseScreen();
 	setMargin(1,getDisplayScreenSize().getY());
 	cursorHome();
+	saveCursor();
 	tabs.clear();
 	memset(m_currentGraphicsState.charsets, 'B', sizeof(m_currentGraphicsState.charsets));
 	m_currentGraphicsState.charset = 'B';

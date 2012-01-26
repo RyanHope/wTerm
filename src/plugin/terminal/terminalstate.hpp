@@ -245,8 +245,11 @@ protected:
 
 	int m_nNumBufferLines; //Must at least be the height of the display screen size.
 	int m_nTopBufferLine; //The index number in the buffer that corresponds to the first line of the display. Starts at 0.
+	int m_nScrollBufferLines;
 	int m_nTopMargin;
 	int m_nBottomMargin;
+
+	int m_nScollOffset;
 
 	void freeBuffer();
 
@@ -338,6 +341,7 @@ public:
 	TSLine * getBufferLine(int nLineIndex);
 	int getBufferTopLineIndex();
 	void setNumBufferLines(int nNumLines);
+	int getNumBufferLines();
 
 	void enableShiftText(bool bShift);
 	bool isShiftText();
@@ -361,6 +365,11 @@ public:
 	void tabBackward(int nTabs);
 	void setShift(bool shift);
 	bool getShift();
+
+	void setScrollBufferLines(int lines);
+	int getScrollBufferLines();
+	void setScollOffset(int offset);
+	int getScollOffset();
 };
 
 #endif

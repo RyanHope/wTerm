@@ -180,7 +180,12 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 				break;
 			}
 		case SDLK_PAGEUP:
-			extTerminal->insertData("\x1B[5~");
+			if (mod & KMOD_SHIFT) {
+				m_terminalState->setScollOffset(m_terminalState->getScollOffset()+10);
+				syslog(LOG_ERR, "UP %d %d %d %d", m_terminalState->getNumBufferLines(), m_terminalState->getBufferTopLineIndex(), m_terminalState->getScollOffset(), m_terminalState->getBufferTopLineIndex() - m_terminalState->getScollOffset());
+				refresh();
+			} else
+				extTerminal->insertData("\x1B[5~");
 			break;
 		case HP_BT_DOWN:
 		case HP_BT_PLUGIN_DOWN:
@@ -190,7 +195,12 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 				break;
 			}
 		case SDLK_PAGEDOWN:
-			extTerminal->insertData("\x1B[6~");
+			if (mod & KMOD_SHIFT) {
+				m_terminalState->setScollOffset(m_terminalState->getScollOffset()-10);
+				syslog(LOG_ERR, "DN %d %d %d %d", m_terminalState->getNumBufferLines(), m_terminalState->getBufferTopLineIndex(), m_terminalState->getScollOffset(), m_terminalState->getBufferTopLineIndex() - m_terminalState->getScollOffset());
+				refresh();
+			} else
+				extTerminal->insertData("\x1B[6~");
 			break;
 		case HP_BT_RIGHT:
 		case HP_BT_PLUGIN_RIGHT:
@@ -304,7 +314,7 @@ void SDLTerminal::redraw()
 {
 	m_terminalState->lock();
 
-	int nTopLineIndex = m_terminalState->getBufferTopLineIndex();
+	int nTopLineIndex = m_terminalState->getBufferTopLineIndex() - m_terminalState->getScollOffset();
 	int nEndLine = nTopLineIndex + m_terminalState->getDisplayScreenSize().getY();
 
 	TSGraphicsState defState = m_terminalState->getDefaultGraphicsState();
@@ -390,4 +400,14 @@ void SDLTerminal::setColor(TSColor_t color, int r, int g, int b)
 	m_colors[color].g = g;
 	m_colors[color].b = b;
 	setDirty(FONT_DIRTY_BIT);
+}
+
+void SDLTerminal::setScrollBufferLines(int lines)
+{
+	m_terminalState->setScrollBufferLines(lines);
+}
+
+int SDLTerminal::getScrollBufferLines()
+{
+	return m_terminalState->getScrollBufferLines();
 }

@@ -503,7 +503,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		break;
 	case CS_MARGIN_SET: //ESC[<Top>;<Bottom>r
 		values[0] = (values[0] <= 0) ? 1 : values[0];
-		values[1] = (values[1] <= 0) ? m_nNumBufferLines : values[1];
+		values[1] = (values[1] <= 0) ? m_nNumBufferLines : values[1]; // This likely needs to get adjusted. ~PTM
 		values[1] = (values[1] <= values[0]) ? (values[0] + 1) : values[1];
 		setMargin(values[0], values[1]);
 		cursorHome();

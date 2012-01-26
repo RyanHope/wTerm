@@ -35,6 +35,11 @@ PDL_bool inject(PDL_JSParameters *params) {
 	return PDL_TRUE;
 }
 
+PDL_bool setScrollBufferLines(PDL_JSParameters *params) {
+	sdlTerminal->setScrollBufferLines(PDL_GetJSParamInt(params, 0));
+	return PDL_TRUE;
+}
+
 PDL_bool setActive(PDL_JSParameters *params) {
 	int active = PDL_GetJSParamInt(params, 0);
 	sdlTerminal->setActive(active);
@@ -130,6 +135,7 @@ int main(int argc, const char* argv[])
 	else
 		terminal->setExec("login -f root");
 
+	PDL_RegisterJSHandler("setScrollBufferLines", setScrollBufferLines);
 	PDL_RegisterJSHandler("inject", inject);
 	PDL_RegisterJSHandler("setActive", setActive);
 	PDL_RegisterJSHandler("setKey", setKey);

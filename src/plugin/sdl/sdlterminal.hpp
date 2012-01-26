@@ -58,6 +58,8 @@ public:
 	void setKey(TSInput_t key, const char *command);
 	void setForegroundColor(TSColor_t color);
 	void setBackgroundColor(TSColor_t color);
+	void setScrollBufferLines(int lines);
+	int getScrollBufferLines();
 
 	void updateDisplaySize();
 };

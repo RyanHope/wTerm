@@ -95,7 +95,7 @@ enyo.kind({
 					    ]}
 					]},
 					{kind: "RowGroup", flex :1, caption: 'Scroll Buffer Lines', components: [
-						{kind: "Input", name: 'bufferlines', changeOnInput: true, onchange: 'bufferlinesChanged', disabled: true},
+						{kind: "Input", name: 'bufferlines', changeOnInput: true, onchange: 'bufferlinesChanged'},
 					]},
 		  		]},
 	  		]},
@@ -223,6 +223,7 @@ enyo.kind({
 	},
 	bufferlinesChanged: function() {
 		enyo.application.prefs.set('bufferlines', this.$.bufferlines.getValue())
+		this.terminal.setScrollBufferLines(enyo.application.prefs.get('bufferlines'))
 	},
 	launchParamWarn: function() {
 		enyo.application.prefs.set('launchParamsOK', this.$.justType.state)
@@ -234,7 +235,7 @@ enyo.kind({
 		this.$.exhibition.setValue(enyo.application.prefs.get('exhibition'))
 		this.$.exec.setValue(enyo.application.prefs.get('exec'))
 		this.$.justType.setState(enyo.application.prefs.get('launchParamsOK'))
-		this.$.bufferlines.setValue(0)//enyo.application.prefs.get('bufferlines'))
+		this.$.bufferlines.setValue(enyo.application.prefs.get('bufferlines'))
 		this.$.fontSize.setValue(enyo.application.prefs.get('fontSize'))
 		this.$.kbdLayouts.setItems(kbdLayoutList());
 		this.$.kbdLayouts.setValue(enyo.application.prefs.get('kbdLayout'))
