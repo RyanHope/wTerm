@@ -158,6 +158,8 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 	SDLMod mod = event.key.keysym.mod;
 	Uint16 unicode = event.key.keysym.unicode;
 
+	bool snapBottom = true;
+
 	char c[4];
 
 	ExtTerminal *extTerminal = getExtTerminal();
@@ -182,7 +184,7 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 		case SDLK_PAGEUP:
 			if (mod & KMOD_SHIFT) {
 				m_terminalState->setScollOffset(m_terminalState->getScollOffset()+10);
-				syslog(LOG_ERR, "UP %d %d %d %d", m_terminalState->getNumBufferLines(), m_terminalState->getBufferTopLineIndex(), m_terminalState->getScollOffset(), m_terminalState->getBufferTopLineIndex() - m_terminalState->getScollOffset());
+				snapBottom = false;
 				refresh();
 			} else
 				extTerminal->insertData("\x1B[5~");
@@ -197,7 +199,7 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 		case SDLK_PAGEDOWN:
 			if (mod & KMOD_SHIFT) {
 				m_terminalState->setScollOffset(m_terminalState->getScollOffset()-10);
-				syslog(LOG_ERR, "DN %d %d %d %d", m_terminalState->getNumBufferLines(), m_terminalState->getBufferTopLineIndex(), m_terminalState->getScollOffset(), m_terminalState->getBufferTopLineIndex() - m_terminalState->getScollOffset());
+				snapBottom = false;
 				refresh();
 			} else
 				extTerminal->insertData("\x1B[6~");
@@ -284,6 +286,22 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 			else
 				extTerminal->insertData("\x7F");
 			break;
+		case SDLK_NUMLOCK:
+		case SDLK_CAPSLOCK:
+		case SDLK_SCROLLOCK:
+		case SDLK_RSHIFT:
+		case SDLK_LSHIFT:
+		case SDLK_RCTRL:
+		case SDLK_LCTRL:
+		case SDLK_RALT:
+		case SDLK_LALT:
+		case SDLK_RMETA:
+		case SDLK_LMETA:
+		case SDLK_LSUPER:
+		case SDLK_RSUPER:
+		case SDLK_MODE:
+			snapBottom = false;
+			break;
 		case SDLK_UNKNOWN:
 		default:
 			// Failed to handle based on 'sym', look to unicode:
@@ -307,6 +325,11 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 		break;
 	default:
 		break;
+	}
+
+	if ((event.type == SDL_KEYDOWN) && (snapBottom) && (m_terminalState->getScollOffset() != 0)) {
+		m_terminalState->setScollOffset(0);
+		refresh();
 	}
 }
 
@@ -343,7 +366,7 @@ void SDLTerminal::redraw()
 
 	m_fontgl.endTextGL();
 
-	if (m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR)
+	if ((m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR) && (m_terminalState->getScollOffset() == 0))
 		drawCursor(m_terminalState->getCursorLocation().getX(), m_terminalState->getCursorLocation().getY());
 
 	m_bNeedsBlink = hasBlinkText;
