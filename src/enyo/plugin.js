@@ -62,15 +62,15 @@ enyo.kind({
   	},
   	
   	getDimensions: function() {
-  		return enyo.json.parse(this.$.plugin.callPluginMethod('getDimensions'))
+  		return enyo.json.parse(this.$.plugin.callPluginMethodDeferred(null, 'getDimensions'))
   	},
   	
   	getFontSize: function() {
-  		return parseInt(this.$.plugin.callPluginMethod('getFontSize'),10)
+  		return parseInt(this.$.plugin.callPluginMethodDeferred(null, 'getFontSize'),10)
   	},
   	
   	setFontSize: function(fontSize) {
-  		return parseInt(this.$.plugin.callPluginMethod('setFontSize', fontSize),10)
+  		return parseInt(this.$.plugin.callPluginMethodDeferred(null, 'setFontSize', fontSize),10)
   	},
   	hsvToRgb: function(h, s, v) {
 		var r, g, b;
@@ -149,7 +149,7 @@ enyo.kind({
 		if (colorScheme == 'Black on Random Light')
 			this.currentColors[17] = this.currentColors[19] = this.hsvToRgb(Math.floor(Math.random()*256),34,247)
   		for (i in this.currentColors)
-  			this.$.plugin.callPluginMethod('setColor', i, this.currentColors[i][0], this.currentColors[i][1], this.currentColors[i][2])
+  			this.$.plugin.callPluginMethodDeferred(null, 'setColor', i, this.currentColors[i][0], this.currentColors[i][1], this.currentColors[i][2])
   	},
   	
   	decodeEscape: function(str) {
@@ -163,16 +163,15 @@ enyo.kind({
 		var inputSchemes = enyo.application.prefs.get('inputSchemes')
 		this.currentKeys = inputSchemes[inputScheme]
 		for (var i=0; i<this.currentKeys.length; i++)
-			this.$.plugin.callPluginMethod('setKey', i, this.decodeEscape(this.currentKeys[i]))
+			this.$.plugin.callPluginMethodDeferred(null, 'setKey', i, this.decodeEscape(this.currentKeys[i]))
   	},
   	
   	setActive: function(active) {
-  		if (this.isReady)
-  			this.$.plugin.callPluginMethod('setActive', active);
+  		if (this.isReady) this.$.plugin.callPluginMethodDeferred(null, 'setActive', active);
   	},
   	
   	inject: function(command) {
-  		this.$.plugin.callPluginMethod('inject', command)
+  		this.$.plugin.callPluginMethodDeferred(null, 'inject', command)
   	}
   	
 })
