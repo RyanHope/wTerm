@@ -23,8 +23,15 @@
 #include "terminal/vtterminalstate.hpp"
 #include "util/utf8.hpp"
 
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <grp.h>
+
 #include <syslog.h>
 #include <PDL.h>
+
+#define WTERM_HOMEDIR "/var/home/wterm"
 
 SDLTerminal *sdlTerminal;
 
@@ -114,10 +121,106 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 	return PDL_TRUE;
 }
 
+int group_study(struct group *g)
+{
+	if (getgrnam(g->gr_name)) return -1;
+
+	while (1)
+	{
+		if (!getgrgid(g->gr_gid)) return -2;
+
+		g->gr_gid++;
+
+		if (g->gr_gid <= 0) return -3;
+	}
+
+	return 0;
+}
+
+int new_group(char *group, gid_t gid)
+{
+	FILE *file;
+	struct group gr;
+
+	gr.gr_gid = gid;
+	gr.gr_name = group;
+	if (!group_study(&gr))
+	{
+		file = fopen("/etc/group", "a");
+		fprintf(file, "%s:x:%u:\n", group, (unsigned)gr.gr_gid);
+		fclose(file);
+		return gr.gr_gid;
+	}
+
+	return -1;
+}
+
+int passwd_study(struct passwd *p)
+{
+	FILE *file;
+
+	int max = 64999;
+
+	if (getpwnam(p->pw_name))
+		return -1;
+
+	p->pw_uid = 1000;
+
+	while (getpwuid(p->pw_uid) || (!p->pw_gid && getgrgid(p->pw_uid)))
+		p->pw_uid++;
+
+	if (!p->pw_gid)
+	{
+		p->pw_gid = p->pw_uid;
+		if (getgrnam(p->pw_name))
+			return -2;
+		file = fopen("/etc/group", "a");
+		fprintf(file, "%s:x:%u:\n", p->pw_name, (unsigned)p->pw_gid);
+		fclose(file);
+	}
+
+	if (p->pw_uid > max)
+		return -3;
+
+	return 0;
+}
+
+void setup_wterm_user()
+{
+	struct passwd *existing = getpwnam("wterm");
+	struct passwd pw;
+	FILE *file;
+
+	if (existing == NULL)
+	{
+		pw.pw_name = (char *)"wterm";
+		pw.pw_gecos = (char *)"wTerm User";
+		pw.pw_shell = (char *)"/bin/sh";
+		pw.pw_dir = (char *)WTERM_HOMEDIR;
+		pw.pw_passwd = (char *)"x";
+		pw.pw_gid = 0;
+
+		if (!passwd_study(&pw))
+		{
+			file = fopen("/etc/passwd", "a");
+			putpwent(&pw, file);
+			fclose(file);
+		}
+	} else {
+		pw = *existing;
+	}
+
+	mkdir(WTERM_HOMEDIR, S_IRWXU | S_IRGRP);
+	chmod(WTERM_HOMEDIR, S_IRWXU | S_IRGRP);
+	chown(WTERM_HOMEDIR, pw.pw_uid, pw.pw_gid);
+}
+
 int main(int argc, const char* argv[])
 {
 	openlog("us.ryanhope.wterm.plugin", LOG_PID, LOG_USER);
 	setlogmask(LOG_UPTO((argc > 3 && atoi(argv[3])>=LOG_EMERG && atoi(argv[3])<=LOG_DEBUG) ? atoi(argv[3]) : LOGLEVEL));
+
+	setup_wterm_user();
 
 	PDL_Init(0);
 
