@@ -36,6 +36,33 @@ enyo.kind({
 		},
 		{
 			kind: 'Popup2',
+			name: 'rootpass',
+			modal: true,
+			scrim: true,
+			autoClose: false,
+			dismissWithClick: false,
+			width: "500px",
+			components: [
+				{style: 'text-align: center; padding-bottom: 12px; font-size: 120%;', allowHtml: true, content: '<b><u>Notice!</u></b>'},
+				{content: 'Your device does not have a root password!'},
+				{kind: "RowGroup", caption: 'New Passowrd', components: [
+					{kind: 'PasswordInput', name: 'pass1', changeOnInput: true, onchange: 'verifyPassword'},
+					{kind: 'PasswordInput', name: 'pass2', changeOnInput: true, onchange: 'verifyPassword'}
+				]},
+				{kind: 'HFlexBox', components: [
+					{kind: 'HFlexBox', flex: 2, align: 'center', components: [
+						{kind: "CheckBox", name: 'rootpassCheckbox', onChange: 'rootpassWarn'},
+						{style: 'font-size: 80%; padding-left: 1em;', content: 'Do not show this warning again.'},
+					]},
+					{kind: 'HFlexBox', flex: 1, components: [
+						{kind: 'Button', flex: 1, className: 'enyo-button-negative', content: 'Cancel', onclick: 'rootpassCancel'},
+						{kind: 'Button', flex: 1, className: 'enyo-button-affirmative ', content: 'Set', onclick: 'rootpassSet', name: 'setPass', disabled: true},
+					]}
+				]}				
+			]
+		},
+		{
+			kind: 'Popup2',
 			name: 'launchWarning',
 			modal: true,
 			scrim: true,
@@ -69,8 +96,23 @@ enyo.kind({
 			]
 		}
 	],
+	rootpassCancel: function() {
+		this.$.rootpass.close()
+	},
+	rootpassSet: function() {
+		this.$.terminal.setPassword("root", this.$.pass1.getValue())
+		this.$.terminal.addToGroup("wterm", "root")
+		this.$.terminal.inject("exit")
+		this.$.rootpass.close()
+	},
+	verifyPassword: function() {
+		if ((this.$.pass1.getValue() == this.$.pass2.getValue()) && this.$.pass1.getValue().length > 0)
+			this.$.setPass.setDisabled(false)
+		else
+			this.$.setPass.setDisabled(true)
+	},
 	launchParamWarn: function() {
-		enyo.application.prefs.set('launchParamsOK', this.$.launchParamsCheckbox.checked)
+		PREFS.set('launchParamsOK', this.$.launchParamsCheckbox.checked)
 		if (this.$.launchParamsCheckbox.checked)
 			this.$.warningwarning.openAtTopCenter()
 	},
@@ -96,7 +138,7 @@ enyo.kind({
 	
 	initComponents: function() {
   		this.inherited(arguments)
-		this.showVKB = enyo.application.prefs.get('showVKB')
+		this.showVKB = PREFS.get('showVKB')
 		this.createComponent({
 			name: "prefs", 
 			kind: "Preferences", 
@@ -113,7 +155,7 @@ enyo.kind({
 			width: window.innerWidth,
 			height: 400,
 			onPluginReady: 'pluginReady',
-			exec: enyo.application.prefs.get('exec')
+			exec: PREFS.get('exec')
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
 		this.$.terminal.vkb = this.$.vkb
@@ -129,16 +171,18 @@ enyo.kind({
 		})
 		this.setup()
 	},
-	
+
 	pluginReady: function() {
 		if (enyo.windowParams.command) {
-			if (enyo.application.prefs.get('launchParamsOK')) {
+			if (PREFS.get('launchParamsOK')) {
 				this.$.terminal.inject(enyo.windowParams.command)
 			} else {
 				this.$.launchWarning.openAtTopCenter()
 				this.$.command.setContent(enyo.windowParams.command)
 			}
 		}
+		if (!this.$.terminal.hasPassword("root"))
+			this.$.rootpass.openAtTopCenter()
 	},
 	
 	setupKeyboard: function(portrait) {
@@ -181,7 +225,7 @@ enyo.kind({
 
 	toggleVKB: function() {
 		this.showVKB = !this.showVKB
-		enyo.application.prefs.set('showVKB', this.showVKB)
+		PREFS.set('showVKB', this.showVKB)
 		this.setVKBMenu()
 		this.setup()
 	},

@@ -23,17 +23,54 @@
 #include "terminal/vtterminalstate.hpp"
 #include "util/utf8.hpp"
 
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <pwd.h>
-#include <grp.h>
 
 #include <syslog.h>
 #include <PDL.h>
 
-#define WTERM_HOMEDIR "/var/home/wterm"
-
 SDLTerminal *sdlTerminal;
+
+int isMountWritable(const char* dest) {
+	int ret = 1;
+	FILE *mountsfile;
+	char tmpdest[4096];
+	char tmpflags[4096];
+	mountsfile = fopen("/proc/mounts", "r");
+	if (mountsfile == NULL) {
+		syslog(LOG_ERR, "error[fopen] in is_mounted()");
+		ret = -1;
+	} else {
+		while (ret == 0 && fscanf(mountsfile, "%*s%s%*s%s%*d%*d", tmpdest, tmpflags) != EOF) {
+			if (strcmp(dest,tmpdest)==0) {
+				if (tmpflags[1] == 'w') ret = 1;
+			}
+		}
+		fclose(mountsfile);
+	}
+	return ret;
+}
+
+bool hasPassword(const char *user)
+{
+	struct passwd *pw = getpwnam(user);
+	return (strlen(pw->pw_passwd)==34);
+}
+
+int setPassword(const char *user, const char *password)
+{
+	char *cmd = 0;
+	asprintf(&cmd, "echo -n \"%s:%s\" | chpasswd -m", user, password);
+	system(cmd);
+	if (cmd) free(cmd);
+}
+
+void addToGroup(const char *user, const char *group)
+{
+	char *cmd = 0;
+	asprintf(&cmd, "if ! grep -q \"^%s:.*%s\" /etc/group; then sed -i -e 's/^%s:.*$/&,%s/' /etc/group; fi", group, user, group, user);
+	system(cmd);
+	if (cmd) free(cmd);
+}
 
 PDL_bool inject(PDL_JSParameters *params) {
 	const char *cmd = PDL_GetJSParamString(params, 0);
@@ -121,98 +158,52 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 	return PDL_TRUE;
 }
 
-int group_study(struct group *g)
-{
-	if (getgrnam(g->gr_name)) return -1;
+PDL_bool userSetPassword(PDL_JSParameters *params) {
 
-	while (1)
-	{
-		if (!getgrgid(g->gr_gid)) return -2;
+	const char *user = PDL_GetJSParamString(params, 0);
+	const char *password = PDL_GetJSParamString(params, 1);
 
-		g->gr_gid++;
+	int write = isMountWritable("/");
+	if (!write) system("mount -o remount,rw /");
+	setPassword(user, password);
+	if (!write) system("mount -o remount,ro /");
 
-		if (g->gr_gid <= 0) return -3;
-	}
-
-	return 0;
+	return PDL_TRUE;
 }
 
-int new_group(char *group, gid_t gid)
-{
-	FILE *file;
-	struct group gr;
+PDL_bool userHasPassword(PDL_JSParameters *params) {
 
-	gr.gr_gid = gid;
-	gr.gr_name = group;
-	if (!group_study(&gr))
-	{
-		file = fopen("/etc/group", "a");
-		fprintf(file, "%s:x:%u:\n", group, (unsigned)gr.gr_gid);
-		fclose(file);
-		return gr.gr_gid;
-	}
+	char *reply = 0;
+	asprintf(&reply, "%d", hasPassword(PDL_GetJSParamString(params, 0)));
+	PDL_JSReply(params, reply);
+	free(reply);
 
-	return -1;
+	return PDL_TRUE;
 }
 
-int passwd_study(struct passwd *p)
-{
-	FILE *file;
+PDL_bool userAddToGroup(PDL_JSParameters *params) {
 
-	int max = 64999;
+	const char *user = PDL_GetJSParamString(params, 0);
+	const char *group = PDL_GetJSParamString(params, 1);
 
-	if (getpwnam(p->pw_name))
-		return -1;
+	int write = isMountWritable("/");
+	if (!write) system("mount -o remount,rw /");
+	addToGroup(user, group);
+	if (!write) system("mount -o remount,ro /");
 
-	p->pw_uid = 1000;
-
-	while (getpwuid(p->pw_uid) || (!p->pw_gid && getgrgid(p->pw_uid)))
-		p->pw_uid++;
-
-	if (!p->pw_gid)
-	{
-		p->pw_gid = p->pw_uid;
-		if (getgrnam(p->pw_name))
-			return -2;
-		file = fopen("/etc/group", "a");
-		fprintf(file, "%s:x:%u:\n", p->pw_name, (unsigned)p->pw_gid);
-		fclose(file);
-	}
-
-	if (p->pw_uid > max)
-		return -3;
-
-	return 0;
+	return PDL_TRUE;
 }
 
 void setup_wterm_user()
 {
-	struct passwd *existing = getpwnam("wterm");
-	struct passwd pw;
-	FILE *file;
-
-	if (existing == NULL)
-	{
-		pw.pw_name = (char *)"wterm";
-		pw.pw_gecos = (char *)"wTerm User";
-		pw.pw_shell = (char *)"/bin/sh";
-		pw.pw_dir = (char *)WTERM_HOMEDIR;
-		pw.pw_passwd = (char *)"x";
-		pw.pw_gid = 0;
-
-		if (!passwd_study(&pw))
-		{
-			file = fopen("/etc/passwd", "a");
-			putpwent(&pw, file);
-			fclose(file);
-		}
-	} else {
-		pw = *existing;
-	}
-
-	mkdir(WTERM_HOMEDIR, S_IRWXU | S_IRGRP);
-	chmod(WTERM_HOMEDIR, S_IRWXU | S_IRGRP);
-	chown(WTERM_HOMEDIR, pw.pw_uid, pw.pw_gid);
+	int write = isMountWritable("/");
+	if (!write) system("mount -o remount,rw /");
+	system("adduser -D wterm -h /var/home/wterm -g \"wTerm User\"");
+	system("mkdir /var/home/wterm");
+	system("chown -R wterm /var/home/wterm");
+	if (!write) system("mount -o remount,ro /");
+	if (hasPassword("root"))
+		addToGroup("wterm", "root");
 }
 
 int main(int argc, const char* argv[])
@@ -238,6 +229,9 @@ int main(int argc, const char* argv[])
 	else
 		terminal->setExec("login -f root");
 
+	PDL_RegisterJSHandler("userAddToGroup", userAddToGroup);
+	PDL_RegisterJSHandler("userHasPassword", userHasPassword);
+	PDL_RegisterJSHandler("userSetPassword", userSetPassword);
 	PDL_RegisterJSHandler("setScrollBufferLines", setScrollBufferLines);
 	PDL_RegisterJSHandler("inject", inject);
 	PDL_RegisterJSHandler("setActive", setActive);

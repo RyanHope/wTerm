@@ -1,3 +1,6 @@
+if (typeof PREFS === 'undefined')
+	var PREFS = new Prefs();
+
 enyo.kind({
 
 	name: 'wTermLauncher',
@@ -13,7 +16,6 @@ enyo.kind({
 	create: function () {
 		this.inherited(arguments);
 		enyo.application.m = this;
-		enyo.application.prefs = new Prefs();
     },
 
 	launch: function (relaunch) {

@@ -30,7 +30,7 @@ enyo.kind({
 			passTouchEvents: true,
 			width: this.width,
 			height: this.height,
-			params: [enyo.application.prefs.get('fontSize').toString(10), this.exec]
+			params: [PREFS.get('fontSize').toString(10), this.exec]
 		})
 	},
 		
@@ -38,7 +38,7 @@ enyo.kind({
   		this.isReady = true
 		this.setColors()
 		this.setKeys()
-		this.setScrollBufferLines(enyo.application.prefs.get('bufferlines'))
+		this.setScrollBufferLines(PREFS.get('bufferlines'))
   		this.doPluginReady()
   	},
   	pluginConnected: function(inSender, inResponse, inRequest) {
@@ -148,8 +148,8 @@ enyo.kind({
 	},
 
   	setColors: function() {
-  		var colorScheme = enyo.application.prefs.get('colorScheme')
-		var colorSchemes = enyo.application.prefs.get('colorSchemes')
+  		var colorScheme = PREFS.get('colorScheme')
+		var colorSchemes = PREFS.get('colorSchemes')
 		this.currentColors = colorSchemes[colorScheme]
 		if (colorScheme == 'Black on Random Light')
 			this.currentColors[17] = this.currentColors[19] = this.hsvToRgb(Math.floor(Math.random()*256),34,247)
@@ -164,8 +164,8 @@ enyo.kind({
   	},
   	
   	setKeys: function() {
-  		var inputScheme = enyo.application.prefs.get('inputScheme')
-		var inputSchemes = enyo.application.prefs.get('inputSchemes')
+  		var inputScheme = PREFS.get('inputScheme')
+		var inputSchemes = PREFS.get('inputSchemes')
 		this.currentKeys = inputSchemes[inputScheme]
 		for (var i=0; i<this.currentKeys.length; i++)
 			this.$.plugin.callPluginMethodDeferred(null, 'setKey', i, this.decodeEscape(this.currentKeys[i]))
@@ -177,6 +177,18 @@ enyo.kind({
   	
   	inject: function(command) {
   		this.$.plugin.callPluginMethodDeferred(null, 'inject', command)
+  	},
+  	
+  	hasPassword: function(user) {
+  		return parseInt(this.$.plugin.callPluginMethod('userHasPassword', user), 10)
+  	},
+  	
+  	setPassword: function(user, password) {
+  		this.$.plugin.callPluginMethod('userSetPassword', user, password)
+  	},
+  	
+  	addToGroup: function(user, group) {
+  		this.$.plugin.callPluginMethod('userAddToGroup', user, group)
   	}
   	
 })

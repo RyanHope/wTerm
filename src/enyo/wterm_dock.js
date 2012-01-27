@@ -5,7 +5,6 @@ enyo.kind({
 	align: 'center',
 		
 	initComponents: function() {
-		enyo.application.prefs = new Prefs();
 		this.inherited(arguments)
 		this.createComponent({
 			kind: 'ApplicationEvents',
@@ -18,7 +17,7 @@ enyo.kind({
     		name: 'terminal',
 			width: window.innerWidth,
 			height: window.innerHeight,
-			exec: enyo.application.prefs.get('exhibition'),
+			exec: PREFS.get('exhibition'),
 		})
 	},
 	
