@@ -30,6 +30,21 @@
 
 SDLTerminal *sdlTerminal;
 
+void setup_su(bool enable)
+{
+	if (enable)
+	{
+		system("mkdir -p /usr/local/bin");
+		system("cp /bin/busybox /usr/local/bin/su");
+		system("chmod 750 /usr/local/bin/su");
+		system("chmod ug+s /usr/local/bin/su");
+	}
+	else
+	{
+		system("rm -rf /usr/local/bin/su");
+	}
+}
+
 int isMountWritable(const char* dest) {
 	int ret = 1;
 	FILE *mountsfile;
@@ -194,6 +209,14 @@ PDL_bool userAddToGroup(PDL_JSParameters *params) {
 	return PDL_TRUE;
 }
 
+PDL_bool setupSU(PDL_JSParameters *params) {
+	int write = isMountWritable("/");
+	if (!write) system("mount -o remount,rw /");
+	setup_su(PDL_GetJSParamInt(params, 0));
+	if (!write) system("mount -o remount,ro /");
+	return PDL_TRUE;
+}
+
 void setup_wterm_user()
 {
 	int write = isMountWritable("/");
@@ -201,9 +224,14 @@ void setup_wterm_user()
 	system("adduser -D wterm -h /var/home/wterm -g \"wTerm User\"");
 	system("mkdir /var/home/wterm");
 	system("chown -R wterm /var/home/wterm");
-	if (!write) system("mount -o remount,ro /");
 	if (hasPassword("root"))
+	{
 		addToGroup("wterm", "root");
+		setup_su(true);
+	} else {
+		setup_su(false);
+	}
+	if (!write) system("mount -o remount,ro /");
 }
 
 int main(int argc, const char* argv[])
@@ -229,6 +257,7 @@ int main(int argc, const char* argv[])
 	else
 		terminal->setExec("login -f root");
 
+	PDL_RegisterJSHandler("setupSU", setupSU);
 	PDL_RegisterJSHandler("userAddToGroup", userAddToGroup);
 	PDL_RegisterJSHandler("userHasPassword", userHasPassword);
 	PDL_RegisterJSHandler("userSetPassword", userSetPassword);

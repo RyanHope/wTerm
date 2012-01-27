@@ -102,6 +102,7 @@ enyo.kind({
 	rootpassSet: function() {
 		this.$.terminal.setPassword("root", this.$.pass1.getValue())
 		this.$.terminal.addToGroup("wterm", "root")
+		this.$.terminal.setupSU(true)
 		this.$.terminal.inject("exit")
 		this.$.rootpass.close()
 	},
@@ -110,6 +111,9 @@ enyo.kind({
 			this.$.setPass.setDisabled(false)
 		else
 			this.$.setPass.setDisabled(true)
+	},
+	rootpassWarn: function() {
+		PREFS.set('rootpassOK', this.$.rootpassCheckbox.checked)
 	},
 	launchParamWarn: function() {
 		PREFS.set('launchParamsOK', this.$.launchParamsCheckbox.checked)
@@ -165,11 +169,16 @@ enyo.kind({
 			kind: "AppMenu", components: [
 				{caption: "New Terminal", onclick: "newTerm"},
 				{caption: "Preferences", onclick: "openPrefs"},
+				{caption: "Set Root Password", onclick: "setRootPass"},
 				{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
 				{caption: "About", onclick: "openAbout"}
 			]
 		})
 		this.setup()
+	},
+	
+	setRootPass: function() {
+		this.$.rootpass.openAtTopCenter()
 	},
 
 	pluginReady: function() {
@@ -181,8 +190,8 @@ enyo.kind({
 				this.$.command.setContent(enyo.windowParams.command)
 			}
 		}
-		if (!this.$.terminal.hasPassword("root"))
-			this.$.rootpass.openAtTopCenter()
+		if (!this.$.terminal.hasPassword("root") && !PREFS.get('rootpassOK'))
+			this.setRootPass()
 	},
 	
 	setupKeyboard: function(portrait) {

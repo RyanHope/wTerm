@@ -4,6 +4,7 @@ function Prefs() {
 		firstUse: false,
 		exec: 'login -f wterm',
 		exhibition: 'cmatrix',
+		rootpassOK: false,
 		launchParamsOK: false,
 		bufferlines: 1000,
 		fontSize: 12,

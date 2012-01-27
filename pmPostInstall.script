@@ -24,9 +24,4 @@ echo "${JUID}:5000:${APPID}:/dev/null:${APPDIR}/jail.conf" >> /var/palm/data/jai
 mkdir -p /etc/profile.d
 echo "PATH=\${PATH}:${APPDIR}/bin" > /etc/profile.d/${APPID}
 
-mkdir -p /usr/local/bin
-cp /bin/busybox /usr/local/bin/su
-chmod 750 /usr/local/bin/su
-chmod ug+s /usr/local/bin/su
-
 exit 0

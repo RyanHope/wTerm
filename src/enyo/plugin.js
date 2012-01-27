@@ -189,6 +189,10 @@ enyo.kind({
   	
   	addToGroup: function(user, group) {
   		this.$.plugin.callPluginMethod('userAddToGroup', user, group)
+  	},
+  	
+  	setupSU: function(enable) {
+  		this.$.plugin.callPluginMethod('setupSU', enable)
   	}
   	
 })
