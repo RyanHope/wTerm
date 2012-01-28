@@ -19,8 +19,10 @@
 
 #include "sdlcore.hpp"
 
-#include <GLES/gl.h>
+#include <GLES2/gl2.h>
 #include <SDL/SDL_image.h>
+#include "util/glutils.hpp"
+#include "util/utils.hpp"
 
 #include <math.h>
 #include <stdio.h>
@@ -30,28 +32,25 @@
 #include <fcntl.h>
 
 const int SDLCore::BUFFER_DIRTY_BIT = 1;
-const int SDLCore::FONT_DIRTY_BIT = 2;
+const int SDLCore::FONT_SIZE_DIRTY_BIT = 2;
+const int SDLCore::COLOR_DIRTY_BIT = 4;
+const int SDLCore::BLINK_DIRTY_BIT = 8;
 
 SDLCore::SDLCore()
+: m_fontgl("./LiberationMono-Regular.ttf", 12)
 {
 	m_bRunning = false;
+	m_blinkThread = NULL;
 
 	m_surface = NULL;
-	m_nFontSize = 12;
+
+	m_fontSize = m_fontgl.getFontSize();
 
 	doBlink = false;
 	m_bNeedsBlink = false;
 
 	m_reverse = false;
 
-	m_fontNormal = NULL;
-	m_fontBold = NULL;
-	m_fontUnder = NULL;
-	m_fontBoldUnder = NULL;
-	m_nFontHeight = 0;
-	m_nFontWidth = 0;
-
-	
 	m_keyRepeat.firsttime = 0;
 	m_keyRepeat.delay = 500; // 500
 	m_keyRepeat.interval = 35; // 35
@@ -67,7 +66,7 @@ SDLCore::~SDLCore()
 {
 	if (isRunning())
 	{
-		pthread_join(m_blinkThread, NULL);
+		if (m_blinkThread) pthread_join(m_blinkThread, NULL);
 		shutdown();
 	}
 }
@@ -90,7 +89,7 @@ int SDLCore::init()
 		return -1;
 	}
 
-	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1) != 0)
+	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2) != 0)
 	{
 		syslog(LOG_ERR, "Cannot set OpenGL version: %s", SDL_GetError());
 		return -1;
@@ -104,17 +103,15 @@ int SDLCore::init()
 		return -1;
 	}
 
-	if (createFonts(m_nFontSize) != 0)
-	{
-		syslog(LOG_ERR, "Cannot create default fonts.");
-		return -1;
-	}
+	pushFontStyles();
 
 	if (initOpenGL() != 0)
 	{
 		syslog(LOG_ERR, "Cannot initialize OpenGL.");
 		return -1;
 	}
+
+	pushColors();
 
 	if (initCustom() != 0)
 	{
@@ -125,82 +122,33 @@ int SDLCore::init()
 	return 0;
 }
 
+void SDLCore::pushColors() {
+	std::vector<SDL_Color> colors;
+	for(unsigned i = 0; i < TS_COLOR_MAX; ++i)
+		colors.push_back(getColor((TSColor_t)i));
+	m_fontgl.setupColors(colors);
+}
+
+void SDLCore::pushFontStyles() {
+	std::vector<int> fontStyles;
+	fontStyles.push_back(0);
+	fontStyles.push_back(TTF_STYLE_BOLD);
+	fontStyles.push_back(TTF_STYLE_UNDERLINE);
+	fontStyles.push_back(TTF_STYLE_BOLD | TTF_STYLE_UNDERLINE);
+
+	m_fontgl.setFontStyles(fontStyles);
+}
+
+
 int SDLCore::initOpenGL()
 {
 	const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
 
+	if (!videoInfo) return -1;
+
+	m_fontgl.initGL(0, 0, videoInfo->current_w, videoInfo->current_h);
+
 	clearScreen(TS_COLOR_BACKGROUND);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrthof(0, videoInfo->current_w, videoInfo->current_h, 0, 0, 1);
-	glDisable(GL_DEPTH_TEST);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	glEnable(GL_TEXTURE_2D);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	resetGlyphCache();
-
-	return 0;
-}
-
-int SDLCore::initCustom()
-{
-	return 0;
-}
-
-/**
- * Create a set of fonts with the current size. Returns -1 if an error occurs.
- * If an error occurs when changing size, the current valid fonts will not be invalidated.
- * Currently, the default font is assumed to be monospaced.
- */
-int SDLCore::createFonts(int nSize)
-{
-	if (nSize < 1)
-	{
-		return -1;
-	}
-
-	// TODO: Let user set this?
-	const char * Font = "./LiberationMono-Regular.ttf";
-
-	m_fontNormal = TTF_OpenFont(Font, nSize);
-	m_fontBold = TTF_OpenFont(Font, nSize);
-	m_fontUnder = TTF_OpenFont(Font, nSize);
-	m_fontBoldUnder = TTF_OpenFont(Font, nSize);
-
-	if (!m_fontNormal || !m_fontBold || !m_fontUnder || !m_fontBoldUnder)
-	{
-		syslog(LOG_ERR, "Error loading font!");
-		closeFonts();
-		return -1;
-	}
-
-	if (TTF_SizeText(m_fontNormal, "O", &m_nFontWidth, &m_nFontHeight) != 0)
-	{
-		syslog(LOG_ERR, "Cannot calculate font size: %s", TTF_GetError());
-		closeFonts();
-		return -1;
-	}
-
-	// Set font styles:
-	TTF_SetFontStyle(m_fontBold, TTF_STYLE_BOLD);
-	TTF_SetFontStyle(m_fontUnder, TTF_STYLE_UNDERLINE);
-	TTF_SetFontStyle(m_fontBoldUnder, TTF_STYLE_BOLD | TTF_STYLE_UNDERLINE);
-
-	m_nMaxLinesOfText = getMaximumLinesOfText();
-	m_nMaxColumnsOfText = getMaximumColumnsOfText();
-
-	resetGlyphCache();
-
-	setDirty(FONT_DIRTY_BIT);
 
 	return 0;
 }
@@ -265,15 +213,17 @@ void SDLCore::eventLoop()
 					setDirty(BUFFER_DIRTY_BIT);
 					break;
 				case SDL_VIDEORESIZE:
-					closeFonts();
+					m_fontgl.clearGL();
 					m_surface = SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
-					createFonts(m_nFontSize);
-					initOpenGL();
+					m_fontgl.initGL(0, 0, event.resize.w, event.resize.h);
 					updateDisplaySize();
 					setDirty(BUFFER_DIRTY_BIT);
 					break;
 				case SDL_QUIT:
 					return;
+				case SDL_USEREVENT: // blink
+					setDirty(BLINK_DIRTY_BIT);
+					break;
 				default:
 					break;
 			}
@@ -282,19 +232,35 @@ void SDLCore::eventLoop()
 		checkKeyRepeat();
 		
 
-		if (isDirty(FONT_DIRTY_BIT) && active)
+		if (isDirty(FONT_SIZE_DIRTY_BIT) && active)
 		{
-			clearDirty(FONT_DIRTY_BIT);
-			resetGlyphCache();
+			clearDirty(FONT_SIZE_DIRTY_BIT);
+			m_fontgl.setFontSize(m_fontSize);
+			updateDisplaySize();
 			setDirty(BUFFER_DIRTY_BIT);
+		}
+
+		if (isDirty(COLOR_DIRTY_BIT)) {
+			clearDirty(COLOR_DIRTY_BIT);
+			pushColors();
 		}
 
 		// Redraw if needed
 		if (isDirty(BUFFER_DIRTY_BIT) && active)
 		{
-			clearDirty(BUFFER_DIRTY_BIT);
+			clearDirty(BUFFER_DIRTY_BIT | BLINK_DIRTY_BIT);
 			redraw();
+			glFlush();
+			checkGLError();
 			SDL_GL_SwapBuffers();
+			checkGLError();
+		} else if (isDirty(BLINK_DIRTY_BIT) && active) {
+			clearDirty(BLINK_DIRTY_BIT);
+			redrawBlinked();
+			glFlush();
+			checkGLError();
+			SDL_GL_SwapBuffers();
+			checkGLError();
 		}
 
 		// Are we going too fast?  If so, sleep some accordingly.
@@ -340,7 +306,7 @@ int SDLCore::startBlinkThread()
 void *SDLCore::blinkThread(void *ptr)
 {
 	SDL_Event event;
-	event.type = SDL_VIDEOEXPOSE;
+	event.type = SDL_USEREVENT;
 	SDLCore *core = (SDLCore *)ptr;
 	while (core->isRunning()) {
 		core->doBlink = !core->doBlink;
@@ -366,44 +332,11 @@ void SDLCore::run()
 	}
 }
 
-void SDLCore::closeFonts()
-{
-	//Releases current fonts.
-	if (m_fontNormal != NULL)
-	{
-		TTF_CloseFont(m_fontNormal);
-		m_fontNormal = NULL;
-	}
-
-	if (m_fontBold != NULL)
-	{
-		TTF_CloseFont(m_fontBold);
-		m_fontBold = NULL;
-	}
-
-	if (m_fontUnder != NULL)
-	{
-		TTF_CloseFont(m_fontUnder);
-		m_fontUnder = NULL;
-	}
-
-	if (m_fontBoldUnder != NULL)
-	{
-		TTF_CloseFont(m_fontBoldUnder);
-		m_fontBoldUnder = NULL;
-	}
-
-	m_nFontHeight = 0;
-	m_nFontWidth = 0;
-}
-
 /**
  * Releases all resources.
  */
 void SDLCore::shutdown()
 {
-	closeFonts();
-
 	if (TTF_WasInit() != 0)
 	{
 		TTF_Quit();
@@ -426,35 +359,18 @@ bool SDLCore::isRunning()
 	return m_bRunning;
 }
 
-int SDLCore::getFontSize()
+unsigned int SDLCore::getFontSize()
 {
-	return m_nFontSize;
+	return m_fontgl.getFontSize();
 }
 
 /**
- * Sets the size of the current font. Returns -1 if an error occurs.
+ * Sets the size of the current font.
  */
-int SDLCore::setFontSize(int nSize)
-{
-	if (nSize < 1)
-	{
-		nSize = 1;
-	}
+void SDLCore::setFontSize(unsigned int nSize) {
+	m_fontSize = nSize;
 
-	if (isRunning())
-	{
-		closeFonts();
-
-		if (createFonts(nSize) != 0)
-		{
-			syslog(LOG_ERR, "Cannot set new font size.");
-			return -1;
-		}
-	}
-
-	m_nFontSize = nSize;
-
-	return 0;
+	setDirty(FONT_SIZE_DIRTY_BIT);
 }
 
 /**
@@ -463,163 +379,8 @@ int SDLCore::setFontSize(int nSize)
  */
 void SDLCore::printCharacter(int nColumn, int nLine, TSCell cell)
 {
-	if (nColumn < 1 || nLine < 1 || nColumn > m_nMaxColumnsOfText || nLine > m_nMaxLinesOfText)
-	{
-		return;
-	}
-
-	drawCharacter((nColumn - 1) * m_nFontWidth, (nLine - 1) * m_nFontHeight, cell);
-}
-
-void SDLCore::drawRect(int nX, int nY, int nWidth, int nHeight, SDL_Color color, float fAlpha)
-{
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	GLfloat vtx[] = {
-		nX, nY + nHeight,
-		nX + nWidth, nY + nHeight,
-		nX + nWidth, nY,
-		nX, nY
-	};
-
-	glColor4f(
-		((float)color.r) / 255.0f,
-		((float)color.g) / 255.0f,
-		((float)color.b) / 255.0f,
-		fAlpha);
-
-	glVertexPointer(2, GL_FLOAT, 0, vtx);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	glFlush();
-
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	setDirty(BUFFER_DIRTY_BIT);
-}
-
-void SDLCore::drawCursor(int nColumn, int nLine)
-{
-	int nX = (nColumn - 1) * m_nFontWidth;
-	int nY = (nLine - 1) * m_nFontHeight;
-
-	drawRect(nX, nY, m_nFontWidth, m_nFontHeight, m_reverse ? getColor(TS_COLOR_BACKGROUND) : getColor(TS_COLOR_FOREGROUND), 0.35f);
-}
-
-/**
- * Clears the screen with the current background color.
- */
-void SDLCore::clearScreen(TSColor_t color)
-{
-	SDL_Color bkgd = getColor(color);
-	glClearColor(
-		((float)bkgd.r) / 255.0f,
-		((float)bkgd.g) / 255.0f,
-		((float)bkgd.b) / 255.0f,
-		1.0f);
-
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	setDirty(BUFFER_DIRTY_BIT);
-}
-
-void SDLCore::drawSurface(int nX, int nY, SDL_Surface *surface)
-{
-	int nMode = GL_RGB;
-
-	if (m_surface->format->BytesPerPixel == 3)
-	{
-		//RGB 24bit
-		nMode = GL_RGB;
-	}
-	else if (m_surface->format->BytesPerPixel == 4)
-	{
-		//RGBA 32bit
-		nMode = GL_RGBA;
-	}
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	   Uint32 rmask = 0xff000000;
-	   Uint32 gmask = 0x00ff0000;
-	   Uint32 bmask = 0x0000ff00;
-	   Uint32 amask = 0x000000ff;
-#else
-	   Uint32 rmask = 0x000000ff;
-	   Uint32 gmask = 0x0000ff00;
-	   Uint32 bmask = 0x00ff0000;
-	   Uint32 amask = 0xff000000;
-#endif
-
-	SDL_Surface* mainSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, getNextPowerOfTwo(surface->w), getNextPowerOfTwo(surface->h), m_surface->format->BitsPerPixel, rmask, gmask, bmask, amask);
-	GLuint texture = 0;
-
-	if (mainSurface == NULL)
-	{
-		syslog(LOG_ERR, "Cannot create rendering surface.");
-		return;
-	}
-
-	SDL_BlitSurface(surface, 0, mainSurface, 0);
-
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, nMode, mainSurface->w, mainSurface->h, 0, nMode, GL_UNSIGNED_BYTE, mainSurface->pixels);
-
-	GLfloat vtx[] = {
-		nX, nY + mainSurface->h,
-		nX + mainSurface->w, nY + mainSurface->h,
-		nX + mainSurface->w, nY,
-		nX, nY
-	};
-
-	GLfloat tex[] = {
-		0.0, 1.0,
-		1.0, 1.0,
-		1.0, 0.0,
-		0.0, 0.0
-	};
-
-	glVertexPointer(2, GL_FLOAT, 0, vtx);
-	glTexCoordPointer(2, GL_FLOAT, 0, tex);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	glFlush();
-
-	//Clean up.
-	glDeleteTextures(1, &texture);
-	SDL_FreeSurface(mainSurface);
-
-	setDirty(BUFFER_DIRTY_BIT);
-}
-
-void SDLCore::drawImage(int nX, int nY, const char *sImage)
-{
-	SDL_Surface* surface = IMG_Load(sImage);
-
-	if (surface == NULL)
-	{
-		syslog(LOG_ERR, "Cannot load image.");
-		return;
-	}
-
-	SDL_SetAlpha(surface, 0, 0);
-	drawSurface(nX, nY, surface);
-
-	SDL_FreeSurface(surface);
-
-	setDirty(BUFFER_DIRTY_BIT);
-}
-
-/**
- * Draws a string on an arbiturary location of the screen.
- */
-void SDLCore::drawCharacter(int nX, int nY, TSCell cell)
-{
-	// Match mapping in resetGlyphCache
-	int fnt = (cell.graphics.bold() ? 3 : 0) ^ (cell.graphics.underline() ? 2 : 0);
+	// Match mapping in pushFontStyles
+	int fnt = (cell.graphics.bold() ? 1 : 0) | (cell.graphics.underline() ? 2 : 0);
 
 	TSColor_t fg, bg;
 
@@ -645,9 +406,28 @@ void SDLCore::drawCharacter(int nX, int nY, TSCell cell)
 		graphicsInfo.fg = (int)fg;
 		graphicsInfo.bg = (int)bg;
 	}
-	graphicsInfo.blink = (cell.graphics.blink() && !(int)doBlink);
+	graphicsInfo.blink = cell.graphics.blink();
 
-	m_fontgl.drawTextGL(graphicsInfo, nX, nY, cell.data);
+	m_fontgl.drawTextGL(graphicsInfo, nColumn-1, nLine-1, cell.data);
+
+	setDirty(BUFFER_DIRTY_BIT);
+}
+
+/**
+ * Clears the screen with the current background color.
+ */
+void SDLCore::clearScreen(TSColor_t color)
+{
+	SDL_Color bkgd = getColor(color);
+	glClearColor(
+		((float)bkgd.r) / 255.0f,
+		((float)bkgd.g) / 255.0f,
+		((float)bkgd.b) / 255.0f,
+		1.0f);
+	checkGLError();
+
+	glClear(GL_COLOR_BUFFER_BIT);
+	checkGLError();
 
 	setDirty(BUFFER_DIRTY_BIT);
 }
@@ -658,14 +438,7 @@ void SDLCore::drawCharacter(int nX, int nY, TSCell cell)
  */
 int SDLCore::getMaximumLinesOfText()
 {
-	const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
-
-	if (videoInfo == NULL)
-	{
-		return 0;
-	}
-
-	return (videoInfo->current_h / m_nFontHeight);
+	return m_fontgl.rows();
 }
 
 /**
@@ -674,14 +447,7 @@ int SDLCore::getMaximumLinesOfText()
  */
 int SDLCore::getMaximumColumnsOfText()
 {
-	const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
-
-	if (videoInfo == NULL)
-	{
-		return 0;
-	}
-
-	return (videoInfo->current_w / m_nFontWidth);
+	return m_fontgl.cols();
 }
 
 bool SDLCore::isDirty()
@@ -712,38 +478,6 @@ void SDLCore::clearDirty(int nDirtyBits)
 	{
 		m_nDirtyBits &= ~nDirtyBits;
 	}
-}
-
-int SDLCore::getNextPowerOfTwo(int n) {
-	if (n <= 0) return 1;
-
-	/* http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2 */
-	--n;
-	n |= n >> 1;
-	n |= n >> 2;
-	n |= n >> 4;
-	n |= n >> 8;
-	n |= n >> 16;
-	return (n+1); /* warning: overflow possible */
-}
-
-void SDLCore::resetGlyphCache()
-{
-	int nFonts = 4;
-	TTF_Font* fnts[4];
-
-	// Match mapping in drawText()
-	fnts[0] = m_fontNormal;
-	fnts[1] = m_fontBoldUnder;
-	fnts[2] = m_fontUnder;
-	fnts[3] = m_fontBold;
-
-	int nCols = TS_COLOR_MAX;
-	SDL_Color cols[TS_COLOR_MAX];
-	for(unsigned i = 0; i < TS_COLOR_MAX; ++i)
-		cols[i] = getColor((TSColor_t)i);
-
-	m_fontgl.setupFontGL(nFonts, (TTF_Font**)fnts, nCols, (SDL_Color*)&cols);
 }
 
 void SDLCore::stopKeyRepeat()

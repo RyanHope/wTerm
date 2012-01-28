@@ -19,6 +19,8 @@
 #include "sdl/sdlfontgl.hpp"
 
 #include "terminal/terminalstate.hpp"
+#include "util/glutils.hpp"
+#include "util/utils.hpp"
 
 #include <syslog.h>
 
@@ -26,6 +28,7 @@
 static const Uint16 unicode_slots[] = {
 	0x0000, // C0 Controls and Basic Latin
 	0x0080, // C1 Controls and Latin-1 Supplement
+
 	0x0100, // Latin Extended-A
 	0x0180, // Latin Extended-B
 	0x0200, // Latin Extended-B (+ part of IPA Extensions)
@@ -39,130 +42,93 @@ static const Uint16 unicode_slots[] = {
 };
 
 #define NSLOTS (sizeof(unicode_slots)/sizeof(unicode_slots[0]))
+
+// hardcoded in some other places as >> 7, 512 ( = 2^16/128), ...
 #define SLOTSIZE (128u)
 
 
-// Log assertion failures to syslog
-#define assert(c) \
-	do { \
-		if (!(c)) \
-			syslog(LOG_ERR, "Assertion \"%s\" failed at %s:%d", \
-					__STRING(c), __FILE__, __LINE__); \
-	} while(0)
+static const char char_vertex_shader[] =
+	"precision highp float;\n"
+	"precision highp int;\n"
+	"uniform vec2 dim;\n"
+	"attribute vec2 pos;\n"
+	"varying vec2 v;\n"
+	"\n"
+	"void main(void) {\n"
+	"  v = vec2(pos.x * dim.x, pos.y * dim.y);\n"
+	"  gl_Position = vec4(-1.0 + 2.0*pos.x, -1.0+2.0*pos.y, 1.0, 1.0);\n"
+	"}\n"
+	;
 
-// For debugging
-#define checkGLError() \
-	do { \
-		int err = glGetError(); \
-		if (err) syslog(LOG_ERR, "GL Error %x at %s:%d", \
-				err, __FILE__, __LINE__); \
-	} while(0)
+static const char char_fragment_shader[] =
+	"precision highp float;\n"
+	"precision highp int;\n"
+	"varying highp vec2 v;\n"
+	"uniform sampler2D cells;\n"
+	"uniform sampler2D glyphs;\n"
+	"uniform sampler2D colors;\n"
+	"uniform vec2 cellsize;\n"
+	"uniform vec2 glyphsize;\n"
+	"uniform float colorsize;\n"
+	"uniform bool blink;\n"
+	"\n"
+	"void main(void) {\n"
+	"  vec4 cell = texture2D(cells, vec2((floor(v.x))*cellsize.x, (floor(v.y))*cellsize.y));\n"
+	"  vec4 fg = texture2D(colors, vec2((0.5 + ceil(mod(cell.z,64.0)*255.0)) * colorsize, 0.5));\n"
+	"  vec4 bg = texture2D(colors, vec2((0.5 + ceil(cell.w*255.0)) * colorsize, 0.5));\n"
 
-// Helper functions
-static void getRGBAMask(Uint32 &rmask, Uint32 &gmask,
-												Uint32 &bmask, Uint32 &amask) {
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		rmask = 0xff000000;
-		gmask = 0x00ff0000;
-		bmask = 0x0000ff00;
-		amask = 0x000000ff;
-#else
-		rmask = 0x000000ff;
-		gmask = 0x0000ff00;
-		bmask = 0x00ff0000;
-		amask = 0xff000000;
-#endif
-}
+	"  float slot = ceil(cell.y*255.0);\n"
 
-static int getGLFormat() {
-	SDL_Surface *s = SDL_GetVideoSurface();
-	if (s->format->BytesPerPixel == 3)
-		return GL_RGB;
-	if (s->format->BytesPerPixel == 4)
-		return GL_RGBA;
-	assert(0 && "Unsupported bpp");
-	return -1;
-}
+	"  float ch = ceil(cell.x*255.0);\n"
+	"  bool bl = (cell.z > 0.249 && !blink);\n"
 
-static unsigned nextPowerOfTwo(int n) {
-	assert(n > 0);
+	"  vec4 g = texture2D(glyphs, vec2((ch + fract(v.x))*glyphsize.x, (slot + 1.0 - fract(v.y)) * glyphsize.y));\n"
+	"  gl_FragColor = mix(bg, fg, bl ? 0.0 : g.a);\n"
+	"}\n"
+	;
 
-	unsigned res = n;
+static const char cursor_vertex_shader[] =
+	"precision highp float;\n"
+	"precision highp int;\n"
+	"uniform vec2 dim;\n"
+	"uniform vec2 cursorpos;\n"
+	"attribute vec2 pos;\n"
+	"\n"
+	"void main(void) {\n"
+	"  vec2 p = vec2((cursorpos.x + pos.x) / dim.x, (cursorpos.y + pos.y) / dim.y);\n"
+	"  gl_Position = vec4(-1.0 + 2.0*p.x, -1.0+2.0*p.y, 1.0, 1.0);\n"
+	"}\n"
+	;
 
-	/* http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2 */
-	--res;
-	res |= res >> 1;
-	res |= res >> 2;
-	res |= res >> 4;
-	res |= res >> 8;
-	res |= res >> 16;
-	return (res+1); /* warning: overflow possible */
-}
+static const char cursor_fragment_shader[] =
+	"precision highp float;\n"
+	"precision highp int;\n"
+	"uniform vec4 cursorcolor;\n"
+	"\n"
+	"void main(void) {\n"
+	"  gl_FragColor = cursorcolor;\n"
+	"}\n"
+	;
 
-void SDLFontGL::setupFontGL(int fnCount, TTF_Font** fnts, int colCount, SDL_Color *cols) {
-	clearGL();
-
-	assert(fnts && cols);
-	assert((fnCount > 0) && (colCount > 0));
-
-	nFonts = fnCount;
-	nCols = colCount;
-
-	this->fnts = (TTF_Font**)malloc(nFonts*sizeof(TTF_Font*));
-	memcpy(this->fnts, fnts, nFonts*sizeof(TTF_Font*));
-
-	this->cols = (SDL_Color*)malloc(nCols*sizeof(SDL_Color));
-	memcpy(this->cols, cols, nCols*sizeof(SDL_Color));
-
-	GlyphCache = 0;
-
-	haveCacheLine = (bool*)malloc(nFonts*NSLOTS*sizeof(bool));
-	memset(haveCacheLine, 0, nFonts*NSLOTS*sizeof(bool));
-
-	const Uint16 OStr[] = {'O', 0};
-	if (TTF_SizeUNICODE(fnts[0], OStr, &nWidth, &nHeight) != 0)
-		assert(0 && "Failed to size font");
-	assert((nWidth > 0) && (nHeight > 0));
-}
-
-void SDLFontGL::createTexture() {
-	// Create Big GL texture:
-	glGenTextures(1,&GlyphCache);
-	glBindTexture(GL_TEXTURE_2D, GlyphCache);
-
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	// Set size of the texture, but no data.
-	// We want 1 extra row of pixel data
-	// so we can draw solid colors as part
-	// of the same operations.
-	texW = nextPowerOfTwo(SLOTSIZE*nWidth);
-	texH = nextPowerOfTwo(nFonts*NSLOTS*nHeight + 1);
-	int nMode = getGLFormat();
-	glTexImage2D(GL_TEXTURE_2D,
-			0, nMode,
-			texW, texH,
-			0, nMode,
-			GL_UNSIGNED_BYTE, NULL);
-	checkGLError();
+static const GLfloat vertices[] = {
+	0.0f, 1.0f,   0.0f, 0.0f,   1.0f, 0.0f,
+	0.0f, 1.0f,   1.0f, 0.0f,   1.0f, 1.0f
+};
 
 
-	// Put a single white pixel at bottom of texture.
-	// We use this as the 'texture' data for blitting
-	// solid backgrounds.
-	char whitepixel[] = { 255, 255, 255, 255 };
-	assert(nFonts && nHeight);
-	glTexSubImage2D(GL_TEXTURE_2D, 0,
-			0,nFonts*NSLOTS*nHeight,
-			1, 1,
-			GL_RGBA, GL_UNSIGNED_BYTE, whitepixel);
-	checkGLError();
-}
-
-SDLFontGL::SDLFontGL()
-: GlyphCache(0), texW(0), texH(0), haveCacheLine(0), nFonts(0), nCols(0), fnts(0), cols(0)
+SDLFontGL::SDLFontGL(const char *fontfilename, unsigned int fontptsize)
+: m_fontFilename(fontfilename), m_fontptsize(fontptsize), m_fontsLoaded(false),
+  m_glyphTex(0), texW(0), texH(0), haveCacheLine(0), nWidth(0), nHeight(0),
+  m_cellsTex(0), m_cellsWidth(0), m_cellsHeight(0), m_cellData(0), m_rows(0), m_cols(0),
+  m_colorTex(0),
+  m_cursorEnabled(0), m_cursorColor(0), m_cursorCol(0), m_cursorRow(0),
+  m_dimX(0), m_dimY(0), m_dimW(0), m_dimH(0),
+  m_curdimX(0), m_curdimY(0), m_curdimW(0), m_curdimH(0),
+  m_openglActive(false)
 {
+	m_charShader.program = 0;
+	m_cursorShader.program = 0;
+
 	for (unsigned int i = 0; i < 512; i++) {
 		m_slotMap[i] = -1;
 	}
@@ -175,295 +141,570 @@ SDLFontGL::SDLFontGL()
 
 SDLFontGL::~SDLFontGL() {
 	clearGL();
+	clearFonts();
+}
+
+void SDLFontGL::initGL(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
+	clearGL();
+	checkGLError();
+
+	m_openglActive = true;
+
+	m_charShader.program = loadProgram(char_vertex_shader, char_fragment_shader);
+	if (m_charShader.program) {
+		glUseProgram(m_charShader.program);
+		checkGLError();
+
+		m_charShader.aDim = glGetUniformLocation(m_charShader.program, "dim");
+		m_charShader.aPos = glGetAttribLocation(m_charShader.program, "pos");
+		m_charShader.aCells = glGetUniformLocation(m_charShader.program, "cells");
+		m_charShader.aGlyphs = glGetUniformLocation(m_charShader.program, "glyphs");
+		m_charShader.aColors = glGetUniformLocation(m_charShader.program, "colors");
+		m_charShader.aGlyphsize = glGetUniformLocation(m_charShader.program, "glyphsize");
+		m_charShader.aCellsize = glGetUniformLocation(m_charShader.program, "cellsize");
+		m_charShader.aColorsize = glGetUniformLocation(m_charShader.program, "colorsize");
+		m_charShader.aBlink = glGetUniformLocation(m_charShader.program, "blink");
+		checkGLError();
+
+		glVertexAttribPointer(m_charShader.aPos, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+		checkGLError();
+
+		glUniform1i(m_charShader.aCells, 0);
+		checkGLError();
+
+		glUniform1i(m_charShader.aGlyphs, 1);
+		checkGLError();
+
+		glUniform1i(m_charShader.aColors, 2);
+		checkGLError();
+	}
+
+	m_cursorShader.program = loadProgram(cursor_vertex_shader, cursor_fragment_shader);
+	if (m_cursorShader.program) {
+		glUseProgram(m_cursorShader.program);
+		checkGLError();
+
+		m_cursorShader.aDim = glGetUniformLocation(m_cursorShader.program, "dim");
+		m_cursorShader.aPos = glGetAttribLocation(m_cursorShader.program, "pos");
+		m_cursorShader.aCursorpos = glGetUniformLocation(m_cursorShader.program, "cursorpos");
+		m_cursorShader.aCursorcolor = glGetUniformLocation(m_cursorShader.program, "cursorcolor");
+		checkGLError();
+
+		glVertexAttribPointer(m_cursorShader.aPos, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+		checkGLError();
+	}
+
+	m_dimX = x; m_dimY = y; m_dimW = w; m_dimH = h;
+
+	updateFonts();
+	updateDimensions();
+	updateColors();
+	updateCursor();
+
+	checkGLError();
 }
 
 void SDLFontGL::clearGL() {
-	if (GlyphCache) {
-		glDeleteTextures(1, &GlyphCache);
-		GlyphCache = 0;
+	checkGLError();
+
+	if (m_charShader.program) {
+		glDeleteProgram(m_charShader.program);
+		checkGLError();
+		m_charShader.program = 0;
+	}
+
+	if (m_cursorShader.program) {
+		glDeleteProgram(m_cursorShader.program);
+		checkGLError();
+		m_cursorShader.program = 0;
+	}
+
+	clearGLFonts();
+	clearGLCells();
+	clearGLColors();
+
+	m_openglActive = false;
+
+	checkGLError();
+}
+
+void SDLFontGL::updateColors() {
+	clearGLColors();
+
+	if (!m_openglActive || m_colors.empty()) return;
+
+	unsigned int texWidth = nextPowerOfTwo(m_colors.size());
+	unsigned char* texData = static_cast<unsigned char*>(malloc(texWidth * 4));
+	assert(texData);
+	memset(texData, 0, texWidth * 4);
+
+	for (unsigned int i = 0; i < m_colors.size(); i++) {
+		texData[4*i] = m_colors[i].r;
+		texData[4*i+1] = m_colors[i].g;
+		texData[4*i+2] = m_colors[i].b;
+		texData[4*i+3] = 255;;
+	}
+
+	if (m_charShader.program) {
+		glUseProgram(m_charShader.program);
+		checkGLError();
+
+		glUniform1f(m_charShader.aColorsize, 1.0/nextPowerOfTwo(m_colors.size()));
+		checkGLError();
+	}
+
+	if (m_colorTex) {
+		glDeleteTextures(1, &m_colorTex);
+		checkGLError();
+		m_colorTex = 0;
+	}
+
+	glActiveTexture(GL_TEXTURE2);
+	glGenTextures(1, &m_colorTex);
+	checkGLError();
+	glBindTexture(GL_TEXTURE_2D, m_colorTex);
+	checkGLError();
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	checkGLError();
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+	checkGLError();
+
+	free(texData);
+}
+
+void SDLFontGL::clearGLColors() {
+	if (m_colorTex) {
+		glDeleteTextures(1, &m_colorTex);
+		checkGLError();
+		m_colorTex = 0;
+	}
+}
+
+void SDLFontGL::setupColors(std::vector<SDL_Color> colors) {
+	assert(!colors.empty());
+	m_colors = colors;
+
+	updateColors();
+	// cursor does a manual color lookup
+	updateCursor();
+}
+
+void SDLFontGL::updateCells() {
+	clearGLCells();
+
+	if (0 == m_cols || 0 == m_rows) return;
+
+	m_cellsWidth = nextPowerOfTwo(m_cols);
+	assert(m_cellsWidth >= m_cols);
+	m_cellsWidth = (m_cellsWidth+3) & ~0x3; /* align at four bytes */
+	m_cellsHeight = nextPowerOfTwo(m_rows);
+	assert(m_cellsHeight >= m_rows);
+
+	if (!m_openglActive) return;
+
+	syslog(LOG_DEBUG, "updateCells: rows = %i, cols = %i, width = %i, height = %i", m_rows, m_cols, m_cellsWidth, m_cellsHeight);
+
+	glActiveTexture(GL_TEXTURE0);
+	glGenTextures(1, &m_cellsTex);
+	checkGLError();
+	glBindTexture(GL_TEXTURE_2D, m_cellsTex);
+	checkGLError();
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	checkGLError();
+
+	m_cellData = static_cast<unsigned char*>(malloc(4*m_cellsWidth * m_cellsHeight));
+	assert(m_cellData);
+	clearText();
+
+	// set size
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_cellsWidth, m_cellsHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	checkGLError();
+
+	if (m_charShader.program) {
+		glUseProgram(m_charShader.program);
+		checkGLError();
+
+		glUniform2f(m_charShader.aCellsize, 1.0/(float)m_cellsWidth, 1.0/(float)m_cellsHeight);
+		checkGLError();
+	}
+}
+
+void SDLFontGL::clearGLCells() {
+	if (m_cellsTex) {
+		glDeleteTextures(1, &m_cellsTex);
+		checkGLError();
+		m_cellsTex = 0;
+	}
+
+	if (m_cellData) {
+		free(m_cellData);
+		m_cellData = 0;
+	}
+}
+
+void SDLFontGL::updateDimensions() {
+	if (!m_openglActive || 0 == nWidth || 0 == nHeight) return;
+
+	unsigned int oldCols = m_cols, oldRows = m_rows;
+
+	m_cols = m_dimW / nWidth;
+	m_rows = m_dimH / nHeight;
+
+	m_curdimW = m_cols * nWidth;
+	m_curdimH = m_rows * nHeight;
+	m_curdimX = m_dimX + (m_dimW - m_curdimW) / 2;
+	m_curdimY = m_dimY + (m_dimH - m_curdimH) / 2;
+
+	if (oldCols != m_cols || oldRows != m_rows || !m_cellsTex) {
+		updateCells();
+	}
+
+	if (m_charShader.program) {
+		glUseProgram(m_charShader.program);
+		checkGLError();
+
+		glUniform2f(m_charShader.aDim, m_cols, m_rows);
+		checkGLError();
+	}
+
+	if (m_cursorShader.program) {
+		glUseProgram(m_cursorShader.program);
+		checkGLError();
+
+		glUniform2f(m_cursorShader.aDim, m_cols, m_rows);
+		checkGLError();
+	}
+}
+
+void SDLFontGL::setDimension(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
+	m_dimX = x; m_dimY = y; m_dimW = w; m_dimH = h;
+
+	updateDimensions();
+}
+
+void SDLFontGL::updateCursor() {
+	if (m_openglActive && m_cursorEnabled && m_cursorShader.program) {
+		glUseProgram(m_cursorShader.program);
+		checkGLError();
+
+		glUniform2f(m_cursorShader.aCursorpos, m_cursorCol, m_rows - m_cursorRow - 1);
+		checkGLError();
+
+		if (m_cursorColor > m_colors.size()) {
+			glUniform4f(m_cursorShader.aCursorcolor, 0.5, 0.5, 0.5, 0.35);
+		} else {
+			SDL_Color c = m_colors[m_cursorColor];
+			glUniform4f(m_cursorShader.aCursorcolor, c.r/255.0, c.g/255.0, c.b/255.0, 0.35);
+		}
+		checkGLError();
+	}
+}
+
+
+void SDLFontGL::setCursor(bool enable, unsigned int row, unsigned int col, unsigned int color) {
+	m_cursorEnabled = enable;
+	m_cursorRow = row;
+	m_cursorCol = col;
+	m_cursorColor = color;
+
+	updateCursor();
+}
+
+void SDLFontGL::updateFonts() {
+	openFonts();
+
+	if (!m_openglActive || m_fontStyles.empty()) return;
+
+	haveCacheLine = (bool*)malloc(m_fontStyles.size()*NSLOTS*sizeof(bool));
+	assert(haveCacheLine);
+	memset(haveCacheLine, 0, m_fontStyles.size()*NSLOTS*sizeof(bool));
+
+	const Uint16 OStr[] = {'O', 0};
+	int w = 0, h = 0;
+	if (TTF_SizeUNICODE(m_fonts[0], OStr, &w, &h) != 0)
+		assert(0 && "Failed to size font");
+	assert((w > 0) && (h > 0));
+
+	nWidth = w;
+	nHeight = h;
+
+	updateDimensions();
+
+	// Set size of the texture, but no data.
+	texW = nextPowerOfTwo(SLOTSIZE*nWidth);
+	texH = nextPowerOfTwo(m_fontStyles.size()*NSLOTS*nHeight);
+
+	if (m_charShader.program) {
+		glUseProgram(m_charShader.program);
+		checkGLError();
+
+		glUniform2f(m_charShader.aGlyphsize, nWidth/(float)texW, nHeight/(float)texH);
+		checkGLError();
+	}
+
+	// Create Big GL texture:
+	glActiveTexture(GL_TEXTURE1);
+	glGenTextures(1, &m_glyphTex);
+	checkGLError();
+	glBindTexture(GL_TEXTURE_2D, m_glyphTex);
+	checkGLError();
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	checkGLError();
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	checkGLError();
+
+	glTexImage2D(GL_TEXTURE_2D,
+			0, GL_ALPHA,
+			texW, texH,
+			0, GL_ALPHA,
+			GL_UNSIGNED_BYTE, NULL);
+	checkGLError();
+
+	getGlyphSlot(0, 0);
+}
+
+void SDLFontGL::clearFonts() {
+	// this clears font caches in normal RAM too
+
+	// TODO: cache glyphs in ram?
+
+	clearGLFonts();
+}
+
+void SDLFontGL::clearGLFonts() {
+	if (m_glyphTex) {
+		glDeleteTextures(1, &m_glyphTex);
+		checkGLError();
+		m_glyphTex = 0;
 	}
 
 	free(haveCacheLine);
-	free(fnts);
-	free(cols);
-
 	haveCacheLine = 0;
-	fnts = NULL;
-	cols = NULL;
 
-	nFonts = nCols = 0;
-	numChars = 0;
+	// the fonts use SDL/opengl resources too, and have to reopened after a resize
+	m_fontsLoaded = false;
+	for (unsigned int i = 0; i < m_fonts.size(); i++) {
+		TTF_CloseFont(m_fonts[i]);
+		checkGLError();
+	}
+	m_fonts.clear();
 }
 
-void SDLFontGL::ensureCacheLine(unsigned int fnt, unsigned int slot)
-{
+void SDLFontGL::openFonts() {
+	clearGLFonts();
 
-	assert(fnt >= 0 && fnt < nFonts);
-	assert(slot >= 0 && slot < NSLOTS);
-	assert(fnts && cols && GlyphCache && haveCacheLine);
+	if (!m_openglActive || m_fontStyles.empty()) return;
 
-	bool & have = hasCacheLine(fnt, slot);
-	if (have) {
-		return;
+	for (unsigned int i = 0; i < m_fontStyles.size(); i++) {
+		TTF_Font *font = TTF_OpenFont(m_fontFilename.c_str(), m_fontptsize);
+
+		if (!font) {
+			syslog(LOG_ERR, "couldn't open font file '%s'", m_fontFilename.c_str());
+			abort();
+		}
+
+		TTF_SetFontStyle(font, m_fontStyles[i]);
+		if (!TTF_FontFaceIsFixedWidth(font)) {
+			syslog(LOG_ERR, "font '%s' with style %i doesn't have fixed width", m_fontFilename.c_str(), m_fontStyles[i]);
+			abort();
+		}
+		m_fonts.push_back(font);
+		checkGLError();
 	}
-	have = true;
+
+	m_fontsLoaded = true;
+}
+
+void SDLFontGL::setFontSize(unsigned int ptsize) {
+	if (m_fontptsize == ptsize) return;
+
+	m_fontptsize = ptsize;
+
+	clearFonts();
+	clearText();
+	updateFonts();
+}
+
+void SDLFontGL::setFontStyles(std::vector<int> styles) {
+	if (styles.empty()) return;
+
+	m_fontStyles = styles;
+
+	clearFonts();
+	clearText();
+	updateFonts();
+}
+
+unsigned int SDLFontGL::getGlyphSlot(unsigned int fnt, unsigned int slot) {
+	assert(fnt < m_fontStyles.size());
+	assert(slot < NSLOTS);
+	assert(m_glyphTex);
+
+	if (fnt >= m_fontStyles.size() || slot >= NSLOTS || !m_glyphTex || !haveCacheLine) return 0;
+
+	unsigned int slotNdx = slot*m_fontStyles.size() + fnt;
+
+	if (haveCacheLine[slotNdx]) return slotNdx;
+	haveCacheLine[slotNdx] = true;
+
+	if (!m_fontsLoaded) openFonts();
 
 	// Lookup requested font
-	TTF_Font * font = fnts[fnt];
+	TTF_Font * font = m_fonts[fnt];
 	assert(font);
 
-	// Grab the native video surface (so we can match its bpp)
-	SDL_Surface* videoSurface = SDL_GetVideoSurface();
-	assert(videoSurface);
-	assert(videoSurface->format->BitsPerPixel == 32);
-
-	// Create a surface for all the characters
-	Uint32 rmask, gmask, bmask, amask;
-	getRGBAMask(rmask, gmask, bmask, amask);
-	SDL_Surface* mainSurface =
-		SDL_CreateRGBSurface(SDL_SWSURFACE,
-				SLOTSIZE*nWidth, nHeight,
-				videoSurface->format->BitsPerPixel,
-				rmask, gmask, bmask, amask);
-	assert(mainSurface);
+	// buffer for all characters
+	unsigned char *glyphData = static_cast<unsigned char*>(malloc(texW * nHeight));
+	assert(glyphData);
+	// set texture to black
+	memset(glyphData, 0, texW * nHeight);
 
 	// Render font in white, will colorize on-the-fly
 	SDL_Color fg = { 255, 255, 255 };
 
-	// Set texture to entirely clear
-	// TODO: Needed?
-	Uint32 fillColor = SDL_MapRGBA(mainSurface->format, 0, 0, 0, SDL_ALPHA_TRANSPARENT);
-	SDL_FillRect(mainSurface, NULL, fillColor);
-
 	// For each character, render the glyph, and put in the appropriate location
-	for(Uint16 i = 0; i < SLOTSIZE; ++i)
-	{
+	for(Uint16 i = 0; i < SLOTSIZE; ++i) {
 		// Lookup this character, and make a single-char string out of it.
 		Uint16 C = unicode_slots[slot] + i;
 		Uint16 buf[2] = { C, 0 };
 
+		/* creates 32-bit ARGB surface; RGB is always fg, A is the interesting channel
+		 * A is the the fourth byte in every component
+		 */
 		SDL_Surface* surface = TTF_RenderUNICODE_Blended(font, (const Uint16*)buf, fg);
-		if (surface)
-		{
-			SDL_SetAlpha(surface, 0, 0);
-
-			SDL_Rect dstRect = { 0, 0, nWidth, nHeight };
-			dstRect.x = i*nWidth;
-
-			SDL_BlitSurface(surface, 0, mainSurface, &dstRect);
+		if (surface) {
+			unsigned char *rectDst = glyphData + i * nWidth;
+			unsigned char *rectSrc = static_cast<unsigned char*>(surface->pixels) + 3;
+			for (unsigned int y = 0; y < (unsigned int) nHeight; y++) {
+				unsigned char *dst = rectDst + (y * texW);
+				unsigned char *src = rectSrc + (y * surface->pitch);
+				for (unsigned int x = 0; x < (unsigned int) nWidth; x++, dst++, src += 4) {
+					*dst = *src;
+				}
+			}
 
 			SDL_FreeSurface(surface);
 		}
 	}
 
 	// Now upload the big set of characters as a single texture:
-	{
-		int nMode = getGLFormat();
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_glyphTex);
+	checkGLError();
 
-		glBindTexture(GL_TEXTURE_2D, GlyphCache);
+	// Upload this font to its place in the big texture
+	glTexSubImage2D(GL_TEXTURE_2D, 0,
+			0, slotNdx*nHeight,
+			texW, nHeight,
+			GL_ALPHA, GL_UNSIGNED_BYTE, glyphData);
+	checkGLError();
 
-		// Upload this font to its place in the big texture
-		glTexSubImage2D(GL_TEXTURE_2D, 0,
-				0, (slot*nFonts + fnt)*nHeight,
-				mainSurface->w, mainSurface->h,
-				nMode, GL_UNSIGNED_BYTE, mainSurface->pixels);
-		glFlush();
-	}
-
-	SDL_FreeSurface(mainSurface);
-}
-
-void SDLFontGL::drawBackground(int color, int nX, int nY, int cells) {
-	// Blit a rectangle of the specified color at the specified coordinates
-	// (Err, don't blit, but insert into our arrays the equivalent)
-	const int stride = 12;
-	GLfloat *tex = &texValues[stride*numChars];
-	GLfloat *vtx = &vtxValues[stride*numChars];
-	GLfloat *clrs = &colorValues[2*stride*numChars];
-	++numChars;
-
-	GLfloat vtxCopy[] = {
-		nX, nY,
-		nX, nY + nHeight,
-		nX + cells*nWidth, nY,
-		nX, nY + nHeight,
-		nX + cells*nWidth, nY,
-		nX + cells*nWidth, nY + nHeight
-	};
-	memcpy(vtx, vtxCopy, sizeof(vtxCopy));
-
-	float y_offset = ((float)nFonts*NSLOTS*nHeight)/(float)texH;
-	float x1 = ((float)1)/(float)texW;
-	float y1 = ((float)1)/(float)texH;
-	GLfloat texCopy[] = {
-		0.0, y_offset,
-		0.0, y_offset + y1,
-		x1,  y_offset,
-		0.0, y_offset + y1,
-		x1,  y_offset,
-		x1,  y_offset + y1
-	};
-	memcpy(tex, texCopy, sizeof(texCopy));
-
-	// Duplicate color...
-	SDL_Color bgc = cols[color];
-	GLfloat colorCopy[] = {
-			((float)bgc.r)/255.f,
-			((float)bgc.g)/255.f,
-			((float)bgc.b)/255.f,
-			1.f
-	};
-
-	for(unsigned i = 0; i < 6; ++i) {
-		memcpy(&clrs[i*4], colorCopy, sizeof(colorCopy));
-	}
-}
-
-void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo,
-													 int nX, int nY, Uint16 cChar) {
-	if (!GlyphCache) createTexture();
-
-	unsigned int fnt = graphicsInfo.font;
-	unsigned int fg = graphicsInfo.fg;
-	unsigned int bg = graphicsInfo.bg;
-	int blink = graphicsInfo.blink;
-
-	assert(fnt >= 0 && fnt < nFonts);
-	assert(fg >= 0 && fg < nCols);
-	assert(bg >= 0 && bg < nCols);
-	assert(fnts && cols && GlyphCache);
-
-	const unsigned int stride = 12; // GL_TRIANGLE_STRIP 2*6
-
-	// Is our operation buffer full?
-	// If so, flush it now.
-	if (numChars > RENDER_BUFFER_SIZE-2)
-		flushGLBuffer();
-
-	drawBackground(bg, nX, nY, 1);
-
-	if (blink) return;
-
-	GLfloat *tex = &texValues[stride*numChars];
-	GLfloat *vtx = &vtxValues[stride*numChars];
-	GLfloat *clrs = &colorValues[2*stride*numChars];
-	numChars += 1;
-
-	float x_scale = ((float)nWidth) / (float)texW;
-	float y_scale = ((float)nHeight) / (float)texH;
-	GLfloat texCopy[] = {
-		0.0, 0.0,
-		0.0, y_scale,
-		x_scale, 0.0,
-		0.0, y_scale,
-		x_scale, 0.0,
-		x_scale, y_scale
-	};
-	GLfloat vtxCopy[] = {
-		nX, nY,
-		nX, nY + nHeight,
-		nX + nWidth, nY,
-		nX, nY + nHeight,
-		nX + nWidth, nY,
-		nX + nWidth, nY + nHeight
-	};
-	SDL_Color fgc = cols[fg];
-	GLfloat colorCopy[] = {
-			((float)fgc.r)/255.f,
-			((float)fgc.g)/255.f,
-			((float)fgc.b)/255.f,
-			1.f,
-			((float)fgc.r)/255.f,
-			((float)fgc.g)/255.f,
-			((float)fgc.b)/255.f,
-			1.f,
-			((float)fgc.r)/255.f,
-			((float)fgc.g)/255.f,
-			((float)fgc.b)/255.f,
-			1.f,
-			((float)fgc.r)/255.f,
-			((float)fgc.g)/255.f,
-			((float)fgc.b)/255.f,
-			1.f,
-			((float)fgc.r)/255.f,
-			((float)fgc.g)/255.f,
-			((float)fgc.b)/255.f,
-			1.f,
-			((float)fgc.r)/255.f,
-			((float)fgc.g)/255.f,
-			((float)fgc.b)/255.f,
-			1.f
-	};
-
-	// Populate texture coordinates
-	memcpy(tex, texCopy, sizeof(texCopy));
-
-	int x,y;
-	getTextureCoordinates(graphicsInfo, cChar, x, y);
-
-	float x_offset = ((float)x) / (float)texW;
-	float y_offset = ((float)y) / (float)texH;
-
-	for(unsigned j = 0; j < stride; j += 2) {
-		tex[j] += x_offset;
-		tex[j+1] += y_offset;
-	}
-
-	// Populate vertex coordinates
-	memcpy(vtx,vtxCopy,sizeof(vtxCopy));
-
-	// Populate color coodinates
-	memcpy(clrs, colorCopy, sizeof(colorCopy));
-}
-
-void SDLFontGL::startTextGL() {
-	// Start over in buffer
-	numChars = 0;
-
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	// Bind the master font texture
-	glBindTexture(GL_TEXTURE_2D, GlyphCache);
-	glEnableClientState(GL_COLOR_ARRAY);
-
-	// Point GL to our arrays...
-	glColorPointer(4, GL_FLOAT, 0, colorValues);
-	glTexCoordPointer(2, GL_FLOAT, 0, texValues);
-	glVertexPointer(2, GL_FLOAT, 0, vtxValues);
-}
-
-void SDLFontGL::flushGLBuffer() {
-	// Render what we've gathered so far
-	glDrawArrays(GL_TRIANGLES, 0, 6*numChars);
-	numChars = 0;
-}
-
-void SDLFontGL::endTextGL() {
-	flushGLBuffer();
-
-	glDisableClientState(GL_COLOR_ARRAY);
 	glFlush();
+	checkGLError();
+
+	free(glyphData);
+
+	return slotNdx;
 }
 
+void SDLFontGL::drawGL(bool blink) {
+	if (!m_openglActive) return;
 
-void SDLFontGL::getTextureCoordinates(TextGraphicsInfo_t & graphicsInfo, Uint16 c, int &x, int &y) {
-	int slot = m_slotMap[c >> 7];
+	checkGLError();
+	glViewport(m_curdimX, m_curdimY, m_curdimW, m_curdimH);
+
+	if (m_charShader.program) {
+		// bind textures for character, glyphs and colors
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_cellsTex);
+		checkGLError();
+
+		// upload all character on each draw. TODO: remember whether it/what changed?
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_cellsWidth, m_cellsHeight, GL_RGBA, GL_UNSIGNED_BYTE, m_cellData);
+		checkGLError();
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, m_glyphTex);
+		checkGLError();
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, m_colorTex);
+		checkGLError();
+
+		// draw characters
+		glUseProgram(m_charShader.program);
+		checkGLError();
+
+		glUniform1i(m_charShader.aBlink, blink);
+		checkGLError();
+
+		glEnableVertexAttribArray(m_charShader.aPos);
+		checkGLError();
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		checkGLError();
+
+		glDisableVertexAttribArray(m_charShader.aPos);
+		checkGLError();
+	}
+
+	if (m_cursorEnabled && m_cursorShader.program) {
+		// draw cursor
+		glUseProgram(m_cursorShader.program);
+		checkGLError();
+
+		glEnableVertexAttribArray(m_cursorShader.aPos);
+		checkGLError();
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		checkGLError();
+		glDisable(GL_BLEND);
+
+		glDisableVertexAttribArray(m_cursorShader.aPos);
+		checkGLError();
+	}
+
+	checkGLError();
+}
+
+void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo, unsigned int col, unsigned int row, Uint16 cChar) {
+	if (!m_cellData) return;
+
+	int slot = m_slotMap[cChar >> 7];
 	if (slot == -1) {
-		c = 0x2595;
-		slot = m_slotMap[c >> 7];
+		cChar = 0x2595;
+		slot = m_slotMap[cChar >> 7];
 		if (slot == -1) {
 			slot = 0;
-			c = '?';
+			cChar = '?';
 		}
 	}
 
-	ensureCacheLine(graphicsInfo.font, slot);
+	slot = getGlyphSlot(graphicsInfo.font, slot);
 
-	// Set by reference
-	x = (c % 128)*nWidth;
-	y = (slot*nFonts + graphicsInfo.font)*nHeight;
+	if (row >= 0 && row < m_rows && col >= 0 && col < m_cols) {
+		unsigned int ndx = 4*(col + m_cellsWidth*(m_rows - row - 1));
+		m_cellData[ndx] = (cChar & 0x7f);
+		m_cellData[ndx+1] = slot;
+		m_cellData[ndx+2] = (graphicsInfo.fg & 0x3f) | (graphicsInfo.blink ? 0x40: 0);
+		m_cellData[ndx+3] = graphicsInfo.bg;
+	} else {
+		// syslog(LOG_DEBUG, "drawTextGL out of bound offset (row %i, col %i) for size (%i, %i)", row, col, m_rows, m_cols);
+	}
+
+	return;
 }
 
-bool &SDLFontGL::hasCacheLine(unsigned int font, unsigned int slot) {
-	return haveCacheLine[slot*nFonts + font];
+void SDLFontGL::clearText() {
+	if (m_cellData) {
+		memset(m_cellData, 0, 4*m_cellsWidth * m_cellsHeight);
+	}
 }
