@@ -2,12 +2,12 @@ enyo.kind({
 
 	name: 'wTermLauncher',
 	kind: enyo.Component,
-	
+
 	initComponents: function() {
-  		this.inherited(arguments)
+		this.inherited(arguments)
 		this.createComponent({kind: 'ApplicationEvents', onApplicationRelaunch: 'onRelaunch'})
 	},
-		
+
 	create: function() {
 		this.inherited(arguments);
 		enyo.application.m = this;
@@ -21,9 +21,9 @@ enyo.kind({
 		else
 			enyo.windows.openWindow('app.html', null, enyo.windowParams, null);
 	},
-	
+
 	onRelaunch: function() {
 		this.launch(true)
 	}
-	
+
 })

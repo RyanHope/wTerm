@@ -1,13 +1,13 @@
 enyo.kind({
 	name: "wi.Group",
 	kind: enyo.Group,
-	
+
 	chrome: [
 		{name: "llabel", kind: "Control", className: "enyo-group-label"},
 		{name: "rlabel", kind: "Control", className: "enyo-group-label-right"},
 		{name: "client", kind: "OrderedContainer", className: "enyo-group-inner"}
 	],
-	
+
 	captionChanged: function() {
 		if (this.caption instanceof Array) {
 			this.$.llabel.setContent(this.caption[0]);
@@ -20,7 +20,7 @@ enyo.kind({
 		}
 		this.addRemoveClass("labeled", this.caption);
 	},
-	
+
 	contentFitChanged: function() {
 		if (this.contentFit) {
 			this.createLayoutFromKind("VFlexLayout");
@@ -30,5 +30,5 @@ enyo.kind({
 		this.$.llabel.addRemoveClass("enyo-group-fit", this.contentFit);
 		this.$.rlabel.addRemoveClass("enyo-group-fit", this.contentFit);
 	},
-	
+
 })
