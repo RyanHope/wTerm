@@ -225,7 +225,6 @@ enyo.kind({
 	lsvar: enyo.fetchAppInfo().id + '_prefs',
 	
 	constructor: function() {
-		this.log('FUCKER')
 	    this.inherited(arguments);
 		this.load();
 	},

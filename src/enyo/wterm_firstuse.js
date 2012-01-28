@@ -32,7 +32,7 @@ enyo.kind({
 			      	{kind: "Input", value: "/bin/sh", disabled: true, components: [{className: 'enyo-label', content: 'Shell'}]}
 			  	]},
 				{style: 'height: 58px'},
-				{kind: 'Button', content: 'Create Root Console Launchpoint', className: 'enyo-button-negative', onclick: "addRootConsoleToLauncher"},
+				{kind: 'Button', content: 'Create Root Console Launchpoint', className: 'enyo-button-negative', onclick: "addRootConsoleToLauncher", disabled: true},
 			]}
  		]},
  		{kind: "Toolbar", pack: "center", className: "enyo-toolbar-light", components: [
@@ -46,7 +46,7 @@ enyo.kind({
 		else
 			this.$.setPass.setDisabled(true)
 	},
-	
+		
 	addRootConsoleToLauncher: function() {
 		var rootLP = enyo.application.p.get('rootLaunchPoint')
 		if (rootLP)
@@ -55,7 +55,7 @@ enyo.kind({
 				{method: "removeLaunchPoint"}
 			);
 		this.$.appManager.call(
-			{id: enyo.fetchAppId(), icon: "images/icon-root-64.png", title: "wTerm (root)", removable: false, appmenu: "wTern (root)", params: {root: true}},
+			{id: enyo.fetchAppId(), icon: "images/icon-root-64.png", title: "wTerm (root)", params: {root: true}},
 			{method: "addLaunchPoint", onResponse: 'rootLaunchPointResponse'}
 		);
 	},
@@ -68,7 +68,7 @@ enyo.kind({
 		enyo.application.p.set('setupLaunchPoint', inResponse.launchPointId)
 	},
 	
-	create: function() {
+	/*create: function() {
 		this.inherited(arguments);
 		var setupLP = enyo.application.p.get('setupLaunchPoint')
 		if (setupLP)
@@ -77,10 +77,10 @@ enyo.kind({
 				{method: "removeLaunchPoint"}
 			);
 		this.$.appManager.call(
-			{id: enyo.fetchAppId(), icon: "images/icon-setup-64.png", title: "wTerm Setup", removable: false, appmenu: "wTern Setup"},
+			{id: enyo.fetchAppId(), icon: "images/icon-setup-64.png", title: "wTerm Setup", params: {root: false}},
 			{method: "addLaunchPoint", onResponse: 'setupLaunchPointResponse'}
 		);
-    },
+    },*/
 	
 	doClose: function() {
 		this.$.setup.setupNonRoot()

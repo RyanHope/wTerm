@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "Preferences",
+	name: "PrefsPullout",
 	kind: enyo.Toaster,
 	events: {
 		onBypassClose: ""

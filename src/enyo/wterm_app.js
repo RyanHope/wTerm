@@ -85,7 +85,7 @@ enyo.kind({
 		this.showVKB = enyo.application.p.get('showVKB')
 		this.createComponent({
 			name: "prefs", 
-			kind: "Preferences", 
+			kind: "PrefsPullout", 
 			style: "width: 320px; top: 0px; bottom: 0; margin-bottom: 0px;", //width: 384px
 			className: "enyo-bg",
 			flyInFrom: "right",
@@ -177,10 +177,10 @@ enyo.kind({
 	},
 
 	openPrefs: function() {
-		if (this.$.enyo.application.p.showing)
-			this.$.enyo.application.p.close();
+		if (this.$.prefs.showing)
+			this.$.prefs.close();
 		else
-			this.$.enyo.application.p.open();
+			this.$.prefs.open();
 	},
 	
 	setup: function() {
