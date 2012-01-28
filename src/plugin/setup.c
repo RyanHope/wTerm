@@ -17,6 +17,7 @@
 
 #define _GNU_SOURCE
 
+#include <SDL/SDL.h>
 #include <syslog.h>
 #include <pwd.h>
 #include <PDL.h>

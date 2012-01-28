@@ -252,6 +252,22 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				{
 					setBackgroundColor(m_defaultGraphicsState.backgroundColor);
 				}
+				else if (values[i] == 22)
+				{
+					removeGraphicsModeFlags(TS_GM_BOLD);
+				}
+				else if (values[i] == 24)
+				{
+					removeGraphicsModeFlags(TS_GM_UNDERSCORE);
+				}
+				else if (values[i] == 25)
+				{
+					removeGraphicsModeFlags(TS_GM_BLINK);
+				}
+				else if (values[i] == 27)
+				{
+					removeGraphicsModeFlags(TS_GM_NEGATIVE);
+				}
 			}
 		}
 		break;
