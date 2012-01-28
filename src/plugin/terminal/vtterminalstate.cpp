@@ -277,7 +277,6 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			if (values[i] == 4)
 			{
 				addTerminalModeFlags(TS_TM_INSERT);
-				enableShiftText(true);
 			}
 			else if (values[i] == 20)
 			{
@@ -363,7 +362,6 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			if (values[i] == 4)
 			{
 				removeTerminalModeFlags(TS_TM_INSERT);
-				enableShiftText(false);
 			}
 			else if (values[i] == 20)
 			{
@@ -632,7 +630,7 @@ void VTTerminalState::insertString(const char *sStr, int len, ExtTerminal *extTe
 				tabForward(1);
 				break;
 			default:
-				insertChar(m_parser->character(), true, false, isShiftText());
+				insertChar(m_parser->character(), true, false);
 				break;
 			}
 		}
