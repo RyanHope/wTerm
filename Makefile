@@ -27,10 +27,12 @@ wterm:
 	mv src/plugin/setup setup
 
 bin/vttest:
+	mkdir -p bin
 	$(MAKE) -C src/vttest
 	mv src/vttest/vttest bin/vttest
 
 bin/cmatrix:
+	mkdir -p bin
 	$(MAKE) -C src/cmatrix
 	mv src/cmatrix/cmatrix bin/cmatrix
 
