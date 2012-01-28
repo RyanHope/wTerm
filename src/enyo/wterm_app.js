@@ -92,6 +92,11 @@ enyo.kind({
 			onOpen: "pulloutToggle",
 			onClose: "closeRightPullout"
 		})
+		var exec = enyo.application.p.get('exec')
+		if (enyo.windowParams.root && !enyo.windowParams.command)
+			exec = 'login -f root'
+		else if (enyo.windowParams.command)
+			exec = 'login -f wterm'
 		this.createComponent({
 		name: 'terminal',
 			kind: 'Terminal',
@@ -99,7 +104,7 @@ enyo.kind({
 			width: window.innerWidth,
 			height: 400,
 			onPluginReady: 'pluginReady',
-			exec: enyo.windowParams.root ? 'login -f root' : enyo.application.p.get('exec')
+			exec: exec 
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
 		this.$.terminal.vkb = this.$.vkb
