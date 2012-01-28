@@ -41,6 +41,10 @@ enyo.kind({
   	
   	setupSU: function(enable) {
   		this.$.plugin.callPluginMethod('setupSU', enable)
-  	}
+  	},
+  	
+  	setupNonRoot: function() {
+  		this.$.plugin.callPluginMethod('setupNonRoot')
+  	},
   	
 })

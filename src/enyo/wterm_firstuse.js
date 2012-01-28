@@ -48,12 +48,16 @@ enyo.kind({
 	},
 	
 	addRootConsoleToLauncher: function() {
-		if (!PREFS.get('rootLaunchPoint')) {
+		var rootLP = PREFS.get('rootLaunchPoint')
+		if (rootLP)
 			this.$.appManager.call(
-				{id: enyo.fetchAppId(), icon: "images/icon-root-64.png", title: "wTerm (root)", params: {root: true}},
-				{method: "addLaunchPoint", onResponse: 'rootLaunchPointResponse'}
-			)
-		}
+				{launchPointId: rootLP},
+				{method: "addLaunchPoint", onResponse: 'launchPointResponse'}
+			);
+		this.$.appManager.call(
+			{id: enyo.fetchAppId(), icon: "images/icon-root-64.png", title: "wTerm (root)", params: {root: true}},
+			{method: "addLaunchPoint", onResponse: 'launchPointResponse'}
+		);
 	},
 	
 	rootLaunchPointResponse: function(inSender, inResponse) {
@@ -65,16 +69,21 @@ enyo.kind({
 	},
 	
 	doClose: function() {
-		PREFS.set('firstUse', true)
-		if (!PREFS.get('setupLaunchPoint')) {
-			this.$.appManager.call(
-				{id: enyo.fetchAppId(), icon: "images/icon-setup-64.png", title: "wTerm Setup", params: {root: true}},
-				{method: "addLaunchPoint", onResponse: 'rootLaunchPointResponse'}
-			)
+		this.$.setup.setupNonRoot()
+		if (enyo.windowParams.setup)
+			window.close()
+		else {
+			PREFS.set('firstUse', true)
+			if (!PREFS.get('setupLaunchPoint')) {
+				this.$.appManager.call(
+					{id: enyo.fetchAppId(), icon: "images/icon-setup-64.png", title: "wTerm Setup", params: {setup: true}},
+					{method: "addLaunchPoint", onResponse: 'rootLaunchPointResponse'}
+				)
+			}
+			this.destroyComponents()
+			this.createComponent({kind: "wTermApp"})
+			this.render()
 		}
-		this.destroyComponents()
-		this.createComponent({kind: "wTermApp"})
-		this.render()
 	},
 	
 	rootpassSet: function() {

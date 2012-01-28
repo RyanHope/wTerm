@@ -79,8 +79,6 @@ void addToGroup(const char *user, const char *group)
 
 void setup_wterm_user()
 {
-	int write = isMountWritable("/");
-	if (!write) system("mount -o remount,rw /");
 	system("adduser -D wterm -h /var/home/wterm -g \"wTerm User\"");
 	system("mkdir /var/home/wterm");
 	system("chown -R wterm /var/home/wterm");
@@ -91,7 +89,16 @@ void setup_wterm_user()
 	} else {
 		setup_su(0);
 	}
+}
+
+PDL_bool setupNonRoot(PDL_JSParameters *params)
+{
+	int write = isMountWritable("/");
+	if (!write) system("mount -o remount,rw /");
+	setup_wterm_user();
 	if (!write) system("mount -o remount,ro /");
+
+	return PDL_TRUE;
 }
 
 PDL_bool userSetPassword(PDL_JSParameters *params)
@@ -147,6 +154,7 @@ int main(int argc, const char* argv[])
 	SDL_Init(SDL_INIT_VIDEO);
 	PDL_Init(0);
 
+	PDL_RegisterJSHandler("setupNonRoot", setupNonRoot);
 	PDL_RegisterJSHandler("setupSU", setupSU);
 	PDL_RegisterJSHandler("userAddToGroup", userAddToGroup);
 	PDL_RegisterJSHandler("userHasPassword", userHasPassword);
