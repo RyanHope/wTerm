@@ -24,6 +24,7 @@
 
 #include <list>
 #include <map>
+#include <string>
 
 #include "terminalstate.hpp"
 
@@ -190,7 +191,7 @@ typedef enum
 	CS_TERM_PARAM, //ESC[<Value>;...;<Value>x
 	CS_TERM_RESET, //ESCc
 
-	CS_OSC, // Operating System Controls
+	CS_OSC, // Operating System Controls: ESC]<Number>;<String>BEL
 
 	//Hardware debug sequences.
 	CS_SCREEN_ALIGN_DISPLAY, //ESC#8
@@ -251,6 +252,8 @@ private:
 	int m_values[MAX_NUM_VALUES];
 	int m_numValues;
 
+	std::string m_oscString;
+
 	CellCharacter m_currentChar;
 	CSToken_t m_token;
 	unsigned char m_prefix[4];
@@ -291,6 +294,8 @@ public:
 	unsigned int numValues() const { return m_numValues; }
 	int value(unsigned int idx) const { return m_values[idx]; }
 	int* values() { return m_values; }
+
+	std::string getOSCParameter() { return m_oscString; }
 
 	void setMode(Mode mode);
 	Mode getMode() const { return m_mode; }

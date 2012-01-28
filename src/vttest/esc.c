@@ -908,12 +908,12 @@ s8c1t(int flag)                 /* Tell terminal to respond with 7-bit or 8-bit 
 
 /*
  * If g is zero,
- *    designate G0 as character set c 
+ *    designate G0 as character set c
  *    designate G1 as character set B (ASCII)
  *    shift-in (select G0 into GL).
  * If g is nonzero
  *    designate G0 as character set B (ASCII)
- *    designate G1 as character set c 
+ *    designate G1 as character set c
  *    shift-out (select G1 into GL).
  * See also scs_normal() and scs_graphics().
  */

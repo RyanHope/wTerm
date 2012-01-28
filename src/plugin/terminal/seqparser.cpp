@@ -23,6 +23,7 @@
 #include <limits>
 
 #include "seqparser.hpp"
+#include "util/utf8.hpp"
 
 const unsigned char ControlSeqParser::ESC_CHAR = 27;
 const unsigned char ControlSeqParser::DELIMITER_CHAR = ';';
@@ -439,17 +440,44 @@ bool ControlSeqParser::parseChar() {
 		}
 		return false;
 	case ST_OSC:
+		if (m_numValues < 2) m_oscString.clear();
 		if (m_currentChar == 0x98 || m_currentChar == 0x9C || m_currentChar == 0x07) {
 			m_state = ST_START;
+			if (2 == m_numValues) {
+				m_token = CS_OSC;
+				m_numValues = 1;
+				return true;
+			}
 		} else if (ESC_CHAR == m_currentChar) {
 			m_state = ST_OSC_ESC;
+		} else {
+			if (m_numValues < 2) {
+				/* no semicolon yet */
+				if ((m_currentChar >= 0x30 && m_currentChar <= 0x39) || 0x3B == m_currentChar) {
+					/* digit */
+					parseCSIValue();
+				} else {
+					m_numValues = 3; /* "invalid" marker */
+				}
+			} else {
+				appendUtf8Char(m_oscString, m_currentChar);
+			}
 		}
 		return false;
 	case ST_OSC_ESC:
 		if (m_currentChar == 0x98 || m_currentChar == 0x9C || m_currentChar == 0x07 || m_currentChar == 'X' || m_currentChar == '\\') {
 			m_state = ST_START;
+			if (2 == m_numValues) {
+				m_token = CS_OSC;
+				m_numValues = 1;
+				return true;
+			}
 		} else {
-			m_state = ST_OSC;
+			/* throw away old state, start with new escape seq */
+			m_state = ST_ESCAPE;
+			m_prefixlen = 0;
+			m_numValues = 0;
+			return parseChar();
 		}
 		return false;
 	case ST_ESCAPE_TRIE:
@@ -528,7 +556,7 @@ bool ControlSeqParser::nextChar() {
 			}
 			if (0 == m_utf8_remlen) {
 				/* char complete */
-				// if ((3 == m_utf8_seqlen) && (m_currentChar < 0x800)) return false; /* overlong */
+				if ((3 == m_utf8_seqlen) && (m_currentChar < 0x800)) return false; /* overlong */
 				return true;
 			}
 			break;

@@ -7,7 +7,7 @@
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1
 
-/* Define this if your curses library has use_default_colors, for 
+/* Define this if your curses library has use_default_colors, for
    cool transparency =-) */
 #define HAVE_USE_DEFAULT_COLORS 1
 

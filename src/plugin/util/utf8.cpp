@@ -63,3 +63,9 @@ void writeUtf8Char(char *buf, Uint16 code) {
 		b[3] = '\0';
 	}
 }
+
+void appendUtf8Char(std::string &str, Uint16 code) {
+	char buf[4];
+	writeUtf8Char(buf, code);
+	str.append(buf);
+}
