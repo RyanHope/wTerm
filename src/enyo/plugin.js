@@ -39,29 +39,29 @@ enyo.kind({
 		this.setColors()
 		this.setKeys()
 		this.setScrollBufferLines(enyo.application.p.get('bufferlines'))
-  		this.doPluginReady()
-  	},
-  	pluginConnected: function(inSender, inResponse, inRequest) {
-  	},
-  	pluginDisconnected: function(inSender, inResponse, inRequest) {
-  		this.error('Terminal Plugin Disconnected')
-  	},
+		this.doPluginReady()
+	},
+	pluginConnected: function(inSender, inResponse, inRequest) {
+	},
+	pluginDisconnected: function(inSender, inResponse, inRequest) {
+		this.error('Terminal Plugin Disconnected')
+	},
 
-  	pushKeyEvent: function(type,sym,unicode) {
-  		return parseInt(this.$.plugin.callPluginMethod('pushKeyEvent',type,sym,unicode))
-  	},
-  	keyDown: function(sym,unicode) {
-  		return this.pushKeyEvent(1,sym,unicode)
-  	},
-  	keyUp: function(sym,unicode) {
-  		return this.pushKeyEvent(0,sym,unicode)
-  	},
-  	
-  	resize: function(width, height) {
-  		this.$.plugin.setWidth(width)
-  		this.$.plugin.setHeight(height)
-  	},
-  	
+	pushKeyEvent: function(type,sym,unicode) {
+		return parseInt(this.$.plugin.callPluginMethod('pushKeyEvent',type,sym,unicode))
+	},
+	keyDown: function(sym,unicode) {
+		return this.pushKeyEvent(1,sym,unicode)
+	},
+	keyUp: function(sym,unicode) {
+		return this.pushKeyEvent(0,sym,unicode)
+	},
+
+	resize: function(width, height) {
+		this.$.plugin.setWidth(width)
+		this.$.plugin.setHeight(height)
+	},
+
 	setScrollBufferLines: function(lines) {
 		this.$.plugin.callPluginMethodDeferred(null, 'setScrollBufferLines', lines)
 	},
@@ -147,8 +147,8 @@ enyo.kind({
 		return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 	},
 
-  	setColors: function() {
-  		var colorScheme = enyo.application.p.get('colorScheme')
+	setColors: function() {
+		var colorScheme = enyo.application.p.get('colorScheme')
 		var colorSchemes = enyo.application.p.get('colorSchemes')
 		this.currentColors = colorSchemes[colorScheme]
 		if (colorScheme == 'Black on Random Light')
@@ -161,10 +161,10 @@ enyo.kind({
 		return str.replace(/\\x([0-9A-Fa-f]{2})/g, function() {
 	        return String.fromCharCode(parseInt(arguments[1], 16));
 	    });
-  	},
-  	
-  	setKeys: function() {
-  		var inputScheme = enyo.application.p.get('inputScheme')
+	},
+
+	setKeys: function() {
+		var inputScheme = enyo.application.p.get('inputScheme')
 		var inputSchemes = enyo.application.p.get('inputSchemes')
 		this.currentKeys = inputSchemes[inputScheme]
 		for (var i=0; i<this.currentKeys.length; i++)
