@@ -1,20 +1,20 @@
 /**
- * This file is part of SDLTerminal.
+ * This file is part of wTerm.
  * Copyright (C) 2011 Vincent Ho <www.whimsicalvee.com>
  * Copyright (C) 2011-2012 Ryan Hope <rmh3093@gmail.com>
  *
- * SDLTerminal is free software: you can redistribute it and/or modify
+ * wTerm is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * SDLTerminal is distributed in the hope that it will be useful,
+ * wTerm is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with SDLTerminal.  If not, see <http://www.gnu.org/licenses/>.
+ * along with wTerm.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "sdl/sdlterminal.hpp"
@@ -41,7 +41,7 @@
 #define HP_BT_PLUGIN_LEFT  0xE0A2
 #define HP_BT_PLUGIN_RIGHT 0xE0A3
 
-SDLTerminal::SDLTerminal()
+WTerm::WTerm()
 {
 	m_terminalState = NULL;
 
@@ -89,7 +89,7 @@ SDLTerminal::SDLTerminal()
 	m_keys.push_back("\033[24~");
 }
 
-SDLTerminal::~SDLTerminal()
+WTerm::~WTerm()
 {
 	if (m_terminalState != NULL)
 	{
@@ -97,7 +97,7 @@ SDLTerminal::~SDLTerminal()
 	}
 }
 
-void SDLTerminal::updateDisplaySize()
+void WTerm::updateDisplaySize()
 {
 	if (m_terminalState != NULL) 
 	{
@@ -111,7 +111,7 @@ void SDLTerminal::updateDisplaySize()
 	}
 }
 
-int SDLTerminal::initCustom()
+int WTerm::initCustom()
 {
 	m_terminalState = new VTTerminalState();
 
@@ -130,7 +130,7 @@ int SDLTerminal::initCustom()
 	return 0;
 }
 
-void SDLTerminal::handleMouseEvent(SDL_Event &event)
+void WTerm::handleMouseEvent(SDL_Event &event)
 {
 	/*switch (event.type)
 	{
@@ -148,13 +148,13 @@ void SDLTerminal::handleMouseEvent(SDL_Event &event)
 	}*/
 }
 
-void SDLTerminal::injectData(const char *data)
+void WTerm::injectData(const char *data)
 {
 	ExtTerminal *extTerminal = getExtTerminal();
 	extTerminal->insertData(data);
 }
 
-void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
+void WTerm::handleKeyboardEvent(SDL_Event &event)
 {
 	SDLKey sym = event.key.keysym.sym;
 	SDLMod mod = event.key.keysym.mod;
@@ -335,7 +335,7 @@ void SDLTerminal::handleKeyboardEvent(SDL_Event &event)
 	}
 }
 
-void SDLTerminal::redraw()
+void WTerm::redraw()
 {
 	m_terminalState->lock();
 
@@ -378,7 +378,7 @@ void SDLTerminal::redraw()
 	m_terminalState->unlock();
 }
 
-void SDLTerminal::redrawBlinked()
+void WTerm::redrawBlinked()
 {
 	m_terminalState->lock();
 
@@ -399,7 +399,7 @@ void SDLTerminal::redrawBlinked()
 	m_terminalState->unlock();
 }
 
-void SDLTerminal::refresh()
+void WTerm::refresh()
 {
 	SDL_Event event;
 
@@ -414,27 +414,27 @@ void SDLTerminal::refresh()
 /**
  * Accepts NULL terminating string.
  */
-void SDLTerminal::insertData(const char *data, int len)
+void WTerm::insertData(const char *data, int len)
 {
 	m_terminalState->insertString(data, len, getExtTerminal());
 	refresh();
 }
 
-TerminalState *SDLTerminal::getTerminalState()
+TerminalState *WTerm::getTerminalState()
 {
 	return m_terminalState;
 }
 
-SDL_Color SDLTerminal::getColor(TSColor_t color)
+SDL_Color WTerm::getColor(TSColor_t color)
 {
 	return m_colors[color];
 }
 
-void SDLTerminal::setKey(TSInput_t key, const char *cmd) {
+void WTerm::setKey(TSInput_t key, const char *cmd) {
 	m_keys[key] = std::string(cmd);
 }
 
-void SDLTerminal::setColor(TSColor_t color, int r, int g, int b)
+void WTerm::setColor(TSColor_t color, int r, int g, int b)
 {
 /*
 	// Should probably do something like this to prevent worst case scenarios
@@ -449,13 +449,13 @@ void SDLTerminal::setColor(TSColor_t color, int r, int g, int b)
 	setDirty(COLOR_DIRTY_BIT);
 }
 
-void SDLTerminal::setScrollBufferLines(int lines)
+void WTerm::setScrollBufferLines(int lines)
 {
 	m_terminalState->setScrollBufferLines(lines);
 	refresh();
 }
 
-int SDLTerminal::getScrollBufferLines()
+int WTerm::getScrollBufferLines()
 {
 	return m_terminalState->getScrollBufferLines();
 }
