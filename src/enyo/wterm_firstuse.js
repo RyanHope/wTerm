@@ -55,7 +55,7 @@ enyo.kind({
 				{method: "removeLaunchPoint"}
 			);
 		this.$.appManager.call(
-			{id: enyo.fetchAppId(), icon: "images/icon-root-64.png", title: "wTerm (root)", params: {root: true}},
+			{id: enyo.fetchAppId(), icon: "images/icon-root-64.png", title: "wTerm (root)", removable: false, appmenu: "wTern (root)", params: {root: true}},
 			{method: "addLaunchPoint", onResponse: 'rootLaunchPointResponse'}
 		);
 	},
@@ -77,7 +77,7 @@ enyo.kind({
 				{method: "removeLaunchPoint"}
 			);
 		this.$.appManager.call(
-			{id: enyo.fetchAppId(), icon: "images/icon-setup-64.png", title: "wTerm Setup", params: {root: true}},
+			{id: enyo.fetchAppId(), icon: "images/icon-setup-64.png", title: "wTerm Setup", removable: false, appmenu: "wTern Setup"},
 			{method: "addLaunchPoint", onResponse: 'setupLaunchPointResponse'}
 		);
     },

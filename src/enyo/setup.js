@@ -48,3 +48,5 @@ enyo.kind({
   	},
   	
 })
+
+// sqlite3 /var/palm/data/localstorage/file_.media.cryptofs.apps.usr.palm.applications.us.ryanhope.wterm_0.localstorage 'SELECT * FROM ItemTable;' | grep "setupLaunchPoint" | cut -f 2 -d "|" | sed s/\"//
