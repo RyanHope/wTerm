@@ -24,12 +24,12 @@ enyo.kind({
 		{kind: "VFlexBox", height: "100%", components: [
 			{kind: "Header", pack: 'center', components: [
 				{kind: "RadioToolButtonGroup", name: 'grp', value: 'appearance', flex: 1, onChange: 'grpChanged', components: [
-	    	  		{caption: "Appearance", value: 'appearance', flex: 2},
-			      	{caption: "Input", value: 'input'},
-			      	{caption: "Misc", value: 'misc'},
-			  	]}
+				{caption: "Appearance", value: 'appearance', flex: 2},
+		{caption: "Input", value: 'input'},
+		{caption: "Misc", value: 'misc'},
+		]}
 			]},
-	  		{kind: "Scroller", flex: 1, components: [
+			{kind: "Scroller", flex: 1, components: [
 				{name: 'grp1', components: [
 					{kind: "RowGroup", caption: 'Text', flex: 1, components: [
 						{kind: 'Item', layoutKind: 'HFlexLayout', align: "center", style: 'padding: 0; margin: 0', components: [
@@ -40,7 +40,7 @@ enyo.kind({
 					{kind: 'RowGroup', flex :1, caption: 'Color Scheme', components: [
 						{kind: "ListSelector", name: 'colorSchemes', onChange: "colorSchemeChanged"},
 						{name: 'foreground', kind: 'wi.InputColor', caption: 'Foreground', onChanged: 'updateColors'},
-						{name: 'background', kind: 'wi.InputColor', caption: 'Background', onChanged: 'updateColors'},					
+						{name: 'background', kind: 'wi.InputColor', caption: 'Background', onChanged: 'updateColors'},
 						{name: 'color1', kind: 'wi.InputColor', caption: 'Color1', onChanged: 'updateColors'},
 						{name: 'color2', kind: 'wi.InputColor', caption: 'Color2', onChanged: 'updateColors'},
 						{name: 'color3', kind: 'wi.InputColor', caption: 'Color3', onChanged: 'updateColors'},
@@ -97,15 +97,15 @@ enyo.kind({
 					{kind: "RowGroup", flex :1, caption: 'Scroll Buffer Lines', components: [
 						{kind: "Input", name: 'bufferlines', onchange: 'bufferlinesChanged'},
 					]},
-		  		]},
-	  		]},
+			]},
+			]},
 			{kind: "Toolbar", className: 'enyo-toolbar-light', align: "center", showing: true, components: [
 				{name: "dragHandle", kind: "GrabButton", onclick: "close"},
 				{kind: 'Button', caption: 'Restore Defaults', onclick: "restore"}
 			]}
 		]}
 	],
-	
+
 	restore: function() {
 		enyo.application.p.reset()
 		this.rendered()
@@ -114,7 +114,7 @@ enyo.kind({
 		this.terminal.setKeys()
 		this.vkb.loadLayout(this.$.kbdLayouts.getValue());
 	},
-	
+
 	flyInFromChanged: function() {
 		this.inherited(arguments);
 		this.$.shadow.addRemoveClass("flyInFromLeft", this.flyInFrom == "left");

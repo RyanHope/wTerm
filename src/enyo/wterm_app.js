@@ -81,11 +81,11 @@ enyo.kind({
 	},
 
 	initComponents: function() {
-  		this.inherited(arguments)
+		this.inherited(arguments)
 		this.showVKB = enyo.application.p.get('showVKB')
 		this.createComponent({
-			name: "prefs", 
-			kind: "PrefsPullout", 
+			name: "prefs",
+			kind: "PrefsPullout",
 			style: "width: 320px; top: 0px; bottom: 0; margin-bottom: 0px;", //width: 384px
 			className: "enyo-bg",
 			flyInFrom: "right",
@@ -104,7 +104,7 @@ enyo.kind({
 			width: window.innerWidth,
 			height: 400,
 			onPluginReady: 'pluginReady',
-			exec: exec 
+			exec: exec
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
 		this.$.terminal.vkb = this.$.vkb
