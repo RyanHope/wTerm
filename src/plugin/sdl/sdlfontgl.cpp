@@ -439,6 +439,8 @@ void SDLFontGL::updateFonts() {
 	texW = nextPowerOfTwo(SLOTSIZE*nWidth);
 	texH = nextPowerOfTwo(m_fontStyles.size()*NSLOTS*nHeight);
 
+	syslog(LOG_DEBUG, "glyph texture size: %u (%u x %u)", texW * texH, texW, texH);
+
 	if (m_charShader.program) {
 		glUseProgram(m_charShader.program);
 		checkGLError();
@@ -540,6 +542,15 @@ void SDLFontGL::setFontStyles(std::vector<int> styles) {
 	clearText();
 	updateFonts();
 }
+
+void SDLFontGL::setFontFilename(const char *filename) {
+	m_fontFilename = filename;
+
+	clearFonts();
+	clearText();
+	updateFonts();
+}
+
 
 unsigned int SDLFontGL::getGlyphSlot(unsigned int fnt, unsigned int slot) {
 	assert(fnt < m_fontStyles.size());
