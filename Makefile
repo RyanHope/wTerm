@@ -12,11 +12,11 @@ IPK			:= $(APPID)_$(VERSION)_$(ARCH).ipk
 package: clean-package ipk/$(IPK)
 
 ipk/$(IPK): wterm bin/vttest bin/cmatrix clean-package
-	- mkdir -p ipk
-	- palm-package -X excludes.txt .
-	- mv $(APPID)_*.ipk ipk/$(IPK)
-	- ar q ipk/$(IPK) pmPostInstall.script
-	- ar q ipk/$(IPK) pmPreRemove.script
+	mkdir -p ipk
+	palm-package -X excludes.txt .
+	mv $(APPID)_*.ipk ipk/$(IPK)
+	ar q ipk/$(IPK) pmPostInstall.script
+	ar q ipk/$(IPK) pmPreRemove.script
 
 clean-package:
 	- rm -rf ipk
