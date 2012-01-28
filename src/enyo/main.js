@@ -1,32 +1,29 @@
-if (typeof PREFS === 'undefined')
-	var PREFS = new Prefs();
-
 enyo.kind({
 
 	name: 'wTermLauncher',
 	kind: enyo.Component,
 	
-	components: [
-		{
-			kind: 'ApplicationEvents',
-			onApplicationRelaunch: 'onRelaunch',
-		}
-	],
+	initComponents: function() {
+  		this.inherited(arguments)
+		this.createComponent({kind: 'ApplicationEvents', onApplicationRelaunch: 'onRelaunch'})
+	},
 		
-	create: function () {
+	create: function() {
 		this.inherited(arguments);
 		enyo.application.m = this;
     },
 
-	launch: function (relaunch) {
-		if (enyo.windowParams.dockMode || enyo.windowParams.windowType === 'dockModeWindow')
+	launch: function(relaunch) {
+		if (enyo.windowParams.resetFirstUse)
+			PREFS.set('firstUse', false)
+		else if (enyo.windowParams.dockMode || enyo.windowParams.windowType === 'dockModeWindow')
 			enyo.windows.openWindow('dock.html', 'dock', enyo.windowParams, {window:"dockMode"});
 		else
 			enyo.windows.openWindow('app.html', null, enyo.windowParams, null);
 	},
 	
-	onRelaunch: function () {
+	onRelaunch: function() {
 		this.launch(true)
-	},
+	}
 	
 })

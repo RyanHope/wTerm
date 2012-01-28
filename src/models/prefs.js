@@ -2,6 +2,8 @@ function Prefs() {
 	
 	this.defaults = {
 		firstUse: false,
+		rootLaunchPoint: null,
+		setupLaunchPoint: null,
 		exec: 'login -f wterm',
 		exhibition: 'cmatrix',
 		rootpassOK: false,
@@ -250,3 +252,6 @@ Prefs.prototype.reset = function() {
 		this.set(key, this.defaults[key])
 	}
 }
+
+if (typeof PREFS === 'undefined')
+	var PREFS = new Prefs();

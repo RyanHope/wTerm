@@ -23,69 +23,12 @@
 #include "terminal/vtterminalstate.hpp"
 #include "util/utf8.hpp"
 
-#include <pwd.h>
-
 #include <syslog.h>
 #include <PDL.h>
 
 SDLTerminal *sdlTerminal;
 
-void setup_su(bool enable)
-{
-	if (enable)
-	{
-		system("mkdir -p /usr/local/bin");
-		system("cp /bin/busybox /usr/local/bin/su");
-		system("chmod 750 /usr/local/bin/su");
-		system("chmod ug+s /usr/local/bin/su");
-	}
-	else
-	{
-		system("rm -rf /usr/local/bin/su");
-	}
-}
 
-int isMountWritable(const char* dest) {
-	int ret = 1;
-	FILE *mountsfile;
-	char tmpdest[4096];
-	char tmpflags[4096];
-	mountsfile = fopen("/proc/mounts", "r");
-	if (mountsfile == NULL) {
-		syslog(LOG_ERR, "error[fopen] in is_mounted()");
-		ret = -1;
-	} else {
-		while (ret == 0 && fscanf(mountsfile, "%*s%s%*s%s%*d%*d", tmpdest, tmpflags) != EOF) {
-			if (strcmp(dest,tmpdest)==0) {
-				if (tmpflags[1] == 'w') ret = 1;
-			}
-		}
-		fclose(mountsfile);
-	}
-	return ret;
-}
-
-bool hasPassword(const char *user)
-{
-	struct passwd *pw = getpwnam(user);
-	return (strlen(pw->pw_passwd)==34);
-}
-
-int setPassword(const char *user, const char *password)
-{
-	char *cmd = 0;
-	asprintf(&cmd, "echo -n \"%s:%s\" | chpasswd -m", user, password);
-	system(cmd);
-	if (cmd) free(cmd);
-}
-
-void addToGroup(const char *user, const char *group)
-{
-	char *cmd = 0;
-	asprintf(&cmd, "if ! grep -q \"^%s:.*%s\" /etc/group; then sed -i -e 's/^%s:.*$/&,%s/' /etc/group; fi", group, user, group, user);
-	system(cmd);
-	if (cmd) free(cmd);
-}
 
 PDL_bool inject(PDL_JSParameters *params) {
 	const char *cmd = PDL_GetJSParamString(params, 0);
@@ -173,73 +116,10 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 	return PDL_TRUE;
 }
 
-PDL_bool userSetPassword(PDL_JSParameters *params) {
-
-	const char *user = PDL_GetJSParamString(params, 0);
-	const char *password = PDL_GetJSParamString(params, 1);
-
-	int write = isMountWritable("/");
-	if (!write) system("mount -o remount,rw /");
-	setPassword(user, password);
-	if (!write) system("mount -o remount,ro /");
-
-	return PDL_TRUE;
-}
-
-PDL_bool userHasPassword(PDL_JSParameters *params) {
-
-	char *reply = 0;
-	asprintf(&reply, "%d", hasPassword(PDL_GetJSParamString(params, 0)));
-	PDL_JSReply(params, reply);
-	free(reply);
-
-	return PDL_TRUE;
-}
-
-PDL_bool userAddToGroup(PDL_JSParameters *params) {
-
-	const char *user = PDL_GetJSParamString(params, 0);
-	const char *group = PDL_GetJSParamString(params, 1);
-
-	int write = isMountWritable("/");
-	if (!write) system("mount -o remount,rw /");
-	addToGroup(user, group);
-	if (!write) system("mount -o remount,ro /");
-
-	return PDL_TRUE;
-}
-
-PDL_bool setupSU(PDL_JSParameters *params) {
-	int write = isMountWritable("/");
-	if (!write) system("mount -o remount,rw /");
-	setup_su(PDL_GetJSParamInt(params, 0));
-	if (!write) system("mount -o remount,ro /");
-	return PDL_TRUE;
-}
-
-void setup_wterm_user()
-{
-	int write = isMountWritable("/");
-	if (!write) system("mount -o remount,rw /");
-	system("adduser -D wterm -h /var/home/wterm -g \"wTerm User\"");
-	system("mkdir /var/home/wterm");
-	system("chown -R wterm /var/home/wterm");
-	if (hasPassword("root"))
-	{
-		addToGroup("wterm", "root");
-		setup_su(true);
-	} else {
-		setup_su(false);
-	}
-	if (!write) system("mount -o remount,ro /");
-}
-
 int main(int argc, const char* argv[])
 {
 	openlog("us.ryanhope.wterm.plugin", LOG_PID, LOG_USER);
-	setlogmask(LOG_UPTO((argc > 3 && atoi(argv[3])>=LOG_EMERG && atoi(argv[3])<=LOG_DEBUG) ? atoi(argv[3]) : LOGLEVEL));
-
-	setup_wterm_user();
+	setlogmask(LOG_UPTO(LOGLEVEL));
 
 	PDL_Init(0);
 
@@ -257,10 +137,6 @@ int main(int argc, const char* argv[])
 	else
 		terminal->setExec("login -f root");
 
-	PDL_RegisterJSHandler("setupSU", setupSU);
-	PDL_RegisterJSHandler("userAddToGroup", userAddToGroup);
-	PDL_RegisterJSHandler("userHasPassword", userHasPassword);
-	PDL_RegisterJSHandler("userSetPassword", userSetPassword);
 	PDL_RegisterJSHandler("setScrollBufferLines", setScrollBufferLines);
 	PDL_RegisterJSHandler("inject", inject);
 	PDL_RegisterJSHandler("setActive", setActive);

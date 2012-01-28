@@ -6,9 +6,14 @@ LDFLAGS		:=	-L$(ROOT)/lib -Wl,--allow-shlib-undefined -lpdl -lSDL -lSDL_ttf -lSD
 OBJECTS		:=	sdl/sdlfontgl.o sdl/sdlcore.o sdl/sdlterminal.o util/point.o util/utf8.o \
 				terminal/seqparser.o terminal/terminal.o terminal/terminalstate.o terminal/vtterminalstate.o terminalmain.o
 
+all: wterm setup
+
 wterm: $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
 	
+setup:
+	$(CC) $(CXXFLAGS) $(LDFLAGS) $@.c -o $@
+
 $(OBJECTS): %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -fPIC -c $< -o $@
 

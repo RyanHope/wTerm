@@ -2,7 +2,6 @@ enyo.kind({
 
 	name: "wTermApp",
 	kind: enyo.VFlexBox,
-	align: 'center',
 	
 	showVKB: false,
 
@@ -36,33 +35,6 @@ enyo.kind({
 		},
 		{
 			kind: 'Popup2',
-			name: 'rootpass',
-			modal: true,
-			scrim: true,
-			autoClose: false,
-			dismissWithClick: false,
-			width: "500px",
-			components: [
-				{style: 'text-align: center; padding-bottom: 12px; font-size: 120%;', allowHtml: true, content: '<b><u>Notice!</u></b>'},
-				{content: 'Your device does not have a root password!'},
-				{kind: "RowGroup", caption: 'New Passowrd', components: [
-					{kind: 'PasswordInput', name: 'pass1', changeOnInput: true, onchange: 'verifyPassword'},
-					{kind: 'PasswordInput', name: 'pass2', changeOnInput: true, onchange: 'verifyPassword'}
-				]},
-				{kind: 'HFlexBox', components: [
-					{kind: 'HFlexBox', flex: 2, align: 'center', components: [
-						{kind: "CheckBox", name: 'rootpassCheckbox', onChange: 'rootpassWarn'},
-						{style: 'font-size: 80%; padding-left: 1em;', content: 'Do not show this warning again.'},
-					]},
-					{kind: 'HFlexBox', flex: 1, components: [
-						{kind: 'Button', flex: 1, className: 'enyo-button-negative', content: 'Cancel', onclick: 'rootpassCancel'},
-						{kind: 'Button', flex: 1, className: 'enyo-button-affirmative ', content: 'Set', onclick: 'rootpassSet', name: 'setPass', disabled: true},
-					]}
-				]}				
-			]
-		},
-		{
-			kind: 'Popup2',
 			name: 'launchWarning',
 			modal: true,
 			scrim: true,
@@ -83,42 +55,10 @@ enyo.kind({
 					]}
 				]}				
 			]
-		},
-		{
-			kind: 'Popup2',
-			name: 'warningwarning',
-			modal: true,
-			scrim: true,
-			dismissWithClick: true,
-			components: [
-				{style: 'text-align: center; padding-bottom: 12px; font-size: 120%;', allowHtml: true, content: '<b><u>Warning!</u></b>'},
-				{allowHtml: true, style: 'text-align: center', content: 'Enabling this option will allow any trojan or virus to execute<br>destructive commands on your device without your knowledge!'},
-			]
 		}
 	],
-	rootpassCancel: function() {
-		this.$.rootpass.close()
-	},
-	rootpassSet: function() {
-		this.$.terminal.setPassword("root", this.$.pass1.getValue())
-		this.$.terminal.addToGroup("wterm", "root")
-		this.$.terminal.setupSU(true)
-		this.$.terminal.inject("exit")
-		this.$.rootpass.close()
-	},
-	verifyPassword: function() {
-		if ((this.$.pass1.getValue() == this.$.pass2.getValue()) && this.$.pass1.getValue().length > 0)
-			this.$.setPass.setDisabled(false)
-		else
-			this.$.setPass.setDisabled(true)
-	},
-	rootpassWarn: function() {
-		PREFS.set('rootpassOK', this.$.rootpassCheckbox.checked)
-	},
 	launchParamWarn: function() {
 		PREFS.set('launchParamsOK', this.$.launchParamsCheckbox.checked)
-		if (this.$.launchParamsCheckbox.checked)
-			this.$.warningwarning.openAtTopCenter()
 	},
 	warningCancel: function() {
 		this.$.launchWarning.close()
@@ -159,7 +99,7 @@ enyo.kind({
 			width: window.innerWidth,
 			height: 400,
 			onPluginReady: 'pluginReady',
-			exec: PREFS.get('exec')
+			exec: enyo.windowParams.root ? 'login -f root' : PREFS.get('exec')
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
 		this.$.terminal.vkb = this.$.vkb
@@ -169,16 +109,11 @@ enyo.kind({
 			kind: "AppMenu", components: [
 				{caption: "New Terminal", onclick: "newTerm"},
 				{caption: "Preferences", onclick: "openPrefs"},
-				{caption: "Set Root Password", onclick: "setRootPass"},
 				{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
 				{caption: "About", onclick: "openAbout"}
 			]
 		})
 		this.setup()
-	},
-	
-	setRootPass: function() {
-		this.$.rootpass.openAtTopCenter()
 	},
 
 	pluginReady: function() {
@@ -190,8 +125,6 @@ enyo.kind({
 				this.$.command.setContent(enyo.windowParams.command)
 			}
 		}
-		if (!this.$.terminal.hasPassword("root") && !PREFS.get('rootpassOK'))
-			this.setRootPass()
 	},
 	
 	setupKeyboard: function(portrait) {

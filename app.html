@@ -9,7 +9,10 @@
     </head>
 	<body>
 		<script type="text/javascript">
-			enyo.create({kind: "wTermApp"}).renderInto(document.body);
+			if (!PREFS.get('firstUse'))
+				enyo.create({kind: "wTermFirstUse"}).renderInto(document.body);
+			else
+				enyo.create({kind: "wTermApp"}).renderInto(document.body);
 		</script>
 	</body>
 </html>

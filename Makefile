@@ -24,6 +24,7 @@ clean-package:
 wterm:
 	$(MAKE) -C src/plugin
 	mv src/plugin/wterm wterm
+	mv src/plugin/setup setup
 
 bin/vttest:
 	$(MAKE) -C src/vttest
@@ -46,6 +47,7 @@ clean:
 	- rm -rf ipk
 	- rm -rf bin/*
 	- rm -rf wterm
+	- rm -rf setup
 	- $(MAKE) -C src/plugin clean
 	- $(MAKE) -C src/vttest clean
 	- $(MAKE) -C src/cmatrix clean

@@ -157,3 +157,23 @@
 .vkb.small .keyImg {
 	height: 16px;
 }
+
+/* Preferences */
+
+.preferences-header {
+    height: 58px;
+    max-height: 58px;
+}
+
+.preferences-header .enyo-header-inner {
+    padding: 3px 12px;
+}
+
+.preferences-header-image {
+    padding-right: 10px;
+}
+
+.enyo-preferences-box .enyo-button,
+.preference-prompt .enyo-button {
+    margin: 6px 3px;
+}

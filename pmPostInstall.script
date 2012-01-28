@@ -24,4 +24,6 @@ echo "${JUID}:5000:${APPID}:/dev/null:${APPDIR}/jail.conf" >> /var/palm/data/jai
 mkdir -p /etc/profile.d
 echo "PATH=\${PATH}:${APPDIR}/bin" > /etc/profile.d/${APPID}
 
+luna-send -n 1 palm://com.palm.applicationManager/launch '{"id":"us.ryanhope.wterm","params":{"resetFirstUse": true}}'
+
 exit 0
