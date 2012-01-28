@@ -1257,7 +1257,7 @@ void TerminalState::restoreScreen()
 
 	m_data = std::deque<TSLine>(m_savedScreen.m_data);
 	m_savedCursorLoc = Point(m_savedScreen.m_savedCursorLoc.getX(), m_savedScreen.m_savedCursorLoc.getY());
-	setNumBufferLines(m_displayScreenSize.getY());
+	setNumBufferLines(m_nNumBufferLines);
 
 	pthread_mutex_unlock(&m_rwLock);
 }
