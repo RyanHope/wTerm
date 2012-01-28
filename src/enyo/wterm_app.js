@@ -2,7 +2,7 @@ enyo.kind({
 
 	name: "wTermApp",
 	kind: enyo.VFlexBox,
-	
+
 	showVKB: false,
 
 	components: [
@@ -53,7 +53,7 @@ enyo.kind({
 						{kind: 'Button', flex: 1, className: 'enyo-button-negative', content: 'Cancel', onclick: 'warningCancel'},
 						{kind: 'Button', flex: 1, className: 'enyo-button-affirmative ', content: 'Ok', onclick: 'warningOk'},
 					]}
-				]}				
+				]}
 			]
 		}
 	],
@@ -68,7 +68,7 @@ enyo.kind({
 		this.$.launchWarning.close()
 		this.$.terminal.inject(enyo.windowParams.command)
 	},
-		
+
 	newTerm: function(inSender, inEvent, params, reactivate) {
 		enyo.application.m.launch(true)
 	},
@@ -79,7 +79,7 @@ enyo.kind({
 	windowDeactivated: function() {
 		this.$.terminal.setActive(0)
 	},
-	
+
 	initComponents: function() {
   		this.inherited(arguments)
 		this.showVKB = enyo.application.p.get('showVKB')
@@ -131,7 +131,7 @@ enyo.kind({
 			}
 		}
 	},
-	
+
 	setupKeyboard: function(portrait) {
 		if (portrait) {
 			this.$.vkb.small()
@@ -161,11 +161,11 @@ enyo.kind({
 				this.setupKeyboard(true)
 		}
 	},
-	
+
 	getVKBMenuText: function() {
 		return this.showVKB ? 'Hide Virtual Keyboard' : 'Show Virtual Keyboard'
 	},
-	
+
 	setVKBMenu: function() {
 		this.$.vkbToggle.setCaption(this.getVKBMenuText())
 	},
@@ -187,7 +187,7 @@ enyo.kind({
 		else
 			this.$.prefs.open();
 	},
-	
+
 	setup: function() {
 		this.$.getPreferencesCall.call({"keys":["rotationLock"]});
 	},

@@ -1,4 +1,5 @@
 enyo.kind({
+
 	name: 'Preferences',
 	kind: enyo.Control,
 	

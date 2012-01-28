@@ -1,4 +1,4 @@
-var	SDLK = {};
+var SDLK = {};
 
 /** @name ASCII mapped keysyms
  *  The keyboard syms have been cleverly chosen to map to ASCII

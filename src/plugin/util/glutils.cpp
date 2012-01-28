@@ -1,19 +1,19 @@
 /**
- * This file is part of SDLTerminal / wTerm.
+ * This file is part of wTerm.
  * Copyright (C) 2012 Stefan Bühler <stbuehler@web.de>
  *
- * SDLTerminal is free software: you can redistribute it and/or modify
+ * wTerm is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * SDLTerminal is distributed in the hope that it will be useful,
+ * wTerm is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with SDLTerminal.  If not, see <http://www.gnu.org/licenses/>.
+ * along with wTerm.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "glutils.hpp"
@@ -54,7 +54,7 @@ GLuint loadShader(GLenum type, const char *source) {
 
 		glGetShaderInfoLog(shader, sizeof(buf), 0, buf);
 
-		syslog(LOG_ERR, "%s compile error: %s", sname, buf); 
+		syslog(LOG_ERR, "%s compile error: %s", sname, buf);
 
 		glDeleteShader(shader);
 		checkGLError();
@@ -65,7 +65,7 @@ GLuint loadShader(GLenum type, const char *source) {
 		glGetShaderInfoLog(shader, sizeof(buf), 0, buf);
 
 		if (buf[0]) {
-			syslog(LOG_INFO, "%s compile log: %s", sname, buf); 
+			syslog(LOG_INFO, "%s compile log: %s", sname, buf);
 		}
 	}
 
