@@ -3,7 +3,7 @@ enyo.kind({
 	name: "wTermDock",
 	kind: enyo.VFlexBox,
 	align: 'center',
-		
+	
 	initComponents: function() {
 		this.inherited(arguments)
 		this.createComponent({
@@ -17,7 +17,7 @@ enyo.kind({
     		name: 'terminal',
 			width: window.innerWidth,
 			height: window.innerHeight,
-			exec: PREFS.get('exhibition'),
+			exec: enyo.application.p.get('exhibition'),
 		})
 	},
 	

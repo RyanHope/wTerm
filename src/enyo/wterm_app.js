@@ -58,7 +58,7 @@ enyo.kind({
 		}
 	],
 	launchParamWarn: function() {
-		PREFS.set('launchParamsOK', this.$.launchParamsCheckbox.checked)
+		enyo.application.p.set('launchParamsOK', this.$.launchParamsCheckbox.checked)
 	},
 	warningCancel: function() {
 		this.$.launchWarning.close()
@@ -82,7 +82,7 @@ enyo.kind({
 	
 	initComponents: function() {
   		this.inherited(arguments)
-		this.showVKB = PREFS.get('showVKB')
+		this.showVKB = enyo.application.p.get('showVKB')
 		this.createComponent({
 			name: "prefs", 
 			kind: "Preferences", 
@@ -99,7 +99,7 @@ enyo.kind({
 			width: window.innerWidth,
 			height: 400,
 			onPluginReady: 'pluginReady',
-			exec: enyo.windowParams.root ? 'login -f root' : PREFS.get('exec')
+			exec: enyo.windowParams.root ? 'login -f root' : enyo.application.p.get('exec')
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
 		this.$.terminal.vkb = this.$.vkb
@@ -118,7 +118,7 @@ enyo.kind({
 
 	pluginReady: function() {
 		if (enyo.windowParams.command) {
-			if (PREFS.get('launchParamsOK')) {
+			if (enyo.application.p.get('launchParamsOK')) {
 				this.$.terminal.inject(enyo.windowParams.command)
 			} else {
 				this.$.launchWarning.openAtTopCenter()
@@ -167,7 +167,7 @@ enyo.kind({
 
 	toggleVKB: function() {
 		this.showVKB = !this.showVKB
-		PREFS.set('showVKB', this.showVKB)
+		enyo.application.p.set('showVKB', this.showVKB)
 		this.setVKBMenu()
 		this.setup()
 	},
@@ -177,10 +177,10 @@ enyo.kind({
 	},
 
 	openPrefs: function() {
-		if (this.$.prefs.showing)
-			this.$.prefs.close();
+		if (this.$.enyo.application.p.showing)
+			this.$.enyo.application.p.close();
 		else
-			this.$.prefs.open();
+			this.$.enyo.application.p.open();
 	},
 	
 	setup: function() {

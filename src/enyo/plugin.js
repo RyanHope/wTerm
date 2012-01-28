@@ -30,7 +30,7 @@ enyo.kind({
 			passTouchEvents: true,
 			width: this.width,
 			height: this.height,
-			params: [PREFS.get('fontSize').toString(10), this.exec]
+			params: [enyo.application.p.get('fontSize').toString(10), this.exec]
 		})
 	},
 		
@@ -38,7 +38,7 @@ enyo.kind({
   		this.isReady = true
 		this.setColors()
 		this.setKeys()
-		this.setScrollBufferLines(PREFS.get('bufferlines'))
+		this.setScrollBufferLines(enyo.application.p.get('bufferlines'))
   		this.doPluginReady()
   	},
   	pluginConnected: function(inSender, inResponse, inRequest) {
@@ -148,8 +148,8 @@ enyo.kind({
 	},
 
   	setColors: function() {
-  		var colorScheme = PREFS.get('colorScheme')
-		var colorSchemes = PREFS.get('colorSchemes')
+  		var colorScheme = enyo.application.p.get('colorScheme')
+		var colorSchemes = enyo.application.p.get('colorSchemes')
 		this.currentColors = colorSchemes[colorScheme]
 		if (colorScheme == 'Black on Random Light')
 			this.currentColors[17] = this.currentColors[19] = this.hsvToRgb(Math.floor(Math.random()*256),34,247)
@@ -164,8 +164,8 @@ enyo.kind({
   	},
   	
   	setKeys: function() {
-  		var inputScheme = PREFS.get('inputScheme')
-		var inputSchemes = PREFS.get('inputSchemes')
+  		var inputScheme = enyo.application.p.get('inputScheme')
+		var inputSchemes = enyo.application.p.get('inputSchemes')
 		this.currentKeys = inputSchemes[inputScheme]
 		for (var i=0; i<this.currentKeys.length; i++)
 			this.$.plugin.callPluginMethodDeferred(null, 'setKey', i, this.decodeEscape(this.currentKeys[i]))

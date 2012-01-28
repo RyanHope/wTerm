@@ -19,7 +19,7 @@ enyo.kind({
 
 	launch: function(relaunch) {
 		if (enyo.windowParams.resetFirstUse)
-			PREFS.set('firstUse', false)
+			enyo.application.p.set('firstUse', false)
 		else if (enyo.windowParams.dockMode || enyo.windowParams.windowType === 'dockModeWindow')
 			enyo.windows.openWindow('dock.html', 'dock', enyo.windowParams, {window:"dockMode"});
 		else

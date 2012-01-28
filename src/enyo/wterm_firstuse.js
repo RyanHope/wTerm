@@ -48,7 +48,7 @@ enyo.kind({
 	},
 	
 	addRootConsoleToLauncher: function() {
-		var rootLP = PREFS.get('rootLaunchPoint')
+		var rootLP = enyo.application.p.get('rootLaunchPoint')
 		if (rootLP)
 			this.$.appManager.call(
 				{launchPointId: rootLP},
@@ -61,16 +61,16 @@ enyo.kind({
 	},
 	
 	rootLaunchPointResponse: function(inSender, inResponse) {
-		PREFS.set('rootLaunchPoint', inResponse.launchPointId)
+		enyo.application.p.set('rootLaunchPoint', inResponse.launchPointId)
 	},
 	
 	setupLaunchPointResponse: function(inSender, inResponse) {
-		PREFS.set('setupLaunchPoint', inResponse.launchPointId)
+		enyo.application.p.set('setupLaunchPoint', inResponse.launchPointId)
 	},
 	
 	create: function() {
 		this.inherited(arguments);
-		var setupLP = PREFS.get('setupLaunchPoint')
+		var setupLP = enyo.application.p.get('setupLaunchPoint')
 		if (setupLP)
 			this.$.appManager.call(
 				{launchPointId: setupLP},
@@ -87,7 +87,7 @@ enyo.kind({
 		if (enyo.windowParams.setup)
 			window.close()
 		else {
-			PREFS.set('firstUse', true)
+			enyo.application.p.set('firstUse', true)
 			this.destroyComponents()
 			this.createComponent({kind: "wTermApp"})
 			this.render()

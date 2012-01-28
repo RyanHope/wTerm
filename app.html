@@ -9,7 +9,7 @@
     </head>
 	<body>
 		<script type="text/javascript">
-			if (!PREFS.get('firstUse') || enyo.windowParams.setup)
+			if (!enyo.application.p.get('firstUse') || enyo.windowParams.setup)
 				enyo.create({kind: "wTermFirstUse"}).renderInto(document.body);
 			else
 				enyo.create({kind: "wTermApp"}).renderInto(document.body);
