@@ -15,9 +15,13 @@
  * along with SDLTerminal.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _GNU_SOURCE
+
 #include <syslog.h>
 #include <pwd.h>
 #include <PDL.h>
+
+#include <stdio.h>
 
 void setup_su(int enable)
 {
@@ -61,7 +65,7 @@ int hasPassword(const char *user)
 	return (strlen(pw->pw_passwd)==34);
 }
 
-int setPassword(const char *user, const char *password)
+void setPassword(const char *user, const char *password)
 {
 	char *cmd = 0;
 	asprintf(&cmd, "echo -n \"%s:%s\" | chpasswd -m", user, password);
@@ -148,6 +152,8 @@ PDL_bool setupSU(PDL_JSParameters *params)
 
 int main(int argc, const char* argv[])
 {
+	SDL_Event Event;
+
 	openlog("us.ryanhope.wterm.plugin", LOG_PID, LOG_USER);
 	setlogmask(LOG_UPTO(LOGLEVEL));
 
@@ -164,7 +170,6 @@ int main(int argc, const char* argv[])
 
 	PDL_CallJS("ready", NULL, 0);
 
-	SDL_Event Event;
 	do {
 		SDL_WaitEvent(&Event);
 	} while (Event.type != SDL_QUIT);
