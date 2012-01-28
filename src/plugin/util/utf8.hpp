@@ -21,6 +21,8 @@
 
 #include "sdl/sdlcore.hpp"
 
+#include <string>
+
 /* parse first utf-8 char in 0-terminated str, returns 0 on failure.
  * only reads <= 0xffff codes
  */
@@ -30,6 +32,8 @@ Uint16 parseUtf8Char(const char *str);
  * with 0-termination
  */
 void writeUtf8Char(char *buf, Uint16 code);
+
+void appendUtf8Char(std::string &str, Uint16 code);
 
 #endif
 
