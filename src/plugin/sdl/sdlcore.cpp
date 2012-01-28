@@ -230,7 +230,7 @@ void SDLCore::eventLoop()
 			gotEvent = SDL_PollEvent(&event);
 		}
 		checkKeyRepeat();
-		
+
 
 		if (isDirty(FONT_SIZE_DIRTY_BIT) && active)
 		{
@@ -496,18 +496,18 @@ void SDLCore::checkKeyRepeat()
 		now = SDL_GetTicks();
 		interval = (now - m_keyRepeat.timestamp);
 		//syslog(LOG_ERR, "Key Repeat Active [now,interval,delay,timestamp,first] %i - %i - %i - %i - %i",now,interval,m_keyRepeat.delay,m_keyRepeat.timestamp,m_keyRepeat.firsttime);
-		if (m_keyRepeat.firsttime) 
+		if (m_keyRepeat.firsttime)
 		{
-			if (interval > (Uint32)m_keyRepeat.delay) 
+			if (interval > (Uint32)m_keyRepeat.delay)
 			{
 				m_keyRepeat.timestamp = now;
 				m_keyRepeat.firsttime = 0;
 				//syslog(LOG_ERR, "First time delay hit");
 			}
-		} 
-		else 
+		}
+		else
 		{
-			if (interval > (Uint32)m_keyRepeat.interval) 
+			if (interval > (Uint32)m_keyRepeat.interval)
 			{
 				m_keyRepeat.timestamp = now;
 				SDL_PushEvent(&m_keyRepeat.evt);
@@ -526,11 +526,11 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 
 	modstate = (Uint16)SDL_GetModState();
 
-	if (event.type == SDL_KEYDOWN) 
+	if (event.type == SDL_KEYDOWN)
 	{
 		state = SDL_PRESSED;
 		event.key.keysym.mod = (SDLMod)modstate;
-		switch (event.key.keysym.sym) 
+		switch (event.key.keysym.sym)
 		{
 			case SDLK_UNKNOWN:
 				repeatable = 1;
@@ -578,11 +578,11 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 				repeatable = 1;
 				break;
 		}
-	} 
+	}
 	else  // key up
 	{
 		state = SDL_RELEASED;
-		switch (event.key.keysym.sym) 
+		switch (event.key.keysym.sym)
 		{
 			case SDLK_UNKNOWN:
 				break;
@@ -623,7 +623,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 		event.key.keysym.mod = (SDLMod)modstate;
 	}
 
-	if (event.key.keysym.sym != SDLK_UNKNOWN) 
+	if (event.key.keysym.sym != SDLK_UNKNOWN)
 	{
 		/* Drop events that don't change state */
 		Uint8 *keyState = SDL_GetKeyState(NULL);
@@ -637,7 +637,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 
 	if (event.type == SDL_KEYUP)
 	{
-		if (m_keyRepeat.timestamp && m_keyRepeat.evt.key.keysym.sym == event.key.keysym.sym) 
+		if (m_keyRepeat.timestamp && m_keyRepeat.evt.key.keysym.sym == event.key.keysym.sym)
 		{
 			m_keyRepeat.timestamp = 0;
 //			syslog(LOG_ERR, "Removed Repeat Event");
@@ -645,7 +645,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 	}
 	else
 	{
-		if (repeatable && m_keyRepeat.delay != 0) 
+		if (repeatable && m_keyRepeat.delay != 0)
 		{
 			m_keyRepeat.evt = event;
 			m_keyRepeat.firsttime = 1;

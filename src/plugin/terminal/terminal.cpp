@@ -237,7 +237,7 @@ int Terminal::forkPTY()
 			if(i != m_slaveFD)
 			{
 				close(i);
-				
+
 				if (i == m_masterFD)
 				{
 					m_masterFD = -1;
@@ -429,7 +429,7 @@ void Terminal::newLogin()
 			syslog(LOG_ERR, "Cannot acquire slave as controlling terminal.");
 			_exit(0);
 		}
-		
+
 		if (dup2(m_slaveFD, STDIN_FILENO) != STDIN_FILENO)
 		{
 			syslog(LOG_ERR, "Cannot duplicate slave into stdin.");

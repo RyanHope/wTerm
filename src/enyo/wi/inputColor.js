@@ -3,11 +3,11 @@ enyo.kind({
 	kind: 'Item',
 	layoutKind: 'HFlexLayout',
 	align: 'center',
-	
+
 	events: {
 		onChanged: ''
 	},
-	
+
 	published: {
 		// caption of the row
 		caption: '',
@@ -22,11 +22,11 @@ enyo.kind({
 	// format is automatically set when you initially set the value at creation or through setValue.
 	// valid formats: any valid css color string, an array [r, g, b], or an object {r: 0, g: 0, b: 0}
 	format: 'string',
-	
+
 	components: [
-		
+
 		{name: 'popup', kind: 'wi.InputColor.Popup', onColorSelect: 'colorSelected'},
-		
+
 		{flex: 1, components: [
 			{name: 'display', className: 'value-display', onclick: 'openPopup', components: [
 				{name: 'displayText1', className: 'value-display-text-1'},
@@ -35,14 +35,14 @@ enyo.kind({
 		]},
 		{name: 'caption', className: 'enyo-label'},
 	],
-	
+
 	create: function () {
 	    this.inherited(arguments);
 		this.addClass('wi-input-color-item');
 		this.$.caption.setContent(this.caption);
 		this.updateDisplay();
 	},
-	
+
 	setValue: function(value) {
 		this.value = value;
 		this.updateDisplay();
@@ -50,7 +50,7 @@ enyo.kind({
 	getValue: function() {
 		return this.value;
 	},
-	
+
 	updateDisplay: function() {
 		if (enyo.isString(this.value)) {
 			this.format = 'string';
@@ -82,32 +82,32 @@ enyo.kind({
 			this.$.displayText2.setContent('[ERR]');
 		}
 	},
-	
+
 	openPopup: function() {
 		this.$.popup.openAtCenter();
 	},
-	
+
 	colorSelected: function(inSender, inColor) {
 		this.log(inColor);
 		this.value = inColor;
 		this.updateDisplay();
 		this.doChanged();
 	},
-	
+
 });
 
 enyo.kind({
 	name: 'wi.InputColor.Popup',
 	kind: 'Popup',
 	scrim: true,
-	
-	popupBorderWidth:	24,	// so says the css for the popup
-	previewWidth:		55,	// the width+marginright of the preview element
-	
+
+	popupBorderWidth:   24, // so says the css for the popup
+	previewWidth:       55, // the width+marginright of the preview element
+
 	events: {
 		onColorSelect: ''
 	},
-	
+
 	components: [
 		{kind: 'VFlexBox', className: 'left-container', components: [
 			{name: 'original', className: 'original', flex: 1},
@@ -141,7 +141,7 @@ enyo.kind({
 			]},
 		]},
 	],
-	
+
 	componentsReady: function() {
 		this.inherited(arguments);
 		if (this.owner.manualInput) {
@@ -164,15 +164,15 @@ enyo.kind({
 		//this.applyStyle('-webkit-transition', '-webkit-transform 0.3s ease');
 		this.$.canvas.applyStyle('-webkit-transition', 'opacity 0.6s linear');
 	},
-	
+
 	doOpen: function() {
 		this.$.canvas.hasNode();
 		this.ctx = this.$.canvas.node.getContext('2d');
-		
+
 		this.img = new Image();
 		this.img.src = 'src/enyo/wi/images/colors.png';
 		this.img.onload = enyo.bind(this, 'drawImage');
-		
+
 		switch (this.owner.format) {
 			case 'string':
 				this.$.original.applyStyle('background-color', this.owner.value);
@@ -193,11 +193,11 @@ enyo.kind({
 	},
 	doClose: function() {
 	},
-	
+
 	drawImage: function() {
 		this.ctx.drawImage(this.img, 0, 0);
 	},
-	
+
 	canvasClick: function(inSender, inEvent) {
 		if (!this.manualShowing) {
 			var d = this.canvasGetColorFromPosition(this.canvasCursorClickPosition(inEvent));
@@ -229,7 +229,7 @@ enyo.kind({
 		var data = this.ctx.getImageData(pos.x, pos.y, 1, 1).data;
 		return {r: data[0], g: data[1], b: data[2], a: data[3]};
 	},
-	
+
 	dragGetCanvasPosition: function(inSender, inEvent) {
 		var x, y;
 		x = inEvent.pageX - (parseInt(this.node.style.left, 10) + this.popupBorderWidth + this.previewWidth);
@@ -262,7 +262,7 @@ enyo.kind({
 			this.doColorSelect(c);
 		}
 	},
-	
+
 	toggleManual: function(inSender, inEvent) {
 		if (this.manualShowing) {
 			this.hideManual();
@@ -286,13 +286,13 @@ enyo.kind({
 		this.$.manual.show();
 		this.$.manualInput.forceFocus();
 	},
-	
+
 	manualSave: function(inSender, inEvent) {
 		var text = this.$.manualInput.getValue();
 		this.doColorSelect(text);
 		this.close();
 	},
-	
+
 	keyDown: function(inSender, inEvent) {
 		var text = this.$.manualInput.getValue();
 		if (inEvent.keyCode === 13) {
@@ -315,7 +315,7 @@ enyo.kind({
 			this.$.manualSave.setDisabled(true);
 		}
 	},
-	
+
 	isValidColorString: function(string) {
 		if (colorWords.indexOf(string) > -1) return true;
 		if (string.match(/#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/)) return true;
@@ -327,7 +327,7 @@ enyo.kind({
 		if (string.match(/hsla\(\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-9][0-9]|3[0-5][0-9]|360)\b\s*,\s*(\d?\d%|100%)+\s*,\s*(\d?\d%|100%)+\s*,\s*([0-9]+(?:\.[0-9]+)?|\.[0-9]+)\s*\)/)) return true;
 		return false;
 	},
-	
+
 	rgbToHex: function(t) {
 		return '#' + this.toHex(t.r) + this.toHex(t.g) + this.toHex(t.b);
 	},
@@ -338,7 +338,7 @@ enyo.kind({
 		 return "0123456789ABCDEF".charAt((n-n%16)/16)
 		      + "0123456789ABCDEF".charAt(n%16);
 	},
-	
+
 });
 
 var colorWords = [

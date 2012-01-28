@@ -1,11 +1,11 @@
 include Makefile.inc
 
-APP			:= wterm
-VENDOR		:= us.ryanhope
-APPID 		:= $(VENDOR).$(APP)
+APP         := wterm
+VENDOR      := us.ryanhope
+APPID       := $(VENDOR).$(APP)
 
-VERSION		:= $(shell cat appinfo.json | grep version | cut -f 2 -d ":" | cut -f 2 -d "\"")
-IPK			:= $(APPID)_$(VERSION)_$(ARCH).ipk
+VERSION     := $(shell cat appinfo.json | grep version | cut -f 2 -d ":" | cut -f 2 -d "\"")
+IPK         := $(APPID)_$(VERSION)_$(ARCH).ipk
 
 .PHONY: wterm package install clean
 

@@ -2,21 +2,21 @@ enyo.kind({
 	name: 'wi.Header',
 	kind: enyo.Control,
 	published: {
-		type:			'',
-		icon:			'',
-		title:			'',
-		version:		'',
-		tagline:		'Random Taglines Are Awesome',
-		date:			[],
-		random:			[]
+		type:           '',
+		icon:           '',
+		title:          '',
+		version:        '',
+		tagline:        'Random Taglines Are Awesome',
+		date:           [],
+		random:         []
 	},
-	_selected:	false,
-	_type:		'',
-	_icon:		'',
-	_title:		'',
-	_version:	'',
-	_tagline:	'',
-	
+	_selected: false,
+	_type:      '',
+	_icon:      '',
+	_title:     '',
+	_version:   '',
+	_tagline:   '',
+
 	components: [
 		{kind: 'PageHeader', components: [
 			{name: 'header', kind: 'HFlexBox', className: 'wi-header', components: [
@@ -33,17 +33,17 @@ enyo.kind({
 		{name:'updateIcon', kind: enyo.PalmService, service: enyo.palmServices.application,
 			method: 'updateLaunchPointIcon', onSuccess: 'updatedIcon', onFailure: 'updateIconFailed'},
 	],
-	
+
 	rendered: function() {
 		if (!this._selected) {
-			var d			= this.getDate()
-			var r			= this.getRandom();
-			this._type		= d.type    || r.type    || this.type;
-			this._icon		= d.icon    || r.icon    || this.icon    || enyo.fetchAppInfo().icon;
-			this._title		= d.title   || r.title   || this.title   || enyo.fetchAppInfo().title;
-			this._version	= d.version || r.version || this.version || 'v' + enyo.fetchAppInfo().version;
-			this._tagline	= d.tagline || r.tagline || this.tagline || '&nbsp;';
-			this._selected	= true;
+			var d           = this.getDate()
+			var r           = this.getRandom();
+			this._type      = d.type    || r.type    || this.type;
+			this._icon      = d.icon    || r.icon    || this.icon    || enyo.fetchAppInfo().icon;
+			this._title     = d.title   || r.title   || this.title   || enyo.fetchAppInfo().title;
+			this._version   = d.version || r.version || this.version || 'v' + enyo.fetchAppInfo().version;
+			this._tagline   = d.tagline || r.tagline || this.tagline || '&nbsp;';
+			this._selected  = true;
 		}
 		if (this._type && !this.$.header.hasClass(this._type))
 			this.$.header.addClass(this._type);
@@ -54,12 +54,12 @@ enyo.kind({
 		this.$.version.setContent(this._version);
 		this.$.tagline.setContent(this._tagline);
 	},
-	
+
 	setIcon: function(icon) {
 		if (icon) this.$.icon.setSrc(icon);
 		else this.$.icon.setSrc(this._icon);
 	},
-	
+
 	getDate: function() {
 		if (this.date.length == 0) return false;
 		var date  = new Date();
@@ -96,5 +96,5 @@ enyo.kind({
 		}
 		return this.random[0];
 	},
-	
+
 });

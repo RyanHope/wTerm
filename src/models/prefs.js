@@ -1,5 +1,5 @@
 function Prefs() {
-	
+
 	this.defaults = {
 		firstUse: false,
 		rootLaunchPoint: null,
@@ -215,7 +215,7 @@ function Prefs() {
 			]
 		}
 	}
-	
+
 	for (key in this.defaults) {
 		if (this.get(key)==null)
 			this.set(key, this.defaults[key])
@@ -232,7 +232,7 @@ function Prefs() {
 			this.set(key, inputSchemes)
 		}
 	}
-	
+
 }
 
 Prefs.prototype.set = function(key, value) {

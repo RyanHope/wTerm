@@ -54,7 +54,7 @@ GLuint loadShader(GLenum type, const char *source) {
 
 		glGetShaderInfoLog(shader, sizeof(buf), 0, buf);
 
-		syslog(LOG_ERR, "%s compile error: %s", sname, buf); 
+		syslog(LOG_ERR, "%s compile error: %s", sname, buf);
 
 		glDeleteShader(shader);
 		checkGLError();
@@ -65,7 +65,7 @@ GLuint loadShader(GLenum type, const char *source) {
 		glGetShaderInfoLog(shader, sizeof(buf), 0, buf);
 
 		if (buf[0]) {
-			syslog(LOG_INFO, "%s compile log: %s", sname, buf); 
+			syslog(LOG_INFO, "%s compile log: %s", sname, buf);
 		}
 	}
 

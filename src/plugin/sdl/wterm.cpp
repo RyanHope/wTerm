@@ -99,7 +99,7 @@ WTerm::~WTerm()
 
 void WTerm::updateDisplaySize()
 {
-	if (m_terminalState != NULL) 
+	if (m_terminalState != NULL)
 	{
 		unsigned int cols = m_fontgl.cols(), rows = m_fontgl.rows();
 
@@ -367,7 +367,7 @@ void WTerm::redraw()
 	}
 
 	m_fontgl.setCursor(m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR && (m_terminalState->getScollOffset() == 0),
-		 m_terminalState->getCursorLocation().getY()-1,
+		m_terminalState->getCursorLocation().getY()-1,
 		m_terminalState->getCursorLocation().getX()-1,
 		m_reverse ? TS_COLOR_BACKGROUND : TS_COLOR_FOREGROUND);
 
@@ -390,7 +390,7 @@ void WTerm::redrawBlinked()
 	clearScreen(m_reverse ? defState.foregroundColor : defState.backgroundColor);
 
 	m_fontgl.setCursor(m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR,
-		 m_terminalState->getCursorLocation().getY()-1,
+		m_terminalState->getCursorLocation().getY()-1,
 		m_terminalState->getCursorLocation().getX()-1,
 		m_reverse ? TS_COLOR_BACKGROUND : TS_COLOR_FOREGROUND);
 
