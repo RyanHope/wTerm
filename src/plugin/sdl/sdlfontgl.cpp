@@ -706,5 +706,12 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo, unsigned int col, 
 void SDLFontGL::clearText() {
 	if (m_cellData) {
 		memset(m_cellData, 0, 4*m_cellsWidth * m_cellsHeight);
+		// Set default background, used for unspecified cells.
+		for(unsigned row = 0; row < m_rows; ++row) {
+			for(unsigned col = 0; col < m_cols; ++col) {
+				unsigned int ndx = 4*(col + m_cellsWidth*(m_rows - row - 1));
+				m_cellData[ndx+3] = TS_COLOR_BACKGROUND;
+			}
+		}
 	}
 }
