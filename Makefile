@@ -53,3 +53,6 @@ clean:
 	- $(MAKE) -C src/plugin clean
 	- $(MAKE) -C src/vttest clean
 	- $(MAKE) -C src/cmatrix clean
+
+resetFirstUse:
+	luna-send -n 1 palm://com.palm.applicationManager/launch '{"id":"us.ryanhope.wterm","params":{"resetFirstUse": true}}'
