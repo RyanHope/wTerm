@@ -19,4 +19,6 @@ sed -i -e '/^wterm:/d' /etc/group
 
 rm -rf /usr/local/bin/su
 
+#luna-send -n 1 palm://com.palm.applicationManager/launch '{"id":"us.ryanhope.wterm","params":{"removeLaunchPoints": true}}'
+
 exit 0
