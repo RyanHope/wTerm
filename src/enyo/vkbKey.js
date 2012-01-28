@@ -18,7 +18,7 @@ enyo.kind({
 	layoutKind: 'HFlexLayout',
 	pack: 'center',
 	align: 'center',
-	
+
 	published: {
 		down: false,
 		depressed: false,
@@ -27,7 +27,7 @@ enyo.kind({
 		sym: -1,
 		symbols: null
 	},
-	
+
 	events: {
 		ontouchstart: '',
 		ontouchend: ''
@@ -38,51 +38,51 @@ enyo.kind({
 		this.addClass('enyo-button');
 		this.addClass('key');
 	},
-	
+
 	initComponents: function() {
-    	this.inherited(arguments)
-    	if (this.symbols) {
+	this.inherited(arguments)
+	if (this.symbols) {
 			if (!this.visual) this.visual = arrayRemoveNull(this.symbols);
-	    	switch(this.visual.length) {
-	    		case 1:
-	    			this.createComponents([
-	    				{flex: 1, content: vbkKeyContent(this.visual[0])}
-    				]);
-	    			break;
-	    		case 2:
-	    			this.createComponents([
-	    				{flex: 1, kind: 'VFlexBox', components: [
-	    					{content: vbkKeyContent(this.visual[1])},
-	    					{content: vbkKeyContent(this.visual[0])},
-	    				]}
-	    			]);
-	    			break;
-	    		case 3:
-	    			this.createComponents([
-	    				{flex: 1, kind: 'VFlexBox', components: [
-	    					{content: vbkKeyContent(this.visual[1])},
-	    					{content: vbkKeyContent(this.visual[0])},
-	    				]},
-	    				{flex: 1, kind: 'VFlexBox', pack: 'start', components: [
-	    					{content: vbkKeyContent(this.visual[2]), flex: 1}
-	    				]},
-    				]);
-	    			break;
-	    		case 4:
-	    			this.createComponents([
-	    				{flex: 1, kind: 'VFlexBox', components: [
-	    					{content: vbkKeyContent(this.visual[1])},
-	    					{content: vbkKeyContent(this.visual[0])},
-	    				]},
-	    				{flex: 1, kind: 'VFlexBox', components: [
-	    					{content: vbkKeyContent(this.visual[3])},
-	    					{content: vbkKeyContent(this.visual[2])}
-	    				]}
-    				]);
-	    			break;
-	    	}
+		switch(this.visual.length) {
+			case 1:
+				this.createComponents([
+					{flex: 1, content: vbkKeyContent(this.visual[0])}
+				]);
+				break;
+			case 2:
+				this.createComponents([
+					{flex: 1, kind: 'VFlexBox', components: [
+						{content: vbkKeyContent(this.visual[1])},
+						{content: vbkKeyContent(this.visual[0])},
+					]}
+				]);
+				break;
+			case 3:
+				this.createComponents([
+					{flex: 1, kind: 'VFlexBox', components: [
+						{content: vbkKeyContent(this.visual[1])},
+						{content: vbkKeyContent(this.visual[0])},
+					]},
+					{flex: 1, kind: 'VFlexBox', pack: 'start', components: [
+						{content: vbkKeyContent(this.visual[2]), flex: 1}
+					]},
+				]);
+				break;
+			case 4:
+				this.createComponents([
+					{flex: 1, kind: 'VFlexBox', components: [
+						{content: vbkKeyContent(this.visual[1])},
+						{content: vbkKeyContent(this.visual[0])},
+					]},
+					{flex: 1, kind: 'VFlexBox', components: [
+						{content: vbkKeyContent(this.visual[3])},
+						{content: vbkKeyContent(this.visual[2])}
+					]}
+				]);
+				break;
+		}
 	    }
-   	},
+	},
 
 	rendered: function() {
 		this.inherited(arguments);
@@ -92,27 +92,27 @@ enyo.kind({
 			this.node.ontouchend = enyo.bind(this,'handleTouchend')
 		}
 	},
-  	
-  	handleTouchstart: function() {
-  		if (!this.disabled) {
-  			if (this.toggling)
-	  			this.setDown(!this.down)
-  			else
-  				this.setDown(true)
-	  		return this.doTouchstart()
-	  	}
-  	},
-  	
-  	handleTouchend: function() {
-  		if (!this.disabled && !this.toggling) {
-	  		this.setDown(false)
-	  		return this.doTouchend()
-	  		
-	  	}
-  	},
-	
-	mouseoverHandler: function() {},                                                                    
-    mouseoutHandler: function() {},                                                                
+
+	handleTouchstart: function() {
+		if (!this.disabled) {
+			if (this.toggling)
+				this.setDown(!this.down)
+			else
+				this.setDown(true)
+			return this.doTouchstart()
+		}
+	},
+
+	handleTouchend: function() {
+		if (!this.disabled && !this.toggling) {
+			this.setDown(false)
+			return this.doTouchend()
+
+		}
+	},
+
+	mouseoverHandler: function() {},
+    mouseoutHandler: function() {},
     mousedownHandler: function() {},
 	mouseupHandler: function() {},
 	flickHandler: function() {},
@@ -120,5 +120,5 @@ enyo.kind({
 	dragstartHandler: function() {},
 	dragoverHandler: function() {},
 	dragfinishHandler: function() {}
-	
+
 })

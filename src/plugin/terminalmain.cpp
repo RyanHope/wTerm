@@ -1,24 +1,24 @@
 /**
- * This file is part of SDLTerminal.
+ * This file is part of wTerm.
  * Copyright (C) 2011 Vincent Ho <www.whimsicalvee.com>
  * Copyright (C) 2011-2012 Ryan Hope <rmh3093@gmail.com>
  *
- * SDLTerminal is free software: you can redistribute it and/or modify
+ * wTerm is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * SDLTerminal is distributed in the hope that it will be useful,
+ * wTerm is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with SDLTerminal.  If not, see <http://www.gnu.org/licenses/>.
+ * along with wTerm.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "sdl/sdlcore.hpp"
-#include "sdl/sdlterminal.hpp"
+#include "sdl/wterm.hpp"
 #include "terminal/terminal.hpp"
 #include "terminal/vtterminalstate.hpp"
 #include "util/utf8.hpp"
@@ -26,32 +26,32 @@
 #include <syslog.h>
 #include <PDL.h>
 
-SDLTerminal *sdlTerminal;
+WTerm *wTerm;
 
 
 
 PDL_bool inject(PDL_JSParameters *params) {
 	const char *cmd = PDL_GetJSParamString(params, 0);
-	sdlTerminal->injectData(cmd);
-	sdlTerminal->injectData("\n");
+	wTerm->injectData(cmd);
+	wTerm->injectData("\n");
 	return PDL_TRUE;
 }
 
 PDL_bool setScrollBufferLines(PDL_JSParameters *params) {
-	sdlTerminal->setScrollBufferLines(PDL_GetJSParamInt(params, 0));
+	wTerm->setScrollBufferLines(PDL_GetJSParamInt(params, 0));
 	return PDL_TRUE;
 }
 
 PDL_bool setActive(PDL_JSParameters *params) {
 	int active = PDL_GetJSParamInt(params, 0);
-	sdlTerminal->setActive(active);
+	wTerm->setActive(active);
 	if (active == 0)
-		sdlTerminal->stopKeyRepeat();
+		wTerm->stopKeyRepeat();
 	return PDL_TRUE;
 }
 
 PDL_bool setKey(PDL_JSParameters *params) {
-	sdlTerminal->setKey((TSInput_t)PDL_GetJSParamInt(params, 0), PDL_GetJSParamString(params, 1));
+	wTerm->setKey((TSInput_t)PDL_GetJSParamInt(params, 0), PDL_GetJSParamString(params, 1));
 	return PDL_TRUE;
 }
 
@@ -62,29 +62,29 @@ PDL_bool setColor(PDL_JSParameters *params) {
 	int g = PDL_GetJSParamInt(params, 2);
 	int b = PDL_GetJSParamInt(params, 3);
 
-	sdlTerminal->setColor(color,r,g,b);
+	wTerm->setColor(color,r,g,b);
 
-	sdlTerminal->refresh();
+	wTerm->refresh();
 
 	return PDL_TRUE;
 }
 
 PDL_bool setFontSize(PDL_JSParameters *params) {
-	sdlTerminal->setFontSize(PDL_GetJSParamInt(params, 0));
+	wTerm->setFontSize(PDL_GetJSParamInt(params, 0));
 	char *reply = 0;
-	asprintf(&reply, "%d", sdlTerminal->getFontSize());
+	asprintf(&reply, "%d", wTerm->getFontSize());
 	PDL_JSReply(params, reply);
 	free(reply);
 
-	sdlTerminal->updateDisplaySize();
-	sdlTerminal->refresh();
+	wTerm->updateDisplaySize();
+	wTerm->refresh();
 
 	return PDL_TRUE;
 }
 
 PDL_bool getFontSize(PDL_JSParameters *params) {
 	char *reply = 0;
-	asprintf(&reply, "%d", sdlTerminal->getFontSize());
+	asprintf(&reply, "%d", wTerm->getFontSize());
 	PDL_JSReply(params, reply);
 	free(reply);
 	return PDL_TRUE;
@@ -92,7 +92,7 @@ PDL_bool getFontSize(PDL_JSParameters *params) {
 
 PDL_bool getDimensions(PDL_JSParameters *params) {
 	char *reply = 0;
-	asprintf(&reply, "[%d,%d]", sdlTerminal->getMaximumLinesOfText(), sdlTerminal->getMaximumColumnsOfText());
+	asprintf(&reply, "[%d,%d]", wTerm->getMaximumLinesOfText(), wTerm->getMaximumColumnsOfText());
 	PDL_JSReply(params, reply);
 	free(reply);
 	return PDL_TRUE;
@@ -106,7 +106,7 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 	event.key.keysym.sym = (SDLKey)PDL_GetJSParamInt(params, 1);
 	event.key.keysym.unicode = parseUtf8Char(PDL_GetJSParamString(params, 2));
 
-	sdlTerminal->fakeKeyEvent(event);
+	wTerm->fakeKeyEvent(event);
 
 	char *reply = 0;
 	asprintf(&reply, "%d", SDL_GetModState());
@@ -123,14 +123,14 @@ int main(int argc, const char* argv[])
 
 	PDL_Init(0);
 
-	sdlTerminal = new SDLTerminal();
+	wTerm = new WTerm();
 	Terminal *terminal = new Terminal();
 	terminal->path = strdup(argv[0]);
 	char *e = strrchr(terminal->path, '/');
 	*e = 0;
 
-	sdlTerminal->setFontSize((argc > 1 && atoi(argv[1])) ? atoi(argv[1]) : 12);
-	sdlTerminal->start();
+	wTerm->setFontSize((argc > 1 && atoi(argv[1])) ? atoi(argv[1]) : 12);
+	wTerm->start();
 
 	if (argc > 2)
 		terminal->setExec(argv[2]);
@@ -149,16 +149,16 @@ int main(int argc, const char* argv[])
 
 	PDL_JSRegistrationComplete();
 
-	if (sdlTerminal->isReady())
+	if (wTerm->isReady())
 	{
-		sdlTerminal->setExtTerminal(terminal);
-		terminal->setExtTerminal(sdlTerminal);
+		wTerm->setExtTerminal(terminal);
+		terminal->setExtTerminal(wTerm);
 
 		//Set defaults
-		sdlTerminal->getTerminalState()->resetTerminal();
+		wTerm->getTerminalState()->resetTerminal();
 
 		//Must set window size before starting the terminal.
-		terminal->setWindowSize(sdlTerminal->getMaximumColumnsOfText(), sdlTerminal->getMaximumLinesOfText());
+		terminal->setWindowSize(wTerm->getMaximumColumnsOfText(), wTerm->getMaximumLinesOfText());
 
 		if (terminal->start() == 0) //Non-blocking, creates a thread to read and a child process for slave device.
 		{
@@ -166,7 +166,7 @@ int main(int argc, const char* argv[])
 				sched_yield();
 			PDL_CallJS("ready", NULL, 0);
 
-			sdlTerminal->run(); //Blocking.
+			wTerm->run(); //Blocking.
 		}
 		else
 		{
@@ -175,14 +175,14 @@ int main(int argc, const char* argv[])
 	}
 	else
 	{
-		syslog(LOG_CRIT, "SDLTerminal not started.");
+		syslog(LOG_CRIT, "WTerm not started.");
 	}
 
-	sdlTerminal->setExtTerminal(NULL);
+	wTerm->setExtTerminal(NULL);
 	terminal->setExtTerminal(NULL);
 
 	delete terminal;
-	delete sdlTerminal;
+	delete wTerm;
 
 	closelog();
 

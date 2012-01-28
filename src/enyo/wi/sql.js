@@ -2,34 +2,34 @@ enyo.kind({
 	name: 'wi.Sql',
 	kind: enyo.Control,
 	published: {
-		db:			'',	// holds the database connection
-		dbName:		'',	// defaults to app title from appinfo 
-		dbDesc:		'',	// defaults to app title + Database
-		dbSize:		0	// defaults to 5MB
+		db:         '', // holds the database connection
+		dbName:     '', // defaults to app title from appinfo
+		dbDesc:     '', // defaults to app title + Database
+		dbSize:     0   // defaults to 5MB
 	},
-	
+
 	constructor: function() {
 	    this.inherited(arguments);
 		if (!this.getDb()) this.open();
 	},
-	
+
 	open: function() {
 		try {
 			//this.db = false;
 			this.db = openDatabase(
-				this.getDbName()	|| enyo.fetchAppInfo().title,
+				this.getDbName() || enyo.fetchAppInfo().title,
 				'', // if we keep this blank we always get the current version
-				this.getDbDesc()	|| enyo.fetchAppInfo().title + ' Database',
-				this.getDbSize()	|| (5 * 1024 * 1024) // 5MB
+				this.getDbDesc() || enyo.fetchAppInfo().title + ' Database',
+				this.getDbSize() || (5 * 1024 * 1024) // 5MB
 			);
 		}
-		catch(e) { 
+		catch(e) {
 			console.log('wi.Sql#openDb', e);
 			return false;
 		}
 		return true;
 	},
-	
+
 	executeSql: function(tx, sql, values, onSuccess, onError) {
 		try {
 			if (!sql) {
@@ -79,7 +79,7 @@ enyo.kind({
 				);
 			}
 		}
-		catch(e) { 
+		catch(e) {
 			console.log('wi.Sql#executeSql', e, tx, sql, values, onSuccess, onError);
 			return false;
 		}
@@ -114,18 +114,18 @@ enyo.kind({
 				);
 			}
 		}
-		catch(e) { 
+		catch(e) {
 			//console.log('wi.Sql#executeSqlChain', e, tx, sql, values, onSuccess, onError);
 			return false;
 		}
 		return true;
 	},
-	
+
 	error: function(tx, results, sql, values, callback) {
 		console.log('wi.Sql#error:', results.code, '-', results.message, ':', '"' + sql + '"', values);
 		if (callback) callback();
 	},
-	
+
 	getVersion: function(integer) {
 		if (integer) return (isNaN(parseInt(this.getVersion(), 10)) ? 0 : parseInt(this.getVersion(), 10));
 		else return this.db.version;
@@ -146,12 +146,12 @@ enyo.kind({
 				return true;
 			}
 		}
-		catch(e) { 
+		catch(e) {
 			console.log('wi.Sql#changeVersion', e, newVersion, sql);
 		}
 		return false;
 	},
-	
+
 	query: function(sql, values, onSuccess, onError) {
 		//console.log(sql, values, onSuccess, onError);
 		this.db.transaction(function (tx) {
@@ -164,12 +164,12 @@ enyo.kind({
 			);
 		}.bind(this));
 	},
-	
+
 	getResults: function(sql, values, onSuccess, onError) {
 		this.query(
 			sql,
 			values,
-			function (tx, results) { this.parseResults(tx, results, onSuccess);	}.bind(this),
+			function (tx, results) { this.parseResults(tx, results, onSuccess); }.bind(this),
 			onError
 		);
 	},
@@ -185,12 +185,12 @@ enyo.kind({
 			if (callback) callback([]);
 		}
 	},
-	
+
 	getRow: function(sql, values, onSuccess, onError) {
 		this.query(
 			sql,
 			values,
-			function (tx, results) { this.parseRow(tx, results, onSuccess);	}.bind(this),
+			function (tx, results) { this.parseRow(tx, results, onSuccess); }.bind(this),
 			onError
 		);
 	},
@@ -202,12 +202,12 @@ enyo.kind({
 			if (callback) callback(false);
 		}
 	},
-	
+
 	getVar: function(sql, values, onSuccess, onError) {
 		this.query(
 			sql,
 			values,
-			function (tx, results) { this.parseVar(tx, results, onSuccess);	}.bind(this),
+			function (tx, results) { this.parseVar(tx, results, onSuccess); }.bind(this),
 			onError
 		);
 	},
@@ -223,5 +223,5 @@ enyo.kind({
 			if (callback) callback(false);
 		}
 	}
-	
+
 });

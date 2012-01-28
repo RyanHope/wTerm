@@ -1,7 +1,7 @@
 enyo.kind({
 	name: 'wi.ListSelector',
 	kind: enyo.ListSelector,
-	
+
 	popupAlign: 'left',
 	/*chrome: [
 		{name: 'arrow', className: 'enyo-listselector-arrow', style: 'margin-right: 10px;'},
@@ -11,10 +11,10 @@ enyo.kind({
 		]},
 		{name: 'label'},
 	],*/
-	
+
 	create: function() {
 		this.inherited(arguments);
-		
+
 		// for some reason, pushing my own chrome errors somewhere, so ill just fix their chrome after the fact
 		this.applyStyle('position', 'relative');
 		this.$.label.removeClass('enyo-listselector-label enyo-label');
@@ -23,5 +23,5 @@ enyo.kind({
 		this.$.arrow.applyStyle('position', 'absolute');
 		this.$.arrow.applyStyle('left', '0');
 	}
-	
+
 });
