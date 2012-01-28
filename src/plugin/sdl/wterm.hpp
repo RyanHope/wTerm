@@ -17,8 +17,8 @@
  * along with wTerm.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SDLTERMINAL_HPP__
-#define SDLTERMINAL_HPP__
+#ifndef WTERM_HPP__
+#define WTERM_HPP__
 
 #include "sdl/sdlcore.hpp"
 #include "terminal/extterminal.hpp"

@@ -17,7 +17,7 @@
  * along with wTerm.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sdl/sdlterminal.hpp"
+#include "sdl/wterm.hpp"
 #include "terminal/terminal.hpp"
 #include "util/utf8.hpp"
 #include "util/utils.hpp"

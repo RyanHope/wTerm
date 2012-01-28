@@ -18,7 +18,7 @@
  */
 
 #include "sdl/sdlcore.hpp"
-#include "sdl/sdlterminal.hpp"
+#include "sdl/wterm.hpp"
 #include "terminal/terminal.hpp"
 #include "terminal/vtterminalstate.hpp"
 #include "util/utf8.hpp"
