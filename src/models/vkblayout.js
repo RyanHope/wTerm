@@ -4,7 +4,7 @@ var kbdLayouts = { };
 function getKbdLayout(name, onload) {
 	var layout, n;
 
-	if (!kbdLayouts[name]) name = 'querty_us';
+	if (!kbdLayouts[name]) name = 'qwerty_us';
 	layout = kbdLayouts[name];
 
 	if (layout.keys) {
