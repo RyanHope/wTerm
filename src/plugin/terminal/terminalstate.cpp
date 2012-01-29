@@ -30,7 +30,6 @@ const CellCharacter TerminalState::BLANK = ' ';
 TerminalState::TerminalState()
 {
 	m_nTermModeFlags = 0;
-	m_bShiftText = false;
 
 	unsolicited = false;
 
@@ -342,8 +341,8 @@ void TerminalState::insertLines(int nLines)
 	if (curLine >= m_nTopMargin && curLine < m_nBottomMargin) {
 		for (int i=0; i<nLines; i++) {
 			if (curLine-1+i < m_nBottomMargin) {
-				m_data.erase(m_data.begin()+m_nBottomMargin-1);
-				m_data.insert(m_data.begin()+curLine-1+i, TSLine());
+				m_data.erase(m_data.begin()+getBufferTopLineIndex() + m_nBottomMargin-1);
+				m_data.insert(m_data.begin()+getBufferTopLineIndex() + curLine-1+i, TSLine());
 			}
 		}
 	}
@@ -361,8 +360,8 @@ void TerminalState::deleteLines(int nLines)
 	if (curLine >= m_nTopMargin && curLine < m_nBottomMargin) {
 		for (int i=0; i<nLines; i++) {
 			if (curLine-1+i < m_nBottomMargin) {
-				m_data.erase(m_data.begin()+curLine-1+i);
-				m_data.insert(m_data.begin()+m_nBottomMargin-1, TSLine());
+				m_data.erase(m_data.begin()+getBufferTopLineIndex() + curLine-1+i);
+				m_data.insert(m_data.begin()+getBufferTopLineIndex() + m_nBottomMargin-1, TSLine());
 			}
 		}
 	}
@@ -865,12 +864,15 @@ void TerminalState::insertBlanks(int nBlanks)
 void TerminalState::displayScreenAlignmentPattern() {
 	int nCols = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
 	int nRows = m_displayScreenSize.getY();
+	int modeFlags = m_nTermModeFlags;
+	m_nTermModeFlags &= ~TS_TM_INSERT;
 	for (int r=0;r<nRows;r++) {
 		for (int c=0;c<nCols;c++) {
 			setCursorLocation(c+1,r+1);
-			insertChar(69, false);
+			insertChar(69, false, true); // 'E'
 		}
 	}
+	m_nTermModeFlags = modeFlags;
 	setCursorLocation(1,1);
 }
 
@@ -1134,30 +1136,12 @@ bool TerminalState::processNonPrintableChar(CellCharacter &c)
 }
 
 /**
- * Inserts a character at the current cursor position. Non-printable characters are ignored.
- */
-void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor)
-{
-	insertChar(c, bAdvanceCursor, true);
-}
-
-/**
- * Inserts a character at the current cursor position. Any character at this location
- * will be replaced.
- */
-void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnoreNonPrintable)
-{
-	insertChar(c, bAdvanceCursor, bIgnoreNonPrintable, false);
-}
-
-/**
  * Inserts a character at the current cursor position. If advance cursor is specified,
  * then the cursor is moved forward a position after the character has been inserted.
  * If ignore non-printable characters is specified, then non-printable characters will not
- * be processed. If shift is specified, then all subsequent characters are shifted forward.
- * Otherwise, the current character is replaced.
+ * be processed.
  */
-void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnoreNonPrintable, bool bShift)
+void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnoreNonPrintable)
 {
 	pthread_mutex_lock(&m_rwLock);
 
@@ -1178,9 +1162,6 @@ void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnor
 
 	if (isPrintable(c) || bPrint)
 	{
-		// TODO: Should mappings be applied to parsing too, not just rendering?
-		// if (getShift()) c += 128;
-
 		if (displayLoc.getX() > nCols)
 		{
 			if ((getTerminalModeFlags() & TS_TM_AUTO_WRAP) > 0)
@@ -1246,7 +1227,7 @@ void TerminalState::saveScreen()
 	pthread_mutex_lock(&m_rwLock);
 
 	m_savedScreen.m_data = m_data;
-	m_savedScreen.m_savedCursorLoc = Point(m_savedCursorLoc.getX(), m_savedCursorLoc.getY());
+	m_savedScreen.m_savedCursorLoc = m_savedCursorLoc;
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -1255,9 +1236,9 @@ void TerminalState::restoreScreen()
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	m_data = std::deque<TSLine>(m_savedScreen.m_data);
-	m_savedCursorLoc = Point(m_savedScreen.m_savedCursorLoc.getX(), m_savedScreen.m_savedCursorLoc.getY());
-	setNumBufferLines(m_displayScreenSize.getY());
+	m_data = m_savedScreen.m_data;
+	m_savedCursorLoc = m_savedScreen.m_savedCursorLoc;
+	setNumBufferLines(m_nNumBufferLines);
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -1307,20 +1288,6 @@ void TerminalState::unlock()
 {
 	pthread_mutex_unlock(&m_rwLock);
 }
-
-void TerminalState::enableShiftText(bool bShift)
-{
-	pthread_mutex_lock(&m_rwLock);
-
-	m_bShiftText = bShift;
-
-	pthread_mutex_unlock(&m_rwLock);
-}
-bool TerminalState::isShiftText()
-{
-	return m_bShiftText;
-}
-
 
 void TerminalState::tabForward(unsigned int nTabs) {
 	if (tabs.size()==0 || nTabs > tabs.size())

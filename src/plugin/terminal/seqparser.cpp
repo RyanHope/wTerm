@@ -20,6 +20,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <syslog.h>
 #include <limits>
 
 #include "seqparser.hpp"
@@ -54,6 +55,15 @@ void ControlSeqParser::addFixedLookup(const char *str, CSToken_t token)
 	if (it == m_csFixedLookup.end()) {
 		it = m_csFixedLookup.insert(std::make_pair(e.fixed[0], std::list<CS_Fixed_Entry>())).first;
 	}
+
+	for (std::list<CS_Fixed_Entry>::const_iterator li = it->second.begin(), le = it->second.end(); li != le; ++li) {
+		unsigned int i = 0;
+		while (0 != e.fixed[i] && e.fixed[i] == li->fixed[i]) ++i;
+		if (0 == e.fixed[i] || 0 == li->fixed[i]) {
+			syslog(LOG_DEBUG, "conflicting ESC sequences: ESC%s and ESC%s", e.fixed, li->fixed);
+		}
+	}
+
 	it->second.push_back(e);
 }
 
@@ -72,6 +82,14 @@ void ControlSeqParser::addCSILookup(const char parameter, CSToken_t token, int n
 	if (it == m_csiLookup.end()) {
 		it = m_csiLookup.insert(std::make_pair(e.function, std::list<CSI_Entry>())).first;
 	}
+
+	for (std::list<CSI_Entry>::const_iterator li = it->second.begin(), le = it->second.end(); li != le; ++li) {
+		if (li->parameter == e.parameter && li->function == e.function) {
+			const char buf[2] = { e.parameter, 0 };
+			syslog(LOG_DEBUG, "conflicting CSI functions: ESC[%s...%c", buf, e.function);
+		}
+	}
+
 	it->second.push_back(e);
 }
 
@@ -80,26 +98,44 @@ void ControlSeqParser::addCSILookup(const char parameter, CSToken_t token, int n
  */
 void ControlSeqParser::buildLookup()
 {
-	addCSILookup(0, CS_CURSOR_POSITION_REPORT, 0, 2, 1, 'R');
-	addCSILookup(0, CS_CURSOR_POSITION, 0, 2, 1, 'H');
-	addCSILookup(0, CS_CURSOR_POSITION, 0, 2, 1, 'f');
-	addCSILookup(0, CS_CURSOR_UP, 0, 1, 1, 'A');
-	addCSILookup(0, CS_CURSOR_DOWN, 0, 1, 1, 'B');
-	addCSILookup(0, CS_CURSOR_FORWARD, 0, 1, 1, 'C');
-	addCSILookup(0, CS_CURSOR_BACKWARD, 0, 1, 1, 'D');
-	addCSILookup(0, CS_CURSOR_POSITION_SAVE, 0, 0, 1, 's');
-	addFixedLookup("7", CS_CURSOR_POSITION_SAVE);
-	addCSILookup(0, CS_CURSOR_POSITION_RESTORE, 0, 0, 1, 'u');
-	addFixedLookup("8", CS_CURSOR_POSITION_RESTORE);
-	addCSILookup(0, CS_ERASE_DISPLAY, 0, -1, 1, 'J');
-	addCSILookup(0, CS_ERASE_LINE, 0, -1, 1, 'K');
-	addCSILookup(0, CS_GRAPHICS_MODE_SET, 0, -1, 1, 'm');
+	addCSILookup(0, CS_ICH, 1, 1, 1, '@');
+	addCSILookup(0, CS_CURSOR_UP, 1, 1, 1, 'A');
+	addCSILookup(0, CS_CURSOR_DOWN, 1, 1, 1, 'B');
+	addCSILookup(0, CS_CURSOR_FORWARD, 1, 1, 1, 'C');
+	addCSILookup(0, CS_CURSOR_BACKWARD, 1, 1, 1, 'D');
+	addCSILookup(0, CS_CNL, 1, 1, 1, 'E');
+	addCSILookup(0, CS_CPL, 1, 1, 1, 'F');
+	addCSILookup(0, CS_CHA, 1, 1, 1, 'G');
+	addCSILookup(0, CS_CURSOR_POSITION, 1, 2, 1, 'H');
+	addCSILookup(0, CS_TAB_FORWARD, 1, 1, 1, 'I');
+	addCSILookup(0, CS_ERASE_DISPLAY, 1, 1, 0, 'J');
+	addCSILookup(0, CS_ERASE_LINE, 1, -1, 0, 'K');
+	addCSILookup(0, CS_IL, 1, 1, 1, 'L');
+	addCSILookup(0, CS_DL, 1, 1, 1, 'M');
+	addCSILookup(0, CS_DCH, 1, 1, 1, 'P');
+	// send only: addCSILookup(0, CS_CURSOR_POSITION_REPORT, 1, 2, 1, 'R');
+	addCSILookup(0, CS_ECH, 1, 1, 1, 'X');
+	addCSILookup(0, CS_CBT, 1, 1, 1, 'Z');
+	addCSILookup(0, CS_HPA, 1, 1, 1, '`');
+	// TODO?: addCSILookup(0, CS_REP, 1, 1, 0, 'b');
+	addCSILookup(0, CS_DEVICE_ATTR_PRIMARY_REQUEST, 1, 1, 0, 'c');
+	// send only: addCSILookup('?', CS_DEVICE_ATTR_PRIMARY_RESPONSE, 1, -1, 0, 'c');
+	addCSILookup('>', CS_DEVICE_ATTR_SECONDARY_REQUEST, 1, 1, 0, 'c');
+	// send only: addCSILookup('>', CS_DEVICE_ATTR_SECONDARY_RESPONSE, 1, -1, 0, 'c');
+	addCSILookup(0, CS_VPA, 1, 1, 1, 'd');
+	addCSILookup(0, CS_CURSOR_POSITION, 1, 2, 1, 'f');
+	addCSILookup(0, CS_TAB_CLEAR, 1, 1, 0, 'g');
+	addCSILookup(0, CS_MODE_SET, 1, -1, 0, 'h');
+	addCSILookup('?', CS_MODE_SET_PRIV, 1, -1, 0, 'h');
+	addCSILookup(0, CS_MODE_RESET, 1, -1, 0, 'l');
+	addCSILookup('?', CS_MODE_RESET_PRIV, 1, -1, 0, 'l');
+	addCSILookup(0, CS_GRAPHICS_MODE_SET, 1, -1, 0, 'm');
+	addCSILookup(0, CS_DEVICE_STATUS_REPORT, 1, -1, 0, 'n');
+	addCSILookup(0, CS_MARGIN_SET, 0, 2, 0, 'r'); // default params are the window size
+	addCSILookup(0, CS_CURSOR_POSITION_SAVE, 0, 0, 0, 's');
+	addCSILookup(0, CS_CURSOR_POSITION_RESTORE, 0, 0, 0, 'u');
+	addCSILookup(0, CS_TERM_PARAM, 1, 1, 0, 'x');
 
-	addCSILookup(0, CS_MODE_SET, 0, -1, 1, 'h');
-	addCSILookup(0, CS_MODE_RESET, 0, -1, 1, 'l');
-
-	addCSILookup('?', CS_MODE_SET_PRIV, 0, -1, 1, 'h');
-	addCSILookup('?', CS_MODE_RESET_PRIV, 0, -1, 1, 'l');
 
 	addFixedLookup("=", CS_KEYPAD_APP_MODE);
 	addFixedLookup(">", CS_KEYPAD_NUM_MODE);
@@ -107,9 +143,10 @@ void ControlSeqParser::buildLookup()
 	addFixedLookup("D", CS_INDEX);
 	addFixedLookup("M", CS_REVERSE_INDEX);
 	addFixedLookup("H", CS_TAB_SET);
-	addCSILookup(0, CS_TAB_CLEAR, 0, 1, 0, 'g');
-	addCSILookup(0, CS_TAB_FORWARD, 0, 1, 1, 'I');
 
+
+	addFixedLookup("7", CS_CURSOR_POSITION_SAVE);
+	addFixedLookup("8", CS_CURSOR_POSITION_RESTORE);
 	addFixedLookup("(K", CS_USER_MAPPING);
 
 	/* G0 charset */
@@ -142,21 +179,6 @@ void ControlSeqParser::buildLookup()
 	addFixedLookup("+2", CS_CHARSET_ALT_SPEC_G3_SET);
 	addFixedLookup("o", CS_CHARSET_USE_G3); /* use g3 */
 
-	addCSILookup(0, CS_VPA, 0, 1, 1, 'd');
-	addCSILookup(0, CS_CHA, 0, 1, 1, 'G');
-	addCSILookup(0, CS_ECH, 0, 1, 1, 'X');
-	addCSILookup(0, CS_IL, 0, 1, 1, 'L');
-	addCSILookup(0, CS_DL, 0, 1, 1, 'M');
-	addCSILookup(0, CS_DCH, 0, 1, 1, 'P');
-	addCSILookup(0, CS_ICH, 0, 1, 1, '@');
-	addCSILookup(0, CS_HPA, 0, 1, 1, '`');
-	addCSILookup(0, CS_CBT, 0, 1, 1, 'Z');
-	addCSILookup(0, CS_CNL, 0, 1, 1, 'E');
-	addCSILookup(0, CS_CPL, 0, 1, 1, 'F');
-
-	addCSILookup(0, CS_MARGIN_SET, 0, 2, 1, 'r');
-	addFixedLookup("D", CS_MOVE_UP);
-	addFixedLookup("M", CS_MOVE_DOWN);
 	addFixedLookup("E", CS_MOVE_NEXT_LINE);
 
 	addFixedLookup("#3", CS_DOUBLE_HEIGHT_LINE_TOP);
@@ -165,15 +187,6 @@ void ControlSeqParser::buildLookup()
 	addFixedLookup("#6", CS_DOUBLE_WIDTH_LINE);
 	addFixedLookup("#8", CS_SCREEN_ALIGNMENT_DISPLAY);
 
-	addCSILookup(0, CS_DEVICE_STATUS_REPORT, 0, -1, 1, 'n');
-
-	addCSILookup(0, CS_DEVICE_ATTR_PRIMARY_REQUEST, 0, 1, 0, 'c');
-	addCSILookup('?', CS_DEVICE_ATTR_PRIMARY_RESPONSE, 0, -1, 0, 'c');
-
-	addCSILookup('>', CS_DEVICE_ATTR_SECONDARY_REQUEST, 0, 1, 0, 'c');
-	addCSILookup('>', CS_DEVICE_ATTR_SECONDARY_RESPONSE, 0, -1, 0, 'c');
-
-	addCSILookup(0, CS_TERM_PARAM, 0, 1, 0, 'x');
 	addFixedLookup("c", CS_TERM_RESET);
 
 	/* VT52 Compat */
@@ -257,6 +270,17 @@ bool ControlSeqParser::matchCSI() {
 	CSI_Lookup::iterator it;
 	std::list<CSI_Entry>::const_iterator i, end;
 
+	m_prefix[m_prefixlen] = 0;
+
+	if (m_prefixlen > 1) {
+		/* prefix too long, we don't use those */
+		syslog(LOG_DEBUG, "unknown ESC[%s ... %c", m_prefix, m_currentChar);
+
+		/* invalid csi function, skip */
+		m_state = ST_START;
+		return false;
+	}
+
 	it = m_csiLookup.find(m_currentChar);
 	if (it == m_csiLookup.end()) {
 		/* invalid csi function, skip */
@@ -267,26 +291,22 @@ bool ControlSeqParser::matchCSI() {
 	i = it->second.begin();
 	end = it->second.end();
 
-	/* empty param string should represent a default value. we ignore this here. */
-	/* if (m_numValues == 0) { m_values[m_numValues++] = -1; } */
-
 	for (; i != end; ++i) {
 		if (i->parameter == (m_prefixlen ? m_prefix[0] : 0)) {
 			/* found function */
 
+			/* empty param string should represent a default value. only add it if required. */
+			if (m_numValues == 0 && 1 == i->minParams) { m_values[m_numValues++] = i->defaultVal; }
+
 			/* invalid numberof parameters */
-			if (m_numValues < i->minParams || (-1 != i->maxParams && m_numValues > i->maxParams)) continue;
+			if (m_numValues < i->minParams || (-1 != i->maxParams && m_numValues > i->maxParams)) {
+				continue;
+			}
 
 			int k;
 			for (k = 0; k < m_numValues; k++) {
 				if (-1 == m_values[k]) {
-					if (-1 != i->defaultVal) {
-						m_values[k] = i->defaultVal;
-					} else {
-						/* no value specified for a param, but neither is a default value available */
-						m_state = ST_START;
-						return false;
-					}
+					m_values[k] = i->defaultVal;
 				}
 			}
 			for (; k < MAX_NUM_VALUES; k++) {
@@ -294,11 +314,20 @@ bool ControlSeqParser::matchCSI() {
 				m_values[k] = -1;
 			}
 
+#if 0
+			syslog(LOG_DEBUG, "CSI seq(%i): ESC[%s%i;%i;%i;%i<...>%c",
+				m_numValues, m_prefix,
+				m_values[0], m_values[1], m_values[2], m_values[3],
+				m_currentChar);
+#endif
+
 			m_token = i->token;
 			m_state = ST_START;
 			return true;
 		}
 	}
+
+	syslog(LOG_DEBUG, "unknown ESC[%s ... %c", m_prefix, m_currentChar);
 
 	/* invalid csi function, skip */
 	m_state = ST_START;
