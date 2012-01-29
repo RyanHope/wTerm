@@ -17,26 +17,25 @@ enyo.kind({
 						{name: 'passStatus', content: "Password Status&nbsp;&nbsp;&nbsp;(?)", flex: 1, allowHtml: true},
 						{kind: "Image", name: 'imgYes', src: "images/button_yes.png", showing: false},
 						{kind: "Image", name: 'imgNo', src: "images/button_no.png", showing: false}
-		]},
-		{kind: "PasswordInput", hint: "New password", name: 'pass1', changeOnInput: true, onchange: 'verifyPassword'},
-		{kind: "PasswordInput", hint: "Retype password", name: 'pass2', changeOnInput: true, onchange: 'verifyPassword'},
-		{kind: "Button", content: "Set Password", className: 'enyo-button-affirmative', name: 'setPass', disabled: true, onclick: 'rootpassSet'}
-		]},
+					]},
+					{kind: "PasswordInput", hint: "New password", name: 'pass1', changeOnInput: true, onchange: 'verifyPassword'},
+					{kind: "PasswordInput", hint: "Retype password", name: 'pass2', changeOnInput: true, onchange: 'verifyPassword'},
+					{kind: "Button", content: "Set Password", className: 'enyo-button-affirmative', name: 'setPass', disabled: true, onclick: 'rootpassSet'}
+				]},
 				{
-					content: "In order to use the 'su' command and safely become root<br> you must set a root password.",
-					style: 'font-size: 75%; text-align: center;',
+					content: "In order to use the 'su' command and safely become root, set a root password.",
+					className: 'enyo-footnote',
+					style: 'text-align: center;',
 					allowHtml: true
 				},
-				{style: 'height: 29px'},
-				{kind: "RowGroup", caption: "Non-Root User (wTerm)", components: [
-		{kind: "Input", value: "/bin/sh", disabled: true, components: [{className: 'enyo-label', content: 'Shell'}]}
-		]},
-				{style: 'height: 58px'},
 				{kind: 'Button', content: 'Create Root Console Launchpoint', className: 'enyo-button-negative', onclick: "addRootConsoleToLauncher", disabled: true},
+				{kind: "RowGroup", caption: "Non-Root User (wTerm)", components: [
+					{kind: "Input", value: "/bin/sh", disabled: true, components: [{className: 'enyo-label', content: 'Shell'}]}
+				]}
 			]}
 		]},
 		{kind: "Toolbar", pack: "center", className: "enyo-toolbar-light", components: [
-            {kind: "Button", caption: "Done", onclick: "doClose", className: "enyo-preference-button enyo-button-dark"}
+            {kind: "Button", caption: "Done", onclick: "doClose", className: "enyo-button-dark enyo-preference-button"}
         ]},
 	],
 
@@ -111,6 +110,12 @@ enyo.kind({
 	pluginReady: function() {
 		this.log('Setup Plugin Ready')
 		this.setup()
+	},
+
+	create: function() {
+		this.inherited(arguments)
+		if (enyo.fetchDeviceInfo().modelNameAscii != 'TouchPad')
+			this.addClass('phone')
 	}
 
 })

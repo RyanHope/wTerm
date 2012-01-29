@@ -4,14 +4,16 @@ enyo.kind({
 	kind: enyo.VFlexBox,
 
 	showVKB: false,
+	hasKeyboard: false,
 
 	components: [
 		{
 			kind: "ApplicationEvents",
 			onWindowRotated: "setup",
-			onKeydown: "onBtKeyDown",
 			onWindowActivated: 'windowActivated',
 			onWindowDeactivated: 'windowDeactivated',
+			onKeyup: 'handleKeyup',
+			onKeydown: 'handleKeydown'
 		},
 		{
 			name : "getPreferencesCall",
@@ -82,7 +84,8 @@ enyo.kind({
 
 	initComponents: function() {
 		this.inherited(arguments)
-		this.showVKB = enyo.application.p.get('showVKB')
+		this.hasKeyboard = (enyo.fetchDeviceInfo().keyboardAvailable || enyo.fetchDeviceInfo().keyboardSlider)
+		this.showVKB = (enyo.application.p.get('showVKB') && !this.hasKeyboard)
 		this.createComponent({
 			name: "prefs",
 			kind: "PrefsPullout",
@@ -97,29 +100,51 @@ enyo.kind({
 			exec = 'login -f root'
 		else if (enyo.windowParams.command)
 			exec = 'login -f wterm'
-		this.createComponent({
-		name: 'terminal',
-			kind: 'Terminal',
-			bgcolor: '000000',
-			width: window.innerWidth,
-			height: 400,
-			onPluginReady: 'pluginReady',
-			onWindowTitleChanged: 'windowTitleChanged',
-			exec: exec
-		})
-		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
-		this.$.terminal.vkb = this.$.vkb
-		this.$.prefs.terminal = this.$.terminal
-		this.$.prefs.vkb = this.$.vkb
-		this.createComponent({
-			kind: "AppMenu", components: [
-				{caption: "New Terminal", onclick: "newTerm"},
-				{caption: "Preferences", onclick: "openPrefs"},
-				{caption: "Setup", onclick: "openSetup"},
-				{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
-				{caption: "About", onclick: "openAbout"}
-			]
-		})
+		if (this.hasKeyboard) {
+			this.createComponent({
+				name: 'terminal',
+				kind: 'Terminal',
+				bgcolor: '000000',
+				width: window.innerWidth,
+				height: window.innerHeight,
+				onPluginReady: 'pluginReady',
+				onWindowTitleChanged: 'windowTitleChanged',
+				exec: exec
+			})
+			this.$.prefs.terminal = this.$.terminal
+			this.createComponent({
+				kind: "AppMenu", components: [
+					{caption: "New Terminal", onclick: "newTerm"},
+					{caption: "Preferences", onclick: "openPrefs"},
+					{caption: "Setup", onclick: "openSetup"},
+					{caption: "About", onclick: "openAbout"}
+				]
+			})
+		} else {
+			this.createComponent({
+				name: 'terminal',
+				kind: 'Terminal',
+				bgcolor: '000000',
+				width: window.innerWidth,
+				height: 400,
+				onPluginReady: 'pluginReady',
+				onWindowTitleChanged: 'windowTitleChanged',
+				exec: exec
+			})
+			this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
+			this.$.terminal.vkb = this.$.vkb
+			this.$.prefs.terminal = this.$.terminal
+			this.$.prefs.vkb = this.$.vkb
+			this.createComponent({
+				kind: "AppMenu", components: [
+					{caption: "New Terminal", onclick: "newTerm"},
+					{caption: "Preferences", onclick: "openPrefs"},
+					{caption: "Setup", onclick: "openSetup"},
+					{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
+					{caption: "About", onclick: "openAbout"}
+				]
+			})
+		}
 		this.setup()
 	},
 	
@@ -136,6 +161,7 @@ enyo.kind({
 				this.$.command.setContent(enyo.windowParams.command)
 			}
 		}
+		this.$.terminal.focus()
 	},
 
 	setupKeyboard: function(portrait) {
@@ -199,15 +225,17 @@ enyo.kind({
 	},
 
 	setup: function() {
-		this.$.getPreferencesCall.call({"keys":["rotationLock"]});
+		if (!this.hasKeyboard)
+			this.$.getPreferencesCall.call({"keys":["rotationLock"]});
 	},
 
-	onBtKeyDown: function(context, event) {
-		if (this.$.terminal.$.plugin.hasNode())
-		{
-			this.$.terminal.$.plugin.node.focus();
-			this.$.terminal.$.plugin.node.dispatchEvent(event);
-		}
+	handleKeyup: function(inSender, inEvent) {
+		this.log(inSender, inEvent)
+		this.$.terminal.dispatchEvent()
+	},
+	handleKeydown: function(inSender, inEvent) {
+		this.log(inSender, inEvent)
+		this.$.terminal.dispatchEvent()
 	}
 
 })

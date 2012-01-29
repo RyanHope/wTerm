@@ -55,4 +55,4 @@ clean:
 	- $(MAKE) -C src/cmatrix clean
 
 resetFirstUse:
-	luna-send -n 1 palm://com.palm.applicationManager/launch '{"id":"us.ryanhope.wterm","params":{"resetFirstUse": true}}'
+	novacom -- run file://usr/bin/luna-send -n 1 palm://com.palm.applicationManager/launch '{"id":"us.ryanhope.wterm","params":{"resetFirstUse": true}}'

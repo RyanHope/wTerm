@@ -173,7 +173,17 @@
     padding-right: 10px;
 }
 
-.enyo-preferences-box .enyo-button,
+.phone .enyo-preferences-box {
+	width: 310px;
+	margin: 0px auto 0;
+}
+
+.phone .enyo-preference-button {
+	width: 180px;
+	margin: 0px auto 0;
+}
+
+/*.enyo-preferences-box .enyo-button,
 .preference-prompt .enyo-button {
     margin: 6px 3px;
-}
+}*/

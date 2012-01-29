@@ -11,6 +11,7 @@ enyo.kind({
 		currentKeys: [],
 		isReady: false,
 		exec: null,
+		bgcolor: "000000"
 	},
 
 	events: {
@@ -19,6 +20,7 @@ enyo.kind({
 	},
 
 	initComponents: function() {
+		this.inherited(arguments)
 		this.createComponent({
 			name: 'plugin',
 			kind: enyo.Hybrid,
@@ -26,6 +28,7 @@ enyo.kind({
 			onPluginReady: 'pluginReady',
 			onPluginConnected: 'pluginConnected',
 			onPluginDisconnected: 'pluginDisconnected',
+			bgcolor: this.bgcolor,
 			allowKeyboardFocus: true,
 			killTransparency: true,
 			passTouchEvents: true,
@@ -205,6 +208,19 @@ enyo.kind({
 
 	setupSU: function(enable) {
 		this.$.plugin.callPluginMethod('setupSU', enable)
+	},
+
+	focus: function() {
+		var ret = false
+		if (this.$.plugin.hasNode())
+		{
+			this.$.plugin.node.focus();
+			ret = true
+		}
+		return ret
+	},
+	dispatchEvent: function() {
+		if (this.focus()) this.$.plugin.node.dispatchEvent(event);
 	}
 
 })
