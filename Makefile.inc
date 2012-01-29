@@ -1,7 +1,7 @@
 
 BUILD_ROOT=/srv/preware/build
 
-ifdef DEVICE
+ifeq ($(DEVICE),1)
 	ARCH=armv7
 	HOST=arm-none-linux-gnueabi
 	ifeq ($(shell uname -s),Darwin)
@@ -11,6 +11,20 @@ ifdef DEVICE
 		ROOT=/opt/PalmPDK/device
 	else
 		MARCH_TUNE=-O2 -march=armv7-a -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp
+		CC=$(BUILD_ROOT)/toolchain/cs09q1armel/build/arm-2009q1/bin/arm-none-linux-gnueabi-gcc
+		CXX=$(BUILD_ROOT)/toolchain/cs09q1armel/build/arm-2009q1/bin/arm-none-linux-gnueabi-g++
+		ROOT=$(BUILD_ROOT)/staging/armv7/usr
+	endif
+else ifeq ($(DEVICE),2)
+	ARCH=armv6
+	HOST=arm-none-linux-gnueabi
+	ifeq ($(shell uname -s),Darwin)
+		MARCH_TUNE=-O2 -mcpu=arm1136jf-s -mfpu=vfp -mfloat-abi=softfp
+		CC=/opt/PalmPDK/arm-gcc/bin/arm-none-linux-gnueabi-gcc
+		CXX=/opt/PalmPDK/arm-gcc/bin/arm-none-linux-gnueabi-g++
+		ROOT=/opt/PalmPDK/device
+	else
+		MARCH_TUNE=-O2 -mcpu=arm1136jf-s -mfpu=vfp -mfloat-abi=softfp
 		CC=$(BUILD_ROOT)/toolchain/cs09q1armel/build/arm-2009q1/bin/arm-none-linux-gnueabi-gcc
 		CXX=$(BUILD_ROOT)/toolchain/cs09q1armel/build/arm-2009q1/bin/arm-none-linux-gnueabi-g++
 		ROOT=$(BUILD_ROOT)/staging/armv7/usr
