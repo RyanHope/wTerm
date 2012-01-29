@@ -549,8 +549,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		syslog(LOG_ERR, "VT100 Control Sequence: DOUBLE CELL not implemented. (%i)", nToken);
 		break;
 	case CS_OSC: // Operating System Controls
-		//FIXME Not implemented.
-		syslog(LOG_ERR, "Operating System Controls not implemented: ESC[%i;%s", values[0], m_parser->getOSCParameter().c_str());
+		handle_osc(values[0], m_parser->getOSCParameter().c_str());
 		break;
 	case CS_SCREEN_ALIGNMENT_DISPLAY: //ESC#8
 		displayScreenAlignmentPattern();

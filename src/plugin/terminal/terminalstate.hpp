@@ -374,6 +374,8 @@ public:
 	int getScrollBufferLines();
 	void setScollOffset(int offset);
 	int getScollOffset();
+
+	void handle_osc(int value, const char *txt);
 };
 
 #endif

@@ -104,6 +104,7 @@ enyo.kind({
 			width: window.innerWidth,
 			height: 400,
 			onPluginReady: 'pluginReady',
+			onWindowTitleChanged: 'windowTitleChanged',
 			exec: exec
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
@@ -120,6 +121,10 @@ enyo.kind({
 			]
 		})
 		this.setup()
+	},
+	
+	windowTitleChanged: function(inSender, txt) {
+		enyo.windows.addBannerMessage(txt, enyo.json.stringify({bannerTap: true, windowName: window.name}))
 	},
 
 	pluginReady: function() {

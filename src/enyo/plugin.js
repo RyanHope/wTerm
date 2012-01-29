@@ -14,7 +14,8 @@ enyo.kind({
 	},
 
 	events: {
-		onPluginReady:''
+		onPluginReady:'',
+		onWindowTitleChanged:''
 	},
 
 	initComponents: function() {
@@ -42,9 +43,20 @@ enyo.kind({
 		this.doPluginReady()
 	},
 	pluginConnected: function(inSender, inResponse, inRequest) {
+		this.$.plugin.addCallback("OSCevent", enyo.bind(this, "OSCevent"))
 	},
 	pluginDisconnected: function(inSender, inResponse, inRequest) {
 		this.error('Terminal Plugin Disconnected')
+	},
+	
+	OSCevent: function(value, txt) {
+		switch(parseInt(value,10)) {
+			case 0:
+			case 1:
+			case 2:
+				this.doWindowTitleChanged(txt);
+				break;
+		}
 	},
 
 	pushKeyEvent: function(type,sym,unicode) {

@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
+#include <PDL.h>
 
 const CellCharacter TerminalState::BLANK = ' ';
 
@@ -1352,4 +1353,15 @@ void TerminalState::resetTerminal()
 	m_currentGraphicsState.charset = 'B';
 	m_defaultGraphicsState.charset_ndx = 0;
 	unsolicited = false;
+}
+
+void TerminalState::handle_osc(int value, const char *txt)
+{
+	char *val = 0;
+	asprintf(&val, "%d", value);
+	const char *params[2];
+	params[0] = val;
+	params[1] = txt;
+	PDL_CallJS("OSCevent", params, 2);
+	if (val) free(val);
 }
