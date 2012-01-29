@@ -98,7 +98,6 @@ typedef enum
 	CS_UNKNOWN, // normal character
 
 	//ANSI
-	CS_CURSOR_POSITION_REPORT, //ESC[<Line>;<Column>R
 	CS_CURSOR_POSITION, //ESC[<Line>;<Column>H or ESC[<Line>;<Column>f
 	CS_CURSOR_UP, //ESC[<Value>A
 	CS_CURSOR_DOWN, //ESC[<Value>B
@@ -182,10 +181,8 @@ typedef enum
 
 	CS_DEVICE_STATUS_REPORT, //ESC[<Value>;...;<Value>n
 	CS_DEVICE_ATTR_PRIMARY_REQUEST, //ESC[<Value>c
-	CS_DEVICE_ATTR_PRIMARY_RESPONSE, //ESC[?1;<Value>c
 
 	CS_DEVICE_ATTR_SECONDARY_REQUEST, //ESC[><Value>c
-	CS_DEVICE_ATTR_SECONDARY_RESPONSE, //ESC[>1;<Value>c
 
 	CS_TERM_IDENTIFY, //ESCZ
 	CS_TERM_PARAM, //ESC[<Value>;...;<Value>x

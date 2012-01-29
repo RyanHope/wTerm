@@ -232,8 +232,6 @@ protected:
 	TSGraphicsState m_savedGraphicsState;
 	Point m_savedCursorLoc;
 
-	bool m_bShiftText;
-
 	Point m_cursorLoc; //Bound by the display screen size. Home location is (1, 1).
 	Point m_displayScreenSize; //The actual terminal screen size.
 
@@ -307,9 +305,7 @@ public:
 	void eraseBeginOfScreenToCursor();
 	void eraseScreen();
 
-	void insertChar(CellCharacter c, bool bAdvanceCursor);
 	void insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnoreNonPrintable);
-	void insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnoreNonPrintable, bool bShift);
 
 	void setDisplayScreenSize(int nWidth, int nHeight);
 	Point getDisplayScreenSize();
@@ -347,9 +343,6 @@ public:
 	void setNumBufferLines(int nNumLines);
 	int getNumBufferLines();
 
-	void enableShiftText(bool bShift);
-	bool isShiftText();
-
 	void lock();
 	void unlock();
 
@@ -367,8 +360,6 @@ public:
 	void insertBlanks(int nBlanks);
 	void tabForward(unsigned int nTabs);
 	void tabBackward(int nTabs);
-	void setShift(bool shift);
-	bool getShift();
 
 	void setScrollBufferLines(int lines);
 	int getScrollBufferLines();

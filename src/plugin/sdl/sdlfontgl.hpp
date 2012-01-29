@@ -135,6 +135,7 @@ public:
 
 	void setFontSize(unsigned int ptsize);
 	void setFontStyles(std::vector<int> styles);
+	void setFontFilename(const char *filename);
 	unsigned int getFontSize() const { return m_fontptsize; }
 
 	void setupColors(std::vector<SDL_Color> colors);

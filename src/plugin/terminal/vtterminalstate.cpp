@@ -39,7 +39,7 @@ VTTerminalState::~VTTerminalState()
 
 void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, ExtTerminal *extTerminal)
 {
-	int i, len;
+	int i;
 
 	pthread_mutex_lock(&m_rwLock);
 
@@ -50,14 +50,13 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		break;
 	case CS_HPA: //ESC[<Column>`
 	case CS_CHA: //ESC[<Column>G
-		setCursorLocation(values[0],m_cursorLoc.getY());
+		setCursorLocation(values[0], m_cursorLoc.getY());
 		break;
 	case CS_VPA: //ESC[<Line>d
 		setCursorLocation(m_cursorLoc.getX(), values[0]);
 		break;
 	case CS_ECH: //ESC[<Chars>X
-		len = values[0] ? values[0] : 1;
-		erase(m_cursorLoc, Point(m_cursorLoc.getX()+len, m_cursorLoc.getY()));
+		erase(m_cursorLoc, Point(m_cursorLoc.getX()+(values[0] ? values[0] : 1), m_cursorLoc.getY()));
 		break;
 	case CS_IL: //ESC[<Lines>L
 		insertLines(values[0] ? values[0] : 1);
@@ -75,16 +74,16 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		tabs.push_back(m_cursorLoc.getX());
 		sort(tabs.begin(),tabs.end());
 		break;
-	case CS_TAB_CLEAR: //ESCH TAB CLEAR
+	case CS_TAB_CLEAR: //ESC[<Value>g TAB CLEAR
 		switch (values[0]) {
-			case 0:
-				for (unsigned int i=0; i < tabs.size(); ++i)
-					if (tabs[i] == m_cursorLoc.getX())
-						tabs.erase(tabs.begin()+i);
-				break;
-			case 3:
-				tabs.clear();
-				break;
+		case 0:
+			for (unsigned int i=0; i < tabs.size(); ++i)
+				if (tabs[i] == m_cursorLoc.getX())
+					tabs.erase(tabs.begin()+i);
+			break;
+		case 3:
+			tabs.clear();
+			break;
 		}
 		break;
 	case CS_TAB_FORWARD: //ESC[<Tabs>I
@@ -93,41 +92,40 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_INDEX: //ESCD
 		moveCursorDown(1, true);
 		break;
-	case CS_VT52_REVERSE_LINE_FEED:
+	case CS_VT52_REVERSE_LINE_FEED: // ESCI
 		syslog(LOG_ERR, "CS_VT52_REVERSE_LINE_FEED");
 	case CS_REVERSE_INDEX: //ESCM
 		moveCursorUp(1, true);
 		break;
 	case CS_CURSOR_POSITION: //ESC[<Line>;<Column>H or ESC[<Line>;<Column>f
-		values[0] = (values[0] <= 0) ? 1 : values[0];
-		values[1] = (values[1] <= 0) ? 1 : values[1];
+		values[1] = (numValues >= 2) ? values[1] : 1;
 		setCursorLocation(values[1], values[0]);
 		break;
-	case CS_VT52_CURSOR_UP:
+	case CS_VT52_CURSOR_UP: // ESCA
 		syslog(LOG_ERR, "CS_VT52_CURSOR_UP");
+		values[0] = 1;
 	case CS_CURSOR_UP: //ESC[<Value>A
-		values[0] = (values[0] <= 0) ? 1 : values[0];
-		moveCursorUp(values[0]);
+		moveCursorUp(values[0] ? values[0] : 1);
 		break;
-	case CS_VT52_CURSOR_DOWN:
+	case CS_VT52_CURSOR_DOWN: // ESCB
 		syslog(LOG_ERR, "CS_VT52_CURSOR_DOWN");
+		values[0] = 1;
 	case CS_CURSOR_DOWN: //ESC[<Value>B
-		values[0] = (values[0] <= 0) ? 1 : values[0];
-		moveCursorDown(values[0]);
+		moveCursorDown(values[0] ? values[0] : 1);
 		break;
-	case CS_VT52_CURSOR_RIGHT:
+	case CS_VT52_CURSOR_RIGHT: // ESCC
 		syslog(LOG_ERR, "CS_VT52_CURSOR_RIGHT");
+		values[0] = 1;
 	case CS_CURSOR_FORWARD: //ESC[<Value>C
-		values[0] = (values[0] <= 0) ? 1 : values[0];
-		moveCursorForward(values[0]);
+		moveCursorForward(values[0] ? values[0] : 1);
 		break;
-	case CS_VT52_CURSOR_LEFT:
+	case CS_VT52_CURSOR_LEFT: // ESCD
 		syslog(LOG_ERR, "CS_VT52_CURSOR_LEFT");
+		values[0] = 1;
 	case CS_CURSOR_BACKWARD: //ESC[<Value>D
-		values[0] = (values[0] <= 0) ? 1 : values[0];
-		moveCursorBackward(values[0]);
+		moveCursorBackward(values[0] ? values[0] : 1);
 		break;
-	case CS_VT52_CURSOR_HOME:
+	case CS_VT52_CURSOR_HOME: // ESCH
 		syslog(LOG_ERR, "CS_VT52_CURSOR_HOME");
 		cursorHome();
 		break;
@@ -137,60 +135,39 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_CURSOR_POSITION_RESTORE: //ESC[u or ESC8
 		restoreCursor();
 		break;
-	case CS_VT52_ERASE_SCREEN:
-		syslog(LOG_ERR, "CS_VT52_ERASE_SCREEN %d", numValues);
-	case CS_ERASE_DISPLAY: //ESC[<Value>;...;<Value>J
-		if (numValues == 0)
-		{
+	case CS_VT52_ERASE_SCREEN: //ESCJ
+		syslog(LOG_ERR, "CS_VT52_ERASE_SCREEN");
+		eraseCursorToEndOfScreen();
+		break;
+	case CS_ERASE_DISPLAY: //ESC[<Value>J
+		switch (values[0]) {
+		case 0:
 			eraseCursorToEndOfScreen();
-		}
-		else
-		{
-			for (i = 0; i < numValues; i++)
-			{
-				values[i] = (values[i] < 0) ? 0 : values[i];
-
-				if (values[i] == 0)
-				{
-					eraseCursorToEndOfScreen();
-				}
-				else if (values[i] == 1)
-				{
-					eraseBeginOfScreenToCursor();
-				}
-				else if (values[i] == 2)
-				{
-					eraseScreen();
-				}
-			}
+			break;
+		case 1:
+			eraseBeginOfScreenToCursor();
+			break;
+		case 2:
+			eraseScreen();
+			break;
+		default: break;
 		}
 		break;
 	case CS_VT52_ERASE_LINE:
 		syslog(LOG_ERR, "CS_VT52_ERASE_LINE %d", numValues);
-	case CS_ERASE_LINE: //ESC[<Value>;...;<Value>K
-		if (numValues == 0)
-		{
+		eraseCursorToEndOfLine();
+		break;
+	case CS_ERASE_LINE: //ESC[<Value>K
+		switch (values[0]) {
+		case 0:
 			eraseCursorToEndOfLine();
-		}
-		else
-		{
-			for (i = 0; i < numValues; i++)
-			{
-				values[i] = (values[i] < 0) ? 0 : values[i];
-
-				if (values[i] == 0)
-				{
-					eraseCursorToEndOfLine();
-				}
-				else if (values[i] == 1)
-				{
-					eraseBeginOfLineToCursor();
-				}
-				else if (values[i] == 2)
-				{
-					eraseCurrentLine();
-				}
-			}
+			break;
+		case 1:
+			eraseBeginOfLineToCursor();
+			break;
+		case 2:
+			eraseCurrentLine();
+			break;
 		}
 		break;
 	case CS_VT52_CURSOR_POSITION:
@@ -205,8 +182,6 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		{
 			for (i = 0; i < numValues; i++)
 			{
-				values[i] = (values[i] < 0) ? 0 : values[i];
-
 				if (values[i] == 0)
 				{
 					memcpy(&m_currentGraphicsState, &m_defaultGraphicsState, sizeof(m_currentGraphicsState));
@@ -277,7 +252,6 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			if (values[i] == 4)
 			{
 				addTerminalModeFlags(TS_TM_INSERT);
-				enableShiftText(true);
 			}
 			else if (values[i] == 20)
 			{
@@ -363,7 +337,6 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			if (values[i] == 4)
 			{
 				removeTerminalModeFlags(TS_TM_INSERT);
-				enableShiftText(false);
 			}
 			else if (values[i] == 20)
 			{
@@ -574,12 +547,10 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		}
 		break;
 	case CS_DEVICE_ATTR_PRIMARY_REQUEST: //ESC[<Value>c
-	case CS_DEVICE_ATTR_PRIMARY_RESPONSE: //ESC[?6c
 		if (extTerminal != NULL && extTerminal->isReady())
 			extTerminal->insertData("\x1B[?6c");
 		break;
 	case CS_DEVICE_ATTR_SECONDARY_REQUEST: //ESC[><Value>c
-	case CS_DEVICE_ATTR_SECONDARY_RESPONSE: //ESC[>0;115;0c
 		if (extTerminal != NULL && extTerminal->isReady())
 			extTerminal->insertData("\x1B[>0;115;0c");
 		break;
@@ -632,7 +603,7 @@ void VTTerminalState::insertString(const char *sStr, int len, ExtTerminal *extTe
 				tabForward(1);
 				break;
 			default:
-				insertChar(m_parser->character(), true, false, isShiftText());
+				insertChar(m_parser->character(), true, false);
 				break;
 			}
 		}
