@@ -1275,11 +1275,14 @@ void TerminalState::resetTerminal()
 
 void TerminalState::handle_osc(int value, const char *txt)
 {
-	char *val = 0;
-	asprintf(&val, "%d", value);
-	const char *params[2];
-	params[0] = val;
-	params[1] = txt;
-	PDL_CallJS("OSCevent", params, 2);
-	if (val) free(val);
+	if (PDL_IsPlugin())
+	{
+		char *val = 0;
+		asprintf(&val, "%d", value);
+		const char *params[2];
+		params[0] = val;
+		params[1] = txt;
+		PDL_CallJS("OSCevent", params, 2);
+		if (val) free(val);
+	}
 }
