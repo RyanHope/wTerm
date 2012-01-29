@@ -36,6 +36,7 @@ enyo.kind({
 			height: this.height,
 			params: [enyo.application.p.get('fontSize').toString(10), this.exec]
 		})
+		this.$.plugin.addCallback("OSCevent", enyo.bind(this, "OSCevent"))
 	},
 
 	pluginReady: function(inSender, inResponse, inRequest) {
@@ -46,12 +47,11 @@ enyo.kind({
 		this.doPluginReady()
 	},
 	pluginConnected: function(inSender, inResponse, inRequest) {
-		this.$.plugin.addCallback("OSCevent", enyo.bind(this, "OSCevent"))
 	},
 	pluginDisconnected: function(inSender, inResponse, inRequest) {
 		this.error('Terminal Plugin Disconnected')
 	},
-	
+
 	OSCevent: function(value, txt) {
 		switch(parseInt(value,10)) {
 			case 0:

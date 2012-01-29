@@ -4,7 +4,7 @@ var kbdLayouts = { };
 function getKbdLayout(name, onload) {
 	var layout, n;
 
-	if (!kbdLayouts[name]) name = 'default';
+	if (!kbdLayouts[name]) name = 'querty_us';
 	layout = kbdLayouts[name];
 
 	if (layout.keys) {
@@ -43,7 +43,7 @@ function kbdLayoutLoad(name, keys) {
 	layout.onload = null;
 }
 
-kbdLayouts.default = { caption: 'QWERTY (en-US)' };
+kbdLayouts.qwerty_us = { caption: 'QWERTY (en-US)' };
 kbdLayouts.dvorak = { caption: 'Dvorak Simplified (en-US)' };
 kbdLayouts.german = { caption: 'QWERTZ (german)' };
 kbdLayouts.french = { caption: 'AZERTY (french)' };

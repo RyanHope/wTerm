@@ -8,6 +8,7 @@ enyo.kind({
 	},
 
 	initComponents: function() {
+		this.inherited(arguments)
 		this.createComponent({
 			name: 'plugin',
 			kind: enyo.Hybrid,

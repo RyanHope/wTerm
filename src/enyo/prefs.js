@@ -63,7 +63,7 @@ enyo.kind({
 				]
 			},
 			colorScheme: 'Linux Colors',
-			kbdLayout: 'default',
+			kbdLayout: 'qwerty_us',
 			colorSchemes: {
 				'Linux Colors': [
 					[0,0,0],
