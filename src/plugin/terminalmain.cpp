@@ -47,6 +47,8 @@ PDL_bool setActive(PDL_JSParameters *params) {
 	wTerm->setActive(active);
 	if (active == 0)
 		wTerm->stopKeyRepeat();
+	else
+		wTerm->refresh();
 	return PDL_TRUE;
 }
 
