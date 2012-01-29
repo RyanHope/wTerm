@@ -13,7 +13,7 @@ enyo.kind({
 		enyo.application.m = this;
     },
 
-	launch: function(relaunch) {
+	launch: function(relaunch, setup) {
 		if (enyo.windowParams.resetFirstUse)
 			enyo.application.p.set('firstUse', false)
 		else if (enyo.windowParams.dockMode || enyo.windowParams.windowType === 'dockModeWindow')

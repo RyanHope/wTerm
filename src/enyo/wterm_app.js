@@ -114,6 +114,7 @@ enyo.kind({
 			kind: "AppMenu", components: [
 				{caption: "New Terminal", onclick: "newTerm"},
 				{caption: "Preferences", onclick: "openPrefs"},
+				{caption: "Setup", onclick: "openSetup"},
 				{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
 				{caption: "About", onclick: "openAbout"}
 			]
@@ -181,6 +182,10 @@ enyo.kind({
 		this.$.about.openAtTopCenter()
 	},
 
+	openSetup: function() {
+		enyo.windows.openWindow('app.html', null, {setup: true}, null);
+	},
+	
 	openPrefs: function() {
 		if (this.$.prefs.showing)
 			this.$.prefs.close();
