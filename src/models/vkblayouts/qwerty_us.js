@@ -1,5 +1,5 @@
 
-kbdLayoutLoad('default', [
+kbdLayoutLoad('qwerty_us', [
 	[
 		{symbols: [['Esc',SDLK._ESCAPE]], small: 1, extraClasses: 'escape'},
 		{flex:1},
