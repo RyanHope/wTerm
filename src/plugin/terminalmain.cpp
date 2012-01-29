@@ -167,7 +167,10 @@ int main(int argc, const char* argv[])
 			while (!terminal->isReady())
 				sched_yield();
 			sched_yield();
-			PDL_CallJS("ready", NULL, 0);
+			PDL_Err mjErr;
+			do {
+				mjErr = PDL_CallJS("ready", NULL, 0);
+			} while (mjErr != PDL_NOERROR);
 
 			wTerm->run(); //Blocking.
 		}
