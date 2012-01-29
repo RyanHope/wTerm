@@ -349,11 +349,21 @@ bool ControlSeqParser::parseChar() {
 	case 0x07: // ^G BEL
 		break; // terminator for OSC
 	case 0x08: // ^H BS \b backspace
+		m_token = CS_ASCII_BS;
+		return true;
 	case 0x09: // ^I HT \t
+		m_token = CS_ASCII_TAB;
+		return true;
 	case 0x0A: // ^J LF \n
+		m_token = CS_ASCII_LF;
+		return true;
 	case 0x0B: // ^K VT \v
+		m_token = CS_ASCII_VT;
+		return true;
 	case 0x0C: // ^L FF \f
+		return false;
 	case 0x0D: // ^M CR \r
+		m_token = CS_ASCII_CR;
 		return true; // return character
 	case 0x0E: // ^N SO (shift out)
 		m_token = CS_CHARSET_USE_G1;

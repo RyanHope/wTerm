@@ -869,7 +869,7 @@ void TerminalState::displayScreenAlignmentPattern() {
 	for (int r=0;r<nRows;r++) {
 		for (int c=0;c<nCols;c++) {
 			setCursorLocation(c+1,r+1);
-			insertChar(69, false, true); // 'E'
+			insertChar(69, false); // 'E'
 		}
 	}
 	m_nTermModeFlags = modeFlags;
@@ -1093,55 +1093,12 @@ TSGraphicsState TerminalState::getDefaultGraphicsState()
 }
 
 /**
- * Invokes commands based on the given non printable char. Processing the
- * character may change its value.
- * Returns true to attempt to print the character.
+ * Inserts a printable character at the current cursor position. If advance cursor is
+ * specified, then the cursor is moved forward a position after the character has been
+ * inserted. If ignore non-printable characters is specified, then non-printable characters
+ * will not be processed.
  */
-bool TerminalState::processNonPrintableChar(CellCharacter &c)
-{
-	if (isPrintable(c))
-	{
-		return true;
-	}
-
-	pthread_mutex_lock(&m_rwLock);
-
-	switch (c)
-	{
-	case 8: //Backspace.
-		if (getCursorLocation().getX() >= 1)
-			moveCursorBackward(1);
-		break;
-	case 10: //Line feed.
-		if ((getTerminalModeFlags() & TS_TM_NEW_LINE) > 0)
-		{
-			moveCursorNextLine();
-		}
-		else
-		{
-			moveCursorDown(1, true);
-		}
-		break;
-	case 11: //Vertical tab
-		moveCursorDown(1, true);
-		break;
-	case 13: //Return.
-		setCursorLocation(1, getCursorLocation().getY());
-		break;
-	}
-
-	pthread_mutex_unlock(&m_rwLock);
-
-	return false;
-}
-
-/**
- * Inserts a character at the current cursor position. If advance cursor is specified,
- * then the cursor is moved forward a position after the character has been inserted.
- * If ignore non-printable characters is specified, then non-printable characters will not
- * be processed.
- */
-void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnoreNonPrintable)
+void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor)
 {
 	pthread_mutex_lock(&m_rwLock);
 
@@ -1149,18 +1106,12 @@ void TerminalState::insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnor
 	int nLine;
 	unsigned int nPos;
 	TSLine *line;
-	bool bPrint = true;
 
 	c = applyCharset(c);
 
 	int nCols = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
 
-	if (!bIgnoreNonPrintable && !isPrintable(c))
-	{
-		bPrint = processNonPrintableChar(c);
-	}
-
-	if (isPrintable(c) || bPrint)
+	if (isPrintable(c))
 	{
 		if (displayLoc.getX() > nCols)
 		{

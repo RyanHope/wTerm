@@ -45,6 +45,21 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 
 	switch (nToken)
 	{
+	case CS_ASCII_BS: //Backspace
+		moveCursorBackward(1);
+		break;
+	case CS_ASCII_TAB: //Tab
+		tabForward(1);
+		break;
+	case CS_ASCII_LF: //Linefeed
+		((getTerminalModeFlags() & TS_TM_NEW_LINE) > 0) ? moveCursorNextLine() : moveCursorDown(1, true);
+		break;
+	case CS_ASCII_VT: //Vertical tab
+		moveCursorDown(1, true);
+		break;
+	case CS_ASCII_CR: //Carriage return
+		setCursorLocation(1, getCursorLocation().getY());
+		break;
 	case CS_CBT: //ESC[<Tabs>Z
 		tabBackward(values[0]);
 		break;
@@ -595,18 +610,10 @@ void VTTerminalState::insertString(const char *sStr, int len, ExtTerminal *extTe
 	m_parser->addInput(sStr, len);
 
 	while (m_parser->next()) {
-		if (m_parser->token() != CS_UNKNOWN) {
+		if (m_parser->token() != CS_UNKNOWN)
 			processControlSeq(m_parser->token(), m_parser->values(), m_parser->numValues(), extTerminal);
-		} else {
-			switch (m_parser->character()) {
-			case 0x09: // '\t'
-				tabForward(1);
-				break;
-			default:
-				insertChar(m_parser->character(), true, false);
-				break;
-			}
-		}
+		else
+			insertChar(m_parser->character(), true);
 	}
 
 	pthread_mutex_unlock(&m_rwLock);

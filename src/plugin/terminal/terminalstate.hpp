@@ -264,8 +264,6 @@ protected:
 	Point convertToDisplayLocation(const Point &loc);
 	Point boundLocation(const Point &loc);
 
-	virtual bool processNonPrintableChar(CellCharacter &c);
-
 	std::vector<int> tabs;
 
 public:
@@ -305,7 +303,7 @@ public:
 	void eraseBeginOfScreenToCursor();
 	void eraseScreen();
 
-	void insertChar(CellCharacter c, bool bAdvanceCursor, bool bIgnoreNonPrintable);
+	void insertChar(CellCharacter c, bool bAdvanceCursor);
 
 	void setDisplayScreenSize(int nWidth, int nHeight);
 	Point getDisplayScreenSize();

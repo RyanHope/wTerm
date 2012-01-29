@@ -97,6 +97,13 @@ typedef enum
 {
 	CS_UNKNOWN, // normal character
 
+	//ASCII
+	CS_ASCII_BS, //Backspace
+	CS_ASCII_TAB, //Tab
+	CS_ASCII_LF, //Linefeed
+	CS_ASCII_VT, //Vertical tab
+	CS_ASCII_CR, //Carriage return
+
 	//ANSI
 	CS_CURSOR_POSITION, //ESC[<Line>;<Column>H or ESC[<Line>;<Column>f
 	CS_CURSOR_UP, //ESC[<Value>A
