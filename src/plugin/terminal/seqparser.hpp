@@ -140,11 +140,6 @@ typedef enum
 	CS_CNL, //ESC[<Value>E Cursor Next Line
 	CS_CPL, //ESC[<Value>F Cursor Preceding Line
 
-	CS_KEYPAD_APP_MODE, //ESC=
-	CS_KEYPAD_NUM_MODE, //ESC>
-
-	CS_SETANSI, //ESC<
-
 	CS_USER_MAPPING, // USER MAPPING ??
 
 	CS_CHARSET_UK_G0_SET, //ESC(A
@@ -253,6 +248,7 @@ private:
 
 	typedef std::map<unsigned char, std::list<CS_Fixed_Entry> > CS_Fixed_Lookup;
 	CS_Fixed_Lookup m_csFixedLookup; /* map by first char */
+	CS_Fixed_Lookup m_csVT52Lookup; /* map by first char */
 
 	int m_values[MAX_NUM_VALUES];
 	int m_numValues;
@@ -263,7 +259,7 @@ private:
 	CSToken_t m_token;
 	unsigned char m_prefix[4];
 	int m_prefixlen;
-	enum { ST_START, ST_ESCAPE, ST_ESCAPE_TRIE, ST_CSI, ST_CSI_VALUES, ST_CSI_INVALID, ST_OSC, ST_OSC_ESC, ST_ESCY } m_state;
+	enum { ST_START, ST_ESCAPE, ST_ESCAPE_TRIE, ST_CSI, ST_CSI_VALUES, ST_CSI_INVALID, ST_OSC, ST_OSC_ESC, ST_VT52_ESCY } m_state;
 
 	const unsigned char *m_seq;
 	int m_len;
@@ -271,9 +267,12 @@ private:
 	Mode m_mode;
 	unsigned int m_utf8_seqlen, m_utf8_remlen;
 
+	bool m_vt52;
+
 	void buildLookup();
 
 	void addFixedLookup(const char *str, CSToken_t token);
+	void addVT52FixedLookup(const char *str, CSToken_t token);
 	void addCSILookup(const char parameter, CSToken_t token, int nMinParam, int nMaxParam, int nDefaultVal, char cFinal);
 
 	bool tryFixedEscape();
@@ -304,6 +303,11 @@ public:
 
 	void setMode(Mode mode);
 	Mode getMode() const { return m_mode; }
+
+	void enableVT52();
+	void disableVT52();
+
+	void reset();
 };
 
 #endif

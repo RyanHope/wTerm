@@ -109,7 +109,6 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		moveCursorDown(1, true);
 		break;
 	case CS_VT52_REVERSE_LINE_FEED: // ESCI
-		syslog(LOG_ERR, "CS_VT52_REVERSE_LINE_FEED");
 	case CS_REVERSE_INDEX: //ESCM
 		moveCursorUp(1, true);
 		break;
@@ -118,31 +117,26 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		setCursorLocation(values[1], values[0]);
 		break;
 	case CS_VT52_CURSOR_UP: // ESCA
-		syslog(LOG_ERR, "CS_VT52_CURSOR_UP");
 		values[0] = 1;
 	case CS_CURSOR_UP: //ESC[<Value>A
 		moveCursorUp(values[0] ? values[0] : 1);
 		break;
 	case CS_VT52_CURSOR_DOWN: // ESCB
-		syslog(LOG_ERR, "CS_VT52_CURSOR_DOWN");
 		values[0] = 1;
 	case CS_CURSOR_DOWN: //ESC[<Value>B
 		moveCursorDown(values[0] ? values[0] : 1);
 		break;
 	case CS_VT52_CURSOR_RIGHT: // ESCC
-		syslog(LOG_ERR, "CS_VT52_CURSOR_RIGHT");
 		values[0] = 1;
 	case CS_CURSOR_FORWARD: //ESC[<Value>C
 		moveCursorForward(values[0] ? values[0] : 1);
 		break;
 	case CS_VT52_CURSOR_LEFT: // ESCD
-		syslog(LOG_ERR, "CS_VT52_CURSOR_LEFT");
 		values[0] = 1;
 	case CS_CURSOR_BACKWARD: //ESC[<Value>D
 		moveCursorBackward(values[0] ? values[0] : 1);
 		break;
 	case CS_VT52_CURSOR_HOME: // ESCH
-		syslog(LOG_ERR, "CS_VT52_CURSOR_HOME");
 		cursorHome();
 		break;
 	case CS_CURSOR_POSITION_SAVE: //ESC[s or ESC7
@@ -152,7 +146,6 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		restoreCursor();
 		break;
 	case CS_VT52_ERASE_SCREEN: //ESCJ
-		syslog(LOG_ERR, "CS_VT52_ERASE_SCREEN");
 		eraseCursorToEndOfScreen();
 		break;
 	case CS_ERASE_DISPLAY: //ESC[<Value>J
@@ -169,8 +162,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		default: break;
 		}
 		break;
-	case CS_VT52_ERASE_LINE:
-		syslog(LOG_ERR, "CS_VT52_ERASE_LINE %d", numValues);
+	case CS_VT52_ERASE_LINE: //ESCK
 		eraseCursorToEndOfLine();
 		break;
 	case CS_ERASE_LINE: //ESC[<Value>K
@@ -186,7 +178,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			break;
 		}
 		break;
-	case CS_VT52_CURSOR_POSITION:
+	case CS_VT52_CURSOR_POSITION://ESCY<char(row+0x19)><char(col+0x19)>
 		setCursorLocation(values[1], values[0]);
 		break;
 	case CS_GRAPHICS_MODE_SET: //ESC[<Value>;...;<Value>m
@@ -275,8 +267,9 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			}
 		}
 		break;
-	case CS_SETANSI: //ESC<
+	case CS_VT52_ANSI_MODE: //ESC<
 		removeTerminalModeFlags(TS_TM_VT52);
+		m_parser->disableVT52();
 		break;
 	case CS_MODE_SET_PRIV: //ESC[<?><Value>;...;<Value>h
 		for (i = 0; i < numValues; i++)
@@ -370,6 +363,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			else if (values[i] == 2)
 			{
 				addTerminalModeFlags(TS_TM_VT52);
+				m_parser->enableVT52();
 			}
 			else if (values[i] == 3)
 			{
@@ -429,10 +423,10 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			}
 		}
 		break;
-	case CS_KEYPAD_APP_MODE: //ESC=
-	case CS_KEYPAD_NUM_MODE: //ESC>
+	case CS_VT52_KEYPAD_ALT_MODE: //ESC=
+	case CS_VT52_KEYPAD_NORMAL_MODE: //ESC>
 		//FIXME Not implemented.
-		syslog(LOG_ERR, "VT100 Control Sequence: KEYPAD not implemented.");
+		syslog(LOG_INFO, "VT52 Control Sequence: KEYPAD not implemented.");
 		break;
 	case CS_CHARSET_UK_G0_SET: //ESC(A
 		setCharset(0, 'A');
@@ -570,9 +564,15 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		if (extTerminal != NULL && extTerminal->isReady())
 			extTerminal->insertData("\x1B[>0;115;0c");
 		break;
-	case CS_VT52_IDENTIFY:
-		syslog(LOG_ERR, "CS_VT52_IDENTIFY");
+	case CS_VT52_IDENTIFY: //ESCZ
 		extTerminal->insertData("\x1B/Z");
+		break;
+	case CS_VT52_SPEC_CHARSET: // ESCF
+		syslog(LOG_INFO, "VT52 Control Sequence: ESC F not implemented.");
+		break;
+	case CS_VT52_ASCII_CHARSET: // ESCG
+		// no need to implement until we have ESC F
+		// syslog(LOG_INFO, "VT52 Control Sequence: ESG G not implemented.");
 		break;
 	case CS_TERM_PARAM: //ESC[<Value>;...;<Value>x
 		if (values[0]) {

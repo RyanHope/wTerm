@@ -30,7 +30,7 @@ const unsigned char ControlSeqParser::ESC_CHAR = 27;
 const unsigned char ControlSeqParser::DELIMITER_CHAR = ';';
 
 ControlSeqParser::ControlSeqParser()
-: m_state(ST_START), m_seq(NULL), m_mode(MODE_UTF8), m_utf8_remlen(0)
+: m_state(ST_START), m_seq(NULL), m_mode(MODE_UTF8), m_utf8_remlen(0), m_vt52(false)
 {
 	buildLookup();
 }
@@ -54,6 +54,33 @@ void ControlSeqParser::addFixedLookup(const char *str, CSToken_t token)
 	it = m_csFixedLookup.find(e.fixed[0]);
 	if (it == m_csFixedLookup.end()) {
 		it = m_csFixedLookup.insert(std::make_pair(e.fixed[0], std::list<CS_Fixed_Entry>())).first;
+	}
+
+	for (std::list<CS_Fixed_Entry>::const_iterator li = it->second.begin(), le = it->second.end(); li != le; ++li) {
+		unsigned int i = 0;
+		while (0 != e.fixed[i] && e.fixed[i] == li->fixed[i]) ++i;
+		if (0 == e.fixed[i] || 0 == li->fixed[i]) {
+			syslog(LOG_DEBUG, "conflicting ESC sequences: ESC%s and ESC%s", e.fixed, li->fixed);
+		}
+	}
+
+	it->second.push_back(e);
+}
+
+void ControlSeqParser::addVT52FixedLookup(const char *str, CSToken_t token) {
+	CS_Fixed_Entry e;
+	unsigned int slen = strlen(str);
+	if (slen == 0) return; /* invalid */
+	if (slen + 1 > sizeof(e.fixed)) return; /* too long */
+
+	memset(&e, 0, sizeof(e));
+	memcpy(e.fixed, str, slen);
+	e.token = token;
+
+	CS_Fixed_Lookup::iterator it;
+	it = m_csVT52Lookup.find(e.fixed[0]);
+	if (it == m_csVT52Lookup.end()) {
+		it = m_csVT52Lookup.insert(std::make_pair(e.fixed[0], std::list<CS_Fixed_Entry>())).first;
 	}
 
 	for (std::list<CS_Fixed_Entry>::const_iterator li = it->second.begin(), le = it->second.end(); li != le; ++li) {
@@ -137,9 +164,6 @@ void ControlSeqParser::buildLookup()
 	addCSILookup(0, CS_TERM_PARAM, 1, 1, 0, 'x');
 
 
-	addFixedLookup("=", CS_KEYPAD_APP_MODE);
-	addFixedLookup(">", CS_KEYPAD_NUM_MODE);
-
 	addFixedLookup("D", CS_INDEX);
 	addFixedLookup("M", CS_REVERSE_INDEX);
 	addFixedLookup("H", CS_TAB_SET);
@@ -190,26 +214,36 @@ void ControlSeqParser::buildLookup()
 	addFixedLookup("c", CS_TERM_RESET);
 
 	/* VT52 Compat */
-	addFixedLookup("<", CS_VT52_ANSI_MODE);
-	addFixedLookup("A", CS_VT52_CURSOR_UP);
-	addFixedLookup("B", CS_VT52_CURSOR_DOWN);
-	addFixedLookup("C", CS_VT52_CURSOR_RIGHT);
-	addFixedLookup("D", CS_VT52_CURSOR_LEFT);
-	addFixedLookup("J", CS_VT52_ERASE_SCREEN);
-	addFixedLookup("K", CS_VT52_ERASE_LINE);
-	addFixedLookup("H", CS_VT52_CURSOR_HOME);
-	addFixedLookup("I", CS_VT52_REVERSE_LINE_FEED);
-	addFixedLookup("Z", CS_VT52_IDENTIFY);
+	addVT52FixedLookup("<", CS_VT52_ANSI_MODE);
+	addVT52FixedLookup("=", CS_VT52_KEYPAD_ALT_MODE);
+	addVT52FixedLookup(">", CS_VT52_KEYPAD_NORMAL_MODE);
+	addVT52FixedLookup("A", CS_VT52_CURSOR_UP);
+	addVT52FixedLookup("B", CS_VT52_CURSOR_DOWN);
+	addVT52FixedLookup("C", CS_VT52_CURSOR_RIGHT);
+	addVT52FixedLookup("D", CS_VT52_CURSOR_LEFT);
+	addVT52FixedLookup("F", CS_VT52_SPEC_CHARSET);
+	addVT52FixedLookup("G", CS_VT52_ASCII_CHARSET);
+	addVT52FixedLookup("J", CS_VT52_ERASE_SCREEN);
+	addVT52FixedLookup("K", CS_VT52_ERASE_LINE);
+	addVT52FixedLookup("H", CS_VT52_CURSOR_HOME);
+	addVT52FixedLookup("I", CS_VT52_REVERSE_LINE_FEED);
 	/* ESC Y -> CS_VT52_CURSOR_POSITION is done manually in the parser */
+	addVT52FixedLookup("Z", CS_VT52_IDENTIFY);
 }
 
 bool ControlSeqParser::tryFixedEscape() {
+	CS_Fixed_Lookup &table(m_vt52 ? m_csVT52Lookup : m_csFixedLookup);
 	CS_Fixed_Lookup::iterator it;
 	std::list<CS_Fixed_Entry>::const_iterator i, end;
 
-	it = m_csFixedLookup.find(m_prefix[0]);
-	if (it == m_csFixedLookup.end()) {
+	m_prefix[m_prefixlen] = 0;
+
+	it = table.find(m_prefix[0]);
+	if (it == table.end()) {
 		/* invalid sequence (prefix) */
+
+		syslog(LOG_DEBUG, "unknown esc sequence prefix: ESC '%s'", m_prefix);
+
 		m_state = ST_START;
 		return true;
 	}
@@ -234,6 +268,8 @@ bool ControlSeqParser::tryFixedEscape() {
 	}
 
 	/* invalid sequence (prefix) */
+	syslog(LOG_DEBUG, "unknown esc sequence prefix: ESC '%s'", m_prefix);
+
 	m_state = ST_START;
 	return true;
 }
@@ -428,8 +464,8 @@ bool ControlSeqParser::parseChar() {
 		} else if (']' == m_currentChar) {
 			m_state = ST_OSC;
 			return false;
-		} else if ('Y' == m_currentChar) {
-			m_state = ST_ESCY;
+		} else if (m_vt52 && 'Y' == m_currentChar) {
+			m_state = ST_VT52_ESCY;
 			return false;
 		} else {
 			m_state = ST_ESCAPE_TRIE;
@@ -528,18 +564,19 @@ bool ControlSeqParser::parseChar() {
 		}
 		m_prefix[m_prefixlen++] = m_currentChar;
 		return tryFixedEscape();
-	case ST_ESCY:
+	case ST_VT52_ESCY:
 		if (m_currentChar < 0x20) {
 			/* cancel sequence, ignore previous part */
 			m_state = ST_START;
 			return true;
 		}
-		m_values[m_numValues++] = m_currentChar - 0x19;
+		m_values[m_numValues++] = m_currentChar - 0x1F;
 		if (2 == m_numValues) {
 			m_state = ST_START;
 			m_token = CS_VT52_CURSOR_POSITION;
 			return true;
 		}
+		return false;
 	default:
 		m_state = ST_START;
 		return true;
@@ -625,4 +662,18 @@ void ControlSeqParser::setMode(Mode mode) {
 		m_mode = mode;
 		m_utf8_remlen = 0; /* reset utf-8 state */
 	}
+}
+
+void ControlSeqParser::enableVT52() {
+	m_vt52 = true;
+}
+
+void ControlSeqParser::disableVT52() {
+	m_vt52 = false;
+}
+
+void ControlSeqParser::reset() {
+	m_state = ST_START;
+	m_mode = MODE_UTF8;
+	m_vt52 = false;
 }
