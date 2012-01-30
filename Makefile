@@ -7,7 +7,7 @@ APPID       := $(VENDOR).$(APP)
 VERSION     := $(shell cat appinfo.json | grep version | cut -f 2 -d ":" | cut -f 2 -d "\"")
 IPK         := $(APPID)_$(VERSION)_$(ARCH).ipk
 
-.PHONY: wterm package install clean
+.PHONY: package install clean bins
 
 package: clean-package ipk/$(IPK)
 
@@ -20,6 +20,8 @@ ipk/$(IPK): wterm bin/vttest bin/cmatrix clean-package
 
 clean-package:
 	- rm -rf ipk
+	
+bins: wterm bin/vttest bin/cmatrix
 
 wterm:
 	$(MAKE) -C src/plugin
