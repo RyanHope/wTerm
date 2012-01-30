@@ -406,6 +406,14 @@ void SDLCore::printCharacter(int nColumn, int nLine, TSCell cell)
 		graphicsInfo.fg = (int)fg;
 		graphicsInfo.bg = (int)bg;
 	}
+
+	if (cell.graphics.bold()) {
+		if (graphicsInfo.fg < TS_COLOR_BLACK_BRIGHT) {
+			graphicsInfo.fg += TS_COLOR_BLACK_BRIGHT;
+		} else {
+			graphicsInfo.fg += 2; // TS_..._FG/BG -> _FG/BG_BRIGHT
+		}
+	}
 	graphicsInfo.blink = cell.graphics.blink();
 
 	m_fontgl.drawTextGL(graphicsInfo, nColumn-1, nLine-1, cell.data);
