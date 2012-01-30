@@ -91,6 +91,14 @@ void ScreenBuffer::setScreenSize(unsigned int rows, unsigned int columns) {
 }
 
 ScreenBuffer::LinesIterator ScreenBuffer::screen_start() {
+	unsigned int haveLines = m_lines.size();
+
+	if (m_sbPos > haveLines - m_rows) {
+		syslog(LOG_ERR, "scroll position out of bounds!");
+		m_sbPos = haveLines - m_rows;
+		// Notification: new scroll pos
+	}
+
 	return m_lines.end() - m_rows - m_sbPos;
 }
 
@@ -199,12 +207,12 @@ void ScreenBuffer::scrollLines(unsigned int rowStart, unsigned int rowEnd, int c
 		} else {
 			// with scrollback
 			m_lines.insert(getLine(rowEnd+1), count, Line(m_cols));
-			if (m_sbPos > 0) m_sbPos = std::max(m_sbSize, m_sbPos + count);
 			unsigned int haveLines = m_lines.size(), maxLines = m_sbSize + m_rows;
 			if (haveLines > maxLines) {
 				m_lines.erase(m_lines.begin(), m_lines.begin() + (haveLines - maxLines));
 				haveLines = maxLines;
 			}
+			if (m_sbPos > 0) m_sbPos = std::max(haveLines - m_rows, m_sbPos + count);
 		}
 	} else {
 		count = std::min<int>(rowEnd - rowStart + 1, -count);
