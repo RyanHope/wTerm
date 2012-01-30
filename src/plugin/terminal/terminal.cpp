@@ -560,6 +560,8 @@ void Terminal::setWindowSize(int nWidth, int nHeight)
  */
 int Terminal::setWindowSize()
 {
+	if (-1 == m_slaveFD) return -1;
+
 	if (m_winSize.ws_col == 0 && m_winSize.ws_row == 0)
 	{
 		//No change.
@@ -574,7 +576,7 @@ int Terminal::setWindowSize()
 
 	if (ioctl(m_slaveFD, TIOCSWINSZ, &m_winSize) < 0)
 	{
-		syslog(LOG_ERR, "Cannot set window size.");
+		syslog(LOG_ERR, "Cannot set window size: %s", strerror(errno));
 		return -1;
 	}
 
