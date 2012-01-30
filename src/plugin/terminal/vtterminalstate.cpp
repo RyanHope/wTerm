@@ -197,8 +197,6 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				else if (values[i] == 1)
 				{
 					addGraphicsModeFlags(TS_GM_BOLD);
-					if (m_currentGraphicsState.foregroundColor == TS_COLOR_FOREGROUND)
-						setForegroundColor(TS_COLOR_FOREGROUND_BRIGHT);
 				}
 				else if (values[i] == 4)
 				{
@@ -214,14 +212,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				}
 				else if (values[i] >= 30 && values[i] <= 37)
 				{
-					if ((m_currentGraphicsState.nGraphicsMode & TS_GM_BOLD) > 0)
-					{
-						setForegroundColor((TSColor_t)(values[i] - 30 + TS_COLOR_BLACK_BRIGHT));
-					}
-					else
-					{
-						setForegroundColor((TSColor_t)(values[i] - 30));
-					}
+					setForegroundColor((TSColor_t)(values[i] - 30));
 				}
 				else if (values[i] == 39)
 				{
@@ -422,6 +413,11 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				restoreScreen();
 			}
 		}
+		break;
+	case CS_KEYPAD_APP_MODE: //ESC=
+	case CS_KEYPAD_NUM_MODE: //ESC>
+		//FIXME Not implemented.
+		syslog(LOG_INFO, "VT100 Control Sequence: KEYPAD not implemented.");
 		break;
 	case CS_VT52_KEYPAD_ALT_MODE: //ESC=
 	case CS_VT52_KEYPAD_NORMAL_MODE: //ESC>

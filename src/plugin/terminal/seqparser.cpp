@@ -164,6 +164,9 @@ void ControlSeqParser::buildLookup()
 	addCSILookup(0, CS_TERM_PARAM, 1, 1, 0, 'x');
 
 
+	addFixedLookup("=", CS_KEYPAD_APP_MODE);
+	addFixedLookup(">", CS_KEYPAD_NUM_MODE);
+
 	addFixedLookup("D", CS_INDEX);
 	addFixedLookup("M", CS_REVERSE_INDEX);
 	addFixedLookup("H", CS_TAB_SET);

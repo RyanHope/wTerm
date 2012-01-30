@@ -140,6 +140,9 @@ typedef enum
 	CS_CNL, //ESC[<Value>E Cursor Next Line
 	CS_CPL, //ESC[<Value>F Cursor Preceding Line
 
+	CS_KEYPAD_APP_MODE, //ESC=
+	CS_KEYPAD_NUM_MODE, //ESC>
+
 	CS_USER_MAPPING, // USER MAPPING ??
 
 	CS_CHARSET_UK_G0_SET, //ESC(A
