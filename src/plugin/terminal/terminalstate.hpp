@@ -20,13 +20,10 @@
 #ifndef TERMINALSTATE_HPP__
 #define TERMINALSTATE_HPP__
 
+#include "screenbuffer.hpp"
 #include "util/point.hpp"
 
-#include <stdint.h>
 #include <pthread.h>
-
-#include <deque>
-#include <vector>
 
 typedef enum
 {
@@ -104,42 +101,6 @@ typedef enum
 
 typedef enum
 {
-	TS_GM_NONE = 0,
-	TS_GM_BOLD = 1,
-	TS_GM_UNDERSCORE = 2,
-	TS_GM_BLINK = 4,
-	TS_GM_NEGATIVE = 8,
-	TS_GM_ITALIC = 16,
-	TS_GM_MAX
-} TSGraphicMode_t;
-
-typedef enum
-{
-	TS_COLOR_BLACK = 0,
-	TS_COLOR_RED,
-	TS_COLOR_GREEN,
-	TS_COLOR_YELLOW,
-	TS_COLOR_BLUE,
-	TS_COLOR_MAGENTA,
-	TS_COLOR_CYAN,
-	TS_COLOR_WHITE,
-	TS_COLOR_BLACK_BRIGHT,
-	TS_COLOR_RED_BRIGHT,
-	TS_COLOR_GREEN_BRIGHT,
-	TS_COLOR_YELLOW_BRIGHT,
-	TS_COLOR_BLUE_BRIGHT,
-	TS_COLOR_MAGENTA_BRIGHT,
-	TS_COLOR_CYAN_BRIGHT,
-	TS_COLOR_WHITE_BRIGHT,
-	TS_COLOR_FOREGROUND,
-	TS_COLOR_BACKGROUND,
-	TS_COLOR_FOREGROUND_BRIGHT,
-	TS_COLOR_BACKGROUND_BRIGHT,
-	TS_COLOR_MAX
-} TSColor_t;
-
-typedef enum
-{
 	TS_INPUT_F1 = 0,
 	TS_INPUT_F2,
 	TS_INPUT_F3,
@@ -171,25 +132,14 @@ typedef enum
 	TS_CS_MAX
 } TSCharset_t;
 
-struct TSCellGraphicsState
-{
-	TSColor_t foregroundColor;
-	TSColor_t backgroundColor;
-	int nGraphicsMode;
-
-	bool bold() const { return nGraphicsMode & TS_GM_BOLD; }
-	bool underline() const { return nGraphicsMode & TS_GM_UNDERSCORE; }
-	bool blink() const { return nGraphicsMode & TS_GM_BLINK; }
-	bool negative() const { return nGraphicsMode & TS_GM_NEGATIVE; }
-	bool italic() const { return nGraphicsMode & TS_GM_ITALIC; }
-
-	TSCellGraphicsState() : foregroundColor(TS_COLOR_FOREGROUND), backgroundColor(TS_COLOR_BACKGROUND), nGraphicsMode(0) { }
-};
-
 struct TSGraphicsState : public TSCellGraphicsState
 {
 	unsigned char charsets[4], charset;
 	unsigned int charset_ndx;
+
+	TSGraphicsState() : charset('B'), charset_ndx(0) {
+		charsets[0] = charsets[1] = charsets[2] = charsets[3] = 'B';
+	}
 };
 
 typedef enum
@@ -200,24 +150,10 @@ typedef enum
 	TS_GM_OP_MAX
 } TSGraphicsModeOp_t;
 
-typedef uint16_t CellCharacter;
-
-// For each cell on the screen, track its graphics and textual contents:
-struct TSCell {
-	TSCellGraphicsState graphics;
-	CellCharacter data;
-
-	TSCell() : data(0) { }
-};
 // Say that a line is a vector of cells.
 // For now, they don't have to be the same size as the screen,
 // in which case the unrepresented cells are empty using our bg color.
 typedef std::vector<TSCell> TSLine;
-
-typedef struct {
-	std::deque<TSLine> m_data;
-	Point m_savedCursorLoc;
-} TSScreen_t;
 
 /**
  * Terminal state information catered.
@@ -225,9 +161,14 @@ typedef struct {
 class TerminalState
 {
 protected:
+	struct TSScreen {
+		ScreenBuffer::Store screenStore;
+		Point savedCursorLoc;
+	};
+
+
 	int m_nTermModeFlags;
 
-	TSGraphicsState m_defaultGraphicsState;
 	TSGraphicsState m_currentGraphicsState;
 	TSGraphicsState m_savedGraphicsState;
 	Point m_savedCursorLoc;
@@ -235,34 +176,19 @@ protected:
 	Point m_cursorLoc; //Bound by the display screen size. Home location is (1, 1).
 	Point m_displayScreenSize; //The actual terminal screen size.
 
-	// Our line buffer (including what's on-screen)
-	std::deque<TSLine> m_data;
+	ScreenBuffer m_screenBuffer;
 
 	pthread_mutexattr_t m_rwLockAttr;
 	pthread_mutex_t m_rwLock;
 
-	TSScreen_t m_savedScreen;
+	TSScreen m_savedScreen;
 
 	bool unsolicited;
 
-	int m_nNumBufferLines; //Must at least be the height of the display screen size.
-	int m_nTopBufferLine; //The index number in the buffer that corresponds to the first line of the display. Starts at 0.
-	int m_nScrollBufferLines;
 	int m_nTopMargin;
 	int m_nBottomMargin;
 
-	int m_nScollOffset;
-
-	void freeBuffer();
-
-	void moveGraphicsState(int nLines, bool bUp);
-
-	void clearBufferLine(int nLine, int nStartX, int nEndX, TSCell & eraseTo);
-	void setBufferTopLine(int nLine);
-	void erase(const Point &start, const Point &end);
-
 	Point convertToDisplayLocation(const Point &loc);
-	Point boundLocation(const Point &loc);
 
 	std::vector<int> tabs;
 
@@ -271,6 +197,9 @@ public:
 
 	TerminalState();
 	virtual ~TerminalState();
+
+	ScreenBuffer::LinesIterator screen_start() { return m_screenBuffer.screen_start(); }
+	ScreenBuffer::LinesIterator screen_end() { return m_screenBuffer.screen_end(); }
 
 	void setCursorLocation(int nX, int nY);
 	void cursorHome();
@@ -287,10 +216,8 @@ public:
 
 	static bool isPrintable(CellCharacter c);
 
-	void moveCursorUp(int nPos);
-	void moveCursorDown(int nPos);
-	void moveCursorUp(int nPos, bool bScroll);
-	void moveCursorDown(int nPos, bool bScroll);
+	void moveCursorUp(int nPos, bool bScroll = false);
+	void moveCursorDown(int nPos, bool bScroll = false);
 	void moveCursorForward(int nPos);
 	void moveCursorBackward(int nPos);
 	void moveCursorNextLine();
@@ -302,8 +229,9 @@ public:
 	void eraseCursorToEndOfScreen();
 	void eraseBeginOfScreenToCursor();
 	void eraseScreen();
+	void eraseCharacters(int nChars);
 
-	void insertChar(CellCharacter c, bool bAdvanceCursor);
+	void insertChar(CellCharacter c);
 
 	void setDisplayScreenSize(int nWidth, int nHeight);
 	Point getDisplayScreenSize();
@@ -328,27 +256,17 @@ public:
 	void setBackgroundColor(TSColor_t color);
 	TSColor_t getBackgroundColor();
 	TSGraphicsState getCurrentGraphicsState();
-	TSGraphicsState getDefaultGraphicsState();
 
 	void setCharset(unsigned int ndx, unsigned char charset);
 	void useCharset(unsigned int ndx);
 	CellCharacter applyCharset(CellCharacter cChar);
 	unsigned char charset();
 
-	int getBufferScreenHeight();
-	TSLine * getBufferLine(int nLineIndex);
-	int getBufferTopLineIndex();
-	void setNumBufferLines(int nNumLines);
-	int getNumBufferLines();
-
 	void lock();
 	void unlock();
 
 	TSCell getEmptyCell() {
-		TSCell cell;
-		cell.graphics = m_defaultGraphicsState;
-		cell.data = BLANK;
-		return cell;
+		return TSCell(BLANK);
 	}
 
 	void resetTerminal();
@@ -361,8 +279,8 @@ public:
 
 	void setScrollBufferLines(int lines);
 	int getScrollBufferLines();
-	void setScollOffset(int offset);
-	int getScollOffset();
+	void setScrollOffset(int offset);
+	int getScrollOffset();
 
 	void handle_osc(int value, const char *txt);
 };

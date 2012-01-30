@@ -185,7 +185,7 @@ void WTerm::handleKeyboardEvent(SDL_Event &event)
 			}
 		case SDLK_PAGEUP:
 			if (mod & KMOD_SHIFT) {
-				m_terminalState->setScollOffset(m_terminalState->getScollOffset()+10);
+				m_terminalState->setScrollOffset(m_terminalState->getScrollOffset()+10);
 				snapBottom = false;
 				refresh();
 			} else
@@ -200,7 +200,7 @@ void WTerm::handleKeyboardEvent(SDL_Event &event)
 			}
 		case SDLK_PAGEDOWN:
 			if (mod & KMOD_SHIFT) {
-				m_terminalState->setScollOffset(m_terminalState->getScollOffset()-10);
+				m_terminalState->setScrollOffset(m_terminalState->getScrollOffset()-10);
 				snapBottom = false;
 				refresh();
 			} else
@@ -329,8 +329,8 @@ void WTerm::handleKeyboardEvent(SDL_Event &event)
 		break;
 	}
 
-	if ((event.type == SDL_KEYDOWN) && (snapBottom) && (m_terminalState->getScollOffset() != 0)) {
-		m_terminalState->setScollOffset(0);
+	if ((event.type == SDL_KEYDOWN) && (snapBottom) && (m_terminalState->getScrollOffset() != 0)) {
+		m_terminalState->setScrollOffset(0);
 		refresh();
 	}
 }
@@ -339,10 +339,7 @@ void WTerm::redraw()
 {
 	m_terminalState->lock();
 
-	int nTopLineIndex = m_terminalState->getBufferTopLineIndex() - m_terminalState->getScollOffset();
-	int nEndLine = nTopLineIndex + m_terminalState->getDisplayScreenSize().getY();
-
-	TSGraphicsState defState = m_terminalState->getDefaultGraphicsState();
+	TSGraphicsState defState;
 
 	m_reverse = (m_terminalState->getTerminalModeFlags() & TS_TM_SCREEN);
 
@@ -353,50 +350,51 @@ void WTerm::redraw()
 
 	m_fontgl.clearText();
 
-	for (int i = nTopLineIndex; i < nEndLine; ++i)
-	{
-		TSLine * line = m_terminalState->getBufferLine(i);
+	unsigned int nRow = 1;
+	ScreenBuffer::LinesIterator l = m_terminalState->screen_start(), le = m_terminalState->screen_end();
+	for ( ; l != le; ++l, ++nRow) {
+		unsigned int nCol = 1;
+		ScreenBuffer::Line::const_iterator r = l->begin(), re = l->end();
 
-		int nCol = 1;
-		for(TSLine::iterator I = line->begin(), E = line->end(); I != E;
-				++I, ++nCol)
-		{
-			hasBlinkText |= (I->graphics.nGraphicsMode & TS_GM_BLINK) != 0;
-			printCharacter(nCol, i - nTopLineIndex + 1, *I);
+		for ( ; r != re; ++r, ++nCol) {
+			hasBlinkText |= (r->graphics.nGraphicsMode & TS_GM_BLINK) != 0;
+			printCharacter(nCol, nRow, *r);
 		}
 	}
 
-	m_fontgl.setCursor(m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR && (m_terminalState->getScollOffset() == 0),
-		m_terminalState->getCursorLocation().getY()-1,
-		m_terminalState->getCursorLocation().getX()-1,
+	m_fontgl.setCursor(m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR && (m_terminalState->getScrollOffset() == 0),
+		m_terminalState->getDisplayCursorLocation().getY()-1,
+		m_terminalState->getDisplayCursorLocation().getX()-1,
 		m_reverse ? TS_COLOR_BACKGROUND : TS_COLOR_FOREGROUND);
 
+	m_terminalState->unlock();
+
+	// don't keep lock while drawing
 	m_fontgl.drawGL(doBlink);
 
 	m_bNeedsBlink = hasBlinkText;
-
-	m_terminalState->unlock();
 }
 
 void WTerm::redrawBlinked()
 {
 	m_terminalState->lock();
 
-	TSGraphicsState defState = m_terminalState->getDefaultGraphicsState();
+	TSGraphicsState defState;
 
 	m_reverse = (m_terminalState->getTerminalModeFlags() & TS_TM_SCREEN);
+
+	m_terminalState->unlock();
 
 	// Clear the entire screen to the default background color
 	clearScreen(m_reverse ? defState.foregroundColor : defState.backgroundColor);
 
 	m_fontgl.setCursor(m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR,
-		m_terminalState->getCursorLocation().getY()-1,
-		m_terminalState->getCursorLocation().getX()-1,
+		m_terminalState->getDisplayCursorLocation().getY()-1,
+		m_terminalState->getDisplayCursorLocation().getX()-1,
 		m_reverse ? TS_COLOR_BACKGROUND : TS_COLOR_FOREGROUND);
 
+	// don't keep lock while drawing
 	m_fontgl.drawGL(doBlink);
-
-	m_terminalState->unlock();
 }
 
 void WTerm::refresh()

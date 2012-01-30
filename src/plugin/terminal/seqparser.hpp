@@ -102,6 +102,7 @@ typedef enum
 	CS_ASCII_TAB, //Tab
 	CS_ASCII_LF, //Linefeed
 	CS_ASCII_VT, //Vertical tab
+	CS_ASCII_FF, //Form feed
 	CS_ASCII_CR, //Carriage return
 
 	//ANSI
