@@ -19,6 +19,7 @@ enyo.depends(
 	"src/enyo/vkb.js",
 	"src/enyo/wterm_prefs.js",
 	"src/enyo/wterm_dock.js",
+	"src/enyo/input_test.js",
 	"src/enyo/wterm_app.js",
 	"src/enyo/wterm_firstuse.js",
 	"src/enyo/main.js"

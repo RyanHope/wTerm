@@ -29,7 +29,7 @@ enyo.kind({
 			onPluginConnected: 'pluginConnected',
 			onPluginDisconnected: 'pluginDisconnected',
 			bgcolor: this.bgcolor,
-			allowKeyboardFocus: true,
+			allowKeyboardFocus: false,
 			killTransparency: true,
 			passTouchEvents: true,
 			width: this.width,
@@ -209,18 +209,19 @@ enyo.kind({
 	setupSU: function(enable) {
 		this.$.plugin.callPluginMethod('setupSU', enable)
 	},
-
-	focus: function() {
-		var ret = false
-		if (this.$.plugin.hasNode())
-		{
-			this.$.plugin.node.focus();
-			ret = true
-		}
-		return ret
+	
+	create: function() {
+		this.inherited(arguments)
+		document.onkeydown = this.keydownHandler.bind(this)
+		document.onkeyup = this.keyupHandler.bind(this)
 	},
-	dispatchEvent: function() {
-		if (this.focus()) this.$.plugin.node.dispatchEvent(event);
+	
+	keydownHandler: function(inEvent) {
+		this.pushKeyEvent(1, inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
+	},
+	
+	keyupHandler: function(inEvent) {
+		this.pushKeyEvent(0, inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
 	}
 
 })

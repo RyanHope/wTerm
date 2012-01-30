@@ -28,19 +28,6 @@
 #include <time.h>
 #include <syslog.h>
 
-// Some HP BT keycodes
-#define HP_BT_LEFT 18
-#define HP_BT_UP 19
-#define HP_BT_RIGHT 20
-#define HP_BT_DOWN 21
-
-// These are different when used as a plugin.
-// Credit to Brybry for finding these.
-#define HP_BT_PLUGIN_UP    0xE0A0
-#define HP_BT_PLUGIN_DOWN  0xE0A1
-#define HP_BT_PLUGIN_LEFT  0xE0A2
-#define HP_BT_PLUGIN_RIGHT 0xE0A3
-
 WTerm::WTerm()
 {
 	m_terminalState = NULL;
@@ -176,8 +163,6 @@ void WTerm::handleKeyboardEvent(SDL_Event &event)
 	case SDL_KEYDOWN:
 		switch(sym)
 		{
-		case HP_BT_UP:
-		case HP_BT_PLUGIN_UP:
 		case SDLK_UP:
 			if (!(mod & KMOD_MODE)) {
 				m_terminalState->sendCursorCommand(VTTS_CURSOR_UP, extTerminal);
@@ -191,8 +176,6 @@ void WTerm::handleKeyboardEvent(SDL_Event &event)
 			} else
 				extTerminal->insertData("\x1B[5~");
 			break;
-		case HP_BT_DOWN:
-		case HP_BT_PLUGIN_DOWN:
 		case SDLK_DOWN:
 			if (!(mod & KMOD_MODE)) {
 				m_terminalState->sendCursorCommand(VTTS_CURSOR_DOWN, extTerminal);
@@ -206,8 +189,6 @@ void WTerm::handleKeyboardEvent(SDL_Event &event)
 			} else
 				extTerminal->insertData("\x1B[6~");
 			break;
-		case HP_BT_RIGHT:
-		case HP_BT_PLUGIN_RIGHT:
 		case SDLK_RIGHT:
 			if (!(mod & KMOD_MODE)) {
 				m_terminalState->sendCursorCommand(VTTS_CURSOR_RIGHT, extTerminal);
@@ -217,8 +198,6 @@ void WTerm::handleKeyboardEvent(SDL_Event &event)
 		case SDLK_END:
 			extTerminal->insertData("\x1B[F");
 			break;
-		case HP_BT_LEFT:
-		case HP_BT_PLUGIN_LEFT:
 		case SDLK_LEFT:
 			if (!(mod & KMOD_MODE)) {
 				m_terminalState->sendCursorCommand(VTTS_CURSOR_LEFT, extTerminal);

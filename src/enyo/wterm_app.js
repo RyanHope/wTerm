@@ -11,9 +11,7 @@ enyo.kind({
 			kind: "ApplicationEvents",
 			onWindowRotated: "setup",
 			onWindowActivated: 'windowActivated',
-			onWindowDeactivated: 'windowDeactivated',
-			onKeyup: 'handleKeyup',
-			onKeydown: 'handleKeydown'
+			onWindowDeactivated: 'windowDeactivated'
 		},
 		{
 			name : "getPreferencesCall",
@@ -161,7 +159,7 @@ enyo.kind({
 				this.$.command.setContent(enyo.windowParams.command)
 			}
 		}
-		this.$.terminal.focus()
+		//this.$.terminal.focus()
 	},
 
 	setupKeyboard: function(portrait) {
@@ -227,15 +225,6 @@ enyo.kind({
 	setup: function() {
 		if (!this.hasKeyboard)
 			this.$.getPreferencesCall.call({"keys":["rotationLock"]});
-	},
-
-	handleKeyup: function(inSender, inEvent) {
-		this.log(inSender, inEvent)
-		this.$.terminal.dispatchEvent()
-	},
-	handleKeydown: function(inSender, inEvent) {
-		this.log(inSender, inEvent)
-		this.$.terminal.dispatchEvent()
 	}
 
 })

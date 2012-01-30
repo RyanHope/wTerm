@@ -31,6 +31,22 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
+
+#define HP_BT_LEFT 18
+#define HP_BT_UP 19
+#define HP_BT_RIGHT 20
+#define HP_BT_DOWN 21
+
+#define HP_BT_PLUGIN_LEFT  37
+#define HP_BT_PLUGIN_UP    38
+#define HP_BT_PLUGIN_RIGHT 39
+#define HP_BT_PLUGIN_DOWN  40
+
+#define HP_BT_PLUGIN_SHIFT 16
+#define HP_BT_PLUGIN_CTRL 17
+#define HP_BT_PLUGIN_ALT 129
+
+
 const int SDLCore::BUFFER_DIRTY_BIT = 1;
 const int SDLCore::FONT_SIZE_DIRTY_BIT = 2;
 const int SDLCore::COLOR_DIRTY_BIT = 4;
@@ -555,18 +571,24 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 					state = SDL_RELEASED;
 				event.key.keysym.mod = (SDLMod)modstate;
 				break;
+			case HP_BT_PLUGIN_CTRL:
+				event.key.keysym.sym = SDLK_LCTRL;
 			case SDLK_LCTRL:
 				modstate |= KMOD_LCTRL;
 				break;
 			case SDLK_RCTRL:
 				modstate |= KMOD_RCTRL;
 				break;
+			case HP_BT_PLUGIN_SHIFT:
+				event.key.keysym.sym = SDLK_LSHIFT;
 			case SDLK_LSHIFT:
 				modstate |= KMOD_LSHIFT;
 				break;
 			case SDLK_RSHIFT:
 				modstate |= KMOD_RSHIFT;
 				break;
+			case HP_BT_PLUGIN_ALT:
+				event.key.keysym.sym = SDLK_LALT;
 			case SDLK_LALT:
 				modstate |= KMOD_LALT;
 				break;
@@ -581,6 +603,22 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 				break;
 			case SDLK_MODE:
 				modstate |= KMOD_MODE;
+				break;
+			case HP_BT_LEFT:
+			case HP_BT_PLUGIN_LEFT:
+				event.key.keysym.sym = SDLK_LEFT;
+				break;
+			case HP_BT_UP:
+			case HP_BT_PLUGIN_UP:
+				event.key.keysym.sym = SDLK_UP;
+				break;
+			case HP_BT_RIGHT:
+			case HP_BT_PLUGIN_RIGHT:
+				event.key.keysym.sym = SDLK_RIGHT;
+				break;
+			case HP_BT_DOWN:
+			case HP_BT_PLUGIN_DOWN:
+				event.key.keysym.sym = SDLK_DOWN;
 				break;
 			default:
 				repeatable = 1;
@@ -598,18 +636,24 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 			case SDLK_CAPSLOCK:
 				/* Only send keydown events */
 				return;
+			case HP_BT_PLUGIN_CTRL:
+				event.key.keysym.sym = SDLK_LCTRL;
 			case SDLK_LCTRL:
 				modstate &= ~KMOD_LCTRL;
 				break;
 			case SDLK_RCTRL:
 				modstate &= ~KMOD_RCTRL;
 				break;
+			case HP_BT_PLUGIN_SHIFT:
+				event.key.keysym.sym = SDLK_LSHIFT;
 			case SDLK_LSHIFT:
 				modstate &= ~KMOD_LSHIFT;
 				break;
 			case SDLK_RSHIFT:
 				modstate &= ~KMOD_RSHIFT;
 				break;
+			case HP_BT_PLUGIN_ALT:
+				event.key.keysym.sym = SDLK_LALT;
 			case SDLK_LALT:
 				modstate &= ~KMOD_LALT;
 				break;
@@ -624,6 +668,22 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 				break;
 			case SDLK_MODE:
 				modstate &= ~KMOD_MODE;
+				break;
+			case HP_BT_LEFT:
+			case HP_BT_PLUGIN_LEFT:
+				event.key.keysym.sym = SDLK_LEFT;
+				break;
+			case HP_BT_UP:
+			case HP_BT_PLUGIN_UP:
+				event.key.keysym.sym = SDLK_UP;
+				break;
+			case HP_BT_RIGHT:
+			case HP_BT_PLUGIN_RIGHT:
+				event.key.keysym.sym = SDLK_RIGHT;
+				break;
+			case HP_BT_DOWN:
+			case HP_BT_PLUGIN_DOWN:
+				event.key.keysym.sym = SDLK_DOWN;
 				break;
 			default:
 				break;
