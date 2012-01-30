@@ -7,9 +7,9 @@ APPID       := $(VENDOR).$(APP)
 VERSION     := $(shell cat appinfo.json | grep version | cut -f 2 -d ":" | cut -f 2 -d "\"")
 IPK         := $(APPID)_$(VERSION)_$(ARCH).ipk
 
-.PHONY: package install clean bins
+.PHONY: package install clean clean-package bins src/plugin/wterm src/plugin/setup src/vttest/vttest src/cmatrix/cmatrix
 
-package: clean-package ipk/$(IPK)
+package: clean-package ipk/$(IPK) wterm
 
 ipk/$(IPK): wterm setup bin/vttest bin/cmatrix clean-package
 	mkdir -p ipk
@@ -20,26 +20,34 @@ ipk/$(IPK): wterm setup bin/vttest bin/cmatrix clean-package
 
 clean-package:
 	- rm -rf ipk
-	
-bins: wterm bin/vttest bin/cmatrix
 
-wterm:
+bins: wterm setup bin/vttest bin/cmatrix
+
+src/plugin/wterm:
 	$(MAKE) -C src/plugin wterm
-	mv src/plugin/wterm wterm
 
-setup:
+src/plugin/setup:
 	$(MAKE) -C src/plugin setup
-	mv src/plugin/setup setup
 
-bin/vttest:
-	mkdir -p bin
+wterm: src/plugin/wterm
+	cp src/plugin/wterm wterm
+
+setup: src/plugin/setup
+	cp src/plugin/setup setup
+
+src/vttest/vttest:
 	$(MAKE) -C src/vttest
-	mv src/vttest/vttest bin/vttest
 
-bin/cmatrix:
+bin/vttest: src/vttest/vttest
 	mkdir -p bin
+	cp src/vttest/vttest bin/vttest
+
+src/cmatrix/cmatrix:
 	$(MAKE) -C src/cmatrix
-	mv src/cmatrix/cmatrix bin/cmatrix
+
+bin/cmatrix: src/cmatrix/cmatrix
+	mkdir -p bin
+	cp src/cmatrix/cmatrix bin/cmatrix
 
 uninstall:
 	- palm-install -r $(APPID)
