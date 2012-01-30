@@ -55,6 +55,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		((getTerminalModeFlags() & TS_TM_NEW_LINE) > 0) ? moveCursorNextLine() : moveCursorDown(1, true);
 		break;
 	case CS_ASCII_VT: //Vertical tab
+	case CS_ASCII_FF: //Form feed
 		moveCursorDown(1, true);
 		break;
 	case CS_ASCII_CR: //Carriage return
@@ -71,7 +72,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		setCursorLocation(m_cursorLoc.getX(), values[0]);
 		break;
 	case CS_ECH: //ESC[<Chars>X
-		erase(m_cursorLoc, Point(m_cursorLoc.getX()+(values[0] ? values[0] : 1), m_cursorLoc.getY()));
+		eraseCharacters(values[0] ? values[0] : 1);
 		break;
 	case CS_IL: //ESC[<Lines>L
 		insertLines(values[0] ? values[0] : 1);
@@ -191,7 +192,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_GRAPHICS_MODE_SET: //ESC[<Value>;...;<Value>m
 		if (numValues == 0)
 		{
-			memcpy(&m_currentGraphicsState, &m_defaultGraphicsState, sizeof(m_currentGraphicsState));
+			m_currentGraphicsState = TSGraphicsState();
 		}
 		else
 		{
@@ -199,7 +200,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			{
 				if (values[i] == 0)
 				{
-					memcpy(&m_currentGraphicsState, &m_defaultGraphicsState, sizeof(m_currentGraphicsState));
+					m_currentGraphicsState = TSGraphicsState();
 				}
 				else if (values[i] == 1)
 				{
@@ -232,7 +233,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				}
 				else if (values[i] == 39)
 				{
-					setForegroundColor(m_defaultGraphicsState.foregroundColor);
+					setForegroundColor(TSGraphicsState().foregroundColor);
 				}
 				else if (values[i] >= 40 && values[i] <= 47)
 				{
@@ -240,7 +241,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				}
 				else if (values[i] == 49)
 				{
-					setBackgroundColor(m_defaultGraphicsState.backgroundColor);
+					setBackgroundColor(TSGraphicsState().backgroundColor);
 				}
 				else if (values[i] == 22)
 				{
@@ -507,7 +508,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		break;
 	case CS_MARGIN_SET: //ESC[<Top>;<Bottom>r
 		values[0] = (values[0] <= 0) ? 1 : values[0];
-		values[1] = (values[1] <= 0) ? m_nNumBufferLines : values[1]; // This likely needs to get adjusted. ~PTM
+		values[1] = (values[1] <= 0) ? getDisplayScreenSize().getY() : values[1]; // This likely needs to get adjusted. ~PTM
 		values[1] = (values[1] <= values[0]) ? (values[0] + 1) : values[1];
 		setMargin(values[0], values[1]);
 		cursorHome();
@@ -613,7 +614,7 @@ void VTTerminalState::insertString(const char *sStr, int len, ExtTerminal *extTe
 		if (m_parser->token() != CS_UNKNOWN)
 			processControlSeq(m_parser->token(), m_parser->values(), m_parser->numValues(), extTerminal);
 		else
-			insertChar(m_parser->character(), true);
+			insertChar(m_parser->character());
 	}
 
 	pthread_mutex_unlock(&m_rwLock);

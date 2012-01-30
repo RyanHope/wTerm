@@ -361,7 +361,8 @@ bool ControlSeqParser::parseChar() {
 		m_token = CS_ASCII_VT;
 		return true;
 	case 0x0C: // ^L FF \f
-		return false;
+		m_token = CS_ASCII_FF;
+		return true;
 	case 0x0D: // ^M CR \r
 		m_token = CS_ASCII_CR;
 		return true; // return character
