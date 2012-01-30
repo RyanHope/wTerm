@@ -11,7 +11,7 @@ IPK         := $(APPID)_$(VERSION)_$(ARCH).ipk
 
 package: clean-package ipk/$(IPK)
 
-ipk/$(IPK): wterm bin/vttest bin/cmatrix clean-package
+ipk/$(IPK): wterm setup bin/vttest bin/cmatrix clean-package
 	mkdir -p ipk
 	palm-package -X excludes.txt .
 	mv $(APPID)_*.ipk ipk/$(IPK)
@@ -24,8 +24,11 @@ clean-package:
 bins: wterm bin/vttest bin/cmatrix
 
 wterm:
-	$(MAKE) -C src/plugin
+	$(MAKE) -C src/plugin wterm
 	mv src/plugin/wterm wterm
+
+setup:
+	$(MAKE) -C src/plugin setup
 	mv src/plugin/setup setup
 
 bin/vttest:
