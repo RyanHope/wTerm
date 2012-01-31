@@ -25,11 +25,15 @@
 // For debugging
 #define checkGLError() \
 	do { \
-		GLenum err = glGetError(); \
-		if (!err) break; \
-		syslog(LOG_ERR, "GL Error %x at %s:%d: %s", \
-				err, __FILE__, __LINE__, glutils_gl_errorstr(err)); \
-	} while (1)
+		GLenum checkGLError_err = glGetError(); \
+		for (;checkGLError_err;) { \
+			syslog(LOG_ERR, "GL Error %x at %s:%d: %s", \
+					checkGLError_err, __FILE__, __LINE__, glutils_gl_errorstr(checkGLError_err)); \
+			GLenum checkGLError_e = glGetError(); \
+			if (checkGLError_e == checkGLError_err) break; \
+			checkGLError_err = checkGLError_e; \
+		} \
+	} while (0)
 
 const char* glutils_gl_errorstr(GLenum err);
 
