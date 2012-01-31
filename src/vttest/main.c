@@ -68,11 +68,6 @@ int
 main(int argc, char *argv[])
 {
 
-  struct winsize w;
-  ioctl(0, TIOCGWINSZ, &w);
-  max_cols = w.ws_col;
-  max_lines = w.ws_row;
-
   static MENU mainmenu[] = {
       { "Exit",                                              0 },
       { "Test of cursor movements",                          tst_movements },
@@ -89,6 +84,11 @@ main(int argc, char *argv[])
       { "Modify test-parameters",                            tst_setup },
       { "",                                                  0 }
     };
+
+  struct winsize w;
+  ioctl(0, TIOCGWINSZ, &w);
+  max_cols = w.ws_col;
+  max_lines = w.ws_row;
 
   while (argc-- > 1) {
     const char *opt = *++argv;
@@ -579,6 +579,8 @@ tst_screen(MENU_ARGS)
   println("Test of the SAVE/RESTORE CURSOR feature. There should");
   println("be ten characters of each flavour, and a rectangle");
   println("of 5 x 4 A's filling the top left of the screen.");
+
+  tbc(3); /* clear tabs for other tests ~stbuehler */
 
   restore_ttymodes();
   return MENU_HOLD;
