@@ -100,12 +100,12 @@ enyo.kind({
 		this.createComponent({
 			name: 'terminal',
 			kind: 'Terminal',
-			bgcolor: '000000',
+			executable: 'wterm',
 			width: window.innerWidth,
 			height: window.innerHeight,
 			onPluginReady: 'pluginReady',
 			onWindowTitleChanged: 'windowTitleChanged',
-			exec: exec
+			params: [enyo.application.p.get('fontSize').toString(10), exec]
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
 		this.$.terminal.vkb = this.$.vkb
@@ -202,6 +202,10 @@ enyo.kind({
 	VKBLayoutChange: function() {
 		this.setup()
 		this.render()
-	}
+	},
+
+	keydownHandler: function(inSender, inEvent) {
+		this.$.terminal.focus()
+	},
 
 })

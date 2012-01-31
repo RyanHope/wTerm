@@ -67,14 +67,14 @@ enyo.kind({
 					if (e.content || e.symbols) {
 						if (this._isPhone) {
 							if (e.hasOwnProperty('toggling') && c.toggling)
-								c = enyo.mixin({kind: 'vkbKey', className: '', onmousedown: 'keyToggle'}, e);
+								c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', onmousedown: 'keyToggle'}, e);
 							else
-								c = enyo.mixin({kind: 'vkbKey', className: '', onmousedown: 'keyDown', onmouseup: 'keyUp'}, e);
+								c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', onmousedown: 'keyDown', onmouseup: 'keyUp'}, e);
 						} else {
 							if (e.hasOwnProperty('toggling') && c.toggling)
-								c = enyo.mixin({kind: 'vkbKey', className: '', ontouchstart: 'keyToggle'}, e);
+								c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', ontouchstart: 'keyToggle'}, e);
 							else
-								c = enyo.mixin({kind: 'vkbKey', className: '', ontouchstart: 'keyDown', ontouchend: 'keyUp'}, e);
+								c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', ontouchstart: 'keyDown', ontouchend: 'keyUp'}, e);
 						}
 					} else {
 						c = enyo.mixin({className: ''}, e); /* simple flex or custom */

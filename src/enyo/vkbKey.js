@@ -25,7 +25,8 @@ enyo.kind({
 		toggling: false,
 		disabled: false,
 		sym: -1,
-		symbols: null
+		symbols: null,
+		terminal: null,
 	},
 
 	events: {
@@ -90,7 +91,6 @@ enyo.kind({
 		this.inherited(arguments);
 		if (this.hasNode()) {
 			this.node.ontouchstart = enyo.bind(this,'handleTouchstart')
-			//this.node.ontouchmove = this.doTouchMove;
 			this.node.ontouchend = enyo.bind(this,'handleTouchend')
 		}
 	},
@@ -101,14 +101,14 @@ enyo.kind({
 				this.setDown(!this.down)
 			else
 				this.setDown(true)
-			return this.doTouchstart()
+			this.doTouchstart()
 		}
 	},
 
 	handleTouchend: function() {
 		if (!this.disabled && !this.toggling) {
 			this.setDown(false)
-			return this.doTouchend()
+			this.doTouchend()
 		}
 	},
 
@@ -118,19 +118,17 @@ enyo.kind({
 				this.setDown(!this.down)
 			else
 				this.setDown(true)
-			return this.doMousedown()
+			this.doMousedown()
 		}
     },
 	mouseupHandler: function() {
 		if (!this.disabled && !this.toggling) {
 			this.setDown(false)
-			return this.doMouseup()
+			this.doMouseup()
 		}
 	},
-	mouseoutHandler: function() {
-		this.setDown(false)
-	},
 	
+	mouseoutHandler: function() {},	
 	mouseoverHandler: function() {},
 	flickHandler: function() {},
 	clickHandler: function() {},

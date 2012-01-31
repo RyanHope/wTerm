@@ -1,57 +1,68 @@
 enyo.kind({
 
 	name: 'Terminal',
-	kind: enyo.Control,
+	kind: enyo.Hybrid,
 
 	published: {
-		width: 0,
+		executable: "",
+		params: [],
+		alphaBlend: false,
+		killTransparency: false,
+		cachePlugin: false,
+		allowKeyboardFocus: true,
+		passTouchEvents: true,
+		bgcolor: '000000',
 		height: 0,
-		vkb: null,
+		width: 0,
+		// Custom
 		currentColors: [],
 		currentKeys: [],
-		isReady: false,
-		exec: null,
-		bgcolor: "000000"
 	},
 
 	events: {
 		onPluginReady:'',
+		onPluginConnected:'',
+		onPluginDisconnected:'',
 		onWindowTitleChanged:''
 	},
 
-	initComponents: function() {
-		this.inherited(arguments)
-		this.createComponent({
-			name: 'plugin',
-			kind: enyo.Hybrid,
-			executable: 'wterm',
-			onPluginReady: 'pluginReady',
-			onPluginConnected: 'pluginConnected',
-			onPluginDisconnected: 'pluginDisconnected',
-			bgcolor: this.bgcolor,
-			allowKeyboardFocus: true,
-			killTransparency: true,
-			passTouchEvents: true,
-			width: this.width,
-			height: this.height,
-			params: [enyo.application.p.get('fontSize').toString(10), this.exec]
-		})
-		this.$.plugin.addCallback("OSCevent", enyo.bind(this, "OSCevent"))
+	pluginReadyCallback: function() {
+		enyo.nextTick(this, function() {
+			if (this.pluginReady) { return; }
+			this.pluginReady = true;
+			// ------------ Some terminal setup based on prefs ------------- //
+			this.setColors()
+			this.setKeys()
+			this.setScrollBufferLines(enyo.application.p.get('bufferlines'))
+			// ------------------------------------------------------------- //
+			this.addCallback("OSCevent", enyo.bind(this, "OSCevent"))
+			this.doPluginReady();
+			this.deferredCalls.forEach(function (call) {
+				call.callback(enyo.call(this.node, call.methodName, call.args));
+				}, this);
+			this.deferredCalls = [];
+		});
 	},
 
-	pluginReady: function(inSender, inResponse, inRequest) {
-		this.isReady = true
-		this.setColors()
-		this.setKeys()
-		this.setScrollBufferLines(enyo.application.p.get('bufferlines'))
-		this.doPluginReady()
-	},
-	pluginConnected: function(inSender, inResponse, inRequest) {
-	},
-	pluginDisconnected: function(inSender, inResponse, inRequest) {
-		this.error('Terminal Plugin Disconnected')
+	focus: function() {
+		if (this.hasNode()) {
+			this.hasNode().focus();
+		}
 	},
 
+	keydownHandler: function(inSender, inEvent) {
+		if (enyo.fetchDeviceInfo().platformVersionMajor < 3)
+			this.keyDown(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
+	},
+
+	keyupHandler: function(inSender, inEvent) {
+		if (enyo.fetchDeviceInfo().platformVersionMajor < 3)
+			this.keyUp(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
+	},
+
+	/**
+	 * Plugin Callbacks
+	 */
 	OSCevent: function(value, txt) {
 		switch(parseInt(value,10)) {
 			case 0:
@@ -62,37 +73,72 @@ enyo.kind({
 		}
 	},
 
-	pushKeyEvent: function(type,sym,unicode) {
-		this.focus()
-		return parseInt(this.$.plugin.callPluginMethod('pushKeyEvent',type,sym,unicode))
+	/**
+	 * Plugin Methods
+	 */
+	setScrollBufferLines: function(lines) {
+		this.callPluginMethodDeferred(null, 'setScrollBufferLines', lines)
 	},
+
+	getDimensions: function() {
+		return enyo.json.parse(this.callPluginMethodDeferred(null, 'getDimensions'))
+	},
+
+	getFontSize: function() {
+		return parseInt(this.callPluginMethodDeferred(null, 'getFontSize'),10)
+	},
+
+	setFontSize: function(fontSize) {
+		return parseInt(this.callPluginMethodDeferred(null, 'setFontSize', fontSize),10)
+	},
+
+	setActive: function(active) {
+		if (this.isReady) this.callPluginMethodDeferred(null, 'setActive', active);
+	},
+
+	inject: function(command) {
+		this.callPluginMethodDeferred(null, 'inject', command)
+	},
+
+	hasPassword: function(user) {
+		return parseInt(this.callPluginMethod('userHasPassword', user), 10)
+	},
+
+	setPassword: function(user, password) {
+		this.callPluginMethod('userSetPassword', user, password)
+	},
+
+	addToGroup: function(user, group) {
+		this.callPluginMethod('userAddToGroup', user, group)
+	},
+
+	setupSU: function(enable) {
+		this.callPluginMethod('setupSU', enable)
+	},
+
+	pushKeyEvent: function(type,sym,unicode) {
+		return parseInt(this.callPluginMethod('pushKeyEvent',type,sym,unicode))
+	},
+
+	/**
+	 * Wrapper/Helper Methods
+	 */
 	keyDown: function(sym,unicode) {
 		return this.pushKeyEvent(1,sym,unicode)
 	},
+
 	keyUp: function(sym,unicode) {
 		return this.pushKeyEvent(0,sym,unicode)
 	},
 
 	resize: function(width, height) {
-		this.$.plugin.setWidth(width)
-		this.$.plugin.setHeight(height)
+		this.setWidth(width)
+		this.setHeight(height)
 	},
 
-	setScrollBufferLines: function(lines) {
-		this.$.plugin.callPluginMethodDeferred(null, 'setScrollBufferLines', lines)
-	},
-
-	getDimensions: function() {
-		return enyo.json.parse(this.$.plugin.callPluginMethodDeferred(null, 'getDimensions'))
-	},
-
-	getFontSize: function() {
-		return parseInt(this.$.plugin.callPluginMethodDeferred(null, 'getFontSize'),10)
-	},
-
-	setFontSize: function(fontSize) {
-		return parseInt(this.$.plugin.callPluginMethodDeferred(null, 'setFontSize', fontSize),10)
-	},
+	/**
+	 * Random Shit
+	 */
 	hsvToRgb: function(h, s, v) {
 		var r, g, b;
 		var i;
@@ -170,7 +216,7 @@ enyo.kind({
 		if (colorScheme == 'Black on Random Light')
 			this.currentColors[17] = this.currentColors[19] = this.hsvToRgb(Math.floor(Math.random()*256),34,247)
 		for (i in this.currentColors)
-			this.$.plugin.callPluginMethodDeferred(null, 'setColor', i, this.currentColors[i][0], this.currentColors[i][1], this.currentColors[i][2])
+			this.callPluginMethodDeferred(null, 'setColor', i, this.currentColors[i][0], this.currentColors[i][1], this.currentColors[i][2])
 	},
 
 	decodeEscape: function(str) {
@@ -184,36 +230,7 @@ enyo.kind({
 		var inputSchemes = enyo.application.p.get('inputSchemes')
 		this.currentKeys = inputSchemes[inputScheme]
 		for (var i=0; i<this.currentKeys.length; i++)
-			this.$.plugin.callPluginMethodDeferred(null, 'setKey', i, this.decodeEscape(this.currentKeys[i]))
+			this.callPluginMethodDeferred(null, 'setKey', i, this.decodeEscape(this.currentKeys[i]))
 	},
-
-	setActive: function(active) {
-		if (this.isReady) this.$.plugin.callPluginMethodDeferred(null, 'setActive', active);
-	},
-
-	inject: function(command) {
-		this.$.plugin.callPluginMethodDeferred(null, 'inject', command)
-	},
-
-	hasPassword: function(user) {
-		return parseInt(this.$.plugin.callPluginMethod('userHasPassword', user), 10)
-	},
-
-	setPassword: function(user, password) {
-		this.$.plugin.callPluginMethod('userSetPassword', user, password)
-	},
-
-	addToGroup: function(user, group) {
-		this.$.plugin.callPluginMethod('userAddToGroup', user, group)
-	},
-
-	setupSU: function(enable) {
-		this.$.plugin.callPluginMethod('setupSU', enable)
-	},
-	
-	focus: function() {
-		return this.$.plugin.hasNode().focus()
-	}
-
 
 })
