@@ -136,6 +136,7 @@ enyo.kind({
 			}
 		}
 		this.setup()
+		this.$.terminal.focus()
 	},
 
 	setupKeyboard: function(portrait) {

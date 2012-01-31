@@ -29,7 +29,7 @@ enyo.kind({
 			onPluginConnected: 'pluginConnected',
 			onPluginDisconnected: 'pluginDisconnected',
 			bgcolor: this.bgcolor,
-			allowKeyboardFocus: false,
+			allowKeyboardFocus: true,
 			killTransparency: true,
 			passTouchEvents: true,
 			width: this.width,
@@ -66,10 +66,14 @@ enyo.kind({
 		return parseInt(this.$.plugin.callPluginMethod('pushKeyEvent',type,sym,unicode))
 	},
 	keyDown: function(sym,unicode) {
-		return this.pushKeyEvent(1,sym,unicode)
+		var ret = this.pushKeyEvent(1,sym,unicode)
+		this.focus()
+		return ret
 	},
 	keyUp: function(sym,unicode) {
-		return this.pushKeyEvent(0,sym,unicode)
+		var ret = this.pushKeyEvent(0,sym,unicode)
+		this.focus()
+		return ret
 	},
 
 	resize: function(width, height) {
@@ -210,18 +214,23 @@ enyo.kind({
 		this.$.plugin.callPluginMethod('setupSU', enable)
 	},
 	
-	create: function() {
-		this.inherited(arguments)
-		document.onkeydown = this.keydownHandler.bind(this)
-		document.onkeyup = this.keyupHandler.bind(this)
+	focus: function() {
+		this.$.plugin.hasNode().focus()
 	},
 	
-	keydownHandler: function(inEvent) {
-		this.keyDown(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
+	keydownHandler: function(inSender, inEvent) {
+		if (enyo.fetchDeviceInfo().platformVersionMajor == 3) {
+			this.$.plugin.hasNode().dispatchEvent(inEvent);
+		} else {
+			this.keyDown(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
+		}
 	},
-	
-	keyupHandler: function(inEvent) {
-		this.keyUp(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
-	}
+	keyupHandler: function(inSender, inEvent) {
+		if (enyo.fetchDeviceInfo().platformVersionMajor == 3) {
+			this.$.plugin.hasNode().dispatchEvent(inEvent);
+		} else {
+			this.keyUp(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
+		}
+	},
 
 })
