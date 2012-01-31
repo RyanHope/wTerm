@@ -315,14 +315,16 @@ bool ControlSeqParser::matchCSI() {
 		/* prefix too long, we don't use those */
 		syslog(LOG_DEBUG, "unknown ESC[%s ... %c", m_prefix, m_currentChar);
 
-		/* invalid csi function, skip */
+		/* unknown csi function, skip */
 		m_state = ST_START;
 		return false;
 	}
 
 	it = m_csiLookup.find(m_currentChar);
 	if (it == m_csiLookup.end()) {
-		/* invalid csi function, skip */
+		syslog(LOG_DEBUG, "unknown ESC[%s ... %c", m_prefix, m_currentChar);
+
+		/* unknown csi function, skip */
 		m_state = ST_START;
 		return false;
 	}
@@ -368,7 +370,7 @@ bool ControlSeqParser::matchCSI() {
 
 	syslog(LOG_DEBUG, "unknown ESC[%s ... %c", m_prefix, m_currentChar);
 
-	/* invalid csi function, skip */
+	/* unknown csi function, skip */
 	m_state = ST_START;
 	return false;
 }
