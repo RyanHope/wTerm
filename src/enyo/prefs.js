@@ -63,7 +63,7 @@ enyo.kind({
 				]
 			},
 			colorScheme: 'Linux Colors',
-			kbdLayout: 'qwerty_us',
+			kbdLayout: (enyo.fetchDeviceInfo().keyboardAvailable || enyo.fetchDeviceInfo().keyboardSlider) ? 'phone_aux' : 'qwerty_us',
 			colorSchemes: {
 				'Linux Colors': [
 					[0,0,0],

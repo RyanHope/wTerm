@@ -4,7 +4,6 @@ enyo.kind({
 	kind: enyo.VFlexBox,
 
 	showVKB: false,
-	hasKeyboard: false,
 
 	components: [
 		{
@@ -82,7 +81,7 @@ enyo.kind({
 
 	initComponents: function() {
 		this.inherited(arguments)
-		this.showVKB = (enyo.application.p.get('showVKB') && !this.hasKeyboard)
+		this.showVKB = enyo.application.p.get('showVKB')
 		this.createComponent({
 			name: "prefs",
 			kind: "PrefsPullout",
@@ -90,7 +89,8 @@ enyo.kind({
 			className: "enyo-bg",
 			flyInFrom: "right",
 			onOpen: "pulloutToggle",
-			onClose: "closeRightPullout"
+			onClose: "closeRightPullout",
+			onVKBLayoutChange: 'VKBLayoutChange'
 		})
 		var exec = enyo.application.p.get('exec')
 		if (enyo.windowParams.root && !enyo.windowParams.command)
@@ -147,7 +147,6 @@ enyo.kind({
 			this.$.vkb.large()
 		if (this.showVKB)
 			height = height - this.$.vkb.hasNode().scrollHeight
-		this.log(width, height)
 		this.$.terminal.resize(width, height)
 	},
 
@@ -196,8 +195,12 @@ enyo.kind({
 	},
 
 	setup: function() {
-		if (!this.hasKeyboard)
-			this.$.getPreferencesCall.call({"keys":["rotationLock"]});
+		this.$.getPreferencesCall.call({"keys":["rotationLock"]});
+	},
+	
+	VKBLayoutChange: function() {
+		this.setup()
+		this.render()
 	}
 
 })

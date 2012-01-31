@@ -2,7 +2,8 @@ enyo.kind({
 	name: "PrefsPullout",
 	kind: enyo.Toaster,
 	events: {
-		onBypassClose: ""
+		onBypassClose: "",
+		onVKBLayoutChange: "",
 	},
 	published : {
 		terminal: null
@@ -256,6 +257,7 @@ enyo.kind({
 	kbdLayoutChanged: function() {
 		enyo.application.p.set('kbdLayout', this.$.kbdLayouts.getValue());
 		this.vkb.loadLayout(this.$.kbdLayouts.getValue());
+		this.doVKBLayoutChange()
 	},
 	inputSchemeChanged: function() {
 		enyo.application.p.set('inputScheme', this.$.inputSchemes.getValue())
