@@ -48,3 +48,4 @@ kbdLayouts.dvorak = { caption: 'Dvorak Simplified (en-US)' };
 kbdLayouts.german = { caption: 'QWERTZ (german)' };
 kbdLayouts.french = { caption: 'AZERTY (french)' };
 kbdLayouts.phone_aux = { caption: 'Phone Auxiliary' };
+kbdLayouts.tablet_aux = { caption: 'Tablet Auxiliary'};

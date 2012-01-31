@@ -10,3 +10,5 @@ wterm
 bin
 ipk
 setup
+src/cmatrix/cmatrix
+src/vttest/vttest
