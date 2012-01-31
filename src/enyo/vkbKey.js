@@ -30,7 +30,9 @@ enyo.kind({
 
 	events: {
 		ontouchstart: '',
-		ontouchend: ''
+		ontouchend: '',
+		onmousedown: '',
+		onmouseup: ''
 	},
 
 	create: function() {
@@ -107,14 +109,29 @@ enyo.kind({
 		if (!this.disabled && !this.toggling) {
 			this.setDown(false)
 			return this.doTouchend()
-
 		}
 	},
 
+	mousedownHandler: function() {
+		if (!this.disabled) {
+			if (this.toggling)
+				this.setDown(!this.down)
+			else
+				this.setDown(true)
+			return this.doMousedown()
+		}
+    },
+	mouseupHandler: function() {
+		if (!this.disabled && !this.toggling) {
+			this.setDown(false)
+			return this.doMouseup()
+		}
+	},
+	mouseoutHandler: function() {
+		this.setDown(false)
+	},
+	
 	mouseoverHandler: function() {},
-    mouseoutHandler: function() {},
-    mousedownHandler: function() {},
-	mouseupHandler: function() {},
 	flickHandler: function() {},
 	clickHandler: function() {},
 	dragstartHandler: function() {},

@@ -82,7 +82,6 @@ enyo.kind({
 
 	initComponents: function() {
 		this.inherited(arguments)
-		this.hasKeyboard = (enyo.fetchDeviceInfo().keyboardAvailable || enyo.fetchDeviceInfo().keyboardSlider)
 		this.showVKB = (enyo.application.p.get('showVKB') && !this.hasKeyboard)
 		this.createComponent({
 			name: "prefs",
@@ -98,52 +97,29 @@ enyo.kind({
 			exec = 'login -f root'
 		else if (enyo.windowParams.command)
 			exec = 'login -f wterm'
-		if (this.hasKeyboard) {
-			this.createComponent({
-				name: 'terminal',
-				kind: 'Terminal',
-				bgcolor: '000000',
-				width: window.innerWidth,
-				height: window.innerHeight,
-				onPluginReady: 'pluginReady',
-				onWindowTitleChanged: 'windowTitleChanged',
-				exec: exec
-			})
-			this.$.prefs.terminal = this.$.terminal
-			this.createComponent({
-				kind: "AppMenu", components: [
-					{caption: "New Terminal", onclick: "newTerm"},
-					{caption: "Preferences", onclick: "openPrefs"},
-					{caption: "Setup", onclick: "openSetup"},
-					{caption: "About", onclick: "openAbout"}
-				]
-			})
-		} else {
-			this.createComponent({
-				name: 'terminal',
-				kind: 'Terminal',
-				bgcolor: '000000',
-				width: window.innerWidth,
-				height: 400,
-				onPluginReady: 'pluginReady',
-				onWindowTitleChanged: 'windowTitleChanged',
-				exec: exec
-			})
-			this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
-			this.$.terminal.vkb = this.$.vkb
-			this.$.prefs.terminal = this.$.terminal
-			this.$.prefs.vkb = this.$.vkb
-			this.createComponent({
-				kind: "AppMenu", components: [
-					{caption: "New Terminal", onclick: "newTerm"},
-					{caption: "Preferences", onclick: "openPrefs"},
-					{caption: "Setup", onclick: "openSetup"},
-					{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
-					{caption: "About", onclick: "openAbout"}
-				]
-			})
-		}
-		this.setup()
+		this.createComponent({
+			name: 'terminal',
+			kind: 'Terminal',
+			bgcolor: '000000',
+			width: window.innerWidth,
+			height: window.innerHeight,
+			onPluginReady: 'pluginReady',
+			onWindowTitleChanged: 'windowTitleChanged',
+			exec: exec
+		})
+		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
+		this.$.terminal.vkb = this.$.vkb
+		this.$.prefs.terminal = this.$.terminal
+		this.$.prefs.vkb = this.$.vkb
+		this.createComponent({
+			kind: "AppMenu", components: [
+				{caption: "New Terminal", onclick: "newTerm"},
+				{caption: "Preferences", onclick: "openPrefs"},
+				{caption: "Setup", onclick: "openSetup"},
+				{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
+				{caption: "About", onclick: "openAbout"}
+			]
+		})
 	},
 	
 	windowTitleChanged: function(inSender, txt) {
@@ -159,23 +135,20 @@ enyo.kind({
 				this.$.command.setContent(enyo.windowParams.command)
 			}
 		}
-		//this.$.terminal.focus()
+		this.setup()
 	},
 
 	setupKeyboard: function(portrait) {
-		if (portrait) {
+		var width = window.innerWidth
+		var height = window.innerHeight
+		if (portrait)
 			this.$.vkb.small()
-			if (this.showVKB)
-				this.$.terminal.resize(window.innerWidth, 722)
-			else
-				this.$.terminal.resize(window.innerWidth, window.innerHeight)
-		} else {
+		else
 			this.$.vkb.large()
-			if (this.showVKB)
-				this.$.terminal.resize(window.innerWidth, 400)
-			else
-				this.$.terminal.resize(window.innerWidth, window.innerHeight)
-		}
+		if (this.showVKB)
+			height = height - this.$.vkb.hasNode().scrollHeight
+		this.log(width, height)
+		this.$.terminal.resize(width, height)
 	},
 
 	prefCallSuccess: function(inSender, inResponse) {

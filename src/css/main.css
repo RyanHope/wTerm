@@ -15,6 +15,18 @@
 	width: 66px;
 }
 
+.vkb.smallP .key {
+	margin: 0px;
+	height: 72px;
+	width: 80px;
+}
+
+.vkb.largeP .key {
+	margin: 0px;
+	height: 62px;
+	width: 80px;
+}
+
 /* Function Keys */
 .vkb .functionPadding {
 	height: 3px;
@@ -156,6 +168,13 @@
 }
 .vkb.small .keyImg {
 	height: 16px;
+}
+
+.vkb.largeP .keyImg {
+	height: 16px;
+}
+.vkb.smallP .keyImg {
+	height: 24px;
 }
 
 /* Preferences */

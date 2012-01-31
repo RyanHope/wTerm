@@ -2,7 +2,6 @@ enyo.kind({
 
 	name: "vkb",
 	kind: 'VFlexBox',
-	flex: 1,
 	width: '100%',
 
 	modstate: 0,
@@ -28,6 +27,7 @@ enyo.kind({
 	create: function() {
 		this._layoutName = '';
 		this.inherited(arguments);
+		this._isPhone = (enyo.fetchDeviceInfo().keyboardAvailable || enyo.fetchDeviceInfo().keyboardSlider)
 		this.addClass('vkb');
 		this.large();
 		this.loadLayout(enyo.application.p.get('kbdLayout'));
@@ -35,13 +35,23 @@ enyo.kind({
 
 	large: function() {
 		this._large = true;
-		this.addClass('large');
-		this.removeClass('small');
+		if (this._isPhone) {
+			this.addClass('smallP');
+			this.removeClass('largeP');
+		} else {
+			this.addClass('large');
+			this.removeClass('small');
+		}
 	},
 	small: function() {
 		this._large = false;
-		this.addClass('small');
-		this.removeClass('large');
+		if (this._isPhone) {
+			this.addClass('largeP');
+			this.removeClass('smallP');
+		} else {
+			this.addClass('small');
+			this.removeClass('large');
+		}
 	},
 
 	loadLayout: function(name) {
@@ -55,14 +65,22 @@ enyo.kind({
 				for (j = 0; j < row.length; j++) {
 					e = row[j];
 					if (e.content || e.symbols) {
-						if (e.hasOwnProperty('toggling') && c.toggling)
-							c = enyo.mixin({kind: 'vkbKey', className: '', ontouchstart: 'keyToggle'}, e);
-						else
-							c = enyo.mixin({kind: 'vkbKey', className: '', ontouchstart: 'keyDown', ontouchend: 'keyUp'}, e);
+						if (this._isPhone) {
+							if (e.hasOwnProperty('toggling') && c.toggling)
+								c = enyo.mixin({kind: 'vkbKey', className: '', onmousedown: 'keyToggle'}, e);
+							else
+								c = enyo.mixin({kind: 'vkbKey', className: '', onmousedown: 'keyDown', onmouseup: 'keyUp'}, e);
+						} else {
+							if (e.hasOwnProperty('toggling') && c.toggling)
+								c = enyo.mixin({kind: 'vkbKey', className: '', ontouchstart: 'keyToggle'}, e);
+							else
+								c = enyo.mixin({kind: 'vkbKey', className: '', ontouchstart: 'keyDown', ontouchend: 'keyUp'}, e);
+						}
 					} else {
 						c = enyo.mixin({className: ''}, e); /* simple flex or custom */
 					}
 					if (c.small) c.className += ' small';
+					else if (c.micro) c.className += ' micro';
 					if (c.extraClasses) c.className += ' ' + c.extraClasses;
 					if (!c.hasOwnProperty('printable')) c.printable = false;
 					if (!c.hasOwnProperty('unicode') && c.content) c.unicode = c.content.toLowerCase();
@@ -115,11 +133,13 @@ enyo.kind({
 	},
 
 	keyUp: function(inSender) {
+		this.log(inSender)
 		var k = this.processKey(inSender)
 		this.modstate = this.terminal.keyUp(k[0], k[1])
 	},
 
 	keyDown: function(inSender) {
+		this.log(inSender)
 		var k = this.processKey(inSender)
 		this.modstate = this.terminal.keyDown(k[0], k[1])
 	}
