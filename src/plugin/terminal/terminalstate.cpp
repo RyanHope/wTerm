@@ -92,7 +92,7 @@ void TerminalState::eraseCursorToEndOfScreen()
 	Point displayLoc = getDisplayCursorLocation();
 
 	m_screenBuffer.fillLine(displayLoc.getY(), displayLoc.getX(), m_displayScreenSize.getX(), TSCell(BLANK, m_currentGraphicsState));
-	m_screenBuffer.fillLines(displayLoc.getY() + 1, m_nBottomMargin, TSCell(BLANK, m_currentGraphicsState));
+	m_screenBuffer.fillLines(displayLoc.getY() + 1, m_displayScreenSize.getY(), TSCell(BLANK, m_currentGraphicsState));
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -104,7 +104,7 @@ void TerminalState::eraseBeginOfScreenToCursor()
 	Point displayLoc = getDisplayCursorLocation();
 
 	m_screenBuffer.fillLine(displayLoc.getY(), 1, displayLoc.getX(), TSCell(BLANK, m_currentGraphicsState));
-	m_screenBuffer.fillLines(m_nTopMargin, displayLoc.getY() - 1, TSCell(BLANK, m_currentGraphicsState));
+	m_screenBuffer.fillLines(1, displayLoc.getY() - 1, TSCell(BLANK, m_currentGraphicsState));
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -114,7 +114,8 @@ void TerminalState::eraseScreen()
 	pthread_mutex_lock(&m_rwLock);
 
 	// why not scrolling things into scrollback ?
-	m_screenBuffer.fillLines(m_nTopMargin, m_nBottomMargin, TSCell(BLANK, m_currentGraphicsState));
+	// m_screenBuffer.fillLines(m_nTopMargin, m_nBottomMargin, TSCell(BLANK, m_currentGraphicsState));
+	m_screenBuffer.fillLines(1, m_displayScreenSize.getY(), TSCell(BLANK, m_currentGraphicsState));
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -897,8 +898,8 @@ void TerminalState::resetTerminal()
 	pthread_mutex_lock(&m_rwLock);
 
 	setTerminalModeFlags(TS_TM_AUTO_REPEAT|TS_TM_AUTO_WRAP|TS_TM_COLUMN|TS_TM_CURSOR);
-	eraseScreen();
 	setMargin(1,getDisplayScreenSize().getY());
+	eraseScreen();
 	cursorHome();
 	saveCursor();
 	tabs.clear();
