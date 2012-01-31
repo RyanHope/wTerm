@@ -217,11 +217,11 @@ enyo.kind({
 	},
 	
 	keydownHandler: function(inEvent) {
-		this.pushKeyEvent(1, inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
+		this.keyDown(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
 	},
 	
 	keyupHandler: function(inEvent) {
-		this.pushKeyEvent(0, inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
+		this.keyUp(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
 	}
 
 })
