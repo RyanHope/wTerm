@@ -87,15 +87,37 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		insertBlanks(values[0] ? values[0] : 1);
 		break;
 	case CS_TAB_SET: //ESCH TAB SET
-		tabs.push_back(m_cursorLoc.getX());
-		sort(tabs.begin(),tabs.end());
+		{
+			bool added = false;
+			int x = m_cursorLoc.getX();
+			for (unsigned int i=0; i < tabs.size(); i++) {
+				if (x < tabs[i]) {
+					tabs.insert(tabs.begin() + i, x);
+					added = true;
+					break;
+				} else if (x == tabs[i]) {
+					/* don't add duplicates */
+					added = true;
+					break;
+				}
+			}
+			if (!added) tabs.push_back(x);
+		}
 		break;
 	case CS_TAB_CLEAR: //ESC[<Value>g TAB CLEAR
 		switch (values[0]) {
 		case 0:
-			for (unsigned int i=0; i < tabs.size(); ++i)
-				if (tabs[i] == m_cursorLoc.getX())
-					tabs.erase(tabs.begin()+i);
+			{
+				int x = m_cursorLoc.getX();
+				for (unsigned int i=0; i < tabs.size(); ++i) {
+					if (x == tabs[i]) {
+						tabs.erase(tabs.begin()+i);
+						break;
+					} else if (x > tabs[i]) {
+						break;
+					}
+				}
+			}
 			break;
 		case 3:
 			tabs.clear();
@@ -524,8 +546,8 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_DOUBLE_HEIGHT_LINE_BOTTOM: //ESC#4
 	case CS_SINGLE_WIDTH_LINE: //ESC#5
 	case CS_DOUBLE_WIDTH_LINE: //ESC#6
-		//FIXME Not implemented.
-		syslog(LOG_ERR, "VT100 Control Sequence: DOUBLE CELL not implemented. (%i)", nToken);
+		//FIXME Not implemented. not really needed otoh.
+		syslog(LOG_INFO, "VT100 Control Sequence: DOUBLE CELL not implemented. (%i)", nToken);
 		break;
 	case CS_OSC: // Operating System Controls
 		handle_osc(values[0], m_parser->getOSCParameter().c_str());
@@ -580,7 +602,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		}
 		break;
 	case CS_TERM_RESET: //ESCc
-		syslog(LOG_WARNING, "VT100 Control Sequence: TERM RESET partially implemented. (%i)", nToken);
+		syslog(LOG_DEBUG, "VT100 Control Sequence: TERM RESET partially implemented.");
 		resetTerminal();
 		break;
 	default:
