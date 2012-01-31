@@ -37,7 +37,7 @@ else
 		CXX=/opt/PalmPDK/i686-gcc/bin/i686-nptl-linux-gnu-g++ --sysroot=/opt/PalmPDK/i686-gcc/sys-root
 		ROOT=/opt/PalmPDK/device
 	else
-		CC=$(BUILD_ROOT)/toolchain/i686-unknown-linux-gnu/build/i686-unknown-linux-gnu/bin/i686-unknown-linux-gnu-g++
+		CC=$(BUILD_ROOT)/toolchain/i686-unknown-linux-gnu/build/i686-unknown-linux-gnu/bin/i686-unknown-linux-gnu-gcc
 		CXX=$(BUILD_ROOT)/toolchain/i686-unknown-linux-gnu/build/i686-unknown-linux-gnu/bin/i686-unknown-linux-gnu-g++
 		ROOT=$(BUILD_ROOT)/staging/i686/usr
 	endif
