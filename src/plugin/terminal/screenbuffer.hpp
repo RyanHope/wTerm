@@ -102,7 +102,8 @@ public:
 
 	void setScrollbackSize(unsigned int scrollbackSize); /** scrollbackSize + screen height = max # lines */
 	void setScrollbackPosition(unsigned int scrollbackPos); /** 0: no scrolling */
-	void setScreenSize(unsigned int rows, unsigned int columns);
+	void modifyScrollPosition(int diff);
+	void setScreenSize(unsigned int rows, unsigned int columns, unsigned int cursorRow);
 
 	unsigned int scrollbackSize() const { return m_sbSize; }
 	unsigned int scrollbackPosition() const { return m_sbPos; }

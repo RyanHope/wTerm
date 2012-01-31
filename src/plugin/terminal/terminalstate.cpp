@@ -469,10 +469,10 @@ void TerminalState::setDisplayScreenSize(int nWidth, int nHeight)
 
 	m_displayScreenSize.setLocation(nWidth, nHeight);
 
+	m_screenBuffer.setScreenSize(nHeight, nWidth, getDisplayCursorLocation().getY());
+
 	//Reset affected attributes to fix cases where location is out of bounds after setting the display.
 	setCursorLocation(m_cursorLoc.getX(), m_cursorLoc.getY());
-
-	m_screenBuffer.setScreenSize(nHeight, nWidth);
 
 	setMargin(m_nTopMargin, m_nBottomMargin);
 

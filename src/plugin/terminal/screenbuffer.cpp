@@ -63,29 +63,54 @@ void ScreenBuffer::setScrollbackPosition(unsigned int scrollbackPos) {
 	// Notification: new scroll pos
 }
 
-void ScreenBuffer::setScreenSize(unsigned int rows, unsigned int columns) {
+void ScreenBuffer::modifyScrollPosition(int diff) {
+	if (diff < 0) {
+		if (-(int) m_sbPos >= diff) {
+			setScrollbackPosition(0);
+		} else {
+			setScrollbackPosition(m_sbPos + diff);
+		}
+	} else {
+		setScrollbackPosition(m_sbPos + diff);
+	}
+}
+
+
+void ScreenBuffer::setScreenSize(unsigned int rows, unsigned int columns, unsigned int cursorRow) {
 	if (columns != m_cols) {
 		for (Lines::iterator l = m_lines.begin(), e = m_lines.end(); l != e; ++l) {
 			l->resize(columns);
 		}
 	}
+	m_cols = columns;
 
 	if (rows > m_rows) {
-		unsigned int haveLines = m_lines.size(), curRows = m_rows;
-		if (haveLines < rows) {
-			curRows += (rows - haveLines);
-			m_lines.insert(m_lines.end(), rows - haveLines, Line(columns));
-			haveLines = rows;
+		m_lines.insert(m_lines.end(), rows - m_rows, Line(m_cols));
+		m_rows = rows;
+	} else if (rows > m_rows) {
+		/* delete lines below cursor */
+		unsigned int del_lines = m_rows - rows;
+		if (cursorRow <= m_rows) {
+			/* cursorRow should always be <= m_rows */
+			del_lines = std::min(m_rows - cursorRow, del_lines);
 		}
-		if (rows - curRows > m_sbPos) {
-			m_sbPos = 0;
-		} else {
-			m_sbPos -= rows - curRows;
-		}
-	}
+		m_lines.erase(m_lines.end() - del_lines, m_lines.end());
 
-	m_cols = columns;
-	m_rows = rows;
+		/* the lines we should have deleted but moved up instead because of the cursor */
+		unsigned int scrolled_up = (m_rows - rows) - del_lines;
+
+		m_rows = rows;
+
+		/* perhaps we still have too much lines, remove them */
+		unsigned int maxLines = m_sbSize + m_rows;
+		unsigned int haveLines = m_lines.size();
+		if (haveLines > maxLines) {
+			m_lines.erase(m_lines.begin(), m_lines.begin() + (haveLines - maxLines));
+			haveLines = maxLines;
+		}
+
+		modifyScrollPosition(scrolled_up);
+	}
 
 	// Notification: total refresh
 }
