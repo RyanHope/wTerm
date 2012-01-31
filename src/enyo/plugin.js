@@ -63,17 +63,14 @@ enyo.kind({
 	},
 
 	pushKeyEvent: function(type,sym,unicode) {
+		this.focus()
 		return parseInt(this.$.plugin.callPluginMethod('pushKeyEvent',type,sym,unicode))
 	},
 	keyDown: function(sym,unicode) {
-		var ret = this.pushKeyEvent(1,sym,unicode)
-		this.focus()
-		return ret
+		return this.pushKeyEvent(1,sym,unicode)
 	},
 	keyUp: function(sym,unicode) {
-		var ret = this.pushKeyEvent(0,sym,unicode)
-		this.focus()
-		return ret
+		return this.pushKeyEvent(0,sym,unicode)
 	},
 
 	resize: function(width, height) {
@@ -215,22 +212,8 @@ enyo.kind({
 	},
 	
 	focus: function() {
-		this.$.plugin.hasNode().focus()
-	},
-	
-	keydownHandler: function(inSender, inEvent) {
-		if (enyo.fetchDeviceInfo().platformVersionMajor == 3) {
-			this.$.plugin.hasNode().dispatchEvent(inEvent);
-		} else {
-			this.keyDown(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
-		}
-	},
-	keyupHandler: function(inSender, inEvent) {
-		if (enyo.fetchDeviceInfo().platformVersionMajor == 3) {
-			this.$.plugin.hasNode().dispatchEvent(inEvent);
-		} else {
-			this.keyUp(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
-		}
-	},
+		return this.$.plugin.hasNode().focus()
+	}
+
 
 })
