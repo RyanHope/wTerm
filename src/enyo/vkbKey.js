@@ -32,7 +32,8 @@ enyo.kind({
 		ontouchstart: '',
 		ontouchend: '',
 		onmousedown: '',
-		onmouseup: ''
+		onmouseup: '',
+		onmouseout: ''
 	},
 
 	create: function() {
@@ -128,7 +129,10 @@ enyo.kind({
 		}
 	},
 	mouseoutHandler: function() {
-		this.setDown(false)
+		if (!this.disabled && !this.toggling) {
+			this.setDown(false)
+			return this.doMouseout()
+		}
 	},
 	
 	mouseoverHandler: function() {},
