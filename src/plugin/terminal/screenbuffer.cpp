@@ -182,15 +182,12 @@ void ScreenBuffer::insertCharacter(unsigned int row, unsigned int col, unsigned 
 	l.erase(l.begin() + lastCol);
 }
 
-void ScreenBuffer::deleteCharacters(unsigned int row, unsigned int col, unsigned int count) {
+void ScreenBuffer::deleteCharacters(unsigned int row, unsigned int col, unsigned int count, TSCell fill) {
 	if (0 == row || row > m_rows || 0 == col || col > m_cols) return;
 
 	count = std::min(count, m_cols - col + 1);
 
 	Line &l(*getLine(row));
-	TSCell fill(l[m_cols-1]);
-	fill.data = ' ';
-
 	Line::iterator c = l.begin() + (col-1);
 	l.erase(c, c + count);
 	l.insert(l.end(), count, fill);
@@ -217,7 +214,7 @@ void ScreenBuffer::fillLines(unsigned int rowStart, unsigned int rowEnd, TSCell 
 	}
 }
 
-void ScreenBuffer::scrollLines(unsigned int rowStart, unsigned int rowEnd, int count) {
+void ScreenBuffer::scrollLines(unsigned int rowStart, unsigned int rowEnd, int count, TSCell fill) {
 	if (0 == count || std::numeric_limits<int>::min() == count) return;
 	rowStart = std::max(1u, rowStart);
 	rowEnd = std::min(m_rows, rowEnd);
@@ -229,6 +226,7 @@ void ScreenBuffer::scrollLines(unsigned int rowStart, unsigned int rowEnd, int c
 			m_lines.insert(getLine(rowEnd+1), count, Line(m_cols));
 			Lines::iterator top(getLine(rowStart));
 			m_lines.erase(top - count, top);
+			fillLines(rowEnd, rowEnd+count-1, fill);
 		} else {
 			// with scrollback
 			m_lines.insert(getLine(rowEnd+1), count, Line(m_cols));
@@ -245,7 +243,10 @@ void ScreenBuffer::scrollLines(unsigned int rowStart, unsigned int rowEnd, int c
 		m_lines.insert(getLine(rowStart), count, Line(m_cols));
 		Lines::iterator bottom(getLine(rowEnd + 1));
 		m_lines.erase(bottom - count, bottom);
+
+		fillLines(rowStart, rowStart+count-1, fill);
 	}
+
 }
 
 ScreenBuffer::Lines::iterator ScreenBuffer::getLine(unsigned int row) {

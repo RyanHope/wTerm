@@ -87,10 +87,10 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		insertBlanks(values[0] ? values[0] : 1);
 		break;
 	case CS_SU: //ESC[<Value>S Scroll Up Lines
-		m_screenBuffer.scrollLines(m_nTopMargin, m_nBottomMargin, values[0] ? values[0] : 1);
+		m_screenBuffer.scrollLines(m_nTopMargin, m_nBottomMargin, values[0] ? values[0] : 1, TSCell(BLANK, m_currentGraphicsState));
 		break;
 	case CS_SD: //ESC[<Value>T Scroll Down Lines
-		m_screenBuffer.scrollLines(m_nTopMargin, m_nBottomMargin, -(values[0] ? values[0] : 1));
+		m_screenBuffer.scrollLines(m_nTopMargin, m_nBottomMargin, -(values[0] ? values[0] : 1), TSCell(BLANK, m_currentGraphicsState));
 		break;
 	case CS_TAB_SET: //ESCH TAB SET
 		{

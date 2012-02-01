@@ -119,7 +119,7 @@ public:
 	// all offset are relative to (1,1) as the top left corner
 	void replaceCharacter(unsigned int row, unsigned int col, TSCell c);
 	void insertCharacter(unsigned int row, unsigned int col, unsigned int lastCol, TSCell c);
-	void deleteCharacters(unsigned int row, unsigned int col, unsigned int count);
+	void deleteCharacters(unsigned int row, unsigned int col, unsigned int count, TSCell fill);
 
 	// inclusive ranges
 
@@ -129,7 +129,7 @@ public:
 	// scroll lines within a window; count > 0 means empty lines are inserted at the bottom, < 0 at the top
 	// if rowStart == 1 and count > 0, the top lines will move up in the Scrollback
 	// if scrollbackPos > 0 it will stay relatively on the same line (until it hits the upper limit)
-	void scrollLines(unsigned int rowStart, unsigned int rowEnd, int count);
+	void scrollLines(unsigned int rowStart, unsigned int rowEnd, int count, TSCell fill);
 
 private:
 	Lines::iterator getLine(unsigned int row); // row > 0 && row <= (m_rows+1)! (m_rows+1 returns m_lines.end())
