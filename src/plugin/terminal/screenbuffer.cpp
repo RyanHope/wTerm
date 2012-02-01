@@ -226,13 +226,12 @@ void ScreenBuffer::scrollLines(unsigned int rowStart, unsigned int rowEnd, int c
 	if (count > 0) {
 		count = std::min<int>(rowEnd - rowStart + 1, count);
 		if (rowStart > 1) {
-			m_lines.insert(getLine(rowEnd+1), count, Line(m_cols));
+			m_lines.insert(getLine(rowEnd+1), count, Line(m_cols, fill));
 			Lines::iterator top(getLine(rowStart));
 			m_lines.erase(top - count, top);
-			fillLines(rowEnd, rowEnd+count-1, fill);
 		} else {
 			// with scrollback
-			m_lines.insert(getLine(rowEnd+1), count, Line(m_cols));
+			m_lines.insert(getLine(rowEnd+1), count, Line(m_cols, fill));
 			unsigned int haveLines = m_lines.size(), maxLines = m_sbSize + m_rows;
 			if (haveLines > maxLines) {
 				m_lines.erase(m_lines.begin(), m_lines.begin() + (haveLines - maxLines));
@@ -243,11 +242,9 @@ void ScreenBuffer::scrollLines(unsigned int rowStart, unsigned int rowEnd, int c
 	} else {
 		count = std::min<int>(rowEnd - rowStart + 1, -count);
 
-		m_lines.insert(getLine(rowStart), count, Line(m_cols));
+		m_lines.insert(getLine(rowStart), count, Line(m_cols, fill));
 		Lines::iterator bottom(getLine(rowEnd + 1));
 		m_lines.erase(bottom - count, bottom);
-
-		fillLines(rowStart, rowStart+count-1, fill);
 	}
 
 }

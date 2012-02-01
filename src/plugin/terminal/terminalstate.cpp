@@ -114,7 +114,6 @@ void TerminalState::eraseScreen()
 	pthread_mutex_lock(&m_rwLock);
 
 	// why not scrolling things into scrollback ?
-	// m_screenBuffer.fillLines(m_nTopMargin, m_nBottomMargin, TSCell(BLANK, m_currentGraphicsState));
 	m_screenBuffer.fillLines(1, m_displayScreenSize.getY(), TSCell(BLANK, m_currentGraphicsState));
 
 	pthread_mutex_unlock(&m_rwLock);
@@ -318,7 +317,7 @@ void TerminalState::insertColumns(int value)
 
 	TSCell blank(BLANK, m_currentGraphicsState);
 
-	for (int r=getDisplayScreenSize().getY(); r>0; r--) {
+	for (int r = m_nTopMargin; r <= m_nBottomMargin; ++r) {
 		for (int x=0; x<value; x++) {
 			m_screenBuffer.insertCharacter(r, m_cursorLoc.getX(), maxX, blank);
 		}
@@ -333,7 +332,7 @@ void TerminalState::deleteColumns(int value)
 
 	TSCell blank(BLANK, m_currentGraphicsState);
 
-	for (int r=getDisplayScreenSize().getY(); r>0; r--)
+	for (int r = m_nTopMargin; r <= m_nBottomMargin; ++r)
 		m_screenBuffer.deleteCharacters(r, m_cursorLoc.getX(), value, blank);
 
 	pthread_mutex_unlock(&m_rwLock);
