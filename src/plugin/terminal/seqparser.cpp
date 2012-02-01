@@ -136,11 +136,17 @@ void ControlSeqParser::buildLookup()
 	addCSILookup(0, CS_CURSOR_POSITION, 1, 2, 1, 'H');
 	addCSILookup(0, CS_TAB_FORWARD, 1, 1, 1, 'I');
 	addCSILookup(0, CS_ERASE_DISPLAY, 1, 1, 0, 'J');
+	// addCSILookup('?', CS_SELECTIVE_ERASE_DISPLAY, 1, 1, 0, 'J'); // DECSED
 	addCSILookup(0, CS_ERASE_LINE, 1, -1, 0, 'K');
+	// addCSILookup('?', CS_SELECTIVE_ERASE_LINE, 1, 1, 0, 'J'); // DECSEL
 	addCSILookup(0, CS_IL, 1, 1, 1, 'L');
 	addCSILookup(0, CS_DL, 1, 1, 1, 'M');
 	addCSILookup(0, CS_DCH, 1, 1, 1, 'P');
 	// send only: addCSILookup(0, CS_CURSOR_POSITION_REPORT, 1, 2, 1, 'R');
+	addCSILookup(0, CS_SU, 1, 1, 1, 'S');
+	addCSILookup(0, CS_SD, 1, 1, 1, 'T');
+	// send only?: ESC[...T - Mouse Tracking
+	// addCSILookup('>' CS_TITLE_MODE, 0, -1, -1, 'T');
 	addCSILookup(0, CS_ECH, 1, 1, 1, 'X');
 	addCSILookup(0, CS_CBT, 1, 1, 1, 'Z');
 	addCSILookup(0, CS_HPA, 1, 1, 1, '`');
