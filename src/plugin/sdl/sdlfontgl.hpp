@@ -26,6 +26,9 @@
 #include <vector>
 #include <string>
 
+// cursor styles
+#include "terminal/terminalstate.hpp"
+
 // OpenGL Font Rendering
 class SDLFontGL {
 public:
@@ -82,11 +85,12 @@ private:
 	struct {
 		GLuint program;
 
-		GLuint aDim, aPos, aCursorpos, aCursorcolor;
+		GLuint aDim, aPos, aCursorpos, aCursorcolor, aCursorstyle;
 	} m_cursorShader;
 
 	bool m_cursorEnabled;
 	unsigned int m_cursorColor, m_cursorCol, m_cursorRow;
+	TSCursorStyle m_cursorStyle;
 
 
 	// misc data
@@ -127,7 +131,7 @@ public:
 	void initGL(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
 	void clearGL();
 	void setDimension(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
-	void setCursor(bool enabled, unsigned int row, unsigned int col, unsigned int color);
+	void setCursor(bool enabled, unsigned int row, unsigned int col, unsigned int color, TSCursorStyle style);
 	void drawGL(bool blink);
 
 	unsigned int rows() const { return m_rows; }

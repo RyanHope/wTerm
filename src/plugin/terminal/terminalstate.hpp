@@ -144,13 +144,13 @@ struct TSGraphicsState : public TSCellGraphicsState
 
 typedef enum
 {
-	TS_CURSOR_STYLE_BLOCK_BLINK,
-	TS_CURSOR_STYLE_BLOCK_STEADY,
-	TS_CURSOR_STYLE_UNDERLINE_BLINK,
-	TS_CURSOR_STYLE_UNDERLINE_STEADY,
-	TS_CURSOR_STYLE_VERTICALLINE_BLINK,
-	TS_CURSOR_STYLE_VERTICALLINE_STEADY
-} TSCursorStyle_t;
+	TS_CURSOR_STYLE_BLOCK_BLINK = 0,
+	TS_CURSOR_STYLE_BLOCK_STEADY = 1,
+	TS_CURSOR_STYLE_UNDERLINE_BLINK = 2,
+	TS_CURSOR_STYLE_UNDERLINE_STEADY = 3,
+	TS_CURSOR_STYLE_VERTICALLINE_BLINK = 4,
+	TS_CURSOR_STYLE_VERTICALLINE_STEADY = 5
+} TSCursorStyle;
 
 typedef enum
 {
@@ -179,7 +179,7 @@ protected:
 
 	int m_nTermModeFlags;
 
-	TSCursorStyle_t m_cursorStyle;
+	TSCursorStyle m_cursorStyle;
 
 	TSGraphicsState m_currentGraphicsState;
 	TSGraphicsState m_savedGraphicsState;
@@ -300,7 +300,8 @@ public:
 	void handle_osc(int value, const char *txt);
 
 	void processCursorStyle(int style);
-	void setCursorStyle(TSCursorStyle_t style);
+	void setCursorStyle(TSCursorStyle style);
+	TSCursorStyle getCursorStyle();
 
 	void insertColumns(int value);
 	void deleteColumns(int value);

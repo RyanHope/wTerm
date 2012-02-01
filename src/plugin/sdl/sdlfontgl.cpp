@@ -93,9 +93,18 @@ static const char cursor_vertex_shader[] =
 	"uniform vec2 dim;\n"
 	"uniform vec2 cursorpos;\n"
 	"attribute vec2 pos;\n"
+	"uniform int cursorstyle;\n"
 	"\n"
 	"void main(void) {\n"
-	"  vec2 p = vec2((cursorpos.x + pos.x) / dim.x, (cursorpos.y + pos.y) / dim.y);\n"
+	"  vec2 p;\n"
+	"  if (2 == cursorstyle) {\n"
+	"    float offx = (cursorpos.x < 0.5 ? 0.1 : 0.0);\n"
+	"    p = vec2((cursorpos.x - offx + 0.2*pos.x) / dim.x, (cursorpos.y + 0.15 + 0.85*pos.y) / dim.y);\n"
+	"  } else if (1 == cursorstyle) {\n"
+	"    p = vec2((cursorpos.x + pos.x) / dim.x, (cursorpos.y + 0.15 + 0.2*pos.y) / dim.y);\n"
+	"  } else {\n"
+	"    p = vec2((cursorpos.x + pos.x) / dim.x, (cursorpos.y + 0.15 + 0.85*pos.y) / dim.y);\n"
+	"  }\n"
 	"  gl_Position = vec4(-1.0 + 2.0*p.x, -1.0+2.0*p.y, 1.0, 1.0);\n"
 	"}\n"
 	;
@@ -121,7 +130,7 @@ SDLFontGL::SDLFontGL(const char *fontfilename, unsigned int fontptsize)
   m_glyphTex(0), texW(0), texH(0), haveCacheLine(0), nWidth(0), nHeight(0),
   m_cellsTex(0), m_cellsWidth(0), m_cellsHeight(0), m_cellData(0), m_rows(0), m_cols(0),
   m_colorTex(0),
-  m_cursorEnabled(0), m_cursorColor(0), m_cursorCol(0), m_cursorRow(0),
+  m_cursorEnabled(0), m_cursorColor(0), m_cursorCol(0), m_cursorRow(0), m_cursorStyle(TS_CURSOR_STYLE_BLOCK_BLINK),
   m_dimX(0), m_dimY(0), m_dimW(0), m_dimH(0),
   m_curdimX(0), m_curdimY(0), m_curdimW(0), m_curdimH(0),
   m_openglActive(false)
@@ -188,6 +197,7 @@ void SDLFontGL::initGL(unsigned int x, unsigned int y, unsigned int w, unsigned 
 		m_cursorShader.aPos = glGetAttribLocation(m_cursorShader.program, "pos");
 		m_cursorShader.aCursorpos = glGetUniformLocation(m_cursorShader.program, "cursorpos");
 		m_cursorShader.aCursorcolor = glGetUniformLocation(m_cursorShader.program, "cursorcolor");
+		m_cursorShader.aCursorstyle = glGetUniformLocation(m_cursorShader.program, "cursorstyle");
 		checkGLError();
 
 		glVertexAttribPointer(m_cursorShader.aPos, 2, GL_FLOAT, GL_FALSE, 0, vertices);
@@ -395,22 +405,28 @@ void SDLFontGL::updateCursor() {
 		glUniform2f(m_cursorShader.aCursorpos, m_cursorCol, m_rows - m_cursorRow - 1);
 		checkGLError();
 
+		glUniform1i(m_cursorShader.aCursorstyle, m_cursorStyle >> 1); // strip blink bit
+		checkGLError();
+
+		// only block uses alpha value
+		float curAlpha = (m_cursorStyle < 2 ? 0.5 : 1.0);
 		if (m_cursorColor > m_colors.size()) {
-			glUniform4f(m_cursorShader.aCursorcolor, 0.5, 0.5, 0.5, 0.35);
+			glUniform4f(m_cursorShader.aCursorcolor, 0.5, 0.5, 0.5, curAlpha);
 		} else {
 			SDL_Color c = m_colors[m_cursorColor];
-			glUniform4f(m_cursorShader.aCursorcolor, c.r/255.0, c.g/255.0, c.b/255.0, 0.35);
+			glUniform4f(m_cursorShader.aCursorcolor, c.r/255.0, c.g/255.0, c.b/255.0, curAlpha);
 		}
 		checkGLError();
 	}
 }
 
 
-void SDLFontGL::setCursor(bool enable, unsigned int row, unsigned int col, unsigned int color) {
+void SDLFontGL::setCursor(bool enable, unsigned int row, unsigned int col, unsigned int color, TSCursorStyle style) {
 	m_cursorEnabled = enable;
 	m_cursorRow = row;
 	m_cursorCol = col;
 	m_cursorColor = color;
+	m_cursorStyle = style;
 
 	updateCursor();
 }
@@ -665,7 +681,7 @@ void SDLFontGL::drawGL(bool blink) {
 		checkGLError();
 	}
 
-	if (m_cursorEnabled && m_cursorShader.program) {
+	if (m_cursorEnabled && (blink || (0 != m_cursorStyle % 2)) && m_cursorShader.program) {
 		// draw cursor
 		glUseProgram(m_cursorShader.program);
 		checkGLError();

@@ -362,14 +362,15 @@ void WTerm::redraw()
 	m_fontgl.setCursor(m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR && (m_terminalState->getScrollOffset() == 0),
 		m_terminalState->getDisplayCursorLocation().getY()-1,
 		m_terminalState->getDisplayCursorLocation().getX()-1,
-		m_reverse ? TS_COLOR_BACKGROUND : TS_COLOR_FOREGROUND);
+		m_reverse ? TS_COLOR_BACKGROUND : TS_COLOR_FOREGROUND,
+		m_terminalState->getCursorStyle());
 
 	m_terminalState->unlock();
 
 	// don't keep lock while drawing
 	m_fontgl.drawGL(doBlink);
 
-	m_bNeedsBlink = hasBlinkText;
+	m_bNeedsBlink = hasBlinkText || (0 == m_terminalState->getCursorStyle() % 2);
 }
 
 void WTerm::redrawBlinked()
@@ -384,11 +385,6 @@ void WTerm::redrawBlinked()
 
 	// Clear the entire screen to the default background color
 	clearScreen(m_reverse ? defState.foregroundColor : defState.backgroundColor);
-
-	m_fontgl.setCursor(m_terminalState->getTerminalModeFlags() & TS_TM_CURSOR,
-		m_terminalState->getDisplayCursorLocation().getY()-1,
-		m_terminalState->getDisplayCursorLocation().getX()-1,
-		m_reverse ? TS_COLOR_BACKGROUND : TS_COLOR_FOREGROUND);
 
 	// don't keep lock while drawing
 	m_fontgl.drawGL(doBlink);

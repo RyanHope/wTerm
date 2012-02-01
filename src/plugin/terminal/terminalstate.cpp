@@ -318,9 +318,11 @@ void TerminalState::insertColumns(int value)
 
 	TSCell blank(BLANK, m_currentGraphicsState);
 
-	for (int r=getDisplayScreenSize().getY(); r>0; r--)
-		for (int x=0; x<value; x++)
+	for (int r=getDisplayScreenSize().getY(); r>0; r--) {
+		for (int x=0; x<value; x++) {
 			m_screenBuffer.insertCharacter(r, m_cursorLoc.getX(), maxX, blank);
+		}
+	}
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -329,7 +331,7 @@ void TerminalState::deleteColumns(int value)
 {
 	pthread_mutex_lock(&m_rwLock);
 
-	int maxX = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+	// int maxX = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
 
 	for (int r=getDisplayScreenSize().getY(); r>0; r--)
 		m_screenBuffer.deleteCharacters(r, m_cursorLoc.getX(), value);
@@ -985,7 +987,7 @@ void TerminalState::handle_osc(int value, const char *txt)
 	}
 }
 
-void TerminalState::setCursorStyle(TSCursorStyle_t style)
+void TerminalState::setCursorStyle(TSCursorStyle style)
 {
 	pthread_mutex_lock(&m_rwLock);
 	m_cursorStyle = style;
@@ -1015,4 +1017,8 @@ void TerminalState::processCursorStyle(int style)
 		setCursorStyle(TS_CURSOR_STYLE_VERTICALLINE_STEADY);
 		break;
 	}
+}
+
+TSCursorStyle TerminalState::getCursorStyle() {
+	return m_cursorStyle;
 }
