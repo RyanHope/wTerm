@@ -282,6 +282,9 @@ public:
 	void setScrollOffset(int offset);
 	int getScrollOffset();
 
+	void forwardIndex();
+	void backIndex();
+
 	void handle_osc(int value, const char *txt);
 };
 

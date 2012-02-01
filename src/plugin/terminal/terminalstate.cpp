@@ -276,6 +276,40 @@ void TerminalState::moveCursorBackward(int nPos)
 	pthread_mutex_unlock(&m_rwLock);
 }
 
+void TerminalState::backIndex()
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	int maxX = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+
+	if (m_cursorLoc.getX() == 1) {
+		TSCell blank(BLANK, m_currentGraphicsState);
+		m_screenBuffer.deleteCharacters(m_cursorLoc.getY(), maxX, 1);
+		m_screenBuffer.insertCharacter(m_cursorLoc.getY(), 1, maxX, blank);
+	} else {
+		moveCursorBackward(1);
+	}
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
+void TerminalState::forwardIndex()
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	int maxX = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+
+	if (m_cursorLoc.getX() == maxX) {
+		TSCell blank(BLANK, m_currentGraphicsState);
+		m_screenBuffer.deleteCharacters(m_cursorLoc.getY(), 1, 1);
+		m_screenBuffer.insertCharacter(m_cursorLoc.getY(), maxX, maxX, blank);
+	} else {
+		moveCursorForward(1);
+	}
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
 void TerminalState::moveCursorPreviousLine()
 {
 	pthread_mutex_lock(&m_rwLock);

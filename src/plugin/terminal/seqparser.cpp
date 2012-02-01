@@ -177,9 +177,10 @@ void ControlSeqParser::buildLookup()
 	addFixedLookup("M", CS_REVERSE_INDEX);
 	addFixedLookup("H", CS_TAB_SET);
 
-
+	addFixedLookup("6", CS_BACK_INDEX);
 	addFixedLookup("7", CS_CURSOR_POSITION_SAVE);
 	addFixedLookup("8", CS_CURSOR_POSITION_RESTORE);
+	addFixedLookup("9", CS_FORWARD_INDEX);
 	addFixedLookup("(K", CS_USER_MAPPING);
 
 	/* G0 charset */
