@@ -93,7 +93,7 @@ enyo.kind({
 	},
 
 	setActive: function(active) {
-		if (this.isReady) this.callPluginMethodDeferred(null, 'setActive', active);
+		if (this.pluginReady) this.callPluginMethodDeferred(null, 'setActive', active);
 	},
 
 	inject: function(command) {
