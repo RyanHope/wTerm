@@ -931,6 +931,7 @@ void TerminalState::resetTerminal()
 {
 	pthread_mutex_lock(&m_rwLock);
 
+	setCursorStyle(TS_CURSOR_STYLE_BLOCK_STEADY);
 	setTerminalModeFlags(TS_TM_AUTO_REPEAT|TS_TM_AUTO_WRAP|TS_TM_COLUMN|TS_TM_CURSOR);
 	setMargin(1,getDisplayScreenSize().getY());
 	eraseScreen();
@@ -954,5 +955,37 @@ void TerminalState::handle_osc(int value, const char *txt)
 		params[1] = txt;
 		PDL_CallJS("OSCevent", params, 2);
 		if (val) free(val);
+	}
+}
+
+void TerminalState::setCursorStyle(TSCursorStyle_t style)
+{
+	pthread_mutex_lock(&m_rwLock);
+	m_cursorStyle = style;
+	pthread_mutex_unlock(&m_rwLock);
+}
+
+void TerminalState::processCursorStyle(int style)
+{
+	switch (style) {
+	case 0:
+	case 1:
+		setCursorStyle(TS_CURSOR_STYLE_BLOCK_BLINK);
+		break;
+	case 2:
+		setCursorStyle(TS_CURSOR_STYLE_BLOCK_STEADY);
+		break;
+	case 3:
+		setCursorStyle(TS_CURSOR_STYLE_UNDERLINE_BLINK);
+		break;
+	case 4:
+		setCursorStyle(TS_CURSOR_STYLE_UNDERLINE_STEADY);
+		break;
+	case 5:
+		setCursorStyle(TS_CURSOR_STYLE_VERTICALLINE_BLINK);
+		break;
+	case 6:
+		setCursorStyle(TS_CURSOR_STYLE_VERTICALLINE_STEADY);
+		break;
 	}
 }

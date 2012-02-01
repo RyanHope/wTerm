@@ -100,6 +100,7 @@ void ControlSeqParser::addCSILookup(const char parameter, CSToken_t token, int n
 	e.token = token;
 	e.parameter = parameter;
 	e.function = cFinal;
+	e.suffix = 0;
 	e.minParams = nMinParam;
 	e.maxParams = nMaxParam;
 	e.defaultVal = nDefaultVal;
@@ -111,9 +112,42 @@ void ControlSeqParser::addCSILookup(const char parameter, CSToken_t token, int n
 	}
 
 	for (std::list<CSI_Entry>::const_iterator li = it->second.begin(), le = it->second.end(); li != le; ++li) {
-		if (li->parameter == e.parameter && li->function == e.function) {
+		if (li->parameter == e.parameter && li->function == e.function && li->suffix == e.suffix) {
 			const char buf[2] = { e.parameter, 0 };
-			syslog(LOG_DEBUG, "conflicting CSI functions: ESC[%s...%c", buf, e.function);
+			if (e.suffix)
+				syslog(LOG_DEBUG, "conflicting CSI functions: ESC[%s...%c%c", buf, e.suffix, e.function);
+			else
+				syslog(LOG_DEBUG, "conflicting CSI functions: ESC[%s...%c", buf, e.function);
+		}
+	}
+
+	it->second.push_back(e);
+}
+
+void ControlSeqParser::addCSI2Lookup(const char parameter, CSToken_t token, int nMinParam, int nMaxParam, int nDefaultVal, char cSuffix, char cFinal)
+{
+	CSI_Entry e;
+	e.token = token;
+	e.parameter = parameter;
+	e.suffix = cSuffix;
+	e.function = cFinal;
+	e.minParams = nMinParam;
+	e.maxParams = nMaxParam;
+	e.defaultVal = nDefaultVal;
+
+	CSI_Lookup::iterator it;
+	it = m_csiLookup.find(e.function);
+	if (it == m_csiLookup.end()) {
+		it = m_csiLookup.insert(std::make_pair(e.function, std::list<CSI_Entry>())).first;
+	}
+
+	for (std::list<CSI_Entry>::const_iterator li = it->second.begin(), le = it->second.end(); li != le; ++li) {
+		if (li->parameter == e.parameter && li->function == e.function && li->suffix == e.suffix) {
+			const char buf[2] = { e.parameter, 0 };
+			if (e.suffix)
+				syslog(LOG_DEBUG, "conflicting CSI functions: ESC[%s...%c%c", buf, e.suffix, e.function);
+			else
+				syslog(LOG_DEBUG, "conflicting CSI functions: ESC[%s...%c", buf, e.function);
 		}
 	}
 
@@ -125,6 +159,8 @@ void ControlSeqParser::addCSILookup(const char parameter, CSToken_t token, int n
  */
 void ControlSeqParser::buildLookup()
 {
+	addCSI2Lookup(0, CS_CURSOR_STYLE, 0, 1, 0, ' ', 'q');
+
 	addCSILookup(0, CS_ICH, 1, 1, 1, '@');
 	addCSILookup(0, CS_CURSOR_UP, 1, 1, 1, 'A');
 	addCSILookup(0, CS_CURSOR_DOWN, 1, 1, 1, 'B');
@@ -168,7 +204,6 @@ void ControlSeqParser::buildLookup()
 	addCSILookup(0, CS_CURSOR_POSITION_SAVE, 0, 0, 0, 's');
 	addCSILookup(0, CS_CURSOR_POSITION_RESTORE, 0, 0, 0, 'u');
 	addCSILookup(0, CS_TERM_PARAM, 1, 1, 0, 'x');
-
 
 	addFixedLookup("=", CS_KEYPAD_APP_MODE);
 	addFixedLookup(">", CS_KEYPAD_NUM_MODE);
@@ -343,6 +378,9 @@ bool ControlSeqParser::matchCSI() {
 		if (i->parameter == (m_prefixlen ? m_prefix[0] : 0)) {
 			/* found function */
 
+			/* invalid suffix */
+			if (i->suffix != m_suffix) continue;
+
 			/* empty param string should represent a default value. only add it if required. */
 			if (m_numValues == 0 && 1 == i->minParams) { m_values[m_numValues++] = i->defaultVal; }
 
@@ -455,12 +493,14 @@ bool ControlSeqParser::parseChar() {
 			m_state = ST_ESCAPE;
 			m_prefixlen = 0;
 			m_numValues = 0;
+			m_suffix = 0;
 			return false;
 		}
 		if (MODE_7BIT != m_mode && m_currentChar >= 0x80 && m_currentChar < 0xA0) {
 			m_state = ST_ESCAPE;
 			m_prefixlen = 0;
 			m_numValues = 0;
+			m_suffix = 0;
 			m_currentChar = m_currentChar - 0x40;
 			return parseChar();
 		}
@@ -513,12 +553,19 @@ bool ControlSeqParser::parseChar() {
 			parseCSIValue();
 		} else if (m_currentChar >= 0x20 && m_currentChar <= 0x2F) {
 			/* intermediate bytes */
-			m_state = ST_CSI_INVALID;
+			m_suffix = m_currentChar;
+			m_state = ST_CSI_SUFFIX;
 		} else if (m_currentChar >= 0x40 && m_currentChar <= 0x7E) {
 			/* final char */
 			return matchCSI();
 		} else {
 			m_state = ST_CSI_INVALID;
+		}
+		return false;
+	case ST_CSI_SUFFIX:
+		if (m_currentChar >= 0x40 && m_currentChar <= 0x7E) {
+			/* final char */
+			return matchCSI();
 		}
 		return false;
 	case ST_CSI_INVALID:

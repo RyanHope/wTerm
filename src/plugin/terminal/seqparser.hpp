@@ -223,6 +223,8 @@ typedef enum
 	CS_BACK_INDEX,
 	CS_FORWARD_INDEX,
 
+	CS_CURSOR_STYLE,
+
 	CS_MAX
 } CSToken_t;
 
@@ -241,6 +243,7 @@ private:
 
 		unsigned char parameter;
 		unsigned char function;
+		unsigned char suffix;
 		int minParams; //Minimum number of parameters should be 0.
 		int maxParams; //-1 for variable parameters.
 		int defaultVal; //-1 for not applicable.
@@ -265,9 +268,10 @@ private:
 
 	CellCharacter m_currentChar;
 	CSToken_t m_token;
+	unsigned char m_suffix;
 	unsigned char m_prefix[4];
 	int m_prefixlen;
-	enum { ST_START, ST_ESCAPE, ST_ESCAPE_TRIE, ST_CSI, ST_CSI_VALUES, ST_CSI_INVALID, ST_OSC, ST_OSC_ESC, ST_VT52_ESCY } m_state;
+	enum { ST_START, ST_ESCAPE, ST_ESCAPE_TRIE, ST_CSI, ST_CSI_VALUES, ST_CSI_SUFFIX, ST_CSI_INVALID, ST_OSC, ST_OSC_ESC, ST_VT52_ESCY } m_state;
 
 	const unsigned char *m_seq;
 	int m_len;
@@ -282,6 +286,7 @@ private:
 	void addFixedLookup(const char *str, CSToken_t token);
 	void addVT52FixedLookup(const char *str, CSToken_t token);
 	void addCSILookup(const char parameter, CSToken_t token, int nMinParam, int nMaxParam, int nDefaultVal, char cFinal);
+	void addCSI2Lookup(const char parameter, CSToken_t token, int nMinParam, int nMaxParam, int nDefaultVal, char cSuffix, char cFinal);
 
 	bool tryFixedEscape();
 

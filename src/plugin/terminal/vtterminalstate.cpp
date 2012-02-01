@@ -617,6 +617,10 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		syslog(LOG_DEBUG, "VT100 Control Sequence: TERM RESET partially implemented.");
 		resetTerminal();
 		break;
+	case CS_CURSOR_STYLE:
+		syslog(LOG_DEBUG, "VT520 Control Sequence: SET CURSOR STYLE partially implemented.");
+		processCursorStyle(values[0]);
+		break;
 	default:
 		syslog(LOG_ERR, "VT100 Control Sequence: %d not implemented.", nToken);
 		break;
