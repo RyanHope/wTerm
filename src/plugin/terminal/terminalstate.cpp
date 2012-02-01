@@ -652,6 +652,12 @@ void TerminalState::setMargin(int nTop, int nBottom)
 		nBottom = nTop + 1;
 	}
 
+	if (nBottom - nTop < 2)
+	{
+		nTop = 1;
+		nBottom = m_displayScreenSize.getY();
+	}
+
 	m_nTopMargin = nTop;
 	m_nBottomMargin = nBottom;
 
