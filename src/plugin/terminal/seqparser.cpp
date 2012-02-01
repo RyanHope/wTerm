@@ -475,8 +475,7 @@ bool ControlSeqParser::parseChar() {
 		return false;  /* ignore */
 	case 0x18: // ^X CAN
 		m_state = ST_START;
-		m_currentChar = 0x2592;
-		return true;
+		return false;
 	case 0x19: // ^Y EM
 		return false;  /* ignore */
 	case 0x1A: // ^Z SUB

@@ -130,10 +130,10 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			break;
 		}
 		break;
-	case CS_BACK_INDEX:
+	case CS_BACK_INDEX: // ESC6
 		backIndex();
 		break;
-	case CS_FORWARD_INDEX:
+	case CS_FORWARD_INDEX: // ESC9
 		forwardIndex();
 		break;
 	case CS_TAB_FORWARD: //ESC[<Tabs>I
