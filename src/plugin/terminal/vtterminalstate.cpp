@@ -119,7 +119,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 					if (x == tabs[i]) {
 						tabs.erase(tabs.begin()+i);
 						break;
-					} else if (x > tabs[i]) {
+					} else if (x < tabs[i]) {
 						break;
 					}
 				}
