@@ -621,6 +621,14 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		syslog(LOG_DEBUG, "VT520 Control Sequence: SET CURSOR STYLE partially implemented.");
 		processCursorStyle(values[0]);
 		break;
+	case CS_DELETE_COLUMN:
+		syslog(LOG_DEBUG, "VT420 Control Sequence: DELETE COLUMN no implemented.");
+		deleteColumns(values[0]);
+		break;
+	case CS_INSERT_COLUMN:
+		syslog(LOG_DEBUG, "VT420 Control Sequence: INSERT COLUMN no implemented.");
+		insertColumns(values[0]);
+		break;
 	default:
 		syslog(LOG_ERR, "VT100 Control Sequence: %d not implemented.", nToken);
 		break;

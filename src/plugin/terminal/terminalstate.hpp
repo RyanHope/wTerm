@@ -301,6 +301,9 @@ public:
 
 	void processCursorStyle(int style);
 	void setCursorStyle(TSCursorStyle_t style);
+
+	void insertColumns(int value);
+	void deleteColumns(int value);
 };
 
 #endif

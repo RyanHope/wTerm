@@ -310,6 +310,33 @@ void TerminalState::forwardIndex()
 	pthread_mutex_unlock(&m_rwLock);
 }
 
+void TerminalState::insertColumns(int value)
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	int maxX = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+
+	TSCell blank(BLANK, m_currentGraphicsState);
+
+	for (int r=getDisplayScreenSize().getY(); r>0; r--)
+		for (int x=0; x<value; x++)
+			m_screenBuffer.insertCharacter(r, m_cursorLoc.getX(), maxX, blank);
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
+void TerminalState::deleteColumns(int value)
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	int maxX = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+
+	for (int r=getDisplayScreenSize().getY(); r>0; r--)
+		m_screenBuffer.deleteCharacters(r, m_cursorLoc.getX(), value);
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
 void TerminalState::moveCursorPreviousLine()
 {
 	pthread_mutex_lock(&m_rwLock);
