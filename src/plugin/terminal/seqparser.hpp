@@ -139,6 +139,8 @@ typedef enum
 	CS_CBT, //ESC[<Value>Z Cursor Backward Tabulation
 	CS_CNL, //ESC[<Value>E Cursor Next Line
 	CS_CPL, //ESC[<Value>F Cursor Preceding Line
+	CS_SU, //ESC[<Value>S Scroll Up Lines
+	CS_SD, //ESC[<Value>T Scroll Down Lines
 
 	CS_KEYPAD_APP_MODE, //ESC=
 	CS_KEYPAD_NUM_MODE, //ESC>
