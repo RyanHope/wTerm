@@ -226,6 +226,9 @@ typedef enum
 	CS_INSERT_COLUMN, // ESC[<Value>'}
 	CS_DELETE_COLUMN, // ESC[<Value>'~
 
+	CS_SCROLL_RIGHT, // ESC[<Value> @
+	CS_SCROLL_LEFT, // ESC[<Value> A
+
 	CS_CURSOR_STYLE, // ESC[<Value> SPq
 
 	CS_MAX

@@ -305,6 +305,9 @@ public:
 
 	void insertColumns(int value);
 	void deleteColumns(int value);
+
+	void scrollLeft(int value);
+	void scrollRight(int value);
 };
 
 #endif

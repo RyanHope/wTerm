@@ -626,6 +626,12 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_INSERT_COLUMN: // ESC[<Value>'}
 		insertColumns(values[0]);
 		break;
+	case CS_SCROLL_RIGHT: // ESC[<Value>'A
+		scrollRight(values[0]);
+		break;
+	case CS_SCROLL_LEFT: // ESC[<Value>'@
+		scrollLeft(values[0]);
+		break;
 	default:
 		syslog(LOG_ERR, "VT100 Control Sequence: %d not implemented.", nToken);
 		break;

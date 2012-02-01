@@ -182,12 +182,15 @@ void ScreenBuffer::insertCharacter(unsigned int row, unsigned int col, unsigned 
 	l.erase(l.begin() + lastCol);
 }
 
-void ScreenBuffer::deleteCharacters(unsigned int row, unsigned int col, unsigned int count, TSCell fill) {
+void ScreenBuffer::deleteCharacters(unsigned int row, unsigned int col, unsigned int count, TSCell fill2) {
 	if (0 == row || row > m_rows || 0 == col || col > m_cols) return;
 
 	count = std::min(count, m_cols - col + 1);
 
 	Line &l(*getLine(row));
+	TSCell fill(l[m_cols-1]);
+	fill.data = ' ';
+
 	Line::iterator c = l.begin() + (col-1);
 	l.erase(c, c + count);
 	l.insert(l.end(), count, fill);

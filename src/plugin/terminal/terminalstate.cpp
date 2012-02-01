@@ -331,8 +331,39 @@ void TerminalState::deleteColumns(int value)
 {
 	pthread_mutex_lock(&m_rwLock);
 
+	TSCell blank(BLANK, m_currentGraphicsState);
+
 	for (int r=getDisplayScreenSize().getY(); r>0; r--)
-		m_screenBuffer.deleteCharacters(r, m_cursorLoc.getX(), value, TSCell(BLANK, m_currentGraphicsState));
+		m_screenBuffer.deleteCharacters(r, m_cursorLoc.getX(), value, blank);
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
+void TerminalState::scrollLeft(int value)
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	TSCell blank(BLANK, m_currentGraphicsState);
+
+	for (int r=getDisplayScreenSize().getY(); r>0; r--)
+		m_screenBuffer.deleteCharacters(r, 1, value, blank);
+
+	pthread_mutex_unlock(&m_rwLock);
+}
+
+void TerminalState::scrollRight(int value)
+{
+	pthread_mutex_lock(&m_rwLock);
+
+	int maxX = (getTerminalModeFlags() & TS_TM_COLUMN) ? getDisplayScreenSize().getX() : 80;
+
+	TSCell blank(BLANK, m_currentGraphicsState);
+
+	for (int r=getDisplayScreenSize().getY(); r>0; r--) {
+		for (int x=0; x<value; x++) {
+			m_screenBuffer.insertCharacter(r, 1, maxX, blank);
+		}
+	}
 
 	pthread_mutex_unlock(&m_rwLock);
 }

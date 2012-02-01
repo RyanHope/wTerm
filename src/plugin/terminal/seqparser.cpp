@@ -164,6 +164,9 @@ void ControlSeqParser::buildLookup()
 	addCSI2Lookup(0, CS_INSERT_COLUMN, 0, -1, 1, '\'', '}'); // what about SP } ? (http://invisible-island.net/xterm/ctlseqs/ctlseqs.html)
 	addCSI2Lookup(0, CS_DELETE_COLUMN, 0, -1, 1, '\'', '~'); // what about SP } ? (http://invisible-island.net/xterm/ctlseqs/ctlseqs.html)
 
+	addCSI2Lookup(0, CS_SCROLL_RIGHT, 0, -1, 1, ' ', 'A');
+	addCSI2Lookup(0, CS_SCROLL_LEFT, 0, -1, 1, ' ', '@');
+
 	addCSILookup(0, CS_ICH, 1, 1, 1, '@');
 	addCSILookup(0, CS_CURSOR_UP, 1, 1, 1, 'A');
 	addCSILookup(0, CS_CURSOR_DOWN, 1, 1, 1, 'B');
