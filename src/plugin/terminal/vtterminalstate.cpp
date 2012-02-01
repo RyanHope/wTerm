@@ -621,11 +621,9 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		processCursorStyle(values[0]);
 		break;
 	case CS_DELETE_COLUMN: // ESC[<Value>'~
-		syslog(LOG_DEBUG, "VT420 Control Sequence: DELETE COLUMN not implemented.");
 		deleteColumns(values[0]);
 		break;
 	case CS_INSERT_COLUMN: // ESC[<Value>'}
-		syslog(LOG_DEBUG, "VT420 Control Sequence: INSERT COLUMN not implemented.");
 		insertColumns(values[0]);
 		break;
 	default:
