@@ -3,21 +3,8 @@ enyo.kind({
 	name: 'Terminal',
 	kind: enyo.Hybrid,
 
-	published: {
-		executable: "",
-		params: [],
-		alphaBlend: false,
-		killTransparency: false,
-		cachePlugin: false,
-		allowKeyboardFocus: true,
-		passTouchEvents: true,
-		bgcolor: '000000',
-		height: 0,
-		width: 0,
-		// Custom
-		currentColors: [],
-		currentKeys: [],
-	},
+	currentColors: [],
+	currentKeys: [],
 
 	events: {
 		onPluginReady:'',
@@ -26,22 +13,25 @@ enyo.kind({
 		onWindowTitleChanged:''
 	},
 
-	pluginReadyCallback: function() {
-		enyo.nextTick(this, function() {
-			if (this.pluginReady) { return; }
-			this.pluginReady = true;
-			// ------------ Some terminal setup based on prefs ------------- //
-			this.setColors()
-			this.setKeys()
-			this.setScrollBufferLines(enyo.application.p.get('bufferlines'))
-			// ------------------------------------------------------------- //
-			this.addCallback("OSCevent", enyo.bind(this, "OSCevent"))
-			this.doPluginReady();
-			this.deferredCalls.forEach(function (call) {
-				call.callback(enyo.call(this.node, call.methodName, call.args));
-				}, this);
-			this.deferredCalls = [];
-		});
+	hybridReady: function() {
+		this.addCallback("OSCevent", enyo.bind(this, "OSCevent"))
+		this.setColors()
+		this.setKeys()
+		this.setScrollBufferLines(enyo.application.p.get('bufferlines'))
+		this.pluginStatusChangedCallback('ready')
+	},
+
+	rendered: function() {
+		this.pluginReady = false;
+		if (this.hasNode()) {
+			if (this.passTouchEvents) {
+				this.node.addEventListener("touchstart", this.nullTouchHandler);
+				this.node.addEventListener("touchend", this.nullTouchHandler);
+				this.node.addEventListener("touchmove", this.nullTouchHandler);
+			}
+			this.node.ready = enyo.bind(this, this.hybridReady)
+			this.deferredCallbacks.forEach(function(cb) {this.node[cb.name] = cb.callback;}, this);
+		}
 	},
 
 	focus: function() {
@@ -51,12 +41,12 @@ enyo.kind({
 	},
 
 	keydownHandler: function(inSender, inEvent) {
-		if (enyo.fetchDeviceInfo().platformVersionMajor < 3)
+		if (enyo.fetchDeviceInfo().platformVersionMajor == 2 && enyo.fetchDeviceInfo().platformVersionMinor == 2)
 			this.keyDown(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
 	},
 
 	keyupHandler: function(inSender, inEvent) {
-		if (enyo.fetchDeviceInfo().platformVersionMajor < 3)
+		if (enyo.fetchDeviceInfo().platformVersionMajor == 2 && enyo.fetchDeviceInfo().platformVersionMinor == 2)
 			this.keyUp(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
 	},
 

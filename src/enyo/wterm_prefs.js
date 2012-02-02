@@ -25,10 +25,10 @@ enyo.kind({
 		{kind: "VFlexBox", height: "100%", components: [
 			{kind: "Header", pack: 'center', components: [
 				{kind: "RadioToolButtonGroup", name: 'grp', value: 'appearance', flex: 1, onChange: 'grpChanged', components: [
-				{caption: "Appearance", value: 'appearance', flex: 2},
-		{caption: "Input", value: 'input'},
-		{caption: "Misc", value: 'misc'},
-		]}
+					{caption: "Appearance", value: 'appearance', flex: 2},
+					{caption: "Input", value: 'input'},
+					{caption: "Misc", value: 'misc'},
+				]}
 			]},
 			{kind: "Scroller", flex: 1, components: [
 				{name: 'grp1', components: [

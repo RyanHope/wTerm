@@ -14,10 +14,12 @@ enyo.kind({
 		})
 		this.createComponent({
 			kind: 'Terminal',
-		name: 'terminal',
+			name: 'terminal',
+			executable: 'wterm',
 			width: window.innerWidth,
 			height: window.innerHeight,
-			exec: enyo.application.p.get('exhibition'),
+			bgcolor: '000000',
+			params: [enyo.application.p.get('fontSize').toString(10), enyo.application.p.get('exhibition')]
 		})
 	},
 

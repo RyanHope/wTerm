@@ -4,7 +4,7 @@ enyo.kind({
 	kind: enyo.VFlexBox,
 
 	components: [
-		{kind: 'Setup', name: 'setup', onPluginReady: 'pluginReady'},
+		{kind: 'Setup', name: 'setup', executable: 'setup', onPluginReady: 'pluginReady'},
 		{name: "appManager", kind: "PalmService", service: enyo.palmServices.application},
 		{kind:"PageHeader", className:"preferences-header", pack:"center", components: [
 			{kind: "Image", src: "images/icon-setup-48.png", className: "preferences-header-image"},

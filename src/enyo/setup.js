@@ -1,51 +1,43 @@
 enyo.kind({
 
 	name: 'Setup',
-	kind: enyo.Control,
+	kind: enyo.Hybrid,
 
-	events: {
-		onPluginReady:''
-	},
-
-	initComponents: function() {
-		this.inherited(arguments)
-		this.createComponent({
-			name: 'plugin',
-			kind: enyo.Hybrid,
-			executable: 'setup',
-			onPluginReady: 'pluginReady',
-			onPluginConnected: 'pluginConnected',
-			onPluginDisconnected: 'pluginDisconnected',
-		})
+	hybridReady: function() {
+		this.pluginStatusChangedCallback('ready')
 	},
 
-	pluginReady: function(inSender, inResponse, inRequest) {
-		this.doPluginReady()
-	},
-	pluginConnected: function(inSender, inResponse, inRequest) {
-	},
-	pluginDisconnected: function(inSender, inResponse, inRequest) {
-		this.error('Setup Plugin Disconnected')
+	rendered: function() {
+		this.pluginReady = false;
+		if (this.hasNode()) {
+			if (this.passTouchEvents) {
+				this.node.addEventListener("touchstart", this.nullTouchHandler);
+				this.node.addEventListener("touchend", this.nullTouchHandler);
+				this.node.addEventListener("touchmove", this.nullTouchHandler);
+			}
+			this.node.ready = enyo.bind(this, this.hybridReady)
+			this.deferredCallbacks.forEach(function(cb) {this.node[cb.name] = cb.callback;}, this);
+		}
 	},
 
 	hasPassword: function(user) {
-		return parseInt(this.$.plugin.callPluginMethod('userHasPassword', user), 10)
+		return parseInt(this.callPluginMethod('userHasPassword', user), 10)
 	},
 
 	setPassword: function(user, password) {
-		this.$.plugin.callPluginMethod('userSetPassword', user, password)
+		this.callPluginMethod('userSetPassword', user, password)
 	},
 
 	addToGroup: function(user, group) {
-		this.$.plugin.callPluginMethod('userAddToGroup', user, group)
+		this.callPluginMethod('userAddToGroup', user, group)
 	},
 
 	setupSU: function(enable) {
-		this.$.plugin.callPluginMethod('setupSU', enable)
+		this.callPluginMethod('setupSU', enable)
 	},
 
 	setupNonRoot: function() {
-		this.$.plugin.callPluginMethod('setupNonRoot')
+		this.callPluginMethod('setupNonRoot')
 	},
 
 })

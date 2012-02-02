@@ -105,12 +105,14 @@ enyo.kind({
 			height: window.innerHeight,
 			onPluginReady: 'pluginReady',
 			onWindowTitleChanged: 'windowTitleChanged',
+			allowKeyboardFocus: true,
+			bgcolor: '000000',
 			params: [enyo.application.p.get('fontSize').toString(10), exec]
 		})
 		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
 		this.$.terminal.vkb = this.$.vkb
-		this.$.prefs.terminal = this.$.terminal
 		this.$.prefs.vkb = this.$.vkb
+		this.$.prefs.terminal = this.$.terminal
 		this.createComponent({
 			kind: "AppMenu", components: [
 				{caption: "New Terminal", onclick: "newTerm"},

@@ -18,7 +18,7 @@ function getKbdLayout(name, onload) {
 			n.setAttribute('onerror', 'console.error(\'Error loading keyboard layout ' + name + '\')');
 		}
 		layout.onload.push(onload);
-		if (n) document.head.appendChild(n);
+		if (n) document.body.appendChild(n);
 	}
 }
 
