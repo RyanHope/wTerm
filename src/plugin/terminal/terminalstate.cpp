@@ -738,7 +738,7 @@ int TerminalState::getGraphicsModeFlags()
 	return m_currentGraphicsState.nGraphicsMode;
 }
 
-void TerminalState::setForegroundColor(TSColor_t color)
+void TerminalState::setForegroundColor(TSColor color)
 {
 	pthread_mutex_lock(&m_rwLock);
 
@@ -747,12 +747,12 @@ void TerminalState::setForegroundColor(TSColor_t color)
 	pthread_mutex_unlock(&m_rwLock);
 }
 
-TSColor_t TerminalState::getForegroundColor()
+TSColor TerminalState::getForegroundColor()
 {
 	return m_currentGraphicsState.foregroundColor;
 }
 
-void TerminalState::setBackgroundColor(TSColor_t color)
+void TerminalState::setBackgroundColor(TSColor color)
 {
 	pthread_mutex_lock(&m_rwLock);
 
@@ -761,7 +761,7 @@ void TerminalState::setBackgroundColor(TSColor_t color)
 	pthread_mutex_unlock(&m_rwLock);
 }
 
-TSColor_t TerminalState::getBackgroundColor()
+TSColor TerminalState::getBackgroundColor()
 {
 	return m_currentGraphicsState.backgroundColor;
 }

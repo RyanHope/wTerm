@@ -106,12 +106,12 @@ public:
 
 	void printCharacter(int nColumn, int nLine, TSCell cCell);
 
-	void clearScreen(TSColor_t color);
+	void clearScreen(TSColor color);
 
 	int getMaximumLinesOfText();
 	int getMaximumColumnsOfText();
 
-	virtual SDL_Color getColor(TSColor_t color) = 0;
+	virtual SDL_Color getColor(TSColor color) = 0;
 	virtual void redraw() = 0;
 	virtual void redrawBlinked() = 0;
 

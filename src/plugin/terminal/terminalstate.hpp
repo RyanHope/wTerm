@@ -97,7 +97,7 @@ typedef enum
 	TS_TM_BACKSPACE = 2048,
 
 	TS_TM_MAX
-} TSTermMode_t;
+} TSTermMode;
 
 typedef enum
 {
@@ -114,26 +114,18 @@ typedef enum
 	TS_INPUT_F11,
 	TS_INPUT_F12,
 	TS_INPUT_MAX
-} TSInput_t;
-
-typedef enum
-{
-	TS_CS_NONE = 0,
-	TS_CS_G0_UK,
-	TS_CS_G0_ASCII,
-	TS_CS_G0_SPEC,
-	TS_CS_G0_ALT_STD,
-	TS_CS_G0_ALT_SPEC,
-	TS_CS_G1_UK,
-	TS_CS_G1_ASCII,
-	TS_CS_G1_SPEC,
-	TS_CS_G1_ALT_STD,
-	TS_CS_G1_ALT_SPEC,
-	TS_CS_MAX
-} TSCharset_t;
+} TSInput;
 
 struct TSGraphicsState : public TSCellGraphicsState
 {
+	/* charset values:
+	 * 'A': UK
+	 * 'B': ASCII
+	 * '0': SPEC
+	 * '1': ALT
+	 * '2': ALT SPEC
+	 */
+
 	unsigned char charsets[4], charset;
 	unsigned int charset_ndx;
 
@@ -158,7 +150,7 @@ typedef enum
 	TS_GM_OP_ADD,
 	TS_GM_OP_REMOVE,
 	TS_GM_OP_MAX
-} TSGraphicsModeOp_t;
+} TSGraphicsModeOp;
 
 // Say that a line is a vector of cells.
 // For now, they don't have to be the same size as the screen,
@@ -263,10 +255,10 @@ public:
 	void addGraphicsModeFlags(int nFlags);
 	void removeGraphicsModeFlags(int nFlags);
 	int getGraphicsModeFlags();
-	void setForegroundColor(TSColor_t color);
-	TSColor_t getForegroundColor();
-	void setBackgroundColor(TSColor_t color);
-	TSColor_t getBackgroundColor();
+	void setForegroundColor(TSColor color);
+	TSColor getForegroundColor();
+	void setBackgroundColor(TSColor color);
+	TSColor getBackgroundColor();
 	TSGraphicsState getCurrentGraphicsState();
 
 	void setCharset(unsigned int ndx, unsigned char charset);

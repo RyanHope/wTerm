@@ -39,7 +39,7 @@ ControlSeqParser::~ControlSeqParser()
 {
 }
 
-void ControlSeqParser::addFixedLookup(const char *str, CSToken_t token)
+void ControlSeqParser::addFixedLookup(const char *str, CSToken token)
 {
 	CS_Fixed_Entry e;
 	unsigned int slen = strlen(str);
@@ -67,7 +67,7 @@ void ControlSeqParser::addFixedLookup(const char *str, CSToken_t token)
 	it->second.push_back(e);
 }
 
-void ControlSeqParser::addVT52FixedLookup(const char *str, CSToken_t token) {
+void ControlSeqParser::addVT52FixedLookup(const char *str, CSToken token) {
 	CS_Fixed_Entry e;
 	unsigned int slen = strlen(str);
 	if (slen == 0) return; /* invalid */
@@ -94,7 +94,7 @@ void ControlSeqParser::addVT52FixedLookup(const char *str, CSToken_t token) {
 	it->second.push_back(e);
 }
 
-void ControlSeqParser::addCSILookup(const char parameter, CSToken_t token, int nMinParam, int nMaxParam, int nDefaultVal, char cFinal)
+void ControlSeqParser::addCSILookup(const char parameter, CSToken token, int nMinParam, int nMaxParam, int nDefaultVal, char cFinal)
 {
 	CSI_Entry e;
 	e.token = token;
@@ -124,7 +124,7 @@ void ControlSeqParser::addCSILookup(const char parameter, CSToken_t token, int n
 	it->second.push_back(e);
 }
 
-void ControlSeqParser::addCSI2Lookup(const char parameter, CSToken_t token, int nMinParam, int nMaxParam, int nDefaultVal, char cSuffix, char cFinal)
+void ControlSeqParser::addCSI2Lookup(const char parameter, CSToken token, int nMinParam, int nMaxParam, int nDefaultVal, char cSuffix, char cFinal)
 {
 	CSI_Entry e;
 	e.token = token;

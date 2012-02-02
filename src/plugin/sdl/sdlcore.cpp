@@ -125,7 +125,7 @@ int SDLCore::init()
 void SDLCore::pushColors() {
 	std::vector<SDL_Color> colors;
 	for(unsigned i = 0; i < TS_COLOR_MAX; ++i)
-		colors.push_back(getColor((TSColor_t)i));
+		colors.push_back(getColor((TSColor)i));
 	m_fontgl.setupColors(colors);
 }
 
@@ -382,22 +382,22 @@ void SDLCore::printCharacter(int nColumn, int nLine, TSCell cell)
 	// Match mapping in pushFontStyles
 	int fnt = (cell.graphics.bold() ? 1 : 0) | (cell.graphics.underline() ? 2 : 0);
 
-	TSColor_t fg, bg;
+	TSColor fg, bg;
 
 	if (cell.graphics.negative()) {
 		fg = cell.graphics.backgroundColor;
 		bg = cell.graphics.foregroundColor;
 		if (bg > 7 && bg < 16) {
-			bg = (TSColor_t) (bg - 8);
+			bg = (TSColor) (bg - 8);
 		} else if (bg > 17) {
-			bg = (TSColor_t) (bg - 2);
+			bg = (TSColor) (bg - 2);
 		}
 	} else {
 		fg = cell.graphics.foregroundColor;
 		bg = cell.graphics.backgroundColor;
 	}
 
-	SDLFontGL::TextGraphicsInfo_t graphicsInfo;
+	SDLFontGL::TextGraphicsInfo graphicsInfo;
 	graphicsInfo.font = fnt;
 	if (m_reverse) {
 		graphicsInfo.bg = (int)fg;
@@ -424,7 +424,7 @@ void SDLCore::printCharacter(int nColumn, int nLine, TSCell cell)
 /**
  * Clears the screen with the current background color.
  */
-void SDLCore::clearScreen(TSColor_t color)
+void SDLCore::clearScreen(TSColor color)
 {
 	SDL_Color bkgd = getColor(color);
 	glClearColor(

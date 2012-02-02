@@ -29,7 +29,7 @@ typedef enum
 	VTTS_CURSOR_DOWN,
 	VTTS_CURSOR_LEFT,
 	VTTS_CURSOR_RIGHT
-} VTTS_Cursor_t;
+} VTTS_Cursor;
 
 class ControlSeqParser;
 
@@ -48,7 +48,7 @@ public:
 	virtual ~VTTerminalState();
 
 	void insertString(const char *sStr, int len, ExtTerminal *extTerminal);
-	void sendCursorCommand(VTTS_Cursor_t cursor, ExtTerminal *extTerminal);
+	void sendCursorCommand(VTTS_Cursor cursor, ExtTerminal *extTerminal);
 };
 
 #endif

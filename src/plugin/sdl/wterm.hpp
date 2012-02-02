@@ -55,9 +55,9 @@ public:
 	void insertData(const char *data, int len);
 	TerminalState *getTerminalState();
 
-	SDL_Color getColor(TSColor_t color);
-	void setColor(TSColor_t color, int r, int g, int b);
-	void setKey(TSInput_t key, const char *command);
+	SDL_Color getColor(TSColor color);
+	void setColor(TSColor color, int r, int g, int b);
+	void setKey(TSInput key, const char *command);
 	void setScrollBufferLines(int lines);
 	int getScrollBufferLines();
 

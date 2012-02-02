@@ -246,7 +246,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				}
 				else if (values[i] >= 30 && values[i] <= 37)
 				{
-					setForegroundColor((TSColor_t)(values[i] - 30));
+					setForegroundColor((TSColor)(values[i] - 30));
 				}
 				else if (values[i] == 39)
 				{
@@ -254,7 +254,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				}
 				else if (values[i] >= 40 && values[i] <= 47)
 				{
-					setBackgroundColor((TSColor_t)(values[i] - 40));
+					setBackgroundColor((TSColor)(values[i] - 40));
 				}
 				else if (values[i] == 49)
 				{
@@ -665,7 +665,7 @@ void VTTerminalState::insertString(const char *sStr, int len, ExtTerminal *extTe
 	pthread_mutex_unlock(&m_rwLock);
 }
 
-void VTTerminalState::sendCursorCommand(VTTS_Cursor_t cursor, ExtTerminal *extTerminal)
+void VTTerminalState::sendCursorCommand(VTTS_Cursor cursor, ExtTerminal *extTerminal)
 {
 	if (extTerminal != NULL)
 	{

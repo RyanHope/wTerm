@@ -28,6 +28,7 @@
 
 #include "terminalstate.hpp"
 
+/* unused:
 typedef enum
 {
 	CS_DA_NONE = 0,
@@ -38,7 +39,7 @@ typedef enum
 	CS_DA_GPO_STP,
 	CS_DA_GPO_AVO,
 	CS_DA_GPO_STP_AVO
-} CSDeviceAttr_t;
+} CSDeviceAttr;
 
 typedef enum
 {
@@ -46,21 +47,21 @@ typedef enum
 	CS_DS_BAD = 3,
 	CS_DS_STATUS_REPORT = 5,
 	CS_DS_POS_REPORT = 6
-} CSDeviceStatus_t;
+} CSDeviceStatus;
 
 typedef enum
 {
 	CS_ED_CUR_TO_END = 0,
 	CS_ED_START_TO_CUR,
 	CS_ED_ALL
-} CSEraseDisplay_t;
+} CSEraseDisplay;
 
 typedef enum
 {
 	CS_EL_CUR_TO_END = 0,
 	CS_EL_START_TO_CUR,
 	CS_EL_ALL
-} CSEraseLine_t;
+} CSEraseLine;
 
 typedef enum
 {
@@ -69,13 +70,13 @@ typedef enum
 	CS_GM_UNDERSCORE = 4,
 	CS_GM_BLINK = 5,
 	CS_GM_NEGATIVE = 7
-} CSGraphicsMode_t;
+} CSGraphicsMode;
 
 typedef enum
 {
 	CS_TC_CUR = 0,
 	CS_TC_ALL = 3
-} CSTABClear_t;
+} CSTABClear;
 
 typedef enum
 {
@@ -91,7 +92,8 @@ typedef enum
 	CS_TM_INTERLACE,
 	CS_TM_CURSOR,
 	CS_TM_LINE_FEED_NEW_LINE = 20
-} CSTermMode_t;
+} CSTermMode;
+*/
 
 typedef enum
 {
@@ -232,7 +234,7 @@ typedef enum
 	CS_CURSOR_STYLE, // ESC[<Value> SPq
 
 	CS_MAX
-} CSToken_t;
+} CSToken;
 
 class ControlSeqParser
 {
@@ -245,7 +247,7 @@ private:
 	static const int MAX_NUM_VALUES = 20;
 
 	struct CSI_Entry {
-		CSToken_t token;
+		CSToken token;
 
 		unsigned char parameter;
 		unsigned char function;
@@ -259,7 +261,7 @@ private:
 	CSI_Lookup m_csiLookup; /* map by final function */
 
 	struct CS_Fixed_Entry {
-		CSToken_t token;
+		CSToken token;
 		unsigned char fixed[4];
 	};
 
@@ -273,7 +275,7 @@ private:
 	std::string m_oscString;
 
 	CellCharacter m_currentChar;
-	CSToken_t m_token;
+	CSToken m_token;
 	unsigned char m_suffix;
 	unsigned char m_prefix[4];
 	int m_prefixlen;
@@ -289,10 +291,10 @@ private:
 
 	void buildLookup();
 
-	void addFixedLookup(const char *str, CSToken_t token);
-	void addVT52FixedLookup(const char *str, CSToken_t token);
-	void addCSILookup(const char parameter, CSToken_t token, int nMinParam, int nMaxParam, int nDefaultVal, char cFinal);
-	void addCSI2Lookup(const char parameter, CSToken_t token, int nMinParam, int nMaxParam, int nDefaultVal, char cSuffix, char cFinal);
+	void addFixedLookup(const char *str, CSToken token);
+	void addVT52FixedLookup(const char *str, CSToken token);
+	void addCSILookup(const char parameter, CSToken token, int nMinParam, int nMaxParam, int nDefaultVal, char cFinal);
+	void addCSI2Lookup(const char parameter, CSToken token, int nMinParam, int nMaxParam, int nDefaultVal, char cSuffix, char cFinal);
 
 	bool tryFixedEscape();
 
@@ -312,7 +314,7 @@ public:
 
 	bool next(); /* returns false if more input is needed */
 
-	CSToken_t token() const { return m_token; }
+	CSToken token() const { return m_token; }
 	CellCharacter character() const { return m_currentChar; }
 	unsigned int numValues() const { return m_numValues; }
 	int value(unsigned int idx) const { return m_values[idx]; }
