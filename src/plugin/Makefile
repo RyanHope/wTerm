@@ -19,5 +19,5 @@ $(OBJECTS): %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -fPIC -c $< -o $@
 
 clean:
-	- rm -f wterm
+	- rm -f wterm setup
 	- rm -f `find . -name "*.o"`
