@@ -223,7 +223,7 @@ enyo.kind({
 		}
 	},
 
-	lsvar: enyo.fetchAppInfo().id + '_prefs',
+	lsvar: enyo.fetchAppId() + '_prefs',
 
 	constructor: function() {
 	    this.inherited(arguments);
@@ -231,23 +231,37 @@ enyo.kind({
 	},
 
 	load: function() {
-		if (localStorage && localStorage[this.lsvar])
-			this.prefs = enyo.mixin(this.defaults, enyo.json.parse(localStorage[this.lsvar]));
-		else if (localStorage) {
-			this.prefs = this.defaults;
-			localStorage[this.lsvar] = enyo.json.stringify(this.prefs);
+		if (enyo.fetchDeviceInfo().platformVersionMajor == 1) {
+			var prefs = enyo.getCookie(this.lsvar)
+			if (prefs)
+				this.prefs = enyo.mixin(this.defaults, enyo.json.parse(prefs))
+			else
+				this.prefs = this.defaults
+				enyo.setCookie(this.lsvar, enyo.json.stringify(this.prefs))
+		} else {
+			if (localStorage && localStorage[this.lsvar])
+				this.prefs = enyo.mixin(this.defaults, enyo.json.parse(localStorage[this.lsvar]));
+			else if (localStorage) {
+				this.prefs = this.defaults;
+				localStorage[this.lsvar] = enyo.json.stringify(this.prefs);
+			}
+			else this.error('no localStorage?');
 		}
-		else this.error('no localStorage?');
 	},
 
 	save: function(prefs) {
 		this.prefs = prefs;
-		if (localStorage) {
-			localStorage[this.lsvar] = enyo.json.stringify(this.prefs);
-			return true;
+		if (enyo.fetchDeviceInfo().platformVersionMajor == 1) {
+			enyo.setCookie(this.lsvar, enyo.json.stringify(this.prefs))
+			return true
 		} else {
-			this.error('no localStorage?');
-			return false;
+			if (localStorage) {
+				localStorage[this.lsvar] = enyo.json.stringify(this.prefs);
+				return true;
+			} else {
+				this.error('no localStorage?');
+				return false;
+			}
 		}
 	},
 
