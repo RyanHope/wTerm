@@ -893,7 +893,7 @@ void TerminalState::saveCursor()
 
 	m_savedGraphicsState = m_currentGraphicsState;
 	m_savedCursorLoc = m_cursorLoc;
-	m_savedCharset = m_currentCharset;
+	m_savedCharset = m_currentCharset.charset;
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -907,7 +907,7 @@ void TerminalState::restoreCursor()
 
 	m_currentGraphicsState = m_savedGraphicsState;
 	m_cursorLoc = m_savedCursorLoc;
-	m_currentCharset = m_savedCharset;
+	m_currentCharset.charset = m_savedCharset;
 
 	pthread_mutex_unlock(&m_rwLock);
 }

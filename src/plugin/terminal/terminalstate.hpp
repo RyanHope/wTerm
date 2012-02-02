@@ -193,7 +193,7 @@ protected:
 	Point m_savedCursorLoc;
 
 	CharsetState m_currentCharset;
-	CharsetState m_savedCharset;
+	unsigned char m_savedCharset; // only save value of selected charset, not slot/index
 
 	Point m_cursorLoc; //Bound by the display screen size. Home location is (1, 1).
 	Point m_displayScreenSize; //The actual terminal screen size.
