@@ -59,7 +59,6 @@ typedef enum
 	TS_COLOR_BACKGROUND_BRIGHT,
 	TS_COLOR_MAX
 } TSColor;
-typedef TSColor TSColor_t; // FIXME: remove _t usage
 
 struct TSCellGraphicsState
 {

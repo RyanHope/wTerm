@@ -702,7 +702,7 @@ void SDLFontGL::drawGL(bool blink) {
 	checkGLError();
 }
 
-void SDLFontGL::drawTextGL(TextGraphicsInfo_t & graphicsInfo, unsigned int col, unsigned int row, Uint16 cChar) {
+void SDLFontGL::drawTextGL(TextGraphicsInfo & graphicsInfo, unsigned int col, unsigned int row, Uint16 cChar) {
 	if (!m_cellData) return;
 
 	int slot = m_slotMap[cChar >> 7];

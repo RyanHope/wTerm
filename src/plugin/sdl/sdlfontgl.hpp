@@ -37,7 +37,7 @@ public:
 		unsigned int fg;
 		unsigned int bg;
 		bool blink;
-	} TextGraphicsInfo_t;
+	} TextGraphicsInfo;
 private:
 	// font/glyph data
 	// --------------
@@ -146,7 +146,7 @@ public:
 
 	void clearText();
 	// col/row start at 0/0
-	void drawTextGL(TextGraphicsInfo_t & graphicsInfo, unsigned int col, unsigned int row, Uint16 cChar);
+	void drawTextGL(TextGraphicsInfo & graphicsInfo, unsigned int col, unsigned int row, Uint16 cChar);
 };
 
 #endif // _SDLFONTGL_H_

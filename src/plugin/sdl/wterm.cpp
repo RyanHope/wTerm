@@ -416,16 +416,16 @@ TerminalState *WTerm::getTerminalState()
 	return m_terminalState;
 }
 
-SDL_Color WTerm::getColor(TSColor_t color)
+SDL_Color WTerm::getColor(TSColor color)
 {
 	return m_colors[color];
 }
 
-void WTerm::setKey(TSInput_t key, const char *cmd) {
+void WTerm::setKey(TSInput key, const char *cmd) {
 	m_keys[key] = std::string(cmd);
 }
 
-void WTerm::setColor(TSColor_t color, int r, int g, int b)
+void WTerm::setColor(TSColor color, int r, int g, int b)
 {
 /*
 	// Should probably do something like this to prevent worst case scenarios
