@@ -43,10 +43,10 @@ enyo.kind({
 	},
 
 	initComponents: function() {
-	this.inherited(arguments)
-	if (this.symbols) {
+		this.inherited(arguments)
+		if (this.symbols) {
 			if (!this.visual) this.visual = arrayRemoveNull(this.symbols);
-		switch(this.visual.length) {
+			switch(this.visual.length) {
 			case 1:
 				this.createComponents([
 					{flex: 1, content: vbkKeyContent(this.visual[0])}
@@ -83,8 +83,8 @@ enyo.kind({
 					]}
 				]);
 				break;
+			}
 		}
-	    }
 	},
 
 	rendered: function() {
@@ -120,15 +120,15 @@ enyo.kind({
 				this.setDown(true)
 			this.doMousedown()
 		}
-    },
+	},
 	mouseupHandler: function() {
 		if (!this.disabled && !this.toggling) {
 			this.setDown(false)
 			this.doMouseup()
 		}
 	},
-	
-	mouseoutHandler: function() {},	
+
+	mouseoutHandler: function() {},
 	mouseoverHandler: function() {},
 	flickHandler: function() {},
 	clickHandler: function() {},
