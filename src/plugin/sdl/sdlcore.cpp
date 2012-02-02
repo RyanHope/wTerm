@@ -17,7 +17,7 @@
  * along with wTerm.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sdlcore.hpp"
+#include "sdlcore_p.hpp"
 
 #include <GLES2/gl2.h>
 #include <SDL/SDL_image.h>
@@ -31,16 +31,100 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
+SDLCore::BlinkTimer::BlinkTimer(SDLCore *core) : Abstract_Timer(core) {
+}
+void SDLCore::BlinkTimer::run() {
+	SDLCore *c = core();
+	c->doBlink = !c->doBlink;
+	c->setDirty(BLINK_DIRTY_BIT);
+}
+
+SDLCore::KeyRepeatTimer::KeyRepeatTimer(SDLCore* core)
+: Abstract_Timer(core), m_delay_msec(0), m_repeat_msec(0) {
+}
+void SDLCore::KeyRepeatTimer::start(const SDL_Event &event) {
+	m_event = event;
+	Abstract_Timer::start(m_delay_msec);
+}
+void SDLCore::KeyRepeatTimer::stop() {
+	Abstract_Timer::stop();
+}
+void SDLCore::KeyRepeatTimer::setDelay(unsigned int delay_msec) {
+	m_delay_msec = delay_msec;
+}
+void SDLCore::KeyRepeatTimer::setRepeat(unsigned int repeat_msec) {
+	m_repeat_msec = repeat_msec;
+}
+void SDLCore::KeyRepeatTimer::run() {
+	// set next interval
+	Abstract_Timer::start(m_repeat_msec);
+	SDL_PushEvent(&m_event);
+}
+
+SDLCore::RefreshDelayTimer::RefreshDelayTimer(SDLCore* core)
+: Abstract_Timer(core), m_delay_msec(0) {
+	m_last_refresh.tv_sec = 0;
+	m_last_refresh.tv_nsec = 0;
+}
+void SDLCore::RefreshDelayTimer::setDelay(unsigned int delay_msec) {
+	m_delay_msec = delay_msec;
+	if (running()) {
+		timespec now, next;
+		SDLCore_TimerCollection::getNow(now);
+		next = m_last_refresh;
+		SDLCore_TimerCollection::addMsec(next, m_delay_msec);
+		if (next > now) {
+			Abstract_Timer::start(next);
+		} else {
+			// done waiting
+			Abstract_Timer::stop();
+		}
+	}
+}
+bool SDLCore::RefreshDelayTimer::update() {
+	if (running()) return false; // not triggered yet
+
+	timespec now, next;
+	SDLCore_TimerCollection::getNow(now);
+	next = m_last_refresh;
+	SDLCore_TimerCollection::addMsec(next, m_delay_msec);
+	if (next > now) {
+		// delay didn't pass yet, start timer
+		Abstract_Timer::start(next);
+		return false;
+	} else {
+		// delay passed, allow update
+		return true;
+	}
+}
+void SDLCore::RefreshDelayTimer::run() {
+	// loop got activated, job done
+	Abstract_Timer::stop();
+}
+
+
 const int SDLCore::BUFFER_DIRTY_BIT = 1;
 const int SDLCore::FONT_SIZE_DIRTY_BIT = 2;
 const int SDLCore::COLOR_DIRTY_BIT = 4;
 const int SDLCore::BLINK_DIRTY_BIT = 8;
 
 SDLCore::SDLCore()
-: m_fontgl("./LiberationMono-Regular.ttf", 12)
+: m_keyRepeatTimer(this), m_blinkTimer(this), m_refreshDelayTimer(this)
+, m_fontgl("./LiberationMono-Regular.ttf", 12)
 {
+	m_timers = new SDLCore_TimerCollection();
+	m_iocollection = new SDLCore_IOCollection();
+
+	SDL_Event event;
+	memset(&event, 0, sizeof(event));
+	event.type = SDL_USEREVENT;
+	m_listenthread = new SDLCore_ListenThread(event);
+	m_listenthread->run();
+
+	m_keyRepeatTimer.setDelay(500);
+	m_keyRepeatTimer.setRepeat(35);
+
 	m_bRunning = false;
-	m_blinkThread = NULL;
 
 	m_surface = NULL;
 
@@ -51,13 +135,8 @@ SDLCore::SDLCore()
 
 	m_reverse = false;
 
-	m_keyRepeat.firsttime = 0;
-	m_keyRepeat.delay = 500; // 500
-	m_keyRepeat.interval = 35; // 35
-	m_keyRepeat.timestamp = 0;
-
 	active = true;
-	lCycleTimeSlot = 25;
+	m_refreshDelayTimer.setDelay(25);
 
 	clearDirty(0);
 }
@@ -66,9 +145,11 @@ SDLCore::~SDLCore()
 {
 	if (isRunning())
 	{
-		if (m_blinkThread) pthread_join(m_blinkThread, NULL);
 		shutdown();
 	}
+	delete m_listenthread;
+	delete m_timers;
+	delete m_iocollection;
 }
 
 /**
@@ -164,8 +245,55 @@ void SDLCore::handleMouseEvent(SDL_Event &event)
 void SDLCore::setActive(int active)
 {
 	this->active = active;
-	lCycleTimeSlot = this->active ? 25 : 1000;
+	m_refreshDelayTimer.setDelay(this->active ? 25 : 1000);
 }
+
+void SDLCore::waitForEvent(SDL_Event &event) {
+	if (m_listenNotified || m_timers->m_changed || m_iocollection->m_changed) {
+		m_listenNotified = false;
+		m_timers->m_changed = false;
+		m_iocollection->m_changed = false;
+		// syslog(LOG_DEBUG, "waitFor with %i timers and %i fds", m_timers->m_heap.size(), m_iocollection->m_pollfds.size());
+		m_listenthread->waitFor(m_timers->hasEvents(), m_timers->nextEvent(), m_iocollection->m_pollfds);
+	}
+
+	SDL_WaitEvent(&event);
+}
+
+void SDLCore::handleEvent(SDL_Event &event) {
+	if (event.type == SDL_USEREVENT) {
+		// listenthread notify
+		m_listenNotified = true;
+		m_iocollection->run();
+		m_timers->run();
+	}
+
+	switch (event.type) {
+	case SDL_MOUSEMOTION:
+	case SDL_MOUSEBUTTONDOWN:
+	case SDL_MOUSEBUTTONUP:
+		handleMouseEvent(event);
+		break;
+	case SDL_KEYUP:
+	case SDL_KEYDOWN:
+		handleKeyboardEvent(event);
+		break;
+	case SDL_VIDEOEXPOSE:
+		setDirty(BUFFER_DIRTY_BIT);
+		break;
+	case SDL_VIDEORESIZE:
+		m_fontgl.clearGL();
+		m_surface = SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
+		m_fontgl.initGL(0, 0, event.resize.w, event.resize.h);
+		updateDisplaySize();
+		setDirty(BUFFER_DIRTY_BIT);
+		break;
+	case SDL_QUIT:
+		break;
+	default:
+		break;
+	}
+ }
 
 /**
  * Main event loop. Does not return until the application exits.
@@ -174,9 +302,8 @@ void SDLCore::eventLoop()
 {
 	// Event descriptor
 	SDL_Event event;
-	Uint32 lOldTime = SDL_GetTicks();
-	Uint32 lCurrentTime = SDL_GetTicks();
-	Uint32 lDelay;
+
+	m_listenNotified = false;
 
 	while (isRunning()) {
 		// If a key repeat event is not active:
@@ -187,50 +314,14 @@ void SDLCore::eventLoop()
 		// the screen as dirty and force a refresh.  We should never end up trying
 		// to draw faster than a controlled amount in all cases.
 
-		bool gotEvent = false;
-		if (!m_keyRepeat.timestamp)
-		{
-			SDL_WaitEvent(&event);
-			gotEvent = true;
-		}
-		else
-			gotEvent = SDL_PollEvent(&event);
+		waitForEvent(event);
+		handleEvent(event);
 
-		while (gotEvent)
-		{
-			switch (event.type)
-			{
-				case SDL_MOUSEMOTION:
-				case SDL_MOUSEBUTTONDOWN:
-				case SDL_MOUSEBUTTONUP:
-					handleMouseEvent(event);
-					break;
-				case SDL_KEYUP:
-				case SDL_KEYDOWN:
-					handleKeyboardEvent(event);
-					break;
-				case SDL_VIDEOEXPOSE:
-					setDirty(BUFFER_DIRTY_BIT);
-					break;
-				case SDL_VIDEORESIZE:
-					m_fontgl.clearGL();
-					m_surface = SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
-					m_fontgl.initGL(0, 0, event.resize.w, event.resize.h);
-					updateDisplaySize();
-					setDirty(BUFFER_DIRTY_BIT);
-					break;
-				case SDL_QUIT:
-					return;
-				case SDL_USEREVENT: // blink
-					setDirty(BLINK_DIRTY_BIT);
-					break;
-				default:
-					break;
-			}
-			gotEvent = SDL_PollEvent(&event);
+		while (event.type != SDL_QUIT && isRunning() && SDL_PollEvent(&event)) {
+			handleEvent(event);
 		}
-		checkKeyRepeat();
 
+		if (event.type == SDL_QUIT) return;
 
 		if (isDirty(FONT_SIZE_DIRTY_BIT) && active)
 		{
@@ -246,14 +337,15 @@ void SDLCore::eventLoop()
 		}
 
 		// Redraw if needed
-		if (isDirty(BUFFER_DIRTY_BIT) && active)
-		{
-			clearDirty(BUFFER_DIRTY_BIT | BLINK_DIRTY_BIT);
-			redraw();
-			glFlush();
-			checkGLError();
-			SDL_GL_SwapBuffers();
-			checkGLError();
+		if (isDirty(BUFFER_DIRTY_BIT) && active) {
+			if (m_refreshDelayTimer.update()) {
+				clearDirty(BUFFER_DIRTY_BIT | BLINK_DIRTY_BIT);
+				redraw();
+				glFlush();
+				checkGLError();
+				SDL_GL_SwapBuffers();
+				checkGLError();
+			}
 		} else if (isDirty(BLINK_DIRTY_BIT) && active) {
 			clearDirty(BLINK_DIRTY_BIT);
 			redrawBlinked();
@@ -263,22 +355,11 @@ void SDLCore::eventLoop()
 			checkGLError();
 		}
 
-		// Are we going too fast?  If so, sleep some accordingly.
-		lCurrentTime = SDL_GetTicks();
-
-		if ((lCurrentTime - lOldTime) < lCycleTimeSlot)
-		{
-			lDelay = lOldTime + lCycleTimeSlot - lCurrentTime;
-
-			if (lDelay > lCycleTimeSlot)
-			{
-				lDelay = lCycleTimeSlot;
-			}
-
-			SDL_Delay(lDelay);
+		if (m_bNeedsBlink) {
+			if (!m_blinkTimer.running()) m_blinkTimer.start(500);
+		} else {
+			m_blinkTimer.stop();
 		}
-
-		lOldTime = SDL_GetTicks();
 	}
 }
 
@@ -298,27 +379,6 @@ void SDLCore::start()
 	}
 }
 
-int SDLCore::startBlinkThread()
-{
-	return pthread_create(&m_blinkThread, NULL, blinkThread, this);
-}
-
-void *SDLCore::blinkThread(void *ptr)
-{
-	SDL_Event event;
-	event.type = SDL_USEREVENT;
-	SDLCore *core = (SDLCore *)ptr;
-	while (core->isRunning()) {
-		core->doBlink = !core->doBlink;
-		// Only bother redrawing if we have any blink text on-screen
-		if (core->m_bNeedsBlink)
-			SDL_PushEvent(&event);
-		usleep(500000);
-	}
-	pthread_exit(NULL);
-	return NULL;
-}
-
 /**
  * Starts the main application event loop. Will not return until the application exits.
  * If SDL is not initialized, then this will return immediately.
@@ -327,7 +387,6 @@ void SDLCore::run()
 {
 	if (isRunning())
 	{
-		startBlinkThread();
 		eventLoop();
 	}
 }
@@ -490,39 +549,8 @@ void SDLCore::clearDirty(int nDirtyBits)
 
 void SDLCore::stopKeyRepeat()
 {
-	m_keyRepeat.timestamp = 0;
+	m_keyRepeatTimer.stop();
 	return;
-}
-
-// pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
-void SDLCore::checkKeyRepeat()
-{
-	//syslog(LOG_ERR, "check ran %i", SDL_GetTicks());
-	if (m_keyRepeat.timestamp)
-	{
-		Uint32 now, interval;
-		now = SDL_GetTicks();
-		interval = (now - m_keyRepeat.timestamp);
-		//syslog(LOG_ERR, "Key Repeat Active [now,interval,delay,timestamp,first] %i - %i - %i - %i - %i",now,interval,m_keyRepeat.delay,m_keyRepeat.timestamp,m_keyRepeat.firsttime);
-		if (m_keyRepeat.firsttime)
-		{
-			if (interval > (Uint32)m_keyRepeat.delay)
-			{
-				m_keyRepeat.timestamp = now;
-				m_keyRepeat.firsttime = 0;
-				//syslog(LOG_ERR, "First time delay hit");
-			}
-		}
-		else
-		{
-			if (interval > (Uint32)m_keyRepeat.interval)
-			{
-				m_keyRepeat.timestamp = now;
-				SDL_PushEvent(&m_keyRepeat.evt);
-				//syslog(LOG_ERR, "Pushed Repeat Event");
-			}
-		}
-	}
 }
 
 // pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
@@ -643,23 +671,10 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 		SDL_SetModState((SDLMod)modstate);
 	}
 
-	if (event.type == SDL_KEYUP)
-	{
-		if (m_keyRepeat.timestamp && m_keyRepeat.evt.key.keysym.sym == event.key.keysym.sym)
-		{
-			m_keyRepeat.timestamp = 0;
-//			syslog(LOG_ERR, "Removed Repeat Event");
-		}
-	}
-	else
-	{
-		if (repeatable && m_keyRepeat.delay != 0)
-		{
-			m_keyRepeat.evt = event;
-			m_keyRepeat.firsttime = 1;
-			m_keyRepeat.timestamp = SDL_GetTicks();
-//			syslog(LOG_ERR, "Added Repeat Event");
-		}
+	if (event.type == SDL_KEYUP) {
+		m_keyRepeatTimer.stop();
+	} else if (repeatable) {
+		m_keyRepeatTimer.start(event);
 	}
 
 	SDL_PushEvent(&event);
