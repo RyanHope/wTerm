@@ -6,6 +6,10 @@ APPS=/media/cryptofs/apps
 
 [ -d ${APPS} ] || { echo "Requires webOS 1.3.5 or later" ; exit 1 ; }
 
+WEBOS_VER=`grep "PRODUCT_VERSION_STRING" /etc/palm-build-info | cut -f 3 -d " "`
+MAJOR=`echo $WEBOS_VER | cut -f 1 -d "."`
+MINOR=`echo $WEBOS_VER | cut -f 2 -d "."`
+
 mount -o remount,rw /
 
 APPDIR=${APPS}/usr/palm/applications/${APPID}
@@ -19,9 +23,17 @@ while [ `cat /var/palm/data/jailusers | cut -f 1 -d ':' | grep -c $JUID` -gt 0 ]
 	JUID=`expr $JUID + 1`
 done
 
-echo "${JUID}:5000:${APPID}:/dev/null:${APPDIR}/jail.conf" >> /var/palm/data/jailusers
+OLDSCHOOL=0
+[ $MAJOR = 1 ] && OLDSCHOOL=1
+[ $MAJOR = 2 -a $MINOR -lt 2 ] && OLDSCHOOL=1
 
 mkdir -p /etc/profile.d
 echo "PATH=\${PATH}:${APPDIR}/bin" > /etc/profile.d/${APPID}
+
+JAILCONF="${APPDIR}/jail.conf"
+
+[ $OLDSCHOOL = 1 ] && JAILCONF="/etc/jail_native-palm.conf"
+
+echo "${JUID}:5000:${APPID}:/dev/null:${JAILCONF}" >> /var/palm/data/jailusers
 
 exit 0
