@@ -459,76 +459,76 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 		syslog(LOG_INFO, "VT52 Control Sequence: KEYPAD not implemented.");
 		break;
 	case CS_CHARSET_UK_G0_SET: //ESC(A
-		setCharset(0, 'A');
+		m_currentCharset.set(0, 'A');
 		break;
 	case CS_CHARSET_ASCII_G0_SET: //ESC(B
-		setCharset(0, 'B');
+		m_currentCharset.set(0, 'B');
 		break;
 	case CS_CHARSET_SPEC_G0_SET: //ESC(0
-		setCharset(0, '0');
+		m_currentCharset.set(0, '0');
 		break;
 	case CS_CHARSET_ALT_G0_SET: //ESC(1
-		setCharset(0, '1');
+		m_currentCharset.set(0, '1');
 		break;
 	case CS_CHARSET_ALT_SPEC_G0_SET: //ESC(2
-		setCharset(0, '2');
+		m_currentCharset.set(0, '2');
 		break;
 	case CS_CHARSET_USE_G0: //ESCO
-		useCharset(0);
+		m_currentCharset.select(0);
 		break;
 	case CS_CHARSET_UK_G1_SET: //ESC)A
-		setCharset(1, 'A');
+		m_currentCharset.set(1, 'A');
 		break;
 	case CS_CHARSET_ASCII_G1_SET: //ESC)B
-		setCharset(1, 'B');
+		m_currentCharset.set(1, 'B');
 		break;
 	case CS_CHARSET_SPEC_G1_SET: //ESC)0
-		setCharset(1, '0');
+		m_currentCharset.set(1, '0');
 		break;
 	case CS_CHARSET_ALT_G1_SET: //ESC)1
-		setCharset(1, '1');
+		m_currentCharset.set(1, '1');
 		break;
 	case CS_CHARSET_ALT_SPEC_G1_SET: //ESC)2
-		setCharset(1, '2');
+		m_currentCharset.set(1, '2');
 		break;
 	case CS_CHARSET_USE_G1: //ESCN
-		useCharset(1);
+		m_currentCharset.select(1);
 		break;
 	case CS_CHARSET_UK_G2_SET: //ESC*A
-		setCharset(2, 'A');
+		m_currentCharset.set(2, 'A');
 		break;
 	case CS_CHARSET_ASCII_G2_SET: //ESC*B
-		setCharset(2, 'B');
+		m_currentCharset.set(2, 'B');
 		break;
 	case CS_CHARSET_SPEC_G2_SET: //ESC*0
-		setCharset(2, '0');
+		m_currentCharset.set(2, '0');
 		break;
 	case CS_CHARSET_ALT_G2_SET: //ESC*1
-		setCharset(2, '1');
+		m_currentCharset.set(2, '1');
 		break;
 	case CS_CHARSET_ALT_SPEC_G2_SET: //ESC*2
-		setCharset(2, '2');
+		m_currentCharset.set(2, '2');
 		break;
 	case CS_CHARSET_USE_G2: //ESCn
-		useCharset(2);
+		m_currentCharset.select(2);
 		break;
 	case CS_CHARSET_UK_G3_SET: //ESC+A
-		setCharset(3, 'A');
+		m_currentCharset.set(3, 'A');
 		break;
 	case CS_CHARSET_ASCII_G3_SET: //ESC+B
-		setCharset(3, 'B');
+		m_currentCharset.set(3, 'B');
 		break;
 	case CS_CHARSET_SPEC_G3_SET: //ESC+0
-		setCharset(3, '0');
+		m_currentCharset.set(3, '0');
 		break;
 	case CS_CHARSET_ALT_G3_SET: //ESC+1
-		setCharset(3, '1');
+		m_currentCharset.set(3, '1');
 		break;
 	case CS_CHARSET_ALT_SPEC_G3_SET: //ESC+2
-		setCharset(3, '2');
+		m_currentCharset.set(3, '2');
 		break;
 	case CS_CHARSET_USE_G3: //ESCo
-		useCharset(3);
+		m_currentCharset.select(3);
 		break;
 	case CS_MARGIN_SET: //ESC[<Top>;<Bottom>r
 		values[0] = (values[0] <= 0) ? 1 : values[0];

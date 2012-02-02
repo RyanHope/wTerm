@@ -116,8 +116,7 @@ typedef enum
 	TS_INPUT_MAX
 } TSInput;
 
-struct TSGraphicsState : public TSCellGraphicsState
-{
+struct CharsetState {
 	/* charset values:
 	 * 'A': UK
 	 * 'B': ASCII
@@ -126,12 +125,32 @@ struct TSGraphicsState : public TSCellGraphicsState
 	 * '2': ALT SPEC
 	 */
 
+	/* we only handle "GL" charset (0x20-0x7F), not "GR" (0xA0-0xFF) */
 	unsigned char charsets[4], charset;
 	unsigned int charset_ndx;
 
-	TSGraphicsState() : charset('B'), charset_ndx(0) {
+	CharsetState() : charset('B'), charset_ndx(0) {
 		charsets[0] = charsets[1] = charsets[2] = charsets[3] = 'B';
 	}
+
+	void reset() {
+		charset_ndx = 0;
+		charset = charsets[0] = charsets[1] = charsets[2] = charsets[3] = 'B';
+	}
+
+	void select(unsigned int ndx) {
+		charset_ndx = ndx & 0x3;
+		charset = charsets[ndx];
+	}
+
+	void set(unsigned int ndx, unsigned char charset) {
+		charsets[ndx & 0x3] = charset;
+		this->charset = charsets[ndx];
+	}
+};
+
+struct TSGraphicsState : public TSCellGraphicsState
+{
 };
 
 typedef enum
@@ -176,6 +195,9 @@ protected:
 	TSGraphicsState m_currentGraphicsState;
 	TSGraphicsState m_savedGraphicsState;
 	Point m_savedCursorLoc;
+
+	CharsetState m_currentCharset;
+	CharsetState m_savedCharset;
 
 	Point m_cursorLoc; //Bound by the display screen size. Home location is (1, 1).
 	Point m_displayScreenSize; //The actual terminal screen size.
@@ -261,10 +283,7 @@ public:
 	TSColor getBackgroundColor();
 	TSGraphicsState getCurrentGraphicsState();
 
-	void setCharset(unsigned int ndx, unsigned char charset);
-	void useCharset(unsigned int ndx);
 	CellCharacter applyCharset(CellCharacter cChar);
-	unsigned char charset();
 
 	void lock();
 	void unlock();
