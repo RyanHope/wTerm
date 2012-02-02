@@ -60,8 +60,11 @@ typedef enum
 	TS_COLOR_MAX
 } TSColor;
 
-struct TSCellGraphicsState
+struct TSGraphicsState
 {
+	static const TSColor DEFAULT_FOREGROUND_COLOR = TS_COLOR_FOREGROUND;
+	static const TSColor DEFAULT_BACKGROUND_COLOR = TS_COLOR_BACKGROUND;
+
 	TSColor foregroundColor;
 	TSColor backgroundColor;
 	int nGraphicsMode;
@@ -72,7 +75,19 @@ struct TSCellGraphicsState
 	bool negative() const { return nGraphicsMode & TS_GM_NEGATIVE; }
 	bool italic() const { return nGraphicsMode & TS_GM_ITALIC; }
 
-	TSCellGraphicsState() : foregroundColor(TS_COLOR_FOREGROUND), backgroundColor(TS_COLOR_BACKGROUND), nGraphicsMode(0) { }
+	TSGraphicsState colors() const {
+		TSGraphicsState r = *this;
+		r.nGraphicsMode = 0;
+		return r;
+	}
+
+	void reset() {
+		foregroundColor = DEFAULT_FOREGROUND_COLOR;
+		backgroundColor = DEFAULT_BACKGROUND_COLOR;
+		nGraphicsMode = 0;
+	}
+
+	TSGraphicsState() : foregroundColor(DEFAULT_FOREGROUND_COLOR), backgroundColor(DEFAULT_BACKGROUND_COLOR), nGraphicsMode(0) { }
 };
 
 typedef uint16_t CellCharacter;
@@ -80,12 +95,12 @@ typedef uint16_t CellCharacter;
 // For each cell on the screen, track its graphics and textual contents:
 struct TSCell {
 	CellCharacter data;
-	TSCellGraphicsState graphics;
+	TSGraphicsState graphics;
 
 	TSCell() : data(0) { }
 	TSCell(CellCharacter data) : data(data) { }
-	TSCell(TSCellGraphicsState graphics) : data(0), graphics(graphics) { }
-	TSCell(CellCharacter data, TSCellGraphicsState graphics) : data(data), graphics(graphics) { }
+	TSCell(TSGraphicsState graphics) : data(0), graphics(graphics) { }
+	TSCell(CellCharacter data, TSGraphicsState graphics) : data(data), graphics(graphics) { }
 };
 
 class ScreenBuffer {

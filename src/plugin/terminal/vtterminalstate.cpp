@@ -218,7 +218,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 	case CS_GRAPHICS_MODE_SET: //ESC[<Value>;...;<Value>m
 		if (numValues == 0)
 		{
-			m_currentGraphicsState = TSGraphicsState();
+			m_currentGraphicsState.reset();;
 		}
 		else
 		{
@@ -226,7 +226,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 			{
 				if (values[i] == 0)
 				{
-					m_currentGraphicsState = TSGraphicsState();
+					m_currentGraphicsState.reset();
 				}
 				else if (values[i] == 1)
 				{
@@ -250,7 +250,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				}
 				else if (values[i] == 39)
 				{
-					setForegroundColor(TSGraphicsState().foregroundColor);
+					setForegroundColor(TSGraphicsState::DEFAULT_FOREGROUND_COLOR);
 				}
 				else if (values[i] >= 40 && values[i] <= 47)
 				{
@@ -258,7 +258,7 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 				}
 				else if (values[i] == 49)
 				{
-					setBackgroundColor(TSGraphicsState().backgroundColor);
+					setBackgroundColor(TSGraphicsState::DEFAULT_BACKGROUND_COLOR);
 				}
 				else if (values[i] == 22)
 				{

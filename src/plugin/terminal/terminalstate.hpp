@@ -149,10 +149,6 @@ struct CharsetState {
 	}
 };
 
-struct TSGraphicsState : public TSCellGraphicsState
-{
-};
-
 typedef enum
 {
 	TS_CURSOR_STYLE_BLOCK_BLINK = 0,

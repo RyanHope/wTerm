@@ -979,7 +979,7 @@ void TerminalState::resetTerminal()
 	cursorHome();
 	saveCursor();
 	tabs.clear();
-	m_currentGraphicsState = TSGraphicsState();
+	m_currentGraphicsState.reset();
 	m_currentCharset.reset();
 	unsolicited = false;
 
