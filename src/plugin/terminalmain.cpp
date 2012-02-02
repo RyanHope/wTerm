@@ -131,6 +131,8 @@ int main(int argc, const char* argv[])
 	char *e = strrchr(terminal->path, '/');
 	*e = 0;
 
+	chdir(terminal->path);
+
 	wTerm->setFontSize((argc > 1 && atoi(argv[1])) ? atoi(argv[1]) : 12);
 	wTerm->start();
 
