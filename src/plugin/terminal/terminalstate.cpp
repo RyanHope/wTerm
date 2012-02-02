@@ -810,6 +810,7 @@ CellCharacter TerminalState::applyCharset(CellCharacter cChar) {
 
 	switch (m_currentGraphicsState.charset) {
 	case '0': // SPEC
+	case '2': // SPEC
 		if (0x5F <= cChar && cChar <= 0x7E) cChar = vt100_mapping[cChar - 0x5F];
 		break;
 	case 'A':
