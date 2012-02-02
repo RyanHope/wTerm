@@ -54,46 +54,44 @@ enyo.kind({
 		}
 	},
 
-	buildLayout: function (layout) {
-		if (name != this._layoutName) return;
-		var components = [], i, j, comps, c, e;
-		for (i = 0; i < layout.length; i++) {
-			row = layout[i];
-			comps = [];
-			for (j = 0; j < row.length; j++) {
-				e = row[j];
-				if (e.content || e.symbols) {
-					if (this._isPhone) {
-						if (e.hasOwnProperty('toggling') && c.toggling)
-							c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', onmousedown: 'keyToggle'}, e);
-						else
-							c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', onmousedown: 'keyDown', onmouseup: 'keyUp'}, e);
-					} else {
-						if (e.hasOwnProperty('toggling') && c.toggling)
-							c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', ontouchstart: 'keyToggle'}, e);
-						else
-							c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', ontouchstart: 'keyDown', ontouchend: 'keyUp'}, e);
-					}
-				} else {
-					c = enyo.mixin({className: ''}, e); /* simple flex or custom */
-				}
-				if (c.small) c.className += ' small';
-				else if (c.micro) c.className += ' micro';
-				if (c.extraClasses) c.className += ' ' + c.extraClasses;
-				if (!c.hasOwnProperty('printable')) c.printable = false;
-				if (!c.hasOwnProperty('unicode') && c.content) c.unicode = c.content.toLowerCase();
-				comps.push(c);
-			}
-			components.push({layoutKind: 'HFlexLayout', pack: 'end', components: comps});
-		}
-		this.destroyComponents();
-		this.createComponents(components);
-		this.render();
-	},
-
 	loadLayout: function(name) {
 		this._layoutName = name;
-		getKbdLayout(name, enyo.bind(this, this.buildLayout));
+		getKbdLayout(name, function (layout) {
+			if (name != this._layoutName) return;
+			var components = [], i, j, comps, c, e;
+			for (i = 0; i < layout.length; i++) {
+				row = layout[i];
+				comps = [];
+				for (j = 0; j < row.length; j++) {
+					e = row[j];
+					if (e.content || e.symbols) {
+						if (this._isPhone) {
+							if (e.hasOwnProperty('toggling') && c.toggling)
+								c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', onmousedown: 'keyToggle'}, e);
+							else
+								c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', onmousedown: 'keyDown', onmouseup: 'keyUp'}, e);
+						} else {
+							if (e.hasOwnProperty('toggling') && c.toggling)
+								c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', ontouchstart: 'keyToggle'}, e);
+							else
+								c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', ontouchstart: 'keyDown', ontouchend: 'keyUp'}, e);
+						}
+					} else {
+						c = enyo.mixin({className: ''}, e); /* simple flex or custom */
+					}
+					if (c.small) c.className += ' small';
+					else if (c.micro) c.className += ' micro';
+					if (c.extraClasses) c.className += ' ' + c.extraClasses;
+					if (!c.hasOwnProperty('printable')) c.printable = false;
+					if (!c.hasOwnProperty('unicode') && c.content) c.unicode = c.content.toLowerCase();
+					comps.push(c);
+				}
+				components.push({layoutKind: 'HFlexLayout', pack: 'end', components: comps});
+			}
+			this.destroyComponents();
+			this.createComponents(components);
+			this.render();
+		}.bind(this));
 	},
 
 	keyToggle: function(inSender) {
