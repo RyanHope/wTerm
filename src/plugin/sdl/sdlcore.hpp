@@ -27,11 +27,130 @@
 #include "terminal/vtterminalstate.hpp"
 #include "sdlfontgl.hpp"
 
+#include <time.h>
+
+class SDLCore_TimerCollection;
+class SDLCore_IOCollection;
+class SDLCore_ListenThread;
+
 /**
  * Initializer and basic 2D function for webOS SDL.
  */
 class SDLCore
 {
+public:
+	class Abstract_Timer {
+	public:
+		Abstract_Timer(SDLCore* core = 0);
+		virtual ~Abstract_Timer();
+		void setCore(SDLCore *core);
+		SDLCore* core();
+
+		virtual void run() = 0;
+
+		void start(unsigned int msec); // repeating timer
+		void start(timespec nextEvent); // one shot
+		void stop();
+		bool running();
+
+	private:
+		friend class SDLCore_TimerCollection;
+		SDLCore *m_core;
+		bool m_running;
+		unsigned int m_interval_msec;
+		timespec m_nextEvent;
+	};
+	friend class Abstract_Timer;
+
+	class Abstract_IO {
+	public:
+		Abstract_IO(SDLCore* core = 0);
+		virtual ~Abstract_IO();
+		void setCore(SDLCore *core);
+		SDLCore* core();
+
+		virtual void read_ready();
+		virtual void write_ready();
+
+		void setFD(int fd);
+		int fd();
+
+		void waitRead();
+		void stopRead();
+		void waitWrite();
+		void stopWrite();
+
+		bool reading();
+		bool writing();
+
+	private:
+		friend class SDLCore_IOCollection;
+		SDLCore *m_core;
+		int m_fd;
+		bool m_read, m_write, m_registered;
+		unsigned int m_colNdx;
+	};
+	friend class Abstract_IO;
+
+private:
+	SDLCore_TimerCollection *m_timers;
+	SDLCore_IOCollection *m_iocollection;
+	SDLCore_ListenThread *m_listenthread;
+	bool m_listenNotified;
+
+	class KeyRepeatTimer : protected Abstract_Timer {
+	public:
+		KeyRepeatTimer(SDLCore* core = 0);
+
+		void start(const SDL_Event &event);
+		void stop();
+
+		void setDelay(unsigned int delay_msec);
+		void setRepeat(unsigned int repeat_msec);
+
+	protected:
+		virtual void run();
+
+	private:
+		SDL_Event m_event;
+		unsigned int m_delay_msec;
+		unsigned int m_repeat_msec;
+	};
+	KeyRepeatTimer m_keyRepeatTimer; // only for faked keys
+
+	class BlinkTimer : public Abstract_Timer {
+	public:
+		BlinkTimer(SDLCore* core = 0);
+		virtual void run();
+	};
+	BlinkTimer m_blinkTimer;
+
+	class RefreshDelayTimer : protected Abstract_Timer {
+	public:
+		RefreshDelayTimer(SDLCore* core = 0);
+
+		/* if new delay makes timer "expired" it won't wakeup the loop
+		 * again. so make sure update gets called later in the same loop
+		 */
+		void setDelay(unsigned int delay_msec);
+
+		/* call when you want to update. return true if no delay
+		 * is needed, false if refresh should delayed. on false a
+		 * timer event is started to wakeup the loop after the delay passed
+		 *
+		 * call update in each loop to check whether it triggered
+		 */
+		bool update();
+
+	protected:
+		virtual void run();
+
+	private:
+		unsigned int m_delay_msec;
+		timespec m_last_refresh;
+	};
+	RefreshDelayTimer m_refreshDelayTimer;
+
 protected:
 	static const int BUFFER_DIRTY_BIT;
 	static const int FONT_SIZE_DIRTY_BIT;
@@ -47,11 +166,6 @@ protected:
 	bool m_reverse;
 
 	bool active;
-	Uint32 lCycleTimeSlot;
-
-	pthread_t m_blinkThread;
-	static void *blinkThread(void *ptr);
-	int startBlinkThread();
 
 	bool isDirty();
 	bool isDirty(int nDirtyBits);
@@ -73,25 +187,16 @@ private:
 	unsigned int m_fontSize;
 
 private:
-	// pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
-	struct {
-		int firsttime;    /* if we check against the delay or repeat value */
-		int delay;        /* the delay before we start repeating */
-		int interval;     /* the delay between key repeat events */
-		Uint32 timestamp; /* the time the first keydown event occurred */
-		SDL_Event evt;    /* the event we are supposed to repeat */
-	} m_keyRepeat;
-
-
 	int init();
 	int initOpenGL();
 	void shutdown();
+
+	void waitForEvent(SDL_Event &event);
+	void handleEvent(SDL_Event &event);
 	void eventLoop();
 
 	void pushColors();
 	void pushFontStyles();
-
-	void checkKeyRepeat();
 
 public:
 	SDLCore();

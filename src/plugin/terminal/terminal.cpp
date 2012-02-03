@@ -487,7 +487,7 @@ int Terminal::runReader()
 			continue;
 
 		// Read all available data:
-		for ( ;; )
+		for (int i = 0; i < 8; i++) // give it a rest after 8 runs, signal screen to update
 		{
 			readResult = read(m_masterFD, dataBuffer, sizeof(dataBuffer));
 
@@ -515,6 +515,9 @@ int Terminal::runReader()
 			getExtTerminal()->insertData("\033c");
 			newLogin();
 		}
+
+		// signal read run is finished and screen should update
+		getExtTerminal()->insertData(NULL, 0);
 	}
 
 	// Indicate we exited neatly.

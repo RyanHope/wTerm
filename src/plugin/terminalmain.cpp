@@ -78,7 +78,6 @@ PDL_bool setFontSize(PDL_JSParameters *params) {
 	PDL_JSReply(params, reply);
 	free(reply);
 
-	wTerm->updateDisplaySize();
 	wTerm->refresh();
 
 	return PDL_TRUE;

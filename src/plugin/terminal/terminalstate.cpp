@@ -31,6 +31,8 @@ TerminalState::TerminalState()
 {
 	m_nTermModeFlags = 0;
 
+	m_savedCharset = 'B';
+
 	unsolicited = false;
 
 	m_nTopMargin = 0;
@@ -893,7 +895,7 @@ void TerminalState::saveCursor()
 
 	m_savedGraphicsState = m_currentGraphicsState;
 	m_savedCursorLoc = m_cursorLoc;
-	m_savedCharset = m_currentCharset;
+	m_savedCharset = m_currentCharset.charset;
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -907,7 +909,7 @@ void TerminalState::restoreCursor()
 
 	m_currentGraphicsState = m_savedGraphicsState;
 	m_cursorLoc = m_savedCursorLoc;
-	m_currentCharset = m_savedCharset;
+	m_currentCharset.charset = m_savedCharset;
 
 	pthread_mutex_unlock(&m_rwLock);
 }
@@ -977,10 +979,10 @@ void TerminalState::resetTerminal()
 	setMargin(1,getDisplayScreenSize().getY());
 	eraseScreen();
 	cursorHome();
-	saveCursor();
-	tabs.clear();
 	m_currentGraphicsState.reset();
 	m_currentCharset.reset();
+	saveCursor();
+	tabs.clear();
 	unsolicited = false;
 
 	pthread_mutex_unlock(&m_rwLock);
