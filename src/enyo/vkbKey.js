@@ -105,7 +105,38 @@ enyo.kind({
 		}
 	},
 
-	handleTouchend: function() {
+	handleTouchend: function(inEvent) {
+		// Obviously don't want to do this every key input, only on those rare double inputs
+		if (inEvent && inEvent.changedTouches && inEvent.changedTouches.length > 1)
+		{
+			for (var i=0; i < inEvent.changedTouches.length; i++)
+			{
+				// Try to find our parent div as our current HTMLElement could be any child of it
+				var tobj = inEvent.changedTouches[i].target;
+				while (tobj)
+				{
+					// would it be faster to just check if enyo.$[tobj.id] && enyo.$[tobj.id].kind == 'vkbKey'?
+					if (/^wTermApp_vkb_vkbKey\d*$/.test(tobj.id))
+						break;
+					tobj = tobj.parentElement;
+				}
+
+				// Went all the way up to document and found nothing :(
+				if (!tobj)
+					continue;
+
+				// Grab the enyo instance
+				tobj = enyo.$[tobj.id];
+
+				if (!tobj) // maybe pointless
+					continue;
+
+				if (tobj != this)
+					tobj.handleTouchend(null);
+			}
+
+		}
+		
 		if (!this.disabled && !this.toggling) {
 			this.setDown(false)
 			this.doTouchend()
