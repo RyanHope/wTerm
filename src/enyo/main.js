@@ -1,3 +1,13 @@
+var dumpObject = function(inSender, inObject) {
+	for (var i in inObject) {
+		try {
+			inSender.log(i, inObject[i])
+		} catch (e) {
+			inSender.error(i, e)
+		}
+	}
+}
+
 enyo.kind({
 
 	name: 'wTermLauncher',
