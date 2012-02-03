@@ -145,7 +145,7 @@ struct CharsetState {
 
 	void set(unsigned int ndx, unsigned char charset) {
 		charsets[ndx & 0x3] = charset;
-		this->charset = charsets[ndx];
+		this->charset = charsets[charset_ndx];
 	}
 };
 
