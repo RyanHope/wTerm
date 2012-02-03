@@ -10,7 +10,8 @@ enyo.kind({
 			kind: "ApplicationEvents",
 			onWindowRotated: "setup",
 			onWindowActivated: 'windowActivated',
-			onWindowDeactivated: 'windowDeactivated'
+			onWindowDeactivated: 'windowDeactivated',
+			onKeydown: 'dispatchKeypress'
 		},
 		{
 			name : "getPreferencesCall",
@@ -206,8 +207,8 @@ enyo.kind({
 		this.render()
 	},
 
-	keydownHandler: function(inSender, inEvent) {
-		this.$.terminal.focus()
-	},
+	dispatchKeypress: function(inSender, inEvent) {
+		this.$.terminal.dispatch(inEvent)
+	}
 
 })

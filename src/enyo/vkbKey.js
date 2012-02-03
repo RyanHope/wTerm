@@ -91,6 +91,7 @@ enyo.kind({
 		if (this.hasNode()) {
 			if (this.isPhone) {
 				this.node.addEventListener("mousedown", enyo.bind(this, this.handleDownEvent), false);
+				this.node.addEventListener("mouseout", enyo.bind(this, this.handleUpEvent), false);
 				this.node.addEventListener("mouseup", enyo.bind(this, this.handleUpEvent), false);
 			} else {
 				this.node.addEventListener("touchstart", enyo.bind(this, this.handleDownEvent), false);

@@ -37,7 +37,9 @@ enyo.kind({
 	focus: function() {
 		if (this.hasNode()) {
 			this.hasNode().focus();
+			return true
 		}
+		return false
 	},
 
 	keydownHandler: function(inSender, inEvent) {
@@ -222,5 +224,9 @@ enyo.kind({
 		for (var i=0; i<this.currentKeys.length; i++)
 			this.callPluginMethodDeferred(null, 'setKey', i, this.decodeEscape(this.currentKeys[i]))
 	},
+
+	dispatch: function(inEvent) {
+		if (this.focus()) this.node.dispatchEvent(inEvent)
+	}
 
 })
