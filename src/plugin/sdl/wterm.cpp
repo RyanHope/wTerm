@@ -394,8 +394,6 @@ void WTerm::refresh()
 {
 	SDL_Event event;
 
-	setDirty(BUFFER_DIRTY_BIT);
-
 	memset(&event, 0, sizeof(event));
 	event.type = SDL_VIDEOEXPOSE;
 
@@ -407,8 +405,11 @@ void WTerm::refresh()
  */
 void WTerm::insertData(const char *data, int len)
 {
-	m_terminalState->insertString(data, len, getExtTerminal());
-	refresh();
+	if (data) {
+		m_terminalState->insertString(data, len, getExtTerminal());
+	} else {
+		refresh();
+	}
 }
 
 TerminalState *WTerm::getTerminalState()
