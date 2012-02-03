@@ -68,7 +68,7 @@ enyo.kind({
 						if (e.hasOwnProperty('toggling') && c.toggling)
 							c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', isPhone: this._isPhone, ondown: 'keyToggle'}, e);
 						else
-							c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', ondown: 'keyDown', onup: 'keyUp'}, e);
+							c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', isPhone: this._isPhone, ondown: 'keyDown', onup: 'keyUp'}, e);
 					} else {
 						c = enyo.mixin({className: ''}, e); /* simple flex or custom */
 					}

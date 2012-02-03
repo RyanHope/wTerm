@@ -42,10 +42,10 @@ enyo.kind({
 	},
 
 	initComponents: function() {
-	this.inherited(arguments)
-	if (this.symbols) {
+		this.inherited(arguments)
+		if (this.symbols) {
 			if (!this.visual) this.visual = arrayRemoveNull(this.symbols);
-		switch(this.visual.length) {
+			switch(this.visual.length) {
 			case 1:
 				this.createComponents([
 					{flex: 1, content: vbkKeyContent(this.visual[0])}
@@ -90,18 +90,17 @@ enyo.kind({
 		this.inherited(arguments);
 		if (this.hasNode()) {
 			if (this.isPhone) {
-				this.node.onmousedown = enyo.bind(this,'handleDownEvent')
-				this.node.onmouseup = enyo.bind(this,'handleUpEvent')
+				this.node.addEventListener("mousedown", enyo.bind(this, this.handleDownEvent), false);
+				this.node.addEventListener("mouseup", enyo.bind(this, this.handleUpEvent), false);
 			} else {
-				this.node.ontouchstart = enyo.bind(this,'handleDownEvent')
-				this.node.ontouchend = enyo.bind(this,'handleUpEvent')
-				this.node.ontouchcancel = enyo.bind(this,'handleUpEvent')
+				this.node.addEventListener("touchstart", enyo.bind(this, this.handleDownEvent), false);
+				this.node.addEventListener("touchcancel", enyo.bind(this, this.handleUpEvent), false);
+				this.node.addEventListener("touchend", enyo.bind(this, this.handleUpEvent), false);
 			}
 		}
 	},
 
 	handleBundledEvents: function(inEvent) {
-		this.log(inEvent)
 		if (inEvent && inEvent.changedTouches && inEvent.changedTouches.length > 1)
 		{
 			for (var i=0; i < inEvent.changedTouches.length; i++)
@@ -134,7 +133,6 @@ enyo.kind({
 	},
 
 	handleUpEvent: function(inEvent) {
-		this.log(inEvent)
 		this.handleBundledEvents(inEvent)
 		if (!this.disabled && !this.toggling) {
 			this.setDown(false)
@@ -143,7 +141,6 @@ enyo.kind({
 	},
 
 	handleDownEvent: function(inEvent) {
-		this.log(inEvent)
 		if (!this.disabled) {
 			if (this.toggling)
 				this.setDown(!this.down)
