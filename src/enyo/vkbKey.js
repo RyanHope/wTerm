@@ -27,13 +27,12 @@ enyo.kind({
 		sym: -1,
 		symbols: null,
 		terminal: null,
+		isPhone: false,
 	},
 
 	events: {
-		ontouchstart: '',
-		ontouchend: '',
-		onmousedown: '',
-		onmouseup: ''
+		ondown: '',
+		onup: '',
 	},
 
 	create: function() {
@@ -90,44 +89,72 @@ enyo.kind({
 	rendered: function() {
 		this.inherited(arguments);
 		if (this.hasNode()) {
-			this.node.ontouchstart = enyo.bind(this,'handleTouchstart')
-			this.node.ontouchend = enyo.bind(this,'handleTouchend')
+			if (this.isPhone) {
+				this.node.onmousedown = enyo.bind(this,'handleDownEvent')
+				this.node.onmouseup = enyo.bind(this,'handleUpEvent')
+			} else {
+				this.node.ontouchstart = enyo.bind(this,'handleDownEvent')
+				this.node.ontouchend = enyo.bind(this,'handleUpEvent')
+				this.node.ontouchcancel = enyo.bind(this,'handleUpEvent')
+			}
 		}
 	},
 
-	handleTouchstart: function() {
+	handleBundledEvents: function(inEvent) {
+		this.log(inEvent)
+		if (inEvent && inEvent.changedTouches && inEvent.changedTouches.length > 1)
+		{
+			for (var i=0; i < inEvent.changedTouches.length; i++)
+			{
+				// Try to find our parent div as our current HTMLElement could be any child of it
+				var tobj = inEvent.changedTouches[i].target;
+				while (tobj)
+				{
+					// would it be faster to just check if enyo.$[tobj.id] && enyo.$[tobj.id].kind == 'vkbKey'?
+					if (/^wTermApp_vkb_vkbKey\d*$/.test(tobj.id))
+						break;
+					tobj = tobj.parentElement;
+				}
+
+				// Went all the way up to document and found nothing :(
+				if (!tobj)
+					continue;
+
+				// Grab the enyo instance
+				tobj = enyo.$[tobj.id];
+
+				if (!tobj) // maybe pointless
+					continue;
+
+				if (tobj != this)
+					tobj.handleUpEvent(null);
+			}
+
+		}
+	},
+
+	handleUpEvent: function(inEvent) {
+		this.log(inEvent)
+		this.handleBundledEvents(inEvent)
+		if (!this.disabled && !this.toggling) {
+			this.setDown(false)
+			this.doUp()
+		}
+	},
+
+	handleDownEvent: function(inEvent) {
+		this.log(inEvent)
 		if (!this.disabled) {
 			if (this.toggling)
 				this.setDown(!this.down)
 			else
 				this.setDown(true)
-			this.doTouchstart()
+			this.doDown()
 		}
 	},
 
-	handleTouchend: function() {
-		if (!this.disabled && !this.toggling) {
-			this.setDown(false)
-			this.doTouchend()
-		}
-	},
-
-	mousedownHandler: function() {
-		if (!this.disabled) {
-			if (this.toggling)
-				this.setDown(!this.down)
-			else
-				this.setDown(true)
-			this.doMousedown()
-		}
-    },
-	mouseupHandler: function() {
-		if (!this.disabled && !this.toggling) {
-			this.setDown(false)
-			this.doMouseup()
-		}
-	},
-	
+	mousedownHandler: function() {},
+	mouseupHandler: function() {},
 	mouseoutHandler: function() {},	
 	mouseoverHandler: function() {},
 	flickHandler: function() {},
