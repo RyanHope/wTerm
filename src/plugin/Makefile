@@ -5,7 +5,7 @@ LDFLAGS     := -L$(ROOT)/lib -Wl,--allow-shlib-undefined -lpdl -lSDL -lSDL_ttf -
 
 OBJECTS     := sdl/sdlfontgl.o sdl/sdlcore.o sdl/sdlcore_events.o sdl/wterm.o util/point.o util/utf8.o util/glutils.o util/utils.o \
                terminal/seqparser.o terminal/terminal.o terminal/terminalstate.o terminal/vtterminalstate.o terminal/screenbuffer.o \
-               terminal.o setup.o wterm.o
+               main_terminal.o main_setup.o main.o
 
 all: wterm
 
