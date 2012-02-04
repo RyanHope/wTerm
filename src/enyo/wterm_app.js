@@ -4,6 +4,8 @@ enyo.kind({
 	kind: enyo.VFlexBox,
 
 	showVKB: false,
+	
+	_orientation: null,
 
 	components: [
 		{
@@ -14,7 +16,7 @@ enyo.kind({
 		},
 		{
 			kind: "ApplicationEvents",
-			onWindowRotated: "setup",
+			onWindowRotated: "windowRotated",
 			onWindowActivated: 'windowActivated',
 			onWindowDeactivated: 'windowDeactivated',
 			onKeydown: 'dispatchKeypress'
@@ -22,10 +24,7 @@ enyo.kind({
 		{
 			name : "getPreferencesCall",
 			kind : "PalmService",
-			service : "palm://com.palm.systemservice/",
-			subscribe: true,
-			method : "getPreferences",
-			onSuccess : "prefCallSuccess",
+			service : "palm://com.palm.systemservice/"
 		},
 		{
 			kind: 'Popup2',
@@ -84,6 +83,21 @@ enyo.kind({
 	},
 	windowDeactivated: function() {
 		this.$.terminal.setActive(0)
+	},
+	
+	create: function() {
+		this.inherited(arguments)
+		this._orientation = enyo.getWindowOrientation()
+		this.$.getPreferencesCall.call(
+			{
+				"keys": ["rotationLock"]
+			},
+			{
+				subscribe: true,
+				method : "getPreferences",
+				onSuccess : "getRotationLock",
+			}
+		)
 	},
 
 	initComponents: function() {
@@ -165,9 +179,17 @@ enyo.kind({
 			height = height - this.$.vkb.hasNode().scrollHeight
 		this.$.terminal.resize(width, height)
 	},
+	
+	windowRotated: function(inSender, inResponse) {
+		if (this._orientation != inResponse.orientation) {
+			dumpObject(this, inResponse)
+			this._orientation = inResponse.orientation
+		}
+	},
 
-	prefCallSuccess: function(inSender, inResponse) {
-		if (inResponse.rotationLock == 3 || inResponse.rotationLock == 4)
+	getRotationLock: function(inSender, inResponse) {
+		dumpObject(this, inResponse)
+		/*if (inResponse.rotationLock == 3 || inResponse.rotationLock == 4)
 			this.setupKeyboard(false)
 		else if (inResponse.rotationLock == 5 || inResponse.rotationLock == 6)
 			this.setupKeyboard(true)
@@ -177,7 +199,7 @@ enyo.kind({
 				this.setupKeyboard(false)
 			else
 				this.setupKeyboard(true)
-		}
+		}*/
 	},
 
 	getVKBMenuText: function() {
@@ -211,7 +233,7 @@ enyo.kind({
 	},
 
 	setup: function() {
-		this.$.getPreferencesCall.call({"keys":["rotationLock"]});
+		
 	},
 	
 	VKBLayoutChange: function() {
@@ -230,4 +252,11 @@ enyo.kind({
 	handleClipboard: function (clipData) {
 		this.$.terminal.inject(unescape(clipData), 1)
 	},
+	
+	setSizes: function() {
+	},
+	
+	resizeHandler: function(inSender, inEvent) {
+		
+	}
 })
