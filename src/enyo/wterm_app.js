@@ -127,6 +127,7 @@ enyo.kind({
 				{caption: "Preferences", onclick: "openPrefs"},
 				{caption: "Setup", onclick: "openSetup"},
 				{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
+				{caption: "Paste", onclick: "doPaste"},
 				{caption: "About", onclick: "openAbout"}
 			]
 		})
@@ -220,6 +221,13 @@ enyo.kind({
 
 	dispatchKeypress: function(inSender, inEvent) {
 		this.$.terminal.dispatch(inEvent)
-	}
+	},
 
+	doPaste: function () {
+		enyo.dom.getClipboard(enyo.bind(this, this.handleClipboard))
+	},
+
+	handleClipboard: function (clipData) {
+		this.$.terminal.inject(unescape(clipData), 1)
+	},
 })
