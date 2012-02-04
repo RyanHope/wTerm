@@ -32,8 +32,10 @@ WTerm *wTerm;
 
 PDL_bool inject(PDL_JSParameters *params) {
 	const char *cmd = PDL_GetJSParamString(params, 0);
+	int noexec = PDL_GetJSParamInt(params, 1);
 	wTerm->injectData(cmd);
-	wTerm->injectData("\n");
+	if (noexec != 1)
+		wTerm->injectData("\n");
 	return PDL_TRUE;
 }
 

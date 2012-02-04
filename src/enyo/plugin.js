@@ -94,8 +94,8 @@ enyo.kind({
 		if (this.pluginReady) this.callPluginMethodDeferred(null, 'setActive', active);
 	},
 
-	inject: function(command) {
-		this.callPluginMethodDeferred(null, 'inject', command)
+	inject: function(command, noexec) {
+		this.callPluginMethodDeferred(null, 'inject', command, noexec)
 	},
 
 	hasPassword: function(user) {
