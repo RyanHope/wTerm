@@ -133,12 +133,12 @@ enyo.kind({
 
 	keyUp: function(inSender) {
 		var k = this.processKey(inSender)
-		this.modstate = this.terminal.keyUp(k[0], k[1])
+		this.modstate = this.terminal.keyUp(k[0], k[1],1)
 	},
 
 	keyDown: function(inSender) {
 		var k = this.processKey(inSender)
-		this.modstate = this.terminal.keyDown(k[0], k[1])
+		this.modstate = this.terminal.keyDown(k[0], k[1],1)
 	}
 
 })

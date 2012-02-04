@@ -60,7 +60,7 @@ void SDLCore::KeyRepeatTimer::setRepeat(unsigned int repeat_msec) {
 void SDLCore::KeyRepeatTimer::run() {
 	// set next interval
 	Abstract_Timer::start(m_repeat_msec);
-	if (PDL_IsPlugin()) PDL_ServiceCall("luna://com.palm.audio/systemsounds/playFeedback", "{\"name\":\"key\"}");
+	if (PDL_IsPlugin() && m_event.key.keysym.scancode) PDL_ServiceCall("luna://com.palm.audio/systemsounds/playFeedback", "{\"name\":\"key\"}");
 	SDL_PushEvent(&m_event);
 }
 
@@ -567,7 +567,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 
 	if (event.type == SDL_KEYDOWN)
 	{
-		if (PDL_IsPlugin()) PDL_ServiceCall("luna://com.palm.audio/systemsounds/playFeedback", "{\"name\":\"key\"}");
+		if (PDL_IsPlugin() && event.key.keysym.scancode) PDL_ServiceCall("luna://com.palm.audio/systemsounds/playFeedback", "{\"name\":\"key\"}");
 
 		state = SDL_PRESSED;
 		event.key.keysym.mod = (SDLMod)modstate;

@@ -46,12 +46,12 @@ enyo.kind({
 
 	keydownHandler: function(inSender, inEvent) {
 		if (enyo.fetchDeviceInfo().platformVersionMajor == 2 && enyo.fetchDeviceInfo().platformVersionMinor == 2)
-			this.keyDown(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
+			this.keyDown(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)), 0)
 	},
 
 	keyupHandler: function(inSender, inEvent) {
 		if (enyo.fetchDeviceInfo().platformVersionMajor == 2 && enyo.fetchDeviceInfo().platformVersionMinor == 2)
-			this.keyUp(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)))
+			this.keyUp(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)), 0)
 	},
 
 	/**
@@ -114,19 +114,19 @@ enyo.kind({
 		this.callPluginMethod('setupSU', enable)
 	},
 
-	pushKeyEvent: function(type,sym,unicode) {
-		return parseInt(this.callPluginMethod('pushKeyEvent',type,sym,unicode))
+	pushKeyEvent: function(type,sym,unicode,snd) {
+		return parseInt(this.callPluginMethod('pushKeyEvent',type,sym,unicode,snd))
 	},
 
 	/**
 	 * Wrapper/Helper Methods
 	 */
-	keyDown: function(sym,unicode) {
-		return this.pushKeyEvent(1,sym,unicode)
+	keyDown: function(sym,unicode,snd) {
+		return this.pushKeyEvent(1,sym,unicode,snd)
 	},
 
-	keyUp: function(sym,unicode) {
-		return this.pushKeyEvent(0,sym,unicode)
+	keyUp: function(sym,unicode,snd) {
+		return this.pushKeyEvent(0,sym,unicode,snd)
 	},
 
 	resize: function(width, height) {

@@ -109,6 +109,7 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 	event.key.type = event.type;
 	event.key.keysym.sym = (SDLKey)PDL_GetJSParamInt(params, 1);
 	event.key.keysym.unicode = parseUtf8Char(PDL_GetJSParamString(params, 2));
+	event.key.keysym.scancode = PDL_GetJSParamInt(params, 3); // abuse scancode, 1 for click sound, 0 for no sound
 
 	wTerm->fakeKeyEvent(event);
 
