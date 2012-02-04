@@ -42,5 +42,6 @@ rm -f /var/palm/ls2/roles/prv/${APPID}.json
 cp ${APPDIR}/roles/pub.json /var/palm/ls2/roles/pub/${APPID}.json
 cp ${APPDIR}/roles/prv.json /var/palm/ls2/roles/prv/${APPID}.json
 
+ls-control scan-services
 
 exit 0
