@@ -132,13 +132,12 @@ enyo.kind({
 	},
 
 	keyUp: function(inSender) {
-		this.$.sysSound.call({"name": "up2"})
 		var k = this.processKey(inSender)
 		this.modstate = this.terminal.keyUp(k[0], k[1])
 	},
 
 	keyDown: function(inSender) {
-		this.$.sysSound.call({"name": "down2"})
+		this.$.sysSound.call({"name": "key"})
 		var k = this.processKey(inSender)
 		this.modstate = this.terminal.keyDown(k[0], k[1])
 	}
