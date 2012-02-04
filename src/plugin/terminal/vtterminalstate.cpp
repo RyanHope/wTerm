@@ -20,6 +20,8 @@
 #include "vtterminalstate.hpp"
 #include "seqparser.hpp"
 
+#include <PDL.h>
+
 #include <algorithm>
 
 #include <stdlib.h>
@@ -45,6 +47,9 @@ void VTTerminalState::processControlSeq(int nToken, int *values, int numValues, 
 
 	switch (nToken)
 	{
+	case CS_ASCII_BEL:
+		PDL_CallJS("bell", NULL, 0);
+		break;
 	case CS_ASCII_BS: //Backspace
 		moveCursorBackward(1);
 		break;

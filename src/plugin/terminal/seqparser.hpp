@@ -100,6 +100,7 @@ typedef enum
 	CS_UNKNOWN, // normal character
 
 	//ASCII
+	CS_ASCII_BEL, //Bell
 	CS_ASCII_BS, //Backspace
 	CS_ASCII_TAB, //Tab
 	CS_ASCII_LF, //Linefeed

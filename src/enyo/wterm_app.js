@@ -7,6 +7,12 @@ enyo.kind({
 
 	components: [
 		{
+			name : "sysSound",
+			kind : "PalmService",
+			service : "palm://com.palm.audio/systemsounds",
+			method : "playFeedback"
+		},
+		{
 			kind: "ApplicationEvents",
 			onWindowRotated: "setup",
 			onWindowActivated: 'windowActivated',
@@ -104,6 +110,7 @@ enyo.kind({
 			executable: 'wterm',
 			width: window.innerWidth,
 			height: window.innerHeight,
+			onBell: 'bell',
 			onPluginReady: 'pluginReady',
 			onWindowTitleChanged: 'windowTitleChanged',
 			allowKeyboardFocus: true,
@@ -127,6 +134,10 @@ enyo.kind({
 	
 	windowTitleChanged: function(inSender, txt) {
 		enyo.windows.addBannerMessage(txt, enyo.json.stringify({bannerTap: true, windowName: window.name}))
+	},
+
+	bell: function() {
+		this.$.sysSound.call({"name": "error_02"})
 	},
 
 	pluginReady: function() {

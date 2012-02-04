@@ -439,6 +439,11 @@ bool ControlSeqParser::parseChar() {
 	case 0x06: // ^F ACK
 		return false; /* ignore */
 	case 0x07: // ^G BEL
+		if (m_state != ST_OSC && m_state != ST_OSC_ESC)
+		{
+			m_token = CS_ASCII_BEL;
+			return true;
+		}
 		break; // terminator for OSC
 	case 0x08: // ^H BS \b backspace
 		m_token = CS_ASCII_BS;

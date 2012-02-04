@@ -10,10 +10,12 @@ enyo.kind({
 		onPluginReady:'',
 		onPluginConnected:'',
 		onPluginDisconnected:'',
-		onWindowTitleChanged:''
+		onWindowTitleChanged:'',
+		onBell:'',
 	},
 
 	hybridReady: function() {
+		this.addCallback("bell", enyo.bind(this, "bell"))
 		this.addCallback("OSCevent", enyo.bind(this, "OSCevent"))
 		this.setColors()
 		this.setKeys()
@@ -63,6 +65,10 @@ enyo.kind({
 				this.doWindowTitleChanged(txt);
 				break;
 		}
+	},
+
+	bell: function() {
+		this.doBell()
 	},
 
 	/**
