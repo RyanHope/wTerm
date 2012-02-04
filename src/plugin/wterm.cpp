@@ -16,10 +16,11 @@
  * along with wTerm.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "wterm.hpp"
-
 #include <cstdlib>
 #include <syslog.h>
+
+void terminal_main(int argc, const char* argv[]);
+void setup_main(int argc, const char* argv[]);
 
 int main(int argc, const char* argv[])
 {

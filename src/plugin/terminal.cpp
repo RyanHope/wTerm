@@ -22,7 +22,6 @@
 #include "terminal/terminal.hpp"
 #include "terminal/vtterminalstate.hpp"
 #include "util/utf8.hpp"
-#include "wterm.hpp"
 
 #include <syslog.h>
 #include <PDL.h>

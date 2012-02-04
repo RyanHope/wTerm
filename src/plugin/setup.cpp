@@ -17,8 +17,6 @@
 
 #define _GNU_SOURCE
 
-#include "wterm.hpp"
-
 #include <SDL/SDL.h>
 #include <syslog.h>
 #include <pwd.h>
