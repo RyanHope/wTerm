@@ -5,19 +5,16 @@ LDFLAGS     := -L$(ROOT)/lib -Wl,--allow-shlib-undefined -lpdl -lSDL -lSDL_ttf -
 
 OBJECTS     := sdl/sdlfontgl.o sdl/sdlcore.o sdl/sdlcore_events.o sdl/wterm.o util/point.o util/utf8.o util/glutils.o util/utils.o \
                terminal/seqparser.o terminal/terminal.o terminal/terminalstate.o terminal/vtterminalstate.o terminal/screenbuffer.o \
-               terminalmain.o
+               terminal.o setup.o wterm.o
 
-all: wterm setup
+all: wterm
 
 wterm: $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
-
-setup:
-	$(CC) $(CXXFLAGS) $(LDFLAGS) $@.c -o $@
 
 $(OBJECTS): %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -fPIC -c $< -o $@
 
 clean:
-	- rm -f wterm setup
+	- rm -f wterm
 	- rm -f `find . -name "*.o"`

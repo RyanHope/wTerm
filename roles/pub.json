@@ -1,0 +1,14 @@
+{
+    "role":
+    {
+    	"exeName":"/media/cryptofs/apps/usr/palm/applications/us.ryanhope.wterm/wterm",
+    	"type": "privileged",
+    	"allowedNames": ["us.ryanhope.wterm",""]
+    },
+    "permissions":
+    [{
+         "service":"us.ryanhope.wterm",
+         "outbound":["*"],
+         "inbound":[]
+    }]
+},

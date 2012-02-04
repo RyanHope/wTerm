@@ -22,6 +22,7 @@
 #include "terminal/terminal.hpp"
 #include "terminal/vtterminalstate.hpp"
 #include "util/utf8.hpp"
+#include "wterm.hpp"
 
 #include <syslog.h>
 #include <PDL.h>
@@ -119,11 +120,8 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 	return PDL_TRUE;
 }
 
-int main(int argc, const char* argv[])
+void terminal_main(int argc, const char* argv[])
 {
-	openlog("us.ryanhope.wterm.plugin", LOG_PID, LOG_USER);
-	setlogmask(LOG_UPTO(LOGLEVEL));
-
 	PDL_Init(0);
 
 	wTerm = new WTerm();
@@ -190,8 +188,4 @@ int main(int argc, const char* argv[])
 
 	delete terminal;
 	delete wTerm;
-
-	closelog();
-
-	exit(0);
 }

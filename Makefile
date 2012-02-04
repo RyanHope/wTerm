@@ -7,11 +7,11 @@ APPID       := $(VENDOR).$(APP)
 VERSION     := $(shell cat appinfo.json | grep version | cut -f 2 -d ":" | cut -f 2 -d "\"")
 IPK         := $(APPID)_$(VERSION)_$(ARCH).ipk
 
-.PHONY: package install clean clean-package bins src/plugin/wterm src/plugin/setup src/vttest/vttest src/cmatrix/cmatrix
+.PHONY: package install clean clean-package bins src/plugin/wterm src/vttest/vttest src/cmatrix/cmatrix
 
 package: clean-package ipk/$(IPK) wterm
 
-ipk/$(IPK): wterm setup bin/vttest bin/cmatrix clean-package
+ipk/$(IPK): wterm bin/vttest bin/cmatrix clean-package
 	mkdir -p ipk
 	palm-package -X excludes.txt .
 	mv $(APPID)_*.ipk ipk/$(IPK)
@@ -21,19 +21,13 @@ ipk/$(IPK): wterm setup bin/vttest bin/cmatrix clean-package
 clean-package:
 	- rm -rf ipk
 
-bins: wterm setup bin/vttest bin/cmatrix
+bins: wterm bin/vttest bin/cmatrix
 
 src/plugin/wterm:
 	$(MAKE) -C src/plugin wterm
 
-src/plugin/setup:
-	$(MAKE) -C src/plugin setup
-
 wterm: src/plugin/wterm
 	cp src/plugin/wterm wterm
-
-setup: src/plugin/setup
-	cp src/plugin/setup setup
 
 src/vttest/vttest:
 	$(MAKE) -C src/vttest
@@ -62,7 +56,6 @@ clean:
 	- rm -rf ipk
 	- rm -rf bin/*
 	- rm -rf wterm
-	- rm -rf setup
 	- $(MAKE) -C src/plugin clean
 	- $(MAKE) -C src/vttest clean
 	- $(MAKE) -C src/cmatrix clean

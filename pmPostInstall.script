@@ -36,4 +36,11 @@ JAILCONF="${APPDIR}/jail.conf"
 
 echo "${JUID}:5000:${APPID}:/dev/null:${JAILCONF}" >> /var/palm/data/jailusers
 
+rm -f /var/palm/ls2/roles/pub/${APPID}.json
+rm -f /var/palm/ls2/roles/prv/${APPID}.json
+
+cp ${APPDIR}/roles/pub.json /var/palm/ls2/roles/pub/${APPID}.json
+cp ${APPDIR}/roles/prv.json /var/palm/ls2/roles/prv/${APPID}.json
+
+
 exit 0
