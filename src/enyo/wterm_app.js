@@ -155,7 +155,6 @@ enyo.kind({
 		this.$.prefs.terminal = this.$.terminal
 		this.createComponent({
 			kind: "ApplicationEvents",
-			onWindowRotated: "windowRotated",
 			onWindowActivated: 'windowActivated',
 			onWindowDeactivated: 'windowDeactivated',
 			onKeydown: 'dispatchKeypress',
