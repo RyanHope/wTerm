@@ -2,10 +2,14 @@ enyo.kind({
 
 	name: "wTermApp",
 	kind: enyo.VFlexBox,
-
-	showVKB: false,
 	
+	_isPhone: null,
 	_orientation: null,
+	_rotationLock: null,
+	_vkbClass: null,
+	_showVKB: null,
+	
+	//style: 'background-color: black;',
 
 	components: [
 		{
@@ -15,15 +19,9 @@ enyo.kind({
 			method : "playFeedback"
 		},
 		{
-			kind: "ApplicationEvents",
-			onWindowRotated: "windowRotated",
-			onWindowActivated: 'windowActivated',
-			onWindowDeactivated: 'windowDeactivated',
-			onKeydown: 'dispatchKeypress'
-		},
-		{
 			name : "getPreferencesCall",
 			kind : "PalmService",
+			subscribe: true,
 			service : "palm://com.palm.systemservice/"
 		},
 		{
@@ -87,43 +85,35 @@ enyo.kind({
 	
 	create: function() {
 		this.inherited(arguments)
-		this._orientation = enyo.getWindowOrientation()
-		this.$.getPreferencesCall.call(
-			{
-				"keys": ["rotationLock"]
-			},
-			{
-				subscribe: true,
-				method : "getPreferences",
-				onSuccess : "getRotationLock",
-			}
-		)
+		this._isPhone = (enyo.fetchDeviceInfo().keyboardAvailable || enyo.fetchDeviceInfo().keyboardSlider)
+		this._showVKB = enyo.application.p.get('showVKB')
+		this.getRotationLock()
 	},
-
-	initComponents: function() {
-		this.inherited(arguments)
-		this.showVKB = enyo.application.p.get('showVKB')
+	
+	createVKB: function() {
 		this.createComponent({
-			name: "prefs",
-			kind: "PrefsPullout",
-			style: "width: 320px; top: 0px; bottom: 0; margin-bottom: 0px;", //width: 384px
-			className: "enyo-bg",
-			flyInFrom: "right",
-			onOpen: "pulloutToggle",
-			onClose: "closeRightPullout",
-			onVKBLayoutChange: 'VKBLayoutChange'
+			kind: 'vkb',
+			name: 'vkb',
+			showing: true,
+			className: 'vkb ' + this._vkbStyle,
+			isPhone: this._isPhone,
+			onPostrender: 'createTerminal'
 		})
+	},
+	
+	createTerminal: function(inSender, vkbHeight) {
+		this.error(inSender, vkbHeight)
 		var exec = enyo.application.p.get('exec')
 		if (enyo.windowParams.root && !enyo.windowParams.command)
 			exec = 'login -f root'
 		else if (enyo.windowParams.command)
 			exec = 'login -f wterm'
-		this.createComponent({
+		var term = this.createComponent({
 			name: 'terminal',
 			kind: 'Terminal',
 			executable: 'wterm',
 			width: window.innerWidth,
-			height: window.innerHeight,
+			height: window.innerHeight - vkbHeight,
 			onBell: 'bell',
 			onPluginReady: 'pluginReady',
 			onWindowTitleChanged: 'windowTitleChanged',
@@ -131,7 +121,39 @@ enyo.kind({
 			bgcolor: '000000',
 			params: [enyo.application.p.get('fontSize').toString(10), exec]
 		})
-		this.createComponent({kind: 'vkb', name: 'vkb', terminal: this.$.terminal, showing: true})
+		term.prepend = true
+		term.render()
+		return term
+	},
+	
+	setup: function() {
+		this.createVKB()
+		//dumpObject(this, vkb.node)
+		//this.warn('VKB HEIGHT', vkb.node.scrollHeight)
+		//enyo.asyncMethod(this, function(){this.addChild(this.createTerminal(vkb.node.scrollHeight))}.bind(this))
+	},
+
+		/*this.createComponent({
+			kind: "ApplicationEvents",
+			onWindowRotated: "windowRotated",
+			onWindowActivated: 'windowActivated',
+			onWindowDeactivated: 'windowDeactivated',
+			onKeydown: 'dispatchKeypress'
+		})
+		this.createComponent({
+			name: "prefs",
+			kind: "PrefsPullout",
+			//style: "width: 320px; position: relative; margin-bottom: 0px;", //width: 384px
+			className: "enyo-bg",
+			flyInFrom: "right",
+			onOpen: "pulloutToggle",
+			onClose: "closeRightPullout",
+			onVKBLayoutChange: 'VKBLayoutChange'
+		})
+		
+		
+		
+		this.$.vkb.terminal = this.$.terminal
 		this.$.terminal.vkb = this.$.vkb
 		this.$.prefs.vkb = this.$.vkb
 		this.$.prefs.terminal = this.$.terminal
@@ -145,7 +167,7 @@ enyo.kind({
 				{caption: "About", onclick: "openAbout"}
 			]
 		})
-	},
+	},*/
 	
 	windowTitleChanged: function(inSender, txt) {
 		enyo.windows.addBannerMessage(txt, enyo.json.stringify({bannerTap: true, windowName: window.name}))
@@ -155,7 +177,7 @@ enyo.kind({
 		this.$.sysSound.call({"name": "error_02"})
 	},
 
-	pluginReady: function() {
+	/*pluginReady: function() {
 		if (enyo.windowParams.command) {
 			if (enyo.application.p.get('launchParamsOK')) {
 				this.$.terminal.inject(enyo.windowParams.command)
@@ -163,10 +185,10 @@ enyo.kind({
 				this.$.launchWarning.openAtTopCenter()
 				this.$.command.setContent(enyo.windowParams.command)
 			}
-		}
-		this.setup()
+		}		
 		this.$.terminal.focus()
-	},
+		this.resizeHandler()
+	},*/
 
 	setupKeyboard: function(portrait) {
 		var width = window.innerWidth
@@ -181,14 +203,56 @@ enyo.kind({
 	},
 	
 	windowRotated: function(inSender, inResponse) {
-		if (this._orientation != inResponse.orientation) {
+		/*if (this._orientation != inResponse.orientation) {
 			dumpObject(this, inResponse)
 			this._orientation = inResponse.orientation
-		}
+			this.getRotationLock()
+		}*/
 	},
 
-	getRotationLock: function(inSender, inResponse) {
-		dumpObject(this, inResponse)
+	getRotationLock: function() {
+		this.$.getPreferencesCall.call(
+			{"keys": ["rotationLock"]},
+			{method : "getPreferences",onSuccess : "rotationLockReponse"}
+		)
+	},
+
+	rotationLockReponse: function(inSender, inResponse) {		
+		this._rotationLock = inResponse.rotationLock
+		var tmpOrientation = null
+		if (this._rotationLock == 0)
+			tmpOrientation = enyo.getWindowOrientation()
+		else if (this._rotationLock == 3)
+			tmpOrientation = 'up'
+		else if (this._rotationLock == 4)
+			tmpOrientation = 'down'
+		else if (this._rotationLock == 5)
+			tmpOrientation = 'left'
+		else if (this._rotationLock == 6)
+			tmpOrientation = 'right'
+		if (this._orientation != tmpOrientation) {
+			this._orientation = tmpOrientation
+			this.warn("orientation has changed",this._orientation)
+			if (this._isPhone) {
+				this.warn("this is a phone, up is portrait")
+				if (this._orientation == 'up' || this.orientation == 'down')
+					this._vkbStyle = 'smallP'
+				else
+					this._vkbStyle = 'largeP'
+			} else {
+				this.warn("this is a tablet, up is landscape")
+				if (this._orientation == 'up' || this.orientation == 'down')
+					this._vkbStyle = 'large'
+				else
+					this._vkbStyle = 'small'
+			}
+			this.warn('vkb style',this._vkbStyle)
+		}
+		if (typeof inResponse.returnValue === 'undefined')
+			this.resizeHandler()
+		else if (inResponse.returnValue)
+			this.createVKB()
+		
 		/*if (inResponse.rotationLock == 3 || inResponse.rotationLock == 4)
 			this.setupKeyboard(false)
 		else if (inResponse.rotationLock == 5 || inResponse.rotationLock == 6)
@@ -232,12 +296,8 @@ enyo.kind({
 			this.$.prefs.open();
 	},
 
-	setup: function() {
-		
-	},
-	
 	VKBLayoutChange: function() {
-		this.setup()
+		//this.setup()
 		this.render()
 	},
 
@@ -257,6 +317,9 @@ enyo.kind({
 	},
 	
 	resizeHandler: function(inSender, inEvent) {
-		
+		if (this._orientation == 'up' || this._orientation == 'down')
+			this.setupKeyboard(!this._isPhone)
+		else
+			this.setupKeyboard(this._isPhone)
 	}
 })

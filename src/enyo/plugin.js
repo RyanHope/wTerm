@@ -2,6 +2,9 @@ enyo.kind({
 
 	name: 'Terminal',
 	kind: enyo.Hybrid,
+	
+	//style: 'float: top;',
+	//style: 'position: absolute; left: 0; top 0;',
 
 	currentColors: [],
 	currentKeys: [],
@@ -233,6 +236,10 @@ enyo.kind({
 
 	dispatch: function(inEvent) {
 		if (this.focus()) this.node.dispatchEvent(inEvent)
+	},
+	
+	_prepend: function(inSender, inEvent) {
+		this.log(inSender, inEvent)
 	}
 
 })

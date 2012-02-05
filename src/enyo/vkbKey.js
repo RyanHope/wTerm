@@ -26,7 +26,6 @@ enyo.kind({
 		disabled: false,
 		sym: -1,
 		symbols: null,
-		terminal: null,
 		isPhone: false,
 	},
 

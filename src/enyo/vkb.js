@@ -3,6 +3,8 @@ enyo.kind({
 	name: "vkb",
 	kind: 'VFlexBox',
 	width: '100%',
+	
+	//style: 'float: bottom;',
 
 	modstate: 0,
 
@@ -18,24 +20,28 @@ enyo.kind({
 	KMOD_NUM: 0x1000,
 	KMOD_CAPS: 0x2000,
 	KMOD_MODE: 0x4000,
+	
+	events: {
+		onPostrender: ''
+	},
 
 	published: {
 		terminal: null,
-		mode: 0
+		isPhone: null,
+		large: true,
 	},
 
 	create: function() {
-		this._layoutName = '';
 		this.inherited(arguments);
-		this._isPhone = (enyo.fetchDeviceInfo().keyboardAvailable || enyo.fetchDeviceInfo().keyboardSlider)
-		this.addClass('vkb');
-		this.large();
+		this._layoutName = '';
+		//this.addClass('vkb');
+		//this.large();
 		this.loadLayout(enyo.application.p.get('kbdLayout'));
 	},
 
 	large: function() {
-		this._large = true;
-		if (this._isPhone) {
+		this.large = true;
+		if (this.isPhone) {
 			this.addClass('smallP');
 			this.removeClass('largeP');
 		} else {
@@ -44,8 +50,8 @@ enyo.kind({
 		}
 	},
 	small: function() {
-		this._large = false;
-		if (this._isPhone) {
+		this.large = false;
+		if (this.isPhone) {
 			this.addClass('largeP');
 			this.removeClass('smallP');
 		} else {
@@ -66,9 +72,9 @@ enyo.kind({
 					e = row[j];
 					if (e.content || e.symbols) {
 						if (e.hasOwnProperty('toggling') && c.toggling)
-							c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', isPhone: this._isPhone, ondown: 'keyToggle'}, e);
+							c = enyo.mixin({kind: 'vkbKey', className: '', isPhone: this.isPhone, ondown: 'keyToggle'}, e);
 						else
-							c = enyo.mixin({kind: 'vkbKey', terminal: this.terminal, className: '', isPhone: this._isPhone, ondown: 'keyDown', onup: 'keyUp'}, e);
+							c = enyo.mixin({kind: 'vkbKey', className: '', isPhone: this.isPhone, ondown: 'keyDown', onup: 'keyUp'}, e);
 					} else {
 						c = enyo.mixin({className: ''}, e); /* simple flex or custom */
 					}
@@ -139,6 +145,12 @@ enyo.kind({
 	keyDown: function(inSender) {
 		var k = this.processKey(inSender)
 		this.modstate = this.terminal.keyDown(k[0], k[1],1)
+	},
+	
+	rendered: function() {
+		this.error(this.node.clientHeight)
+		this.inherited(arguments)
+		this.doPostrender(this.node.clientHeight)
 	}
 
 })
