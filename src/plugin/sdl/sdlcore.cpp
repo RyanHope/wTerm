@@ -18,6 +18,7 @@
  */
 
 #include "sdlcore_p.hpp"
+#include "sdlgeneric.hpp"
 
 #include <GLES2/gl2.h>
 #include <SDL/SDL_image.h>
@@ -31,114 +32,15 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-#include <PDL.h>
+namespace SDL {
 
-SDLCore::BlinkTimer::BlinkTimer(SDLCore *core) : Abstract_Timer(core) {
-}
-void SDLCore::BlinkTimer::run() {
-	SDLCore *c = core();
-	c->doBlink = !c->doBlink;
-	c->setDirty(BLINK_DIRTY_BIT);
-}
-
-SDLCore::KeyRepeatTimer::KeyRepeatTimer(SDLCore* core)
-: Abstract_Timer(core), m_delay_msec(0), m_repeat_msec(0), m_playFeedback(true) {
-}
-
-PDL_bool SDLCore::KeyRepeatTimer::playFeedbackCallback(PDL_ServiceParameters *params, void *context)
-{
-	KeyRepeatTimer *keyRepeatTimer = (KeyRepeatTimer *)context;
-	if (keyRepeatTimer == NULL)
-	{
-		syslog(LOG_DEBUG, "playFeedbackCallback context null");
-		return PDL_TRUE;
+	SDLCore::BlinkTimer::BlinkTimer(SDLCore *core) : Abstract_Timer(core) {
 	}
-
-	if (PDL_ParamExists(params, "x_palm_virtualkeyboard_prefs"))
-	{
-		char result [256];
-		char *search = NULL;
-		PDL_GetParamString(params, "x_palm_virtualkeyboard_prefs", result, 256);
-
-		search = strstr(result, "TapSounds\":");
-		if (search == NULL)
-			return PDL_TRUE;
-		search += strlen("TapSounds\":");
-		
-		keyRepeatTimer->setPlayFeedback((*search == 't')); // ? true : false
+	void SDLCore::BlinkTimer::run() {
+		SDLCore *c = core();
+		c->doBlink = !c->doBlink;
+		c->setDirty(BLINK_DIRTY_BIT);
 	}
-	else
-		syslog(LOG_DEBUG, "no x_palm_virtualkeyboard_prefs in response");
-	return PDL_TRUE;
-}
-
-void SDLCore::KeyRepeatTimer::start(const SDL_Event &event) {
-	m_event = event;
-	Abstract_Timer::start(m_delay_msec);
-}
-void SDLCore::KeyRepeatTimer::stop() {
-	Abstract_Timer::stop();
-}
-void SDLCore::KeyRepeatTimer::setDelay(unsigned int delay_msec) {
-	m_delay_msec = delay_msec;
-}
-void SDLCore::KeyRepeatTimer::setRepeat(unsigned int repeat_msec) {
-	m_repeat_msec = repeat_msec;
-}
-void SDLCore::KeyRepeatTimer::setPlayFeedback(bool playFeedback) {
-	m_playFeedback = playFeedback;
-}
-bool SDLCore::KeyRepeatTimer::getPlayFeedback() {
-	return m_playFeedback;
-}
-void SDLCore::KeyRepeatTimer::run() {
-	// set next interval
-	Abstract_Timer::start(m_repeat_msec);
-	if (PDL_IsPlugin() && m_event.key.keysym.scancode && getPlayFeedback())
-		PDL_ServiceCall("luna://com.palm.audio/systemsounds/playFeedback", "{\"name\":\"key\"}");
-	SDL_PushEvent(&m_event);
-}
-
-SDLCore::RefreshDelayTimer::RefreshDelayTimer(SDLCore* core)
-: Abstract_Timer(core), m_delay_msec(0) {
-	m_last_refresh.tv_sec = 0;
-	m_last_refresh.tv_nsec = 0;
-}
-void SDLCore::RefreshDelayTimer::setDelay(unsigned int delay_msec) {
-	m_delay_msec = delay_msec;
-	if (running()) {
-		timespec now, next;
-		SDLCore_TimerCollection::getNow(now);
-		next = m_last_refresh;
-		SDLCore_TimerCollection::addMsec(next, m_delay_msec);
-		if (next > now) {
-			Abstract_Timer::start(next);
-		} else {
-			// done waiting
-			Abstract_Timer::stop();
-		}
-	}
-}
-bool SDLCore::RefreshDelayTimer::update() {
-	if (running()) return false; // not triggered yet
-
-	timespec now, next;
-	SDLCore_TimerCollection::getNow(now);
-	next = m_last_refresh;
-	SDLCore_TimerCollection::addMsec(next, m_delay_msec);
-	if (next > now) {
-		// delay didn't pass yet, start timer
-		Abstract_Timer::start(next);
-		return false;
-	} else {
-		// delay passed, allow update
-		return true;
-	}
-}
-void SDLCore::RefreshDelayTimer::run() {
-	// loop got activated, job done
-	Abstract_Timer::stop();
-}
 
 
 const int SDLCore::BUFFER_DIRTY_BIT = 1;
@@ -147,20 +49,23 @@ const int SDLCore::COLOR_DIRTY_BIT = 4;
 const int SDLCore::BLINK_DIRTY_BIT = 8;
 
 SDLCore::SDLCore()
-: m_keyRepeatTimer(this), m_blinkTimer(this), m_refreshDelayTimer(this)
-, m_fontgl("./LiberationMono-Regular.ttf", 12)
+: m_fontgl("./LiberationMono-Regular.ttf", 12)
 {
-	m_timers = new SDLCore_TimerCollection();
-	m_iocollection = new SDLCore_IOCollection();
+	m_timers = new TimerCollection();
+	m_iocollection = new IOCollection();
 
 	SDL_Event event;
 	memset(&event, 0, sizeof(event));
 	event.type = SDL_USEREVENT;
-	m_listenthread = new SDLCore_ListenThread(event);
+	m_listenthread = new ListenThread(event);
 	m_listenthread->run();
 
-	m_keyRepeatTimer.setDelay(500);
-	m_keyRepeatTimer.setRepeat(35);
+	m_keyRepeatTimer = new KeyRepeatTimer(this);
+	m_blinkTimer = new BlinkTimer(this);
+	m_refreshDelayTimer = new RefreshDelayTimer(this);
+
+	m_keyRepeatTimer->setDelay(500);
+	m_keyRepeatTimer->setRepeat(35);
 
 	m_bRunning = false;
 
@@ -174,7 +79,7 @@ SDLCore::SDLCore()
 	m_reverse = false;
 
 	active = true;
-	m_refreshDelayTimer.setDelay(25);
+	m_refreshDelayTimer->setDelay(25);
 
 	clearDirty(0);
 }
@@ -185,6 +90,11 @@ SDLCore::~SDLCore()
 	{
 		shutdown();
 	}
+
+	delete m_keyRepeatTimer;
+	delete m_blinkTimer;
+	delete m_refreshDelayTimer;
+
 	delete m_listenthread;
 	delete m_timers;
 	delete m_iocollection;
@@ -238,7 +148,7 @@ int SDLCore::init()
 		return -1;
 	}
 
-	PDL_Err err = PDL_ServiceCallWithCallback("luna://com.palm.systemservice/getPreferences","{\"keys\":[\"x_palm_virtualkeyboard_prefs\"],\"subscribe\":true}", SDLCore::KeyRepeatTimer::playFeedbackCallback, &m_keyRepeatTimer, PDL_FALSE);
+	PDL_Err err = PDL_ServiceCallWithCallback("luna://com.palm.systemservice/getPreferences","{\"keys\":[\"x_palm_virtualkeyboard_prefs\"],\"subscribe\":true}", KeyRepeatTimer::playFeedbackCallback, m_keyRepeatTimer, PDL_FALSE);
 	if (err != PDL_NOERROR)
 		syslog(LOG_ERR, "Failed to register playFeedbackCallback: %s", PDL_GetError());
 
@@ -287,7 +197,7 @@ void SDLCore::handleMouseEvent(SDL_Event &event)
 void SDLCore::setActive(int active)
 {
 	this->active = active;
-	m_refreshDelayTimer.setDelay(this->active ? 25 : 1000);
+	m_refreshDelayTimer->setDelay(this->active ? 25 : 1000);
 }
 
 void SDLCore::waitForEvent(SDL_Event &event) {
@@ -380,7 +290,7 @@ void SDLCore::eventLoop()
 
 		// Redraw if needed
 		if (isDirty(BUFFER_DIRTY_BIT) && active) {
-			if (m_refreshDelayTimer.update()) {
+			if (m_refreshDelayTimer->update()) {
 				clearDirty(BUFFER_DIRTY_BIT | BLINK_DIRTY_BIT);
 				redraw();
 				glFlush();
@@ -398,9 +308,9 @@ void SDLCore::eventLoop()
 		}
 
 		if (m_bNeedsBlink) {
-			if (!m_blinkTimer.running()) m_blinkTimer.start(500);
+			if (!m_blinkTimer->running()) m_blinkTimer->start(500);
 		} else {
-			m_blinkTimer.stop();
+			m_blinkTimer->stop();
 		}
 	}
 }
@@ -591,7 +501,7 @@ void SDLCore::clearDirty(int nDirtyBits)
 
 void SDLCore::stopKeyRepeat()
 {
-	m_keyRepeatTimer.stop();
+	m_keyRepeatTimer->stop();
 	return;
 }
 
@@ -606,7 +516,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 
 	if (event.type == SDL_KEYDOWN)
 	{
-		if (PDL_IsPlugin() && event.key.keysym.scancode && m_keyRepeatTimer.getPlayFeedback())
+		if (PDL_IsPlugin() && event.key.keysym.scancode && m_keyRepeatTimer->getPlayFeedback())
 			PDL_ServiceCall("luna://com.palm.audio/systemsounds/playFeedback", "{\"name\":\"key\"}");
 
 		state = SDL_PRESSED;
@@ -717,10 +627,12 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 	}
 
 	if (event.type == SDL_KEYUP) {
-		m_keyRepeatTimer.stop();
+		m_keyRepeatTimer->stop();
 	} else if (repeatable) {
-		m_keyRepeatTimer.start(event);
+		m_keyRepeatTimer->start(event);
 	}
 
 	SDL_PushEvent(&event);
 }
+
+} // end namespace SDL

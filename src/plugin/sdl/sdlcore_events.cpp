@@ -28,18 +28,20 @@
 
 #include <algorithm>
 
-bool SDLCore_TimerCollection::orderTimers(SDLCore::Abstract_Timer *a, SDLCore::Abstract_Timer *b) {
+namespace SDL {
+
+bool TimerCollection::orderTimers(Abstract_Timer *a, Abstract_Timer *b) {
 	return (a->m_nextEvent > b->m_nextEvent);
 }
 
-void SDLCore_TimerCollection::getNow(timespec &t) {
+void TimerCollection::getNow(timespec &t) {
 	if (0 != clock_gettime(CLOCK_MONOTONIC, &t)) {
 		syslog(LOG_ERR, "clock_gettime failed: %s", strerror(errno));
 		abort();
 	}
 }
 
-void SDLCore_TimerCollection::addMsec(timespec &t, int msec) {
+void TimerCollection::addMsec(timespec &t, int msec) {
 	int sec = msec / 1000;
 	msec = msec - (1000 * sec);
 	t.tv_sec += sec;
@@ -55,28 +57,28 @@ void SDLCore_TimerCollection::addMsec(timespec &t, int msec) {
 }
 
 
-SDLCore_TimerCollection::SDLCore_TimerCollection() : m_changed(false) {
+TimerCollection::TimerCollection() : m_changed(false) {
 }
-SDLCore_TimerCollection::~SDLCore_TimerCollection() {
+TimerCollection::~TimerCollection() {
 	while (!m_heap.empty()) remove(m_heap.back());
 }
 
-bool SDLCore_TimerCollection::hasEvents() {
+bool TimerCollection::hasEvents() {
 	return !m_heap.empty();
 }
 
-timespec SDLCore_TimerCollection::nextEvent() {
+timespec TimerCollection::nextEvent() {
 	if (!m_heap.empty()) return m_heap.front()->m_nextEvent;
 	timespec t = {0,0};
 	return t;
 }
 
-void SDLCore_TimerCollection::run() {
+void TimerCollection::run() {
 	timespec t;
 	getNow(t);
 	while (!m_heap.empty() && m_heap.front()->m_nextEvent <= t) {
 		std::pop_heap(m_heap.begin(), m_heap.end(), orderTimers);
-		SDLCore::Abstract_Timer *timer = m_heap.back();
+		Abstract_Timer *timer = m_heap.back();
 		if (0 != timer->m_interval_msec) {
 			// restart timer
 			timer->m_nextEvent = t;
@@ -93,7 +95,7 @@ void SDLCore_TimerCollection::run() {
 	}
 }
 
-void SDLCore_TimerCollection::remove(SDLCore::Abstract_Timer *t) {
+void TimerCollection::remove(Abstract_Timer *t) {
 	if (!t->m_running) return;
 	t->m_running = false;
 
@@ -118,7 +120,7 @@ void SDLCore_TimerCollection::remove(SDLCore::Abstract_Timer *t) {
 	std::make_heap(m_heap.begin(), m_heap.end(), orderTimers);
 }
 
-void SDLCore_TimerCollection::insert(SDLCore::Abstract_Timer *t) {
+void TimerCollection::insert(Abstract_Timer *t) {
 	if (t->m_running) return;
 	t->m_running = true;
 
@@ -128,12 +130,12 @@ void SDLCore_TimerCollection::insert(SDLCore::Abstract_Timer *t) {
 	std::push_heap(m_heap.begin(), m_heap.end(), orderTimers);
 }
 
-SDLCore::Abstract_Timer::Abstract_Timer(SDLCore* core) : m_core(core), m_running(false) {
+Abstract_Timer::Abstract_Timer(SDLCore* core) : m_core(core), m_running(false) {
 }
-SDLCore::Abstract_Timer::~Abstract_Timer() {
+Abstract_Timer::~Abstract_Timer() {
 	stop();
 }
-void SDLCore::Abstract_Timer::setCore(SDLCore *core) {
+void Abstract_Timer::setCore(SDLCore *core) {
 	if (core == m_core) return;
 	if (m_running) {
 		stop();
@@ -143,21 +145,21 @@ void SDLCore::Abstract_Timer::setCore(SDLCore *core) {
 		m_core = core;
 	}
 }
-SDLCore* SDLCore::Abstract_Timer::core() {
+SDLCore* Abstract_Timer::core() {
 	return m_core;
 }
-void SDLCore::Abstract_Timer::start(unsigned int msec) {
+void Abstract_Timer::start(unsigned int msec) {
 	if (0 == msec || !m_core) return;
 	if (m_running) stop(); // restart timer
 
 	m_interval_msec = msec;
 
-	SDLCore_TimerCollection::getNow(m_nextEvent);
-	SDLCore_TimerCollection::addMsec(m_nextEvent, msec);
+	TimerCollection::getNow(m_nextEvent);
+	TimerCollection::addMsec(m_nextEvent, msec);
 
 	m_core->m_timers->insert(this);
 }
-void SDLCore::Abstract_Timer::start(timespec nextEvent) {
+void Abstract_Timer::start(timespec nextEvent) {
 	if (!m_core) return;
 	if (m_running) stop(); // restart timer
 
@@ -166,22 +168,22 @@ void SDLCore::Abstract_Timer::start(timespec nextEvent) {
 
 	m_core->m_timers->insert(this);
 }
-void SDLCore::Abstract_Timer::stop() {
+void Abstract_Timer::stop() {
 	if (!m_core || !m_running) return;
 	m_core->m_timers->remove(this);
 }
-bool SDLCore::Abstract_Timer::running() {
+bool Abstract_Timer::running() {
 	return m_running;
 }
 
-SDLCore_IOCollection::SDLCore_IOCollection() : m_changed(false), m_changedComp(false) {
+IOCollection::IOCollection() : m_changed(false), m_changedComp(false) {
 }
 
-SDLCore_IOCollection::~SDLCore_IOCollection() {
+IOCollection::~IOCollection() {
 	while (!m_list.empty()) remove(m_list.back());
 }
 
-void SDLCore_IOCollection::run() {
+void IOCollection::run() {
 	int readyCount = poll(&m_pollfds[0], m_pollfds.size(), 0);
 	if (readyCount <= 0) return;
 
@@ -191,7 +193,7 @@ restart: // restart if the arrays are resized (content may move)
 		short &revents(m_pollfds[i].revents);
 		if (revents) {
 			revents &= (POLLIN | POLLOUT);
-			SDLCore::Abstract_IO *t = m_list[i];
+			Abstract_IO *t = m_list[i];
 			if (revents & POLLIN) {
 				revents &= ~POLLIN; // mark as done
 				if (t->m_read) t->read_ready();
@@ -206,7 +208,7 @@ restart: // restart if the arrays are resized (content may move)
 	}
 }
 
-void SDLCore_IOCollection::remove(SDLCore::Abstract_IO *t) {
+void IOCollection::remove(Abstract_IO *t) {
 	if (!t->m_registered) return;
 
 	m_changedComp = true;
@@ -224,7 +226,7 @@ void SDLCore_IOCollection::remove(SDLCore::Abstract_IO *t) {
 	t->m_colNdx = 0;
 }
 
-void SDLCore_IOCollection::insert(SDLCore::Abstract_IO *t) {
+void IOCollection::insert(Abstract_IO *t) {
 	if (t->m_registered) return;
 
 	m_changedComp = true;
@@ -243,7 +245,7 @@ void SDLCore_IOCollection::insert(SDLCore::Abstract_IO *t) {
 	t->m_registered = true;
 }
 
-void SDLCore_IOCollection::update(SDLCore::Abstract_IO *t) {
+void IOCollection::update(Abstract_IO *t) {
 	if (t->m_registered) {
 		if (-1 == t->m_fd || (!t->m_read && !t->m_write)) {
 			remove(t);
@@ -267,15 +269,15 @@ void SDLCore_IOCollection::update(SDLCore::Abstract_IO *t) {
 	if (p.fd != old.fd || p.events != old.events) m_changed = true;
 }
 
-SDLCore::Abstract_IO::Abstract_IO(SDLCore* core)
+Abstract_IO::Abstract_IO(SDLCore* core)
 : m_core(core), m_fd(-1), m_read(false), m_write(false), m_registered(false), m_colNdx(0) {
 }
-SDLCore::Abstract_IO::~Abstract_IO() {
+Abstract_IO::~Abstract_IO() {
 	if (m_registered) m_core->m_iocollection->remove(this);
 	m_fd = -1;
 	m_write = m_read = false;
 }
-void SDLCore::Abstract_IO::setCore(SDLCore *core) {
+void Abstract_IO::setCore(SDLCore *core) {
 	if (core == m_core) return;
 
 	if (m_registered) m_core->m_iocollection->remove(this);
@@ -284,46 +286,46 @@ void SDLCore::Abstract_IO::setCore(SDLCore *core) {
 
 	if (m_core) m_core->m_iocollection->update(this);
 }
-SDLCore* SDLCore::Abstract_IO::core() {
+SDLCore* Abstract_IO::core() {
 	return m_core;
 }
 
-void SDLCore::Abstract_IO::read_ready() {
+void Abstract_IO::read_ready() {
 	stopRead();
 }
-void SDLCore::Abstract_IO::write_ready() {
+void Abstract_IO::write_ready() {
 	stopWrite();
 }
 
-void SDLCore::Abstract_IO::setFD(int fd) {
+void Abstract_IO::setFD(int fd) {
 	m_fd = fd;
 	if (m_core) m_core->m_iocollection->update(this);
 }
-int SDLCore::Abstract_IO::fd() {
+int Abstract_IO::fd() {
 	return m_fd;
 }
 
-void SDLCore::Abstract_IO::waitRead() {
+void Abstract_IO::waitRead() {
 	m_read = true;
 	if (m_core && m_fd != -1) m_core->m_iocollection->update(this);
 }
-void SDLCore::Abstract_IO::stopRead() {
+void Abstract_IO::stopRead() {
 	m_read = false;
 	if (m_core && m_fd != -1) m_core->m_iocollection->update(this);
 }
-void SDLCore::Abstract_IO::waitWrite() {
+void Abstract_IO::waitWrite() {
 	m_write = true;
 	if (m_core && m_fd != -1) m_core->m_iocollection->update(this);
 }
-void SDLCore::Abstract_IO::stopWrite() {
+void Abstract_IO::stopWrite() {
 	m_write = false;
 	if (m_core && m_fd != -1) m_core->m_iocollection->update(this);
 }
 
-bool SDLCore::Abstract_IO::reading() {
+bool Abstract_IO::reading() {
 	return m_read;
 }
-bool SDLCore::Abstract_IO::writing() {
+bool Abstract_IO::writing() {
 	return m_write;
 }
 
@@ -344,7 +346,7 @@ static void nonBlock(int fd) {
 	}
 }
 
-SDLCore_ListenThread::SDLCore_ListenThread(SDL_Event event) : m_event(event), m_thread(0), m_hasTimeout(false), m_stop(false), m_waiting(false) {
+ListenThread::ListenThread(SDL_Event event) : m_event(event), m_thread(0), m_hasTimeout(false), m_stop(false), m_waiting(false) {
 	pthread_mutex_init(&m_lock, NULL);
 	pthread_cond_init(&m_cond, NULL);
 
@@ -358,7 +360,7 @@ SDLCore_ListenThread::SDLCore_ListenThread(SDL_Event event) : m_event(event), m_
 	m_timeout.tv_nsec = 0;
 }
 
-SDLCore_ListenThread::~SDLCore_ListenThread() {
+ListenThread::~ListenThread() {
 	stop();
 
 	close(m_threadPipe[0]);
@@ -368,7 +370,7 @@ SDLCore_ListenThread::~SDLCore_ListenThread() {
 	pthread_mutex_destroy(&m_lock);
 }
 
-void SDLCore_ListenThread::setEvent(SDL_Event event) {
+void ListenThread::setEvent(SDL_Event event) {
 	pthread_mutex_lock(&m_lock);
 
 	m_event = event;
@@ -376,25 +378,25 @@ void SDLCore_ListenThread::setEvent(SDL_Event event) {
 	pthread_mutex_unlock(&m_lock);
 }
 
-const SDL_Event& SDLCore_ListenThread::event() {
+const SDL_Event& ListenThread::event() {
 	return m_event;
 }
 
 void* listen_thread(void* ptr) {
-	syslog(LOG_DEBUG, "running SDLCore_ListenThread");
-	static_cast<SDLCore_ListenThread*>(ptr)->run_thread();
-	syslog(LOG_DEBUG, "finished SDLCore_ListenThread");
+	syslog(LOG_DEBUG, "running SDL::ListenThread");
+	static_cast<ListenThread*>(ptr)->run_thread();
+	syslog(LOG_DEBUG, "finished SDL::ListenThread");
 	return NULL;
 }
 
-void SDLCore_ListenThread::run() {
+void ListenThread::run() {
 	if (m_thread) return;
 
 	m_stop = false;
 	pthread_create(&m_thread, NULL, listen_thread, this);
 }
 
-void SDLCore_ListenThread::stop() {
+void ListenThread::stop() {
 	if (!m_thread) return;
 
 	pthread_mutex_lock(&m_lock);
@@ -408,7 +410,7 @@ void SDLCore_ListenThread::stop() {
 	m_thread = 0;
 }
 
-void SDLCore_ListenThread::waitFor(bool hasTimeout, timespec timeout, const std::vector<pollfd> &pollfds) {
+void ListenThread::waitFor(bool hasTimeout, timespec timeout, const std::vector<pollfd> &pollfds) {
 	pthread_mutex_lock(&m_lock);
 
 	m_hasTimeout = hasTimeout;
@@ -424,13 +426,13 @@ void SDLCore_ListenThread::waitFor(bool hasTimeout, timespec timeout, const std:
 	pthread_mutex_unlock(&m_lock);
 }
 
-void SDLCore_ListenThread::wakeup() {
+void ListenThread::wakeup() {
 	static const char buf[1] = { ' ' };
 	write(m_threadPipe[1], buf, 1);
 	pthread_cond_signal(&m_cond);
 }
 
-void SDLCore_ListenThread::run_thread() {
+void ListenThread::run_thread() {
 	bool noevent = true;
 	static char buf[64];
 
@@ -464,7 +466,7 @@ void SDLCore_ListenThread::run_thread() {
 		int nTimeout = -1;
 		if (hasTimeout) {
 			timespec now;
-			SDLCore_TimerCollection::getNow(now);
+			TimerCollection::getNow(now);
 			nTimeout = (timeout.tv_sec - now.tv_sec)*1000 + (timeout.tv_nsec - now.tv_nsec)/1000000;
 			if (nTimeout < 0) nTimeout = 0;
 		}
@@ -480,3 +482,5 @@ void SDLCore_ListenThread::run_thread() {
 		}
 	}
 }
+
+} // end namspace SDL
