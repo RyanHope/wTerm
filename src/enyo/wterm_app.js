@@ -290,7 +290,7 @@ enyo.kind({
 	
 	resizeHandler: function(inSender, inEvent) {
 		var tmpOrientation = enyo.getWindowOrientation()
-		if (this._orientation != tmpOrientation)
+		if (this._rotationLock == 0 && (this._orientation != tmpOrientation))
 			this._orientation = tmpOrientation
 		this.refresh()
 	}
