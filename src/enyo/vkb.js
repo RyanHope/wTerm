@@ -28,19 +28,17 @@ enyo.kind({
 	published: {
 		terminal: null,
 		isPhone: null,
-		large: true,
+		_large: true,
 	},
 
 	create: function() {
 		this.inherited(arguments);
 		this._layoutName = '';
-		//this.addClass('vkb');
-		//this.large();
 		this.loadLayout(enyo.application.p.get('kbdLayout'));
 	},
 
 	large: function() {
-		this.large = true;
+		this._large = true;
 		if (this.isPhone) {
 			this.addClass('smallP');
 			this.removeClass('largeP');
@@ -50,7 +48,7 @@ enyo.kind({
 		}
 	},
 	small: function() {
-		this.large = false;
+		this._large = false;
 		if (this.isPhone) {
 			this.addClass('largeP');
 			this.removeClass('smallP');
@@ -148,7 +146,6 @@ enyo.kind({
 	},
 	
 	rendered: function() {
-		this.error(this.node.clientHeight)
 		this.inherited(arguments)
 		this.doPostrender(this.node.clientHeight)
 	}

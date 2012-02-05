@@ -278,5 +278,12 @@ enyo.kind({
 			this.$.grp1.setShowing(false)
 			this.$.grp2.setShowing(false)
 		}
+	},
+	updateHeight: function() {
+		this.applyStyle("height", window.innerHeight+'px');
+	},
+	open: function() {
+		this.inherited(arguments);
+		this.updateHeight()
 	}
 })
