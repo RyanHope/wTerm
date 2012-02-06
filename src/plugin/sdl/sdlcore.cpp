@@ -238,9 +238,7 @@ int SDLCore::init()
 		return -1;
 	}
 
-	PDL_Err err = PDL_ServiceCallWithCallback("luna://com.palm.systemservice/getPreferences","{\"keys\":[\"x_palm_virtualkeyboard_prefs\"],\"subscribe\":true}", SDLCore::KeyRepeatTimer::playFeedbackCallback, &m_keyRepeatTimer, PDL_FALSE);
-	if (err != PDL_NOERROR)
-		syslog(LOG_ERR, "Failed to register playFeedbackCallback: %s", PDL_GetError());
+	PDL_ServiceCallWithCallback("luna://com.palm.systemservice/getPreferences","{\"keys\":[\"x_palm_virtualkeyboard_prefs\"],\"subscribe\":true}", SDLCore::KeyRepeatTimer::playFeedbackCallback, &m_keyRepeatTimer, PDL_FALSE);
 
 	return 0;
 }
