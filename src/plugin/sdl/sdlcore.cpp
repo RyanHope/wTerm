@@ -54,8 +54,6 @@ PDL_bool SDLCore::KeyRepeatTimer::playFeedbackCallback(PDL_ServiceParameters *pa
 		return PDL_TRUE;
 	}
 
-	syslog(LOG_DEBUG, "GOT CALLBACK %s", PDL_GetParamJson(params));
-
 	if (PDL_ParamExists(params, "x_palm_virtualkeyboard_prefs"))
 	{
 		char result [256];
