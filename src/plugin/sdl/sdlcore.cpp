@@ -438,10 +438,6 @@ void SDLCore::run()
  */
 void SDLCore::shutdown()
 {
-	PDL_Err err = PDL_UnregisterServiceCallback(SDLCore::KeyRepeatTimer::playFeedbackCallback);
-	if (err != PDL_NOERROR)
-		syslog(LOG_ERR, "Failed to unregister playFeedbackCallback: %s", PDL_GetError());
-
 	if (TTF_WasInit() != 0)
 	{
 		TTF_Quit();
