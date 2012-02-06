@@ -91,6 +91,11 @@ private:
 	unsigned int m_colNdx; // index in the collection vector
 };
 
+/* careful: AsyncJob instances get deleted after they were executed
+ *   (in the sdl thread context)
+ * so don't put such instances on your stack, and don't delete (or access)
+ * them after you sent them!
+ */
 class Abstract_AsyncJob {
 public:
 	Abstract_AsyncJob();
@@ -125,8 +130,6 @@ private:
 		virtual void run();
 	};
 
-
-	KeyRepeatTimer *m_keyRepeatTimer; // only for faked keys
 	BlinkTimer *m_blinkTimer;
 	RefreshDelayTimer *m_refreshDelayTimer;
 
@@ -201,8 +204,6 @@ public:
 
 	virtual void updateDisplaySize() = 0;
 
-	void stopKeyRepeat();
-	void fakeKeyEvent(SDL_Event &event);
 	void setActive(int active);
 };
 

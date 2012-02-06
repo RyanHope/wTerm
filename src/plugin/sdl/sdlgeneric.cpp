@@ -21,69 +21,28 @@
 
 #include <syslog.h>
 
-#include <PDL.h>
-
 namespace SDL {
 
-	KeyRepeatTimer::KeyRepeatTimer(SDLCore* core)
-	: Abstract_Timer(core), m_delay_msec(0), m_repeat_msec(0), m_playFeedback(true) {
+	DelayedRepeatTimer::DelayedRepeatTimer(SDLCore* core)
+	: Abstract_Timer(core), m_delay_msec(0), m_repeat_msec(0) {
 	}
-	void KeyRepeatTimer::start(const SDL_Event &event) {
-		m_event = event;
+	void DelayedRepeatTimer::start() {
 		Abstract_Timer::start(m_delay_msec);
 	}
-	void KeyRepeatTimer::stop() {
+	void DelayedRepeatTimer::stop() {
 		Abstract_Timer::stop();
 	}
-	void KeyRepeatTimer::setDelay(unsigned int delay_msec) {
+	void DelayedRepeatTimer::setDelay(unsigned int delay_msec) {
 		m_delay_msec = delay_msec;
 	}
-	void KeyRepeatTimer::setRepeat(unsigned int repeat_msec) {
+	void DelayedRepeatTimer::setRepeat(unsigned int repeat_msec) {
 		m_repeat_msec = repeat_msec;
 	}
-	void KeyRepeatTimer::setPlayFeedback(bool playFeedback) {
-		m_playFeedback = playFeedback;
-	}
-	bool KeyRepeatTimer::getPlayFeedback() {
-		return m_playFeedback;
-	}
-	void KeyRepeatTimer::run() {
+	void DelayedRepeatTimer::run() {
 		// set next interval
 		Abstract_Timer::start(m_repeat_msec);
-		if (PDL_IsPlugin() && m_event.key.keysym.scancode && getPlayFeedback()) {
-			PDL_ServiceCall("luna://com.palm.audio/systemsounds/playFeedback", "{\"name\":\"key\"}");
-		}
-		SDL_PushEvent(&m_event);
+		triggered();
 	}
-	PDL_bool KeyRepeatTimer::playFeedbackCallback(PDL_ServiceParameters *params, void *context)
-	{
-		KeyRepeatTimer *keyRepeatTimer = (KeyRepeatTimer *)context;
-		if (keyRepeatTimer == NULL)
-		{
-			syslog(LOG_DEBUG, "playFeedbackCallback context null");
-			return PDL_TRUE;
-		}
-
-		if (PDL_ParamExists(params, "x_palm_virtualkeyboard_prefs"))
-		{
-			char result [256];
-			char *search = NULL;
-			PDL_GetParamString(params, "x_palm_virtualkeyboard_prefs", result, 256);
-
-			search = strstr(result, "TapSounds\":");
-			if (search == NULL)
-				return PDL_TRUE;
-			search += strlen("TapSounds\":");
-
-			keyRepeatTimer->setPlayFeedback((*search == 't')); // ? true : false
-		}
-		else
-		{
-			syslog(LOG_DEBUG, "no x_palm_virtualkeyboard_prefs in response");
-		}
-		return PDL_TRUE;
-	}
-
 
 	RefreshDelayTimer::RefreshDelayTimer(SDLCore* core)
 	: Abstract_Timer(core), m_delay_msec(0) {

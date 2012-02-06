@@ -23,29 +23,24 @@
 
 namespace SDL {
 
-	class KeyRepeatTimer : protected Abstract_Timer {
+	class DelayedRepeatTimer : protected Abstract_Timer {
 	public:
-		KeyRepeatTimer(SDLCore* core = 0);
+		DelayedRepeatTimer(SDLCore* core = 0);
 
-		void start(const SDL_Event &event);
+		void start();
 		void stop();
 
 		void setDelay(unsigned int delay_msec);
 		void setRepeat(unsigned int repeat_msec);
 
-		void setPlayFeedback(bool playFeedback);
-		bool getPlayFeedback();
+		virtual void triggered() = 0;
 
-		static PDL_bool playFeedbackCallback(PDL_ServiceParameters *params, void *context);
-
-	protected:
+	private:
 		virtual void run();
 
 	private:
-		SDL_Event m_event;
 		unsigned int m_delay_msec;
 		unsigned int m_repeat_msec;
-		bool m_playFeedback;
 	};
 
 

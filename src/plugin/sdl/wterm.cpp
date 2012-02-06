@@ -23,7 +23,6 @@
 #include "util/utils.hpp"
 
 #include <SDL/SDL_image.h>
-#include <PDL.h>
 #include <string.h>
 #include <time.h>
 #include <syslog.h>

@@ -19,6 +19,7 @@
 
 #include "sdl/sdlcore.hpp"
 #include "sdl/wterm.hpp"
+#include "sdl/webos.hpp"
 #include "terminal/terminal.hpp"
 #include "terminal/vtterminalstate.hpp"
 #include "util/utf8.hpp"
@@ -27,7 +28,7 @@
 #include <PDL.h>
 
 WTerm *wTerm;
-
+Webos::Adapter *wAdapter;
 
 
 PDL_bool inject(PDL_JSParameters *params) {
@@ -48,7 +49,7 @@ PDL_bool setActive(PDL_JSParameters *params) {
 	int active = PDL_GetJSParamInt(params, 0);
 	wTerm->setActive(active);
 	if (active == 0)
-		wTerm->stopKeyRepeat();
+		wAdapter->stopKeyRepeat();
 	else
 		wTerm->refresh();
 	return PDL_TRUE;
@@ -74,9 +75,7 @@ PDL_bool setColor(PDL_JSParameters *params) {
 }
 
 PDL_bool setFontSize(PDL_JSParameters *params) {
-	wTerm->setFontSize(PDL_GetJSParamInt(params, 0));
-
-	wTerm->refresh();
+	wAdapter->setFontSize(PDL_GetJSParamInt(params, 0));
 
 	return PDL_TRUE;
 }
@@ -89,9 +88,10 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 	event.key.keysym.mod = (SDLMod)PDL_GetJSParamInt(params, 1);
 	event.key.keysym.sym = (SDLKey)PDL_GetJSParamInt(params, 2);
 	event.key.keysym.unicode = parseUtf8Char(PDL_GetJSParamString(params, 3));
-	event.key.keysym.scancode = PDL_GetJSParamInt(params, 4); // abuse scancode, 1 for click sound, 0 for no sound
 
-	wTerm->fakeKeyEvent(event);
+	bool sound = (0 != PDL_GetJSParamInt(params, 4));
+
+	wAdapter->fakeKeyEvent(event, sound);
 
 	return PDL_TRUE;
 }
@@ -101,6 +101,7 @@ void terminal_main(int argc, const char* argv[])
 	PDL_Init(0);
 
 	wTerm = new WTerm();
+	wAdapter = new Webos::Adapter(wTerm);
 	Terminal *terminal = new Terminal();
 	terminal->path = strdup(argv[0]);
 	char *e = strrchr(terminal->path, '/');
@@ -161,5 +162,6 @@ void terminal_main(int argc, const char* argv[])
 	terminal->setExtTerminal(NULL);
 
 	delete terminal;
+	delete wAdapter;
 	delete wTerm;
 }

@@ -65,12 +65,8 @@ SDLCore::SDLCore()
 	event.user.code = 1;
 	m_asyncqueue = new AsyncQueue(event);
 
-	m_keyRepeatTimer = new KeyRepeatTimer(this);
 	m_blinkTimer = new BlinkTimer(this);
 	m_refreshDelayTimer = new RefreshDelayTimer(this);
-
-	m_keyRepeatTimer->setDelay(500);
-	m_keyRepeatTimer->setRepeat(35);
 
 	m_bRunning = false;
 
@@ -91,7 +87,6 @@ SDLCore::SDLCore()
 
 SDLCore::~SDLCore()
 {
-	delete m_keyRepeatTimer;
 	delete m_blinkTimer;
 	delete m_refreshDelayTimer;
 
@@ -155,10 +150,6 @@ int SDLCore::init()
 		syslog(LOG_ERR, "Cannot initialize customizations.");
 		return -1;
 	}
-
-	PDL_Err err = PDL_ServiceCallWithCallback("luna://com.palm.systemservice/getPreferences","{\"keys\":[\"x_palm_virtualkeyboard_prefs\"],\"subscribe\":true}", KeyRepeatTimer::playFeedbackCallback, m_keyRepeatTimer, PDL_FALSE);
-	if (err != PDL_NOERROR)
-		syslog(LOG_ERR, "Failed to register playFeedbackCallback: %s", PDL_GetError());
 
 	return 0;
 }
@@ -512,49 +503,6 @@ void SDLCore::clearDirty(int nDirtyBits)
 	{
 		m_nDirtyBits &= ~nDirtyBits;
 	}
-}
-
-void SDLCore::stopKeyRepeat()
-{
-	m_keyRepeatTimer->stop();
-	return;
-}
-
-// pulled from SDL_keyboard.c / lgpl Copyright (C) 1997-2006 Sam Lantinga
-void SDLCore::fakeKeyEvent(SDL_Event &event)
-{
-	if (PDL_IsPlugin() && event.key.keysym.scancode && m_keyRepeatTimer->getPlayFeedback()) {
-		PDL_ServiceCall("luna://com.palm.audio/systemsounds/playFeedback", "{\"name\":\"key\"}");
-	}
-
-	if (event.type == SDL_KEYUP) {
-		m_keyRepeatTimer->stop();
-	} else {
-#define HP_SYM         17
-#define HP_ORANGE      129
-		switch (event.key.keysym.sym) {
-		case SDLK_NUMLOCK:
-		case SDLK_CAPSLOCK:
-		case HP_SYM:
-		case SDLK_LCTRL:
-		case SDLK_RCTRL:
-		case SDLK_LSHIFT:
-		case SDLK_RSHIFT:
-		case SDLK_WORLD_30:
-		case SDLK_LALT:
-		case SDLK_RALT:
-		case HP_ORANGE:
-		case SDLK_LMETA:
-		case SDLK_RMETA:
-		case SDLK_MODE:
-			break;
-		default:
-			m_keyRepeatTimer->start(event);
-			break;
-		}
-	}
-
-	SDL_PushEvent(&event);
 }
 
 } // end namespace SDL
