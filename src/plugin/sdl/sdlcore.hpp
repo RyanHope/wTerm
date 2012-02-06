@@ -23,6 +23,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 #include <map>
+#include <PDL.h>
 
 #include "terminal/vtterminalstate.hpp"
 #include "sdlfontgl.hpp"
@@ -107,6 +108,10 @@ private:
 
 		void setDelay(unsigned int delay_msec);
 		void setRepeat(unsigned int repeat_msec);
+		void setPlayFeedback(bool playFeedback);
+		bool getPlayFeedback();
+
+		static PDL_bool playFeedbackCallback(PDL_ServiceParameters *params, void *context);
 
 	protected:
 		virtual void run();
@@ -115,6 +120,7 @@ private:
 		SDL_Event m_event;
 		unsigned int m_delay_msec;
 		unsigned int m_repeat_msec;
+		bool m_playFeedback;
 	};
 	KeyRepeatTimer m_keyRepeatTimer; // only for faked keys
 

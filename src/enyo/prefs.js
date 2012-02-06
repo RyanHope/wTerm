@@ -281,4 +281,5 @@ enyo.kind({
 
 });
 
-enyo.application.p = new Preferences();
+if (typeof enyo.application.p == 'undefined')
+	enyo.application.p = new Preferences();
