@@ -330,6 +330,56 @@ bool Abstract_IO::writing() {
 }
 
 
+AsyncQueue::AsyncQueue(SDL_Event event)
+: m_eventPending(false), m_event(event) {
+	pthread_mutex_init(&m_lock, NULL);
+	m_mainThread = pthread_self();
+}
+AsyncQueue::~AsyncQueue() {
+	runQueue();
+	pthread_mutex_destroy(&m_lock);
+}
+
+void AsyncQueue::sendJob(Abstract_AsyncJob *job) {
+	bool pending;
+
+	pthread_mutex_lock(&m_lock);
+
+	pending = m_eventPending;
+	m_eventPending = true;
+	m_jobs.push_back(job);
+
+	pthread_mutex_unlock(&m_lock);
+
+	if (!pending) SDL_PushEvent(&m_event);
+}
+
+void AsyncQueue::runQueue() {
+	List jobs;
+
+	pthread_mutex_lock(&m_lock);
+
+	m_eventPending = false;
+	std::swap(jobs, m_jobs);
+
+	pthread_mutex_unlock(&m_lock);
+
+	for (List::iterator i = jobs.begin(), e = jobs.end(); i != e; ++i) {
+		(*i)->run();
+		delete *i;
+	}
+}
+
+Abstract_AsyncJob::Abstract_AsyncJob() {
+}
+Abstract_AsyncJob::~Abstract_AsyncJob() {
+}
+
+void Abstract_AsyncJob::send(SDLCore *core) {
+	core->m_asyncqueue->sendJob(this);
+}
+
+
 static void nonBlock(int fd) {
 	int val = fcntl(fd, F_GETFL, 0);
 

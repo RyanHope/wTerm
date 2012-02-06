@@ -37,6 +37,7 @@ class SDLCore;
 
 class TimerCollection;
 class IOCollection;
+class AsyncQueue;
 class ListenThread;
 
 class Abstract_Timer {
@@ -90,7 +91,14 @@ private:
 	unsigned int m_colNdx; // index in the collection vector
 };
 
+class Abstract_AsyncJob {
+public:
+	Abstract_AsyncJob();
+	virtual ~Abstract_AsyncJob();
 
+	virtual void run() = 0;
+	void send(SDLCore *core);
+};
 
 class KeyRepeatTimer;
 class RefreshDelayTimer;
@@ -103,9 +111,11 @@ class SDLCore
 private:
 	friend class Abstract_Timer; // access m_timers
 	friend class Abstract_IO; // access m_iocolllection
+	friend class Abstract_AsyncJob; // access m_asyncqueue
 
 	TimerCollection *m_timers;
 	IOCollection *m_iocollection;
+	AsyncQueue *m_asyncqueue;
 	ListenThread *m_listenthread;
 	bool m_listenNotified;
 

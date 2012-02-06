@@ -57,8 +57,13 @@ SDLCore::SDLCore()
 	SDL_Event event;
 	memset(&event, 0, sizeof(event));
 	event.type = SDL_USEREVENT;
+
+	event.user.code = 0;
 	m_listenthread = new ListenThread(event);
 	m_listenthread->run();
+
+	event.user.code = 1;
+	m_asyncqueue = new AsyncQueue(event);
 
 	m_keyRepeatTimer = new KeyRepeatTimer(this);
 	m_blinkTimer = new BlinkTimer(this);
@@ -91,6 +96,7 @@ SDLCore::~SDLCore()
 	delete m_refreshDelayTimer;
 
 	delete m_listenthread;
+	delete m_asyncqueue;
 	delete m_timers;
 	delete m_iocollection;
 
@@ -216,12 +222,19 @@ void SDLCore::waitForEvent(SDL_Event &event) {
 
 void SDLCore::handleEvent(SDL_Event &event) {
 	if (event.type == SDL_USEREVENT) {
-		// listenthread notify
-		m_listenNotified = true;
-		m_iocollection->run();
-		m_timers->run();
+		switch (event.user.code) {
+		case 0: // listenthread notify
+			m_listenNotified = true;
+			m_iocollection->run();
+			m_timers->run();
+			break;
+		case 1: // asyncqueue notify
+			m_asyncqueue->runQueue();
+			break;
+		}
 	}
 
+	// TODO: use more generic event handling for this stuff
 	switch (event.type) {
 	case SDL_MOUSEMOTION:
 	case SDL_MOUSEBUTTONDOWN:

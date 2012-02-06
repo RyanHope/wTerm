@@ -22,6 +22,7 @@
 #include "sdlcore.hpp"
 
 #include <vector>
+#include <deque>
 
 #include <poll.h>
 #include <pthread.h>
@@ -86,6 +87,24 @@ public:
 	void insert(Abstract_IO *t);
 
 	void update(Abstract_IO *t);
+};
+
+class AsyncQueue {
+public:
+	AsyncQueue(SDL_Event event);
+	~AsyncQueue();
+
+	void sendJob(Abstract_AsyncJob *job);
+	void runQueue();
+
+	pthread_mutex_t m_lock;
+	pthread_t m_mainThread;
+
+	typedef std::deque<Abstract_AsyncJob*> List;
+
+	List m_jobs;
+	bool m_eventPending;
+	SDL_Event m_event;
 };
 
 class ListenThread {
