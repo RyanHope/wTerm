@@ -42,8 +42,38 @@ void SDLCore::BlinkTimer::run() {
 }
 
 SDLCore::KeyRepeatTimer::KeyRepeatTimer(SDLCore* core)
-: Abstract_Timer(core), m_delay_msec(0), m_repeat_msec(0) {
+: Abstract_Timer(core), m_delay_msec(0), m_repeat_msec(0), m_playFeedback(true) {
 }
+
+PDL_bool SDLCore::KeyRepeatTimer::playFeedbackCallback(PDL_ServiceParameters *params, void *context)
+{
+	KeyRepeatTimer *keyRepeatTimer = (KeyRepeatTimer *)context;
+	if (keyRepeatTimer == NULL)
+	{
+		syslog(LOG_DEBUG, "playFeedbackCallback context null");
+		return PDL_TRUE;
+	}
+
+	syslog(LOG_DEBUG, "GOT CALLBACK %s", PDL_GetParamJson(params));
+
+	if (PDL_ParamExists(params, "x_palm_virtualkeyboard_prefs"))
+	{
+		char result [256];
+		char *search = NULL;
+		PDL_GetParamString(params, "x_palm_virtualkeyboard_prefs", result, 256);
+
+		search = strstr(result, "TapSounds\":");
+		if (search == NULL)
+			return PDL_TRUE;
+		search += strlen("TapSounds\":");
+		
+		keyRepeatTimer->setPlayFeedback((*search == 't')); // ? true : false
+	}
+	else
+		syslog(LOG_DEBUG, "no x_palm_virtualkeyboard_prefs in response");
+	return PDL_TRUE;
+}
+
 void SDLCore::KeyRepeatTimer::start(const SDL_Event &event) {
 	m_event = event;
 	Abstract_Timer::start(m_delay_msec);
@@ -57,10 +87,17 @@ void SDLCore::KeyRepeatTimer::setDelay(unsigned int delay_msec) {
 void SDLCore::KeyRepeatTimer::setRepeat(unsigned int repeat_msec) {
 	m_repeat_msec = repeat_msec;
 }
+void SDLCore::KeyRepeatTimer::setPlayFeedback(bool playFeedback) {
+	m_playFeedback = playFeedback;
+}
+bool SDLCore::KeyRepeatTimer::getPlayFeedback() {
+	return m_playFeedback;
+}
 void SDLCore::KeyRepeatTimer::run() {
 	// set next interval
 	Abstract_Timer::start(m_repeat_msec);
-	if (PDL_IsPlugin() && m_event.key.keysym.scancode) PDL_ServiceCall("luna://com.palm.audio/systemsounds/playFeedback", "{\"name\":\"key\"}");
+	if (PDL_IsPlugin() && m_event.key.keysym.scancode && getPlayFeedback())
+		PDL_ServiceCall("luna://com.palm.audio/systemsounds/playFeedback", "{\"name\":\"key\"}");
 	SDL_PushEvent(&m_event);
 }
 
@@ -202,6 +239,10 @@ int SDLCore::init()
 		syslog(LOG_ERR, "Cannot initialize customizations.");
 		return -1;
 	}
+
+	PDL_Err err = PDL_ServiceCallWithCallback("luna://com.palm.systemservice/getPreferences","{\"keys\":[\"x_palm_virtualkeyboard_prefs\"],\"subscribe\":true}", SDLCore::KeyRepeatTimer::playFeedbackCallback, &m_keyRepeatTimer, PDL_FALSE);
+	if (err != PDL_NOERROR)
+		syslog(LOG_ERR, "Failed to register playFeedbackCallback: %s", PDL_GetError());
 
 	return 0;
 }
@@ -399,6 +440,10 @@ void SDLCore::run()
  */
 void SDLCore::shutdown()
 {
+	PDL_Err err = PDL_UnregisterServiceCallback(SDLCore::KeyRepeatTimer::playFeedbackCallback);
+	if (err != PDL_NOERROR)
+		syslog(LOG_ERR, "Failed to unregister playFeedbackCallback: %s", PDL_GetError());
+
 	if (TTF_WasInit() != 0)
 	{
 		TTF_Quit();
@@ -567,7 +612,8 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 
 	if (event.type == SDL_KEYDOWN)
 	{
-		if (PDL_IsPlugin() && event.key.keysym.scancode) PDL_ServiceCall("luna://com.palm.audio/systemsounds/playFeedback", "{\"name\":\"key\"}");
+		if (PDL_IsPlugin() && event.key.keysym.scancode && m_keyRepeatTimer.getPlayFeedback())
+			PDL_ServiceCall("luna://com.palm.audio/systemsounds/playFeedback", "{\"name\":\"key\"}");
 
 		state = SDL_PRESSED;
 		event.key.keysym.mod = (SDLMod)modstate;
