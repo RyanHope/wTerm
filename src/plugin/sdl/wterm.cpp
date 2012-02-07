@@ -157,6 +157,8 @@ void WTerm::handleKeyboardEvent(SDL_Event &event)
 	SDLMod mod = event.key.keysym.mod;
 	Uint16 unicode = event.key.keysym.unicode;
 
+	syslog(LOG_ERR, "%d %d %d", sym, mod, unicode);
+
 	bool snapBottom = true;
 
 	char c[4];
@@ -173,6 +175,9 @@ void WTerm::handleKeyboardEvent(SDL_Event &event)
 	case SDL_KEYDOWN:
 		switch(sym)
 		{
+		case SDLK_WORLD_30:
+			extTerminal->insertData(".");
+			break;
 		case HP_BT_UP:
 		case HP_BT_PLUGIN_UP:
 		case SDLK_UP:
