@@ -8,6 +8,7 @@ enyo.kind({
 	_rotationLock: null,
 	_vkbClass: null,
 	_showVKB: true,
+	_windowTitle: null,
 	
 	components: [
 		{
@@ -162,7 +163,10 @@ enyo.kind({
 	},
 
 	windowTitleChanged: function(inSender, txt) {
-		enyo.windows.addBannerMessage(txt, enyo.json.stringify({bannerTap: true, windowName: window.name}))
+		if (this._windowTitle != txt) {
+			this._windowTitle = txt
+			enyo.windows.addBannerMessage(this._windowTitle, enyo.json.stringify({bannerTap: true, windowName: window.name}))
+		}
 	},
 
 	bell: function() {
@@ -181,15 +185,19 @@ enyo.kind({
 	},
 
 	setupKeyboard: function(portrait) {
-		var width = window.innerWidth
-		var height = window.innerHeight
-		if (portrait)
-			this.$.vkb.small()
-		else
-			this.$.vkb.large()
-		if (this._showVKB)
-			height = height - this.$.vkb.hasNode().scrollHeight
-		this.$.terminal.resize(width, height)
+		if (typeof this.$.vkb != 'undefined' && this.$.vkb.hasNode()) {
+			var width = window.innerWidth
+			var height = window.innerHeight
+			if (portrait)
+				this.$.vkb.small()
+			else
+				this.$.vkb.large()
+			if (this._showVKB)
+				height = height - this.$.vkb.hasNode().scrollHeight
+			this.$.terminal.resize(width, height)
+		} else {
+			enyo.asyncMethod(this, enyo.bind(this, this.setupKeyboard))
+		}
 	},
 
 	getRotationLock: function() {
@@ -212,7 +220,7 @@ enyo.kind({
 			tmpOrientation = 'left'
 		else if (this._rotationLock == 6)
 			tmpOrientation = 'right'
-		if (this._orientation != tmpOrientation) {
+		if (!this._vkbStyle || this._orientation != tmpOrientation) {
 			this._orientation = tmpOrientation
 			if (this._isPhone) {
 				if (this._orientation == 'up' || this.orientation == 'down')
