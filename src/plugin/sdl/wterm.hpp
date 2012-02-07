@@ -29,7 +29,7 @@
 /**
  * SDL Terminal front end.
  */
-class WTerm : public SDLCore, public ExtTerminal, public ExtTerminalContainer
+class WTerm : public SDL::SDLCore, public ExtTerminal, public ExtTerminalContainer
 {
 protected:
 	VTTerminalState *m_terminalState;

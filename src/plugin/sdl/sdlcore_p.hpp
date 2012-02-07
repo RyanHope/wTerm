@@ -41,37 +41,39 @@ inline bool operator>=(const timespec &a, const timespec &b) {
 	return (b >= a);
 }
 
-class SDLCore_TimerCollection {
+namespace SDL {
+
+class TimerCollection {
 public:
-	SDLCore_TimerCollection();
-	~SDLCore_TimerCollection();
+	TimerCollection();
+	~TimerCollection();
 
 	const static int MAX_WAIT_SEC = 600;
 
-	typedef std::vector<SDLCore::Abstract_Timer*> Heap;
+	typedef std::vector<Abstract_Timer*> Heap;
 	Heap m_heap;
 	bool m_changed;
 
 	bool hasEvents();
 	timespec nextEvent();
 
-	static bool orderTimers(SDLCore::Abstract_Timer *a, SDLCore::Abstract_Timer *b);
+	static bool orderTimers(Abstract_Timer *a, Abstract_Timer *b);
 	static void getNow(timespec &t);
 	static void addMsec(timespec &t, int msec);
 	static int diffMsec(const timespec &a, const timespec &b); // "a - b"
 
 	void run();
 
-	void remove(SDLCore::Abstract_Timer *t);
-	void insert(SDLCore::Abstract_Timer *t);
+	void remove(Abstract_Timer *t);
+	void insert(Abstract_Timer *t);
 };
 
-class SDLCore_IOCollection {
+class IOCollection {
 public:
-	SDLCore_IOCollection();
-	~SDLCore_IOCollection();
+	IOCollection();
+	~IOCollection();
 
-	typedef std::vector<SDLCore::Abstract_IO*> List;
+	typedef std::vector<Abstract_IO*> List;
 	List m_list;
 
 	std::vector<pollfd> m_pollfds;
@@ -80,16 +82,16 @@ public:
 
 	void run();
 
-	void remove(SDLCore::Abstract_IO *t);
-	void insert(SDLCore::Abstract_IO *t);
+	void remove(Abstract_IO *t);
+	void insert(Abstract_IO *t);
 
-	void update(SDLCore::Abstract_IO *t);
+	void update(Abstract_IO *t);
 };
 
-class SDLCore_ListenThread {
+class ListenThread {
 public:
-	SDLCore_ListenThread(SDL_Event event);
-	~SDLCore_ListenThread();
+	ListenThread(SDL_Event event);
+	~ListenThread();
 
 	// event that thread sends to SDL to signal activity
 	void setEvent(SDL_Event event);
@@ -121,5 +123,7 @@ private:
 	timespec m_timeout;
 	bool m_stop, m_waiting;
 };
+
+} // end namespace SDL
 
 #endif
