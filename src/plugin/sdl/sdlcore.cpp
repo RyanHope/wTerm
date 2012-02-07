@@ -34,14 +34,17 @@
 
 namespace SDL {
 
-	SDLCore::BlinkTimer::BlinkTimer(SDLCore *core) : Abstract_Timer(core) {
-	}
-	void SDLCore::BlinkTimer::run() {
-		SDLCore *c = core();
-		c->doBlink = !c->doBlink;
-		c->setDirty(BLINK_DIRTY_BIT);
-	}
+#define HP_SYM		17
+#define HP_ORANGE	129
 
+SDLCore::BlinkTimer::BlinkTimer(SDLCore *core) : Abstract_Timer(core) {
+}
+
+void SDLCore::BlinkTimer::run() {
+	SDLCore *c = core();
+	c->doBlink = !c->doBlink;
+	c->setDirty(BLINK_DIRTY_BIT);
+}
 
 const int SDLCore::BUFFER_DIRTY_BIT = 1;
 const int SDLCore::FONT_SIZE_DIRTY_BIT = 2;
@@ -538,6 +541,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 					state = SDL_RELEASED;
 				event.key.keysym.mod = (SDLMod)modstate;
 				break;
+			case HP_SYM:
 			case SDLK_LCTRL:
 				modstate |= KMOD_LCTRL;
 				break;
@@ -550,12 +554,14 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 			case SDLK_RSHIFT:
 				modstate |= KMOD_RSHIFT;
 				break;
+			case SDLK_WORLD_30:
 			case SDLK_LALT:
 				modstate |= KMOD_LALT;
 				break;
 			case SDLK_RALT:
 				modstate |= KMOD_RALT;
 				break;
+			case HP_ORANGE:
 			case SDLK_LMETA:
 				modstate |= KMOD_LMETA;
 				break;
@@ -581,6 +587,7 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 			case SDLK_CAPSLOCK:
 				/* Only send keydown events */
 				return;
+			case HP_SYM:
 			case SDLK_LCTRL:
 				modstate &= ~KMOD_LCTRL;
 				break;
@@ -593,12 +600,14 @@ void SDLCore::fakeKeyEvent(SDL_Event &event)
 			case SDLK_RSHIFT:
 				modstate &= ~KMOD_RSHIFT;
 				break;
+			case SDLK_WORLD_30:
 			case SDLK_LALT:
 				modstate &= ~KMOD_LALT;
 				break;
 			case SDLK_RALT:
 				modstate &= ~KMOD_RALT;
 				break;
+			case HP_ORANGE:
 			case SDLK_LMETA:
 				modstate &= ~KMOD_LMETA;
 				break;
