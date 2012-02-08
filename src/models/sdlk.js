@@ -265,3 +265,21 @@ SDLK._MENU = 319;
 SDLK._POWER = 320;      /**< Power Macintosh power key */
 SDLK._EURO = 321;      /**< Some european keyboards */
 SDLK._UNDO = 322;      /**< Atari keyboard has Undo */
+/*@}*/
+
+
+/** modifier states */
+/*@{*/
+SDLK.KMOD_NONE = 0x0000;
+SDLK.KMOD_LSHIFT = 0x0001;
+SDLK.KMOD_RSHIFT = 0x0002;
+SDLK.KMOD_LCTRL = 0x0040;
+SDLK.KMOD_RCTRL = 0x0080;
+SDLK.KMOD_LALT = 0x0100;
+SDLK.KMOD_RALT = 0x0200;
+SDLK.KMOD_LMETA = 0x0400;
+SDLK.KMOD_RMETA = 0x0800;
+SDLK.KMOD_NUM = 0x1000;
+SDLK.KMOD_CAPS = 0x2000;
+SDLK.KMOD_MODE = 0x4000;
+/*@}*/

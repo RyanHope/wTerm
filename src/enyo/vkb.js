@@ -8,19 +8,6 @@ enyo.kind({
 
 	modstate: 0,
 
-	KMOD_NONE: 0x0000,
-	KMOD_LSHIFT: 0x0001,
-	KMOD_RSHIFT: 0x0002,
-	KMOD_LCTRL: 0x0040,
-	KMOD_RCTRL: 0x0080,
-	KMOD_LALT: 0x0100,
-	KMOD_RALT: 0x0200,
-	KMOD_LMETA: 0x0400,
-	KMOD_RMETA: 0x0800,
-	KMOD_NUM: 0x1000,
-	KMOD_CAPS: 0x2000,
-	KMOD_MODE: 0x4000,
-	
 	events: {
 		onPostrender: ''
 	},
@@ -70,9 +57,9 @@ enyo.kind({
 					e = row[j];
 					if (e.content || e.symbols) {
 						if (e.hasOwnProperty('toggling') && c.toggling)
-							c = enyo.mixin({kind: 'vkbKey', className: '', isPhone: this.isPhone, ondown: 'keyToggle'}, e);
+							c = enyo.mixin({kind: 'vkbKey', className: '', isPhone: this.isPhone, ondown: 'vkbKeyToggle'}, e);
 						else
-							c = enyo.mixin({kind: 'vkbKey', className: '', isPhone: this.isPhone, ondown: 'keyDown', onup: 'keyUp'}, e);
+							c = enyo.mixin({kind: 'vkbKey', className: '', isPhone: this.isPhone, ondown: 'vkbKeyDown', onup: 'vkbKeyUp'}, e);
 					} else {
 						c = enyo.mixin({className: ''}, e); /* simple flex or custom */
 					}
@@ -97,18 +84,18 @@ enyo.kind({
 		}.bind(this));
 	},
 
-	keyToggle: function(inSender) {
+	vkbKeyToggle: function(inSender) {
 		if (!inSender.down)
-			this.keyUp(inSender)
+			this.vkbKeyUp(inSender)
 		else
-			this.keyDown(inSender)
+			this.vkbKeyDown(inSender)
 	},
 
 	isShift: function() {
-		return ((this.modstate & this.KMOD_LSHIFT) || (this.modstate & this.KMOD_RSHIFT) || (this.modstate & this.KMOD_CAPS))
+		return ((this.modstate & SDLK.KMOD_LSHIFT) || (this.modstate & SDLK.KMOD_RSHIFT) || (this.modstate & SDLK.KMOD_CAPS))
 	},
 	isMode: function() {
-		return (this.modstate & this.KMOD_MODE)
+		return (this.modstate & SDLK.KMOD_MODE)
 	},
 
 	processKey: function(inSender) {
@@ -135,14 +122,42 @@ enyo.kind({
 		return [sym, unicode]
 	},
 
-	keyUp: function(inSender) {
-		var k = this.processKey(inSender)
-		this.modstate = this.terminal.keyUp(k[0], k[1],1)
+	keyUp: function(sym, unicode) {
+		var m = vkb.modKeys[sym];
+		if (m) {
+			if (m instanceof Array) {
+				// toggle
+				m = m[0];
+				this.modstate = this.modstate ^ m;
+			} else {
+				this.modstate = this.modstate & ~m;
+			}
+		}
+		this.terminal.keyUp(this.modstate, sym, unicode, 0);
 	},
 
-	keyDown: function(inSender) {
-		var k = this.processKey(inSender)
-		this.modstate = this.terminal.keyDown(k[0], k[1],1)
+	vkbKeyUp: function(inSender) {
+		var k = this.processKey(inSender);
+		this.keyUp(k[0], k[1]);
+	},
+
+	keyDown: function(sym, unicode, sound) {
+		var m = vkb.modKeys[sym];
+		if (m) {
+			if (m instanceof Array) {
+				// toggle
+				m = m[0];
+				this.modstate = this.modstate ^ m;
+			} else {
+				this.modstate = this.modstate | m;
+			}
+		}
+		this.terminal.keyDown(this.modstate, sym, unicode, sound);
+	},
+
+	vkbKeyDown: function(inSender) {
+		var k = this.processKey(inSender);
+		this.keyDown(k[0], k[1], 1);
 	},
 	
 	rendered: function() {
@@ -151,3 +166,24 @@ enyo.kind({
 	}
 
 })
+
+// array of one modifier: "LOCK"ing
+vkb.modKeys = {};
+vkb.modKeys[SDLK._NUMLOCK] = [SDLK.KMOD_NUM];
+vkb.modKeys[SDLK._CAPSLOCK] = [SDLK.KMOD_CAPS];
+// vkb.modKeys[SDLK._SCROLLOCK] = [SDLK.KMOD_];
+vkb.modKeys[SDLK._RSHIFT] = SDLK.KMOD_RSHIFT;
+vkb.modKeys[SDLK._LSHIFT] = SDLK.KMOD_LSHIFT;
+vkb.modKeys[SDLK._RCTRL] = SDLK.KMOD_RCTRL;
+vkb.modKeys[17] = SDLK.KMOD_LCTRL; // HP_"SYM"
+vkb.modKeys[SDLK._LCTRL] = SDLK.KMOD_LCTRL;
+vkb.modKeys[SDLK._RALT] = SDLK.KMOD_RALT;
+vkb.modKeys[SDLK._WORLD_30] = SDLK.KMOD_LALT; // HP_???
+vkb.modKeys[SDLK._LALT] = SDLK.KMOD_LALT;
+vkb.modKeys[SDLK._RMETA] = SDLK.KMOD_RMETA;
+vkb.modKeys[129] = SDLK.KMOD_LMETA; // HP_"ORANGE"
+vkb.modKeys[SDLK._LMETA] = SDLK.KMOD_LMETA;
+// vkb.modKeys[SDLK._LSUPER] = SDLK.KMOD_;
+// vkb.modKeys[SDLK._RSUPER] = SDLK.KMOD_;
+vkb.modKeys[SDLK._MODE] = SDLK.KMOD_MODE
+// vkb.modKeys[SDLK._COMPOSE] = SDLK.KMOD_;

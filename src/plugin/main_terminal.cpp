@@ -75,29 +75,9 @@ PDL_bool setColor(PDL_JSParameters *params) {
 
 PDL_bool setFontSize(PDL_JSParameters *params) {
 	wTerm->setFontSize(PDL_GetJSParamInt(params, 0));
-	char *reply = 0;
-	asprintf(&reply, "%d", wTerm->getFontSize());
-	PDL_JSReply(params, reply);
-	free(reply);
 
 	wTerm->refresh();
 
-	return PDL_TRUE;
-}
-
-PDL_bool getFontSize(PDL_JSParameters *params) {
-	char *reply = 0;
-	asprintf(&reply, "%d", wTerm->getFontSize());
-	PDL_JSReply(params, reply);
-	free(reply);
-	return PDL_TRUE;
-}
-
-PDL_bool getDimensions(PDL_JSParameters *params) {
-	char *reply = 0;
-	asprintf(&reply, "[%d,%d]", wTerm->getMaximumLinesOfText(), wTerm->getMaximumColumnsOfText());
-	PDL_JSReply(params, reply);
-	free(reply);
 	return PDL_TRUE;
 }
 
@@ -106,16 +86,12 @@ PDL_bool pushKeyEvent(PDL_JSParameters *params) {
 
 	event.type = PDL_GetJSParamInt(params, 0) ? SDL_KEYDOWN : SDL_KEYUP;
 	event.key.type = event.type;
-	event.key.keysym.sym = (SDLKey)PDL_GetJSParamInt(params, 1);
-	event.key.keysym.unicode = parseUtf8Char(PDL_GetJSParamString(params, 2));
-	event.key.keysym.scancode = PDL_GetJSParamInt(params, 3); // abuse scancode, 1 for click sound, 0 for no sound
+	event.key.keysym.mod = (SDLMod)PDL_GetJSParamInt(params, 1);
+	event.key.keysym.sym = (SDLKey)PDL_GetJSParamInt(params, 2);
+	event.key.keysym.unicode = parseUtf8Char(PDL_GetJSParamString(params, 3));
+	event.key.keysym.scancode = PDL_GetJSParamInt(params, 4); // abuse scancode, 1 for click sound, 0 for no sound
 
 	wTerm->fakeKeyEvent(event);
-
-	char *reply = 0;
-	asprintf(&reply, "%d", SDL_GetModState());
-	PDL_JSReply(params, reply);
-	free(reply);
 
 	return PDL_TRUE;
 }
@@ -146,8 +122,6 @@ void terminal_main(int argc, const char* argv[])
 	PDL_RegisterJSHandler("setKey", setKey);
 	PDL_RegisterJSHandler("setColor", setColor);
 	PDL_RegisterJSHandler("pushKeyEvent", pushKeyEvent);
-	PDL_RegisterJSHandler("getDimensions", getDimensions);
-	PDL_RegisterJSHandler("getFontSize", getFontSize);
 	PDL_RegisterJSHandler("setFontSize", setFontSize);
 
 	PDL_JSRegistrationComplete();

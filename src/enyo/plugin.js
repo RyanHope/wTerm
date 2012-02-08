@@ -48,13 +48,15 @@ enyo.kind({
 	},
 
 	keydownHandler: function(inSender, inEvent) {
-		if (enyo.fetchDeviceInfo().platformVersionMajor == 2 && enyo.fetchDeviceInfo().platformVersionMinor == 2)
-			this.keyDown(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)), 0)
+		if (this.vkb && enyo.fetchDeviceInfo().platformVersionMajor == 2 && enyo.fetchDeviceInfo().platformVersionMinor == 2) {
+			this.vkb.keyDown(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)), 0);
+		}
 	},
 
 	keyupHandler: function(inSender, inEvent) {
-		if (enyo.fetchDeviceInfo().platformVersionMajor == 2 && enyo.fetchDeviceInfo().platformVersionMinor == 2)
-			this.keyUp(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)), 0)
+		if (this.vkb && enyo.fetchDeviceInfo().platformVersionMajor == 2 && enyo.fetchDeviceInfo().platformVersionMinor == 2) {
+			this.vkb.keyUp(inEvent.keyCode, String.fromCharCode(parseInt(inEvent.keyIdentifier.substr(2), 16)));
+		}
 	},
 
 	/**
@@ -81,16 +83,8 @@ enyo.kind({
 		this.callPluginMethodDeferred(null, 'setScrollBufferLines', lines)
 	},
 
-	getDimensions: function() {
-		return enyo.json.parse(this.callPluginMethodDeferred(null, 'getDimensions'))
-	},
-
-	getFontSize: function() {
-		return parseInt(this.callPluginMethodDeferred(null, 'getFontSize'),10)
-	},
-
 	setFontSize: function(fontSize) {
-		return parseInt(this.callPluginMethodDeferred(null, 'setFontSize', fontSize),10)
+		this.callPluginMethodDeferred(null, 'setFontSize', fontSize);
 	},
 
 	setActive: function(active) {
@@ -117,19 +111,19 @@ enyo.kind({
 		this.callPluginMethod('setupSU', enable)
 	},
 
-	pushKeyEvent: function(type,sym,unicode,snd) {
-		return parseInt(this.callPluginMethod('pushKeyEvent',type,sym,unicode,snd))
+	pushKeyEvent: function(type,modstate,sym,unicode,snd) {
+		this.callPluginMethod('pushKeyEvent',type,modstate,sym,unicode,snd);
 	},
 
 	/**
 	 * Wrapper/Helper Methods
 	 */
-	keyDown: function(sym,unicode,snd) {
-		return this.pushKeyEvent(1,sym,unicode,snd)
+	keyDown: function(modstate,sym,unicode,snd) {
+		this.pushKeyEvent(1,modstate,sym,unicode,snd)
 	},
 
-	keyUp: function(sym,unicode,snd) {
-		return this.pushKeyEvent(0,sym,unicode,snd)
+	keyUp: function(modstate,sym,unicode,snd) {
+		this.pushKeyEvent(0,modstate,sym,unicode,snd)
 	},
 
 	resize: function(width, height) {
