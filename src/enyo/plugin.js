@@ -26,6 +26,7 @@ enyo.kind({
 		this.pluginStatusChangedCallback('ready')
 	},
 
+	// Fixes PopupLayer on phones giving document.body an id/class which messes up enyo.dispatch wrt ApplicationEvents
 	create: function() {
 		this.inherited(arguments);
 		this.dispatchFilter = this.dispatchFilter.bind(this);

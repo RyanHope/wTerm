@@ -157,7 +157,9 @@ enyo.kind({
 		this.createComponent({
 			kind: "ApplicationEvents",
 			onWindowActivated: 'windowActivated',
-			onWindowDeactivated: 'windowDeactivated'
+			onWindowDeactivated: 'windowDeactivated',
+			onKeydown: 'dispatchKeyInput',
+			onKeyup: 'dispatchKeyInput'
 		})
 	},
 
@@ -295,5 +297,10 @@ enyo.kind({
 		if (this._rotationLock == 0 && (this._orientation != tmpOrientation))
 			this._orientation = tmpOrientation
 		this.refresh()
+	},
+
+	dispatchKeyInput: function(inSender, inEvent) {
+		this.$.terminal.focus();
+		this.$.terminal.hasNode().dispatchEvent(inEvent);
 	}
 })
