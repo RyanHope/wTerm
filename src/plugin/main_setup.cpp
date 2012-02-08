@@ -173,4 +173,7 @@ void setup_main(int argc, const char* argv[])
 	do {
 		SDL_WaitEvent(&Event);
 	} while (Event.type != SDL_QUIT);
+
+	PDL_Quit();
+	SDL_Quit();
 }

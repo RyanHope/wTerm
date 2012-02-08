@@ -86,11 +86,6 @@ SDLCore::SDLCore()
 
 SDLCore::~SDLCore()
 {
-	if (isRunning())
-	{
-		shutdown();
-	}
-
 	delete m_keyRepeatTimer;
 	delete m_blinkTimer;
 	delete m_refreshDelayTimer;
@@ -98,6 +93,13 @@ SDLCore::~SDLCore()
 	delete m_listenthread;
 	delete m_timers;
 	delete m_iocollection;
+
+	PDL_Quit();
+
+	if (isRunning())
+	{
+		shutdown();
+	}
 }
 
 /**
