@@ -157,8 +157,7 @@ enyo.kind({
 		this.createComponent({
 			kind: "ApplicationEvents",
 			onWindowActivated: 'windowActivated',
-			onWindowDeactivated: 'windowDeactivated',
-			onKeydown: 'dispatchKeypress',
+			onWindowDeactivated: 'windowDeactivated'
 		})
 	},
 
@@ -273,10 +272,6 @@ enyo.kind({
 	VKBLayoutChange: function() {
 		this.refresh()
 		this.render()
-	},
-
-	dispatchKeypress: function(inSender, inEvent) {
-		this.$.terminal.dispatch(inEvent)
 	},
 
 	doPaste: function () {

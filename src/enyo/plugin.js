@@ -26,6 +26,29 @@ enyo.kind({
 		this.pluginStatusChangedCallback('ready')
 	},
 
+	create: function() {
+		this.inherited(arguments);
+		this.dispatchFilter = this.dispatchFilter.bind(this);
+		enyo.dispatcher.features.push(this.dispatchFilter);
+	},
+
+	destroy: function() {
+		var l = enyo.dispatcher.features;
+		for (var i = 0; i < l.length; ++i) {
+			if (l[i] == this.dispatchFilter) {
+				l.splice(i, 1);
+				break;
+			}
+		}
+	},
+
+	dispatchFilter: function(e) {
+		if (enyo.getPopupLayer() == e.dispatchTarget && ('keydown' == e.type || 'keyup' == e.type)) {
+			this.node.dispatchEvent(e);
+			return true;
+		}
+	},
+
 	rendered: function() {
 		this.pluginReady = false;
 		if (this.hasNode()) {
@@ -228,10 +251,6 @@ enyo.kind({
 			this.callPluginMethodDeferred(null, 'setKey', i, this.decodeEscape(this.currentKeys[i]))
 	},
 
-	dispatch: function(inEvent) {
-		if (this.focus()) this.node.dispatchEvent(inEvent)
-	},
-	
 	_prepend: function(inSender, inEvent) {
 		this.log(inSender, inEvent)
 	}
