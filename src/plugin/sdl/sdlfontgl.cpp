@@ -77,9 +77,9 @@ static const char char_fragment_shader[] =
 	"  vec4 fg = texture2D(colors, vec2((0.5 + ceil(mod(cell.z,64.0)*255.0)) * colorsize, 0.5));\n"
 	"  vec4 bg = texture2D(colors, vec2((0.5 + ceil(cell.w*255.0)) * colorsize, 0.5));\n"
 
-	"  float slot = ceil(cell.y*255.0);\n"
+	"  float slot = ceil(cell.y*127.0);\n"
 
-	"  float ch = ceil(cell.x*255.0);\n"
+	"  float ch = ceil(cell.x*127.0);\n"
 	"  bool bl = (cell.z > 0.249 && !blink);\n"
 
 	"  vec4 g = texture2D(glyphs, vec2((ch + fract(v.x))*glyphsize.x, (slot + 1.0 - fract(v.y)) * glyphsize.y));\n"
@@ -719,8 +719,8 @@ void SDLFontGL::drawTextGL(TextGraphicsInfo & graphicsInfo, unsigned int col, un
 
 	if (row >= 0 && row < m_rows && col >= 0 && col < m_cols) {
 		unsigned int ndx = 4*(col + m_cellsWidth*(m_rows - row - 1));
-		m_cellData[ndx] = (cChar & 0x7f);
-		m_cellData[ndx+1] = slot;
+		m_cellData[ndx] = (cChar & 0x7f) << 1;
+		m_cellData[ndx+1] = slot << 1;
 		m_cellData[ndx+2] = (graphicsInfo.fg & 0x3f) | (graphicsInfo.blink ? 0x40: 0);
 		m_cellData[ndx+3] = graphicsInfo.bg;
 	} else {
