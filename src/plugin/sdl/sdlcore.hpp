@@ -33,6 +33,12 @@
 
 namespace SDL {
 
+typedef enum {
+	WTERM_ASYNC_QUEUE = SDL_USEREVENT,
+	WTERM_LISTEN_THREAD,
+	WTERM_VIDEORESIZE
+} wTermEvent;
+
 class SDLCore;
 
 class TimerCollection;
