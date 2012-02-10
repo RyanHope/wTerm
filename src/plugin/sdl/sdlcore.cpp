@@ -58,11 +58,11 @@ SDLCore::SDLCore()
 	memset(&event, 0, sizeof(event));
 	event.type = SDL_USEREVENT;
 
-	event.user.code = WTERM_LISTEN_THREAD;
+	event.user.code = 0;
 	m_listenthread = new ListenThread(event);
 	m_listenthread->run();
 
-	event.user.code = WTERM_ASYNC_QUEUE;
+	event.user.code = 1;
 	m_asyncqueue = new AsyncQueue(event);
 
 	m_blinkTimer = new BlinkTimer(this);
@@ -214,12 +214,12 @@ void SDLCore::waitForEvent(SDL_Event &event) {
 void SDLCore::handleEvent(SDL_Event &event) {
 	if (event.type == SDL_USEREVENT) {
 		switch (event.user.code) {
-		case WTERM_LISTEN_THREAD:
+		case 0: // listenthread notify
 			m_listenNotified = true;
 			m_iocollection->run();
 			m_timers->run();
 			break;
-		case WTERM_ASYNC_QUEUE:
+		case 1: // asyncqueue notify
 			m_asyncqueue->runQueue();
 			break;
 		}
