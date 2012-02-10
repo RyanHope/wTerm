@@ -49,8 +49,8 @@ kbdLayoutLoad('german', [
 		{symbols: [['P']], printable: true},
 		{symbols: [['Ü']], printable: true},
 		{symbols: [['+'],['*'],['~',0,'<span class="fnBind">~</span>']], printable: true},
-		{symbols: [['<'],['>'],['|',0,'<span class="fnBind">|</span>']], printable: true},
 		{symbols: [['#'],["'"]], printable: true},
+		{flex:1},
 	],
 	[
 		{symbols: [['Caps Lock',SDLK._CAPSLOCK]], modifier: 1, extraClasses: 'caps', toggling: true},
@@ -68,7 +68,8 @@ kbdLayoutLoad('german', [
 		{symbols: [['Enter<br><img src="images/key_enter.png" class="keyImg"/>',SDLK._RETURN]], extraClasses: 'enter'},
 	],
 	[
-		{symbols: [['Shift',SDLK._LSHIFT]], modifier: 1, extraClasses: 'shift-left'},
+		{symbols: [['Shift',SDLK._LSHIFT]], modifier: 1, extraClasses: 'shift-left',flex:1},
+		{symbols: [['<'],['>'],['|',0,'<span class="fnBind">|</span>']], printable: true},
 		{symbols: [['Y']], printable: true},
 		{symbols: [['X']], printable: true},
 		{symbols: [['C']], printable: true},
