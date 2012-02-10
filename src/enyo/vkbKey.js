@@ -92,48 +92,11 @@ enyo.kind({
 				this.node.addEventListener("mousedown", enyo.bind(this, this.handleDownEvent), false);
 				this.node.addEventListener("mouseout", enyo.bind(this, this.handleUpEvent), false);
 				this.node.addEventListener("mouseup", enyo.bind(this, this.handleUpEvent), false);
-			} else {
-				this.node.addEventListener("touchstart", enyo.bind(this, this.handleDownEvent), false);
-				this.node.addEventListener("touchcancel", enyo.bind(this, this.handleUpEvent), false);
-				this.node.addEventListener("touchend", enyo.bind(this, this.handleUpEvent), false);
 			}
-		}
-	},
-
-	handleBundledEvents: function(inEvent) {
-		if (inEvent && inEvent.changedTouches && inEvent.changedTouches.length > 1)
-		{
-			for (var i=0; i < inEvent.changedTouches.length; i++)
-			{
-				// Try to find our parent div as our current HTMLElement could be any child of it
-				var tobj = inEvent.changedTouches[i].target;
-				while (tobj)
-				{
-					// would it be faster to just check if enyo.$[tobj.id] && enyo.$[tobj.id].kind == 'vkbKey'?
-					if (/^wTermApp_vkb_vkbKey\d*$/.test(tobj.id))
-						break;
-					tobj = tobj.parentElement;
-				}
-
-				// Went all the way up to document and found nothing :(
-				if (!tobj)
-					continue;
-
-				// Grab the enyo instance
-				tobj = enyo.$[tobj.id];
-
-				if (!tobj) // maybe pointless
-					continue;
-
-				if (tobj != this)
-					tobj.handleUpEvent(null);
-			}
-
 		}
 	},
 
 	handleUpEvent: function(inEvent) {
-		this.handleBundledEvents(inEvent)
 		if (!this.disabled && !this.toggling) {
 			this.setDown(false)
 			this.doUp()
