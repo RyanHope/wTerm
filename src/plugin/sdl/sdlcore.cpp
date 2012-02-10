@@ -56,12 +56,13 @@ SDLCore::SDLCore()
 
 	SDL_Event event;
 	memset(&event, 0, sizeof(event));
-	event.type = WTERM_LISTEN_THREAD;
+	event.type = SDL_USEREVENT;
 
+	event.user.code = WTERM_LISTEN_THREAD;
 	m_listenthread = new ListenThread(event);
 	m_listenthread->run();
 
-	event.type = WTERM_ASYNC_QUEUE;
+	event.user.code = WTERM_ASYNC_QUEUE;
 	m_asyncqueue = new AsyncQueue(event);
 
 	m_blinkTimer = new BlinkTimer(this);
@@ -210,18 +211,22 @@ void SDLCore::waitForEvent(SDL_Event &event) {
 	SDL_WaitEvent(&event);
 }
 
-void SDLCore::handleEvent(SDL_Event &event)
-{
+void SDLCore::handleEvent(SDL_Event &event) {
+	if (event.type == SDL_USEREVENT) {
+		switch (event.user.code) {
+		case WTERM_LISTEN_THREAD:
+			m_listenNotified = true;
+			m_iocollection->run();
+			m_timers->run();
+			break;
+		case WTERM_ASYNC_QUEUE:
+			m_asyncqueue->runQueue();
+			break;
+		}
+	}
+
 	// TODO: use more generic event handling for this stuff
 	switch (event.type) {
-	case WTERM_ASYNC_QUEUE:
-		m_asyncqueue->runQueue();
-		break;
-	case WTERM_LISTEN_THREAD:
-		m_listenNotified = true;
-		m_iocollection->run();
-		m_timers->run();
-		break;
 	case SDL_MOUSEMOTION:
 	case SDL_MOUSEBUTTONDOWN:
 	case SDL_MOUSEBUTTONUP:
@@ -232,11 +237,9 @@ void SDLCore::handleEvent(SDL_Event &event)
 		handleKeyboardEvent(event);
 		break;
 	case SDL_VIDEOEXPOSE:
-		syslog(LOG_ERR, "SDL_VIDEOEXPOSE");
 		setDirty(BUFFER_DIRTY_BIT);
 		break;
 	case SDL_VIDEORESIZE:
-		syslog(LOG_ERR, "SDL_VIDEORESIZE");
 		m_fontgl.clearGL();
 		m_surface = SDL_SetVideoMode(0, 0, 0, SDL_OPENGL);
 		m_fontgl.initGL(0, 0, event.resize.w, event.resize.h);

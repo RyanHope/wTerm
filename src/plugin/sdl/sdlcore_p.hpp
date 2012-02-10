@@ -44,6 +44,11 @@ inline bool operator>=(const timespec &a, const timespec &b) {
 
 namespace SDL {
 
+typedef enum {
+	WTERM_ASYNC_QUEUE = SDL_USEREVENT,
+	WTERM_LISTEN_THREAD
+} wTermEvent;
+
 class TimerCollection {
 public:
 	TimerCollection();
