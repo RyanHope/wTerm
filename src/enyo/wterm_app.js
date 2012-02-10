@@ -128,6 +128,10 @@ enyo.kind({
 	},
 	
 	createTerminal: function(inSender, vkbHeight) {
+		if (this.$.terminal) {
+			this.$.terminal.setHeight(window.innerHeight - vkbHeight);
+			return;
+		}
 		var exec = enyo.application.p.get('exec')
 		if (enyo.windowParams.root && !enyo.windowParams.command)
 			exec = 'login -f root'
@@ -226,12 +230,12 @@ enyo.kind({
 		if (!this._vkbStyle || this._orientation != tmpOrientation) {
 			this._orientation = tmpOrientation
 			if (this._isPhone) {
-				if (this._orientation == 'up' || this.orientation == 'down')
+				if (this._orientation == 'up' || this._orientation == 'down')
 					this._vkbStyle = 'smallP'
 				else
 					this._vkbStyle = 'largeP'
 			} else {
-				if (this._orientation == 'up' || this.orientation == 'down')
+				if (this._orientation == 'up' || this._orientation == 'down')
 					this._vkbStyle = 'large'
 				else
 					this._vkbStyle = 'small'
@@ -274,8 +278,7 @@ enyo.kind({
 	},
 
 	VKBLayoutChange: function() {
-		this.refresh()
-		this.render()
+		this.resized()
 	},
 
 	doPaste: function () {
