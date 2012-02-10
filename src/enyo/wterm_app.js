@@ -39,8 +39,8 @@ enyo.kind({
 			scrim: true,
 			components: [
 				{style: 'text-align: center; padding-bottom: 6px; font-size: 120%;', allowHtml: true, content: '<img src="images/icon-64.png"/ style="vertical-align: middle; padding-right: 1em;"><b><u>wTerm v'+enyo.fetchAppInfo().version+'</u></b>'},
-				{style: 'padding: 4px; text-align: center; font-size: 90%', content: '<a href="https://github.com/PuffTheMagic/wTerm">Project Home</a>'},
-				{style: 'padding: 4px; text-align: center; font-size: 90%', content: '<a href="https://github.com/PuffTheMagic/wTerm/issues">Issues</a>'},
+				{style: 'padding: 4px; text-align: center; font-size: 90%', content: '<a href="https://github.com/RyanHope/wTerm">Project Home</a>'},
+				{style: 'padding: 4px; text-align: center; font-size: 90%', content: '<a href="https://github.com/RyanHope/wTerm/issues">Issues</a>'},
 				{style: 'padding: 4px; text-align: center; font-size: 90%', content: '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VU4L7VTGSR5C2">Donate</a>'},
 				{style: 'text-align: center; padding-top: 24px; font-style: italic; font-size: 60%', allowHtml: true, content: '&copy; 2011-2012 WebOS Internals'}
 			]
@@ -96,6 +96,8 @@ enyo.kind({
 		this.inherited(arguments)
 		this._isPhone = (enyo.fetchDeviceInfo().keyboardAvailable || enyo.fetchDeviceInfo().keyboardSlider)
 		this._showVKB = enyo.application.p.get('showVKB')
+		if (enyo.fetchDeviceInfo().platformVersionMajor == 2 && enyo.fetchDeviceInfo().platformVersionMinor == 1)
+			enyo.setAllowedOrientation("up")
 		this.getRotationLock()
 	},
 	
