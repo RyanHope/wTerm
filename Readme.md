@@ -50,11 +50,11 @@ By default, wTerm logs into a non-root user (wterm). For safe root access follow
 Screenshots
 -----------
 
-<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/htop.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/htop.png" width=25%></a>
-<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/irssi.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/irssi.png" width=25%></a>
-<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/midnight_commander.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/midnight_commander.png" width=25%></a><br>
-<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/vim.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/vim.png" width=25%></a>
-<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/emacs.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/emacs.png" width=25%></a>
-<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/exhibition.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/exhibition.png" width=25%></a><br>
-<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/stack_of_wterms.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/stack_of_wterms.png" width=25%></a>
-<a href="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/just_type.png"><img src="https://github.com/PuffTheMagic/wTerm/raw/master/screenshots/just_type.png" width=25%></a>
+<a href="https://github.com/RyanHope/wTerm/raw/master/screenshots/htop.png"><img src="https://github.com/RyanHope/wTerm/raw/master/screenshots/htop.png" width=25%></a>
+<a href="https://github.com/RyanHope/wTerm/raw/master/screenshots/irssi.png"><img src="https://github.com/RyanHope/wTerm/raw/master/screenshots/irssi.png" width=25%></a>
+<a href="https://github.com/RyanHope/wTerm/raw/master/screenshots/midnight_commander.png"><img src="https://github.com/RyanHope/wTerm/raw/master/screenshots/midnight_commander.png" width=25%></a><br>
+<a href="https://github.com/RyanHope/wTerm/raw/master/screenshots/vim.png"><img src="https://github.com/RyanHope/wTerm/raw/master/screenshots/vim.png" width=25%></a>
+<a href="https://github.com/RyanHope/wTerm/raw/master/screenshots/emacs.png"><img src="https://github.com/RyanHope/wTerm/raw/master/screenshots/emacs.png" width=25%></a>
+<a href="https://github.com/RyanHope/wTerm/raw/master/screenshots/exhibition.png"><img src="https://github.com/RyanHope/wTerm/raw/master/screenshots/exhibition.png" width=25%></a><br>
+<a href="https://github.com/RyanHope/wTerm/raw/master/screenshots/stack_of_wterms.png"><img src="https://github.com/RyanHope/wTerm/raw/master/screenshots/stack_of_wterms.png" width=25%></a>
+<a href="https://github.com/RyanHope/wTerm/raw/master/screenshots/just_type.png"><img src="https://github.com/RyanHope/wTerm/raw/master/screenshots/just_type.png" width=25%></a>
