@@ -15,6 +15,7 @@ enyo.depends(
 	"src/enyo/setup.js",
 	"src/enyo/popup2.js",
 	"src/enyo/prefs.js",
+	"src/enyo/charSelector.js",
 	"src/enyo/vkbKey.js",
 	"src/enyo/vkb.js",
 	"src/enyo/wterm_prefs.js",
