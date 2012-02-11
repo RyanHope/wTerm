@@ -1,4 +1,5 @@
 *.ipk
+.settings
 .DS_Store
 .project
 wterm
@@ -10,5 +11,6 @@ wterm
 bin
 ipk
 setup
+src/mojo
 src/cmatrix/cmatrix
 src/vttest/vttest

@@ -46,6 +46,11 @@
 	background-color: #D2FFD6;
 }
 
+/* Sym */
+.vkb .key.small.sym {
+	background-color: #FFC180;
+}
+
 /* Enter */
 .vkb.small .key.enter {
 	width: 94px;
@@ -206,3 +211,15 @@
 .preference-prompt .enyo-button {
     margin: 6px 3px;
 }*/
+
+.enyo-popup.charSelect  {
+	-webkit-border-image: url(popup1.png) 12 12 12 12 stretch stretch;
+}
+@media (-webkit-min-device-pixel-ratio:1.5) {
+.enyo-popup.charSelect {
+		-webkit-border-image: url(popup2.png) 18 18 18 18 stretch stretch;
+	}
+}
+.enyo-popup-inner.charSelect {
+	margin: -7px -14px;
+}

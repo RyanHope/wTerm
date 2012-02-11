@@ -156,7 +156,7 @@ enyo.kind({
 	},
 	
 	finalize: function() {
-		this.$.vkb.terminal = this.$.terminal
+		this.$.vkb.setTerminal(this.$.terminal)
 		this.$.terminal.vkb = this.$.vkb
 		this.$.prefs.vkb = this.$.vkb
 		this.$.prefs.terminal = this.$.terminal
