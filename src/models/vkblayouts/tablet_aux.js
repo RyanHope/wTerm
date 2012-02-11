@@ -1,7 +1,6 @@
 
 kbdLayoutLoad('tablet_aux', [
 	[
-		{flex:1},
 		{symbols: [['Esc',SDLK._ESCAPE]], small: 1, extraClasses: 'escape'},
 		{flex:1},
 		{symbols: [['F1',SDLK._F1]], small: 1},
@@ -19,5 +18,6 @@ kbdLayoutLoad('tablet_aux', [
 		{symbols: [['F11',SDLK._F11]], small: 1},
 		{symbols: [['F12',SDLK._F12]], small: 1},
 		{flex:1},
+		{symbols: [['Sym',SDLK._MENU]], small: 1, extraClasses: 'sym'},
 	],
 ]);

@@ -61,14 +61,14 @@ enyo.kind({
 	],
 	
 	doMouseup: function(inSender, inEvent) {
-		this.log(inSender)
+		//this.log(inSender)
 		this.terminal.inject(inSender.getCaption(), 1)
 		this.close()
 	},
 	
 	create: function() {
 		this.inherited(arguments);
-		this.log(this.className)
+		//this.log(this.className)
 	},
 	
 	setupRow: function(inSender, inIndex) {

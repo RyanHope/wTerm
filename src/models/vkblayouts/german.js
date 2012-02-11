@@ -17,6 +17,8 @@ kbdLayoutLoad('german', [
 		{symbols: [['F10',SDLK._F10]], small: 1},
 		{symbols: [['F11',SDLK._F11]], small: 1},
 		{symbols: [['F12',SDLK._F12]], small: 1},
+		{flex:1},
+		{symbols: [['Sym',SDLK._MENU]], small: 1, extraClasses: 'sym'},
 	],
 	[{extraClasses: 'functionPadding'}],
 	[

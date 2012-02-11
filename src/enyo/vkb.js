@@ -10,6 +10,17 @@ enyo.kind({
 		onPostrender: ''
 	},
 
+	components: [
+		{
+			name : "sysSound",
+			kind : "PalmService",
+			service : "palm://com.palm.audio/systemsounds",
+			method : "playFeedback"
+		},
+		{kind: 'CharSelector', name: 'charSelector'},
+		{name: 'keys'} // will be replaced later
+	],
+
 	published: {
 		terminal: null,
 		isPhone: null,
@@ -70,15 +81,8 @@ enyo.kind({
 				}
 				components.push({layoutKind: 'HFlexLayout', pack: 'end', components: comps});
 			}
-			this.destroyComponents();
-			this.createComponents(components);
-			this.createComponent({
-				name : "sysSound",
-				kind : "PalmService",
-				service : "palm://com.palm.audio/systemsounds",
-				method : "playFeedback"
-			})
-			this.createComponent({kind: 'CharSelector', name: 'charSelector'})
+			this.$.keys.destroy();
+			this.createComponents([{name: 'keys', components: components}]);
 			this.render();
 		}.bind(this));
 	},
