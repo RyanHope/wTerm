@@ -47,7 +47,7 @@
 }
 
 /* Sym */
-.vkb .key.small.sym {
+.vkb .key.sym {
 	background-color: #FFC180;
 }
 
@@ -219,7 +219,4 @@
 .enyo-popup.charSelect {
 		-webkit-border-image: url(popup2.png) 18 18 18 18 stretch stretch;
 	}
-}
-.enyo-popup-inner.charSelect {
-	margin: -7px -14px;
 }

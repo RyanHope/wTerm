@@ -146,7 +146,11 @@ enyo.kind({
 
 	vkbKeyUp: function(inSender) {
 		var k = this.processKey(inSender);
-		this.keyUp(k[0], k[1]);
+		if (k[0] == SDLK._MENU) {
+			this.$.charSelector.openAtCenter()
+		} else {
+			this.keyUp(k[0], k[1]);
+		}
 	},
 
 	keyDown: function(sym, unicode, sound) {
@@ -165,11 +169,8 @@ enyo.kind({
 
 	vkbKeyDown: function(inSender) {
 		var k = this.processKey(inSender);
-		if (k[0] == SDLK._MENU) {
-			this.$.charSelector.openAtCenter()
-		} else {
+		if (k[0] != SDLK._MENU)
 			this.keyDown(k[0], k[1], 1);
-		}
 	},
 	
 	rendered: function() {

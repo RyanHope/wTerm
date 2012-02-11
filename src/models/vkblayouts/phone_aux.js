@@ -2,7 +2,7 @@
 kbdLayoutLoad('phone_aux', [
 	[
 		{flex:1},
-		{symbols: [['Esc',SDLK._ESCAPE]], extraClasses: 'escape'},
+		{symbols: [['Esc',SDLK._ESCAPE]]},
 		{flex:1},
 		{symbols: [['Tab<br><img src="images/key_tab.png" class="keyImg"/>',SDLK._TAB]]},
 		{flex:1},
@@ -14,5 +14,7 @@ kbdLayoutLoad('phone_aux', [
 		{flex:1},
 		{symbols: [['<img src="images/cursorRight.png" class="keyImg"/>',SDLK._RIGHT],null,['<span class="fnBind">End</span>',SDLK._END]], extraClasses: 'arrow'},
 		{flex:1},
+		{symbols: [['Sym',SDLK._MENU]], extraClasses: 'sym'},
+		{flex:1}
 	],
 ]);
