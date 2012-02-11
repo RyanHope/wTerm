@@ -32,8 +32,8 @@ function kbdLayoutList() {
 	return l;
 }
 
-function kbdLayoutLoad(name, keys) {
-	var layout = kbdLayouts[name];
+function kbdLayoutLoad(obj) {
+	var layout = kbdLayouts[obj.name];
 	if (!layout || layout.keys) return;
 	layout.keys = keys;
 	var l = layout.onload;
@@ -42,10 +42,3 @@ function kbdLayoutLoad(name, keys) {
 	}
 	layout.onload = null;
 }
-
-kbdLayouts.qwerty_us = { caption: 'QWERTY (en-US)' };
-kbdLayouts.dvorak = { caption: 'Dvorak Simplified (en-US)' };
-kbdLayouts.german = { caption: 'QWERTZ (german)' };
-kbdLayouts.french = { caption: 'AZERTY (french)' };
-kbdLayouts.phone_aux = { caption: 'Phone Auxiliary' };
-kbdLayouts.tablet_aux = { caption: 'Tablet Auxiliary'};

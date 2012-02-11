@@ -3,9 +3,9 @@ enyo.depends(
 	"$enyo/palm/list2/",
 
 	"src/css/main.css",
-
+	
 	"src/models/sdlk.js",
-	"src/models/vkblayout.js",
+	//"src/models/vkblayout.js",
 
 	"src/enyo/wi/depends.js",
 

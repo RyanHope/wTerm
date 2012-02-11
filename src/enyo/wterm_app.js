@@ -115,19 +115,18 @@ enyo.kind({
 		})
 	},
 	
-	createVKB: function(large) {
+	createVKB: function(createTerm) {
 		this.createComponent({
-			kind: 'vkb',
+			kind: enyo.application.p.get('kbdLayout'),
 			name: 'vkb',
-			showing: true,
-			className: 'vkb ' + this._vkbStyle,
-			isPhone: this._isPhone,
-			_large: large,
-			onPostrender: 'createTerminal'
+			landscape: this.landscape
 		})
+		this.$.vkb.render()
+		if (createTerm)
+			this.createTerminal(this.$.vkb.node.clientHeight)
 	},
 	
-	createTerminal: function(inSender, vkbHeight) {
+	createTerminal: function(vkbHeight) {
 		if (this.$.terminal) {
 			this.$.terminal.setHeight(window.innerHeight - vkbHeight);
 			return;
@@ -191,17 +190,15 @@ enyo.kind({
 		}
 	},
 
-	setupKeyboard: function(portrait) {
+	setupKeyboard: function() {
 		if (typeof this.$.vkb != 'undefined' && this.$.vkb.hasNode()) {
 			var width = window.innerWidth
 			var height = window.innerHeight
-			if (portrait)
-				this.$.vkb.small()
-			else
-				this.$.vkb.large()
+			this.$.vkb.setLandscape(this.landscape)
 			if (this._showVKB)
 				height = height - this.$.vkb.hasNode().scrollHeight
-			this.$.terminal.resize(width, height)
+			if (typeof this.$.terminal != 'undefined' && this.$.terminal.hasNode())
+				this.$.terminal.resize(width, height)
 		} else {
 			enyo.asyncMethod(this, enyo.bind(this, this.setupKeyboard))
 		}
@@ -227,24 +224,24 @@ enyo.kind({
 			tmpOrientation = 'left'
 		else if (this._rotationLock == 6)
 			tmpOrientation = 'right'
-		if (!this._vkbStyle || this._orientation != tmpOrientation) {
+		if (typeof this.landscape === 'undefined' || this._orientation != tmpOrientation) {
 			this._orientation = tmpOrientation
 			if (this._isPhone) {
 				if (this._orientation == 'up' || this._orientation == 'down')
-					this._vkbStyle = 'smallP'
+					this.landscape = false
 				else
-					this._vkbStyle = 'largeP'
+					this.landscape = true
 			} else {
 				if (this._orientation == 'up' || this._orientation == 'down')
-					this._vkbStyle = 'large'
+					this.landscape = true
 				else
-					this._vkbStyle = 'small'
+					this.landscape = false
 			}
 		}
 		if (typeof inResponse.returnValue === 'undefined')
 			this.refresh()
 		else if (inResponse.returnValue)
-			this.createVKB((this._vkbStyle == 'large' || this._vkbStyle == 'largeP'))
+			this.createVKB(true)
 	},
 
 	getVKBMenuText: function() {
@@ -278,6 +275,8 @@ enyo.kind({
 	},
 
 	VKBLayoutChange: function() {
+		this.$.vkb.destroy()
+		this.createVKB(false)
 		this.resized()
 	},
 
@@ -290,10 +289,7 @@ enyo.kind({
 	},
 
 	refresh: function() {
-		if (this._orientation == 'up' || this._orientation == 'down')
-			this.setupKeyboard(this._isPhone)
-		else
-			this.setupKeyboard(!this._isPhone)
+		this.setupKeyboard()
 		this.$.prefs.updateHeight()
 	},
 	

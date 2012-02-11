@@ -243,7 +243,7 @@ enyo.kind({
 		this.$.justType.setState(enyo.application.p.get('launchParamsOK'))
 		this.$.bufferlines.setValue(enyo.application.p.get('bufferlines'))
 		this.$.fontSize.setValue(enyo.application.p.get('fontSize'))
-		this.$.kbdLayouts.setItems(kbdLayoutList());
+		this.$.kbdLayouts.setItems(enyo.application.vkbLayouts);
 		this.$.kbdLayouts.setValue(enyo.application.p.get('kbdLayout'))
 		this.getColorSchemes()
 		this.getKeys()
@@ -256,7 +256,6 @@ enyo.kind({
 	},
 	kbdLayoutChanged: function() {
 		enyo.application.p.set('kbdLayout', this.$.kbdLayouts.getValue());
-		this.vkb.loadLayout(this.$.kbdLayouts.getValue());
 		this.doVKBLayoutChange()
 	},
 	inputSchemeChanged: function() {
