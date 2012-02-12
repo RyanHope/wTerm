@@ -1,6 +1,3 @@
-enyo.application.vkbLayouts = []
-enyo.depends('src/enyo/vkbLayouts/')
-
 enyo.kind({
 
 	name: 'vkb',
@@ -157,6 +154,9 @@ enyo.kind({
 	}
 
 })
+
+enyo.application.vkbLayouts = []
+enyo.depends('src/enyo/vkbLayouts/')
 
 // array of one modifier: "LOCK"ing
 vkb.modKeys = {};

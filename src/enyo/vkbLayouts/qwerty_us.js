@@ -1,8 +1,9 @@
-var layout = enyo.kind({
+enyo.application.vkbLayouts.unshift({caption: 'QWERTY (en-US)', value: 'qwerty_us'})
+enyo.kind({
 
 	kind: 'vkb',
-	name: 'qwerty_us',
-	caption: 'QWERTY (en-US)',
+	name: enyo.application.vkbLayouts[0].value,
+	caption: enyo.application.vkbLayouts[0].caption,
 	
 	layout: [
 		[
@@ -100,8 +101,4 @@ var layout = enyo.kind({
 			{symbols: [['<img src="images/cursorDown.png" class="keyImg"/>',SDLK._DOWN],null,['<span class="fnBind">PgDn</span>',SDLK._PAGEDOWN]], extraClasses: 'arrow'},
 		]
 	]
-})
-enyo.application.vkbLayouts.push({
-	caption: layout.prototype.caption,
-	value: layout.prototype.kindName
 })

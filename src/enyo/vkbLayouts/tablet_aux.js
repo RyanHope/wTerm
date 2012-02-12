@@ -1,8 +1,9 @@
-var layout = enyo.kind({
+enyo.application.vkbLayouts.unshift({caption: 'Tablet Auxiliary', value: 'tablet_aux'})
+enyo.kind({
 
 	kind: 'vkb',
-	name: 'tablet_aux',
-	caption: 'Tablet Auxiliary',
+	name: enyo.application.vkbLayouts[0].value,
+	caption: enyo.application.vkbLayouts[0].caption,
 	
 	layout: [
 		[
@@ -26,8 +27,4 @@ var layout = enyo.kind({
 			{symbols: [['Sym',SDLK._MENU]], small: 1, extraClasses: 'sym'},
 		]
 	]
-})
-enyo.application.vkbLayouts.push({
-	caption: layout.prototype.caption,
-	value: layout.prototype.kindName
 })

@@ -1,8 +1,9 @@
-var layout = enyo.kind({
+enyo.application.vkbLayouts.unshift({caption: 'Phone Auxiliary', value: 'phone_aux'})
+enyo.kind({
 
 	kind: 'vkb',
-	name: 'phone_aux',
-	caption: 'Phone Auxiliary',
+	name: enyo.application.vkbLayouts[0].value,
+	caption: enyo.application.vkbLayouts[0].caption,
 	
 	layout: [
 		[
@@ -23,8 +24,4 @@ var layout = enyo.kind({
 			{flex:1}
 		]
 	]
-})
-enyo.application.vkbLayouts.push({
-	caption: layout.prototype.caption,
-	value: layout.prototype.kindName
-})
+});
