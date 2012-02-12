@@ -1,0 +1,37 @@
+.vkb .key {
+	margin: 0px;
+	padding: 0px;
+	font-weight: 700;
+	height: 69px;
+	width: 69px;
+	font-size: 100%;
+}
+
+.vkb .keyImg {
+	height: 24px;
+}
+
+.charSelect {
+	width: 450px;
+	height: 450px;
+}
+
+.charSelectList {
+	width: 450px;
+	height: 450px;
+	margin: -7px -14px;
+	padding: 0px;
+}
+
+.charSelectRow {
+	height: 82px;
+	margin: 0px;
+	padding: 0px;
+}
+
+.charKey {
+	width: 82px;
+	height: 82px;
+	border-width: 1px;
+	border-color: gray;
+}

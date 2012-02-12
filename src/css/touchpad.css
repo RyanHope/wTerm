@@ -1,0 +1,139 @@
+.vkb .key {
+	margin: 0px;
+	padding: 0px;
+	font-weight: 700;
+	height: 48px;
+	width: 53px;
+	font-size: 60%;
+}
+
+.vkb.landscape .key {
+	margin: 1px;
+	height: 58px;
+	width: 66px;
+	font-size: 100%;
+}
+
+.vkb .keyImg {
+	height: 16px;
+}
+
+.vkb.landscape .keyImg {
+	height: 24px;
+}
+
+/* Backspace */
+.vkb .key.backspace {
+	width: 79px;
+}
+.vkb.landscape .key.backspace {
+	width: 138px;
+}
+
+/* Function Keys */
+.vkb .functionPadding {
+	height: 3px;
+}
+.vkb .key.small {
+	height: 26px;
+}
+.vkb.landscape .key.small {
+	height: 29px;
+}
+
+/* Enter */
+.vkb .key.enter {
+	width: 94px;
+}
+.vkb.landscape .key.enter {
+	width: 158px;
+}
+
+/* Shift */
+.vkb .key.shift-left {
+	width: 106px;
+}
+.vkb.landscape .key.shift-left {
+	width: 144px;
+}
+.vkb .key.shift-right {
+	width: 80px;
+}
+.vkb.landscape .key.shift-right {
+	width: 128px;
+}
+
+/* Caps */
+.vkb .key.caps {
+	width: 91px;
+}
+.vkb.landscape .key.caps {
+	width: 114px;
+}
+
+/* Spacebar */
+.vkb .key.spacebar {
+	width: 300px;
+}
+.vkb.landscape .key.spacebar {
+	width: 398px;
+}
+
+/* Tab */
+.vkb .key.tab {
+	width: 79px;
+}
+.vkb.landscape .key.tab {
+	width: 94px;
+}
+
+/* Modifiers */
+.vkb .key.mod {
+	width: 58px;
+}
+.vkb.landscape .key.mod {
+	width: 76px;
+}
+.vkb .key.mod.ctrl {
+	width: 68px;
+}
+.vkb.landscape .key.mod.ctrl {
+	width: 91px;
+}
+
+/* Misc */
+.vkb.landscape .key.slash {
+	width: 110px;
+}
+
+
+
+
+
+
+
+
+.charSelect {
+	width: 450px;
+	height: 450px;
+}
+
+.charSelectList {
+	width: 450px;
+	height: 450px;
+	margin: -7px -14px;
+	padding: 0px;
+}
+
+.charSelectRow {
+	height: 82px;
+	margin: 0px;
+	padding: 0px;
+}
+
+.charKey {
+	width: 82px;
+	height: 82px;
+	border-width: 1px;
+	border-color: gray;
+}

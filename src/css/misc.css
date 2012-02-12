@@ -21,11 +21,52 @@
 	margin: 0px auto 0;
 }
 
-.enyo-popup.charSelect  {
-	-webkit-border-image: url(popup1.png) 12 12 12 12 stretch stretch;
-}
 @media (-webkit-min-device-pixel-ratio:1.5) {
-.enyo-popup.charSelect {
-		-webkit-border-image: url(popup2.png) 18 18 18 18 stretch stretch;
+	.enyo-popup {
+		min-width: 450px;
 	}
 }
+
+/*.enyo-popup.charSelect {
+	-webkit-border-image: url(popup1.png) 24 24 24 24 stretch stretch;
+	width: 300px;
+	height: 300px;
+	padding: 0px;
+	margin: 0px;
+}
+
+.enyo-popup.charSelect.Pre3 {
+	-webkit-border-image: url(popup2.png) 36 36 36 36 stretch stretch;
+	border-width: 1px;
+	width: 450px;
+	height: 450px;
+}
+
+.enyo-popup.charSelect .charSelectList {
+	width: 300px;
+	height: 300px;
+	padding: 0px;
+	margin: -7px -14px;
+}
+.enyo-popup.charSelect.Pre3 .charSelectList {
+	width: 450px;
+	height: 450px;
+}
+
+.enyo-popup.charSelect .charSelectList .charSelectRow {
+	height: 50px;
+}
+.enyo-popup.charSelect.Pre3 .charSelectList .charSelectRow {
+	height: 75px;
+}
+
+.enyo-popup.charSelect .charSelectList .charSelectRow .charKey {
+	width: 50px;
+	height: 50px;
+	border-width: 1px;
+	border-color: gray;
+}
+.enyo-popup.charSelect.Pre3 .charSelectList .charSelectRow .charKey {
+	width: 75px;
+	height: 75px;
+}*/

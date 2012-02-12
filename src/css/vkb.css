@@ -1,125 +1,27 @@
-.vkb .key {
-	margin: 0px;
-	padding: 0px;
-	font-weight: 700;
-	height: 48px;
-	width: 53px;
-	font-size: 60%;
-}
-
-.vkb.landscape .key {
-	margin: 1px;
-	height: 58px;
-	width: 66px;
-	font-size: 100%;
-}
-
-.vkb.Pre .key,
-.vkb.Pre2 .key {
-	height: 45px;
-	width: 45px;
-	font-size: 80%;
-}
-
-.vkb.Pre3 .key {
-	height: 69px;
-	width: 69px;
-	font-size: 100%;
-}
-
-/* Arrows */
+/* Colored Keys */
 .vkb .key.arrow {
 	background-color: #FFFBD2;
-}
-
-/* Function Keys */
-.vkb .functionPadding {
-	height: 3px;
 }
 .vkb .key.small {
 	background-color: #FFD2F5;
 }
-.vkb .key.small {
-	height: 26px;
-}
-.vkb.landscape .key.small {
-	height: 29px;
-}
-
-/* Escape */
 .vkb .key.escape {
 	background-color: #D2FFD6;
 }
-
-/* Sym */
 .vkb .key.sym {
 	background-color: #FFC180;
 }
-
-/* Enter */
-.vkb .key.enter {
-	width: 94px;
-}
-.vkb.landscape .key.enter {
-	width: 158px;
-}
-
-/* Backspace */
 .vkb .key.backspace {
 	background-color: #FFFBD2;
-	width: 79px;
 }
-.vkb.landscape .key.backspace {
-	width: 138px;
-}
-
-/* Shift */
 .vkb .key.shift-left {
 	background-color: #D0D0D0;
-	width: 106px;
-}
-.vkb.landscape .key.shift-left {
-	width: 144px;
 }
 .vkb .key.shift-right {
 	background-color: #D0D0D0;
-	width: 80px;
 }
-.vkb.landscape .key.shift-right {
-	width: 128px;
-}
-
-/* Caps */
 .vkb .key.caps {
 	background-color: #D0D0D0;
-	width: 91px;
-}
-.vkb.landscape .key.caps {
-	width: 114px;
-}
-
-/* Spacebar */
-.vkb .key.spacebar {
-	width: 300px;
-}
-.vkb.landscape .key.spacebar {
-	width: 398px;
-}
-
-/* Tab */
-.vkb .key.tab {
-	width: 79px;
-}
-.vkb.landscape .key.tab {
-	width: 94px;
-}
-
-/* Modifiers */
-.vkb .key.mod {
-	width: 58px;
-}
-.vkb.landscape .key.mod {
-	width: 76px;
 }
 .vkb .key.mod.fn {
 	background-color: #D2D2FF;
@@ -130,37 +32,9 @@
 }
 .vkb .key.mod.ctrl {
 	background-color: #D0D0D0;
-	width: 68px;
 }
-.vkb.landscape .key.mod.ctrl {
-	width: 91px;
-}
-
-/* Misc Styles */
-.vkb.landscape .key.slash {
-	width: 110px;
-}
-
 .vkb .fnBind {
 	color: #0000FF;
 	font-size: 80%;
 	font-weight: 100;
-}
-
-/* Images */
-.vkb .keyImg {
-	height: 16px;
-}
-.vkb.landscape .keyImg {
-	height: 24px;
-}
-.vkb.Pre .keyImg,
-.vkb.Pre2 .keyImg {
-	height: 18px;
-}
-.vkb.Pre3 .keyImg {
-	height: 20px;
-}
-.vkb.landscape.phone .keyImg {
-	height: 24px;
 }

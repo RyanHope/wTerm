@@ -2,12 +2,12 @@ enyo.kind({
 	
 	name: 'charKey',
 	kind: "CustomButton",
-	width: '50px',
-	height: '50px',
 	layoutKind: 'HFlexLayout',
+
+	className: 'charKey',
+
 	pack: 'center',
 	align: 'center',
-	style: 'border-width: 1px; border-color: gray;',
 	
 	published: {
 		sym: null,
@@ -50,12 +50,9 @@ enyo.kind({
 	
 	name: 'CharSelector',
 	kind: "Popup",
-	
+
 	className: 'enyo-popup charSelect',
-	
-	width: '300px',
-	height: '300px',
-	
+
 	chars: [
 		[ ["F1", SDLK._F1], ["F2", SDLK._F2], ["F3", SDLK._F3], ["F4", SDLK._F4], ["F5", SDLK._F5], ["F6", SDLK._F6], ["F7", SDLK._F7], ["F8", SDLK._F8], ["F9", SDLK._F9], ["F10", SDLK._F10], ["F11", SDLK._F11], ["F12", SDLK._F12]],
 		[ ["$"], ["€"], [";"], ["<"], [">"], ["["], ["\\"], ["]"], ["^"], ["`"], ["{"], ["|"], ["}"], ["~"], ["¡"], ["¢"], ["£"], ["¤"], ["¥"], ["§"], ["©"], ["ª"], ["«"], ["¬"], ["®"], ["°"], ["±"], ["º"], ["¹"], ["²"], ["³"], ["µ"], ["¶"], ["»"], ["¼"], ["½"], ["¾"], ["¿"], ["ƒ"], ["‘"], ["’"], ["‚"], ["‛"], ["“"], ["”"], ["„"], ["†"], ["‡"], ["•"], ["…"], ["‰"], ["‹"], ["›"], ["™"], ["Ω"], ["×"], ["÷"], ["Þ"], ["ß"], ["à"], ["á"], ["â"], ["ã"], ["ä"], ["å"], ["æ"], ["ç"], ["ć"], ["è"], ["é"], ["ê"], ["ë"], ["ę"], ["ē"], ["ì"], ["í"], ["î"], ["ï"], ["ł"], ["ð"], ["ñ"], ["ń"], ["ò"], ["ó"], ["ô"], ["õ"], ["ö"], ["ø"], ["ő"], ["œ"], ["š"], ["ù"], ["ú"], ["û"], ["ü"], ["ű"], ["ý"], ["ÿ"], ["ž"], ["ź"], ["ż"], ["þ"], ["À"], ["Á"], ["Â"], ["Ã"], ["Ä"], ["Å"], ["Æ"], ["Ç"], ["Ć"], ["È"], ["É"], ["Ê"], ["Ë"], ["Ę"], ["Ì"], ["Í"], ["Î"], ["Ï"], ["Ł"], ["Ð"], ["Ñ"], ["Ń"], ["Ò"], ["Ó"], ["Ô"], ["Õ"], ["Ö"], ["Ø"], ["Ő"], ["Œ"], ["Š"], ["Ù"], ["Ú"], ["Û"], ["Ü"], ["Ű"], ["Ý"], ["Ÿ"], ["Ž"], ["Ź"], ["Ż"] ],
@@ -67,8 +64,8 @@ enyo.kind({
 	},
 
 	components: [
-		{kind: "VirtualList", width: '300px', height: '300px', style: 'padding: 0px; margin: 0px', onSetupRow: "setupRow", components: [
-			{kind: "Item", width: '300px', style: 'padding: 0px; margin: 0px', name: 'charRow', layoutKind: 'HFlexLayout', components: [
+		{kind: "VirtualList", className: 'charSelectList', onSetupRow: "setupRow", components: [
+			{kind: "Item", className: 'charSelectRow', name: 'charRow', layoutKind: 'HFlexLayout', components: [
 				{kind: "charKey", name: 'b1', onmouseup: 'doMouseup'},
 				{kind: "charKey", name: 'b2', onmouseup: 'doMouseup'},
 				{kind: "charKey", name: 'b3', onmouseup: 'doMouseup'},
@@ -99,13 +96,14 @@ enyo.kind({
 		if (inIndex == max) return true
 		if (inIndex >= 0 && inIndex < max) {
 			var borderTop = "none"
-			if (inIndex==0)
-				borderTop = "solid"
-			this.$.b1.setBorder(borderTop, "solid", "none", "solid")
-			this.$.b2.setBorder(borderTop, "solid", "none", "solid")
-			this.$.b3.setBorder(borderTop, "solid", "none", "solid")
-			this.$.b4.setBorder(borderTop, "solid", "none", "solid")
-			this.$.b5.setBorder(borderTop, "solid", "none", "none")
+			var borderBottom = "solid"
+			if (inIndex == max-1)
+				borderBottom = "none"
+			this.$.b1.setBorder(borderTop, borderBottom, "none", "solid")
+			this.$.b2.setBorder(borderTop, borderBottom, "none", "solid")
+			this.$.b3.setBorder(borderTop, borderBottom, "none", "solid")
+			this.$.b4.setBorder(borderTop, borderBottom, "none", "solid")
+			this.$.b5.setBorder(borderTop, borderBottom, "none", "none")
 			var i = inIndex * 5
 			if (i+0 < this.data.length)
 				this.$.b1.setData(this.data[i+0])

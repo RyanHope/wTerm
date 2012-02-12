@@ -58,8 +58,6 @@ enyo.kind({
 
 	initComponents: function() {
 		this.inherited(arguments)
-		if (enyo.fetchDeviceInfo().modelNameAscii != 'TouchPad')
-			this.addClass(enyo.fetchDeviceInfo().modelNameAscii)
 		this.landscapeChanged()
 		this.setupLayout()
 	},

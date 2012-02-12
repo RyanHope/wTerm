@@ -1,6 +1,6 @@
 enyo.depends(
 
-	"src/css/",
+	"src/css/vkb.css",
 	
 	"src/models/sdlk.js",
 
