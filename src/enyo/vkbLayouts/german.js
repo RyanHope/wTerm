@@ -3,8 +3,8 @@ var layout = enyo.kind({
 	kind: 'vkb',
 	name: 'german',
 	caption: 'QWERTZ (german)',
-	
-	layouts: [
+
+	layout: [
 		[
 			{symbols: [['Esc',SDLK._ESCAPE]], small: 1, extraClasses: 'escape'},
 			{flex:1},
