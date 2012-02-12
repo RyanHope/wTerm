@@ -16,6 +16,17 @@ enyo.kind({
 		layout: null,
 		phone: false
 	},
+	
+	components: [
+		{
+			name : "sysSound",
+			kind : "PalmService",
+			service : "palm://com.palm.audio/systemsounds",
+			method : "playFeedback"
+		},
+		{kind: 'CharSelector', name: 'charSelector'},
+		{name: 'keys'}
+	],
 
 	setupLayout: function() {
 		var components = [], i, j, comps, c, e;
@@ -41,6 +52,7 @@ enyo.kind({
 			}
 			components.push({layoutKind: 'HFlexLayout', pack: 'end', components: comps});
 		}
+		this.$.keys.destroy();
 		this.createComponents([{kind: 'VFlexBox', name: 'keys', components: components}]);
 	},
 
@@ -62,6 +74,7 @@ enyo.kind({
 
 	setTerminal: function(term) {
 		this.terminal = term
+		this.$.charSelector.terminal = term
 	},
 
 	vkbKeyToggle: function(inSender) {
