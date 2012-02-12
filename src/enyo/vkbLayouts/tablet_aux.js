@@ -4,10 +4,6 @@ var layout = enyo.kind({
 	name: 'tablet_aux',
 	caption: 'Tablet Auxiliary',
 	
-	published: {
-		landscape: false,
-	},
-	
 	layout: [
 		[
 			{symbols: [['Esc',SDLK._ESCAPE]], small: 1, extraClasses: 'escape'},

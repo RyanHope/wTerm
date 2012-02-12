@@ -6,6 +6,7 @@ enyo.kind({
 	_isPhone: null,
 	_orientation: null,
 	_rotationLock: null,
+	_landscape: null,
 	_vkbClass: null,
 	_showVKB: true,
 	_windowTitle: null,
@@ -119,7 +120,8 @@ enyo.kind({
 		this.createComponent({
 			kind: enyo.application.p.get('kbdLayout'),
 			name: 'vkb',
-			landscape: this.landscape
+			landscape: this._landscape,
+			phone: this._isPhone
 		})
 		this.$.vkb.render()
 		if (createTerm)
@@ -194,7 +196,7 @@ enyo.kind({
 		if (typeof this.$.vkb != 'undefined' && this.$.vkb.hasNode()) {
 			var width = window.innerWidth
 			var height = window.innerHeight
-			this.$.vkb.setLandscape(this.landscape)
+			this.$.vkb.setLandscape(this._landscape)
 			if (this._showVKB)
 				height = height - this.$.vkb.hasNode().scrollHeight
 			if (typeof this.$.terminal != 'undefined' && this.$.terminal.hasNode())
@@ -212,11 +214,12 @@ enyo.kind({
 	},
 
 	rotationLockReponse: function(inSender, inResponse) {		
-		this._rotationLock = inResponse.rotationLock
-		var tmpOrientation = null
-		if (this._rotationLock == 0)
-			tmpOrientation = enyo.getWindowOrientation()
-		else if (this._rotationLock == 3)
+		var tmpOrientation = enyo.getWindowOrientation()
+		if (typeof inResponse.rotationLock != 'undefined')
+			this._rotationLock = inResponse.rotationLock
+		else
+			this._rotationLock = 0
+		if (this._rotationLock == 3)
 			tmpOrientation = 'up'
 		else if (this._rotationLock == 4)
 			tmpOrientation = 'down'
@@ -224,19 +227,9 @@ enyo.kind({
 			tmpOrientation = 'left'
 		else if (this._rotationLock == 6)
 			tmpOrientation = 'right'
-		if (typeof this.landscape === 'undefined' || this._orientation != tmpOrientation) {
+		if (this._landscape == null || this._orientation != tmpOrientation) {
 			this._orientation = tmpOrientation
-			if (this._isPhone) {
-				if (this._orientation == 'up' || this._orientation == 'down')
-					this.landscape = false
-				else
-					this.landscape = true
-			} else {
-				if (this._orientation == 'up' || this._orientation == 'down')
-					this.landscape = true
-				else
-					this.landscape = false
-			}
+			this.processOrientation()
 		}
 		if (typeof inResponse.returnValue === 'undefined')
 			this.refresh()
@@ -291,12 +284,21 @@ enyo.kind({
 	refresh: function() {
 		this.setupKeyboard()
 		this.$.prefs.updateHeight()
+		this.log(this.$.vkb.getClassName())
+	},
+	
+	processOrientation: function() {
+		if (this._orientation == 'up' || this._orientation == 'down')
+			this._landscape = !this._isPhone
+		else
+			this._landscape = this._isPhone
 	},
 	
 	resizeHandler: function(inSender, inEvent) {
 		var tmpOrientation = enyo.getWindowOrientation()
 		if (this._rotationLock == 0 && (this._orientation != tmpOrientation))
 			this._orientation = tmpOrientation
+		this.processOrientation()
 		this.refresh()
 	},
 
