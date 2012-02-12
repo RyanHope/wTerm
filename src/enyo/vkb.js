@@ -2,21 +2,21 @@ enyo.application.vkbLayouts = []
 enyo.depends('src/enyo/vkbLayouts/')
 
 enyo.kind({
-	
+
 	name: 'vkb',
 	kind: enyo.Stateful,
-	
+
 	width: '100%',
-	
+
 	className: 'vkb',
-	
+
 	published: {
 		caption: '',
 		landscape: false,
-		phone: false,
 		layout: null,
+		phone: false
 	},
-	
+
 	setupLayout: function() {
 		var components = [], i, j, comps, c, e;
 		for (i = 0; i < this.layout.length; i++) {
@@ -43,26 +43,23 @@ enyo.kind({
 		}
 		this.createComponents([{kind: 'VFlexBox', name: 'keys', components: components}]);
 	},
-	
+
 	initComponents: function() {
 		this.inherited(arguments)
+		if (enyo.fetchDeviceInfo().modelNameAscii != 'TouchPad')
+			this.addClass(enyo.fetchDeviceInfo().modelNameAscii)
 		this.landscapeChanged()
-		this.phoneChanged()
 		this.setupLayout()
 	},
-	
+
 	setState: function(inState, inValue) {
 		this.addRemoveClass(inState, Boolean(inValue));
 	},
-	
-	phoneChanged: function() {
-		this.stateChanged("phone")
-	},
-	
+
 	landscapeChanged: function() {
 		this.stateChanged("landscape")
 	},
-	
+
 	setTerminal: function(term) {
 		this.terminal = term
 	},

@@ -14,15 +14,17 @@
 	font-size: 100%;
 }
 
-.vkb.phone .key {
-	height: 72px;
-	width: 80px;
+.vkb.Pre .key,
+.vkb.Pre2 .key {
+	height: 45px;
+	width: 45px;
+	font-size: 80%;
 }
 
-.vkb.landscape.phone .key {
-	margin: 0px;
-	height: 62px;
-	width: 80px;
+.vkb.Pre3 .key {
+	height: 69px;
+	width: 69px;
+	font-size: 100%;
 }
 
 /* Arrows */
@@ -152,8 +154,12 @@
 .vkb.landscape .keyImg {
 	height: 24px;
 }
-.vkb.phone .keyImg {
-	height: 16px;
+.vkb.Pre .keyImg,
+.vkb.Pre2 .keyImg {
+	height: 18px;
+}
+.vkb.Pre3 .keyImg {
+	height: 20px;
 }
 .vkb.landscape.phone .keyImg {
 	height: 24px;

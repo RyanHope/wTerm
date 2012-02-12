@@ -284,7 +284,6 @@ enyo.kind({
 	refresh: function() {
 		this.setupKeyboard()
 		this.$.prefs.updateHeight()
-		this.log(this.$.vkb.getClassName())
 	},
 	
 	processOrientation: function() {
