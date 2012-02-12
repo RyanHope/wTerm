@@ -126,6 +126,7 @@ enyo.kind({
 		this.$.vkb.render()
 		if (createTerm)
 			this.createTerminal(this.$.vkb.node.clientHeight)
+		this.finalize()
 	},
 	
 	createTerminal: function(vkbHeight) {
@@ -153,14 +154,6 @@ enyo.kind({
 		})
 		term.prepend = true
 		term.render()
-		this.finalize()
-	},
-	
-	finalize: function() {
-		this.$.vkb.setTerminal(this.$.terminal)
-		this.$.terminal.vkb = this.$.vkb
-		this.$.prefs.vkb = this.$.vkb
-		this.$.prefs.terminal = this.$.terminal
 		this.createComponent({
 			kind: "ApplicationEvents",
 			onWindowActivated: 'windowActivated',
@@ -168,6 +161,13 @@ enyo.kind({
 			onKeydown: 'dispatchKeyInput',
 			onKeyup: 'dispatchKeyInput'
 		})
+	},
+
+	finalize: function() {
+		this.$.vkb.setTerminal(this.$.terminal)
+		this.$.terminal.vkb = this.$.vkb
+		this.$.prefs.vkb = this.$.vkb
+		this.$.prefs.terminal = this.$.terminal
 	},
 
 	windowTitleChanged: function(inSender, txt) {
