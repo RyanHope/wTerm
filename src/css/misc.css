@@ -21,52 +21,35 @@
 	margin: 0px auto 0;
 }
 
-@media (-webkit-min-device-pixel-ratio:1.5) {
-	.enyo-popup {
-		min-width: 450px;
-	}
-}
-
-/*.enyo-popup.charSelect {
-	-webkit-border-image: url(popup1.png) 24 24 24 24 stretch stretch;
-	width: 300px;
-	height: 300px;
-	padding: 0px;
-	margin: 0px;
-}
-
-.enyo-popup.charSelect.Pre3 {
-	-webkit-border-image: url(popup2.png) 36 36 36 36 stretch stretch;
+.termToolbar {
+	width: 100%;
+	font-size: 70%;
+	color: white;
+	background-color: #2c2e30;
+	min-height: 28px;
+	height: 28px;
+	line-height: 28px;
+	border-bottom: groove;
 	border-width: 1px;
-	width: 450px;
-	height: 450px;
 }
-
-.enyo-popup.charSelect .charSelectList {
-	width: 300px;
-	height: 300px;
-	padding: 0px;
-	margin: -7px -14px;
+.termToolbar .menutext {
+	font-weight: 900;
+	padding-left: 4px;
+	padding-right: 4px;
 }
-.enyo-popup.charSelect.Pre3 .charSelectList {
-	width: 450px;
-	height: 450px;
+.termToolbar .img {
+	background-image:url('menu_arrow.png');
+	width: 28px;
+	height: 28px;
+	padding-right: 4px;
 }
-
-.enyo-popup.charSelect .charSelectList .charSelectRow {
-	height: 50px;
-}
-.enyo-popup.charSelect.Pre3 .charSelectList .charSelectRow {
-	height: 75px;
-}
-
-.enyo-popup.charSelect .charSelectList .charSelectRow .charKey {
-	width: 50px;
-	height: 50px;
+.termToolbar .title {
+	border-left: groove;
 	border-width: 1px;
-	border-color: gray;
+	vertical-align: middle;
+	text-align: center;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	padding-left: 18px;
+	padding-right: 18px;
 }
-.enyo-popup.charSelect.Pre3 .charSelectList .charSelectRow .charKey {
-	width: 75px;
-	height: 75px;
-}*/

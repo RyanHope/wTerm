@@ -11,6 +11,8 @@ enyo.kind({
 	_showVKB: true,
 	_windowTitle: null,
 	
+	_headerHeight: 29,
+	
 	components: [
 		{
 			name : "sysSound",
@@ -95,6 +97,7 @@ enyo.kind({
 	
 	create: function() {
 		this.inherited(arguments)
+		enyo.setFullScreen(true)
 		this._isPhone = (enyo.fetchDeviceInfo().keyboardAvailable || enyo.fetchDeviceInfo().keyboardSlider)
 		this._showVKB = enyo.application.p.get('showVKB')
 		if (enyo.fetchDeviceInfo().platformVersionMajor == 2 && enyo.fetchDeviceInfo().platformVersionMinor == 1)
@@ -131,7 +134,7 @@ enyo.kind({
 	
 	createTerminal: function(vkbHeight) {
 		if (this.$.terminal) {
-			this.$.terminal.setHeight(window.innerHeight - vkbHeight);
+			this.$.terminal.setHeight(window.innerHeight - vkbHeight - this._headerHeight);
 			return;
 		}
 		var exec = enyo.application.p.get('exec')
@@ -144,7 +147,7 @@ enyo.kind({
 			kind: 'Terminal',
 			executable: 'wterm',
 			width: window.innerWidth,
-			height: window.innerHeight - vkbHeight,
+			height: window.innerHeight - vkbHeight - this._headerHeight,
 			onBell: 'bell',
 			onPluginReady: 'pluginReady',
 			onWindowTitleChanged: 'windowTitleChanged',
@@ -161,6 +164,30 @@ enyo.kind({
 			onKeydown: 'dispatchKeyInput',
 			onKeyup: 'dispatchKeyInput'
 		})
+		var header = this.createComponent({
+			kind: "HFlexBox",
+			name: 'toolbar',
+			style: 'background-color: black; width: 100%; padding: 0px; margin: 0px; height: '+this._headerHeight+'px',
+			components: [{
+				kind: "HFlexBox",
+				pack: 'center',
+				align: 'center',
+				className: 'termToolbar',
+				components: [
+					{kind: 'CustomButton', layoutKind: 'HFlexLayout', className: 'menutext', onclick: 'showAppMenu', components: [
+						{content: 'Menu'},
+						{className: 'img'}
+					]},
+					{name: "termTitle", flex: 1, className: "title", content: 'wTerm'}
+				]
+			}]
+		})
+		header.prepend = true
+		header.render()
+	},
+	
+	showAppMenu: function(inSender, inEvent) {
+		this.$.appMenu.openAtControl(inSender, {top: 28})
 	},
 
 	finalize: function() {
@@ -171,10 +198,7 @@ enyo.kind({
 	},
 
 	windowTitleChanged: function(inSender, txt) {
-		if (this._windowTitle != txt) {
-			this._windowTitle = txt
-			enyo.windows.addBannerMessage(this._windowTitle, enyo.json.stringify({bannerTap: true, windowName: window.name}))
-		}
+		this.$.termTitle.setContent(txt)
 	},
 
 	bell: function() {
@@ -195,7 +219,7 @@ enyo.kind({
 	setupKeyboard: function() {
 		if (typeof this.$.vkb != 'undefined' && this.$.vkb.hasNode()) {
 			var width = window.innerWidth
-			var height = window.innerHeight
+			var height = window.innerHeight - this._headerHeight
 			this.$.vkb.setLandscape(this._landscape)
 			if (this._showVKB)
 				height = height - this.$.vkb.hasNode().scrollHeight

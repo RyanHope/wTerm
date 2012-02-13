@@ -173,7 +173,7 @@ void WTerm::handleKeyboardEvent(SDL_Event &event)
 		switch(sym)
 		{
 		case SDLK_WORLD_30:
-			if (mod & KMOD_META) extTerminal->insertData(".");
+			if (mod & KMOD_MODE) extTerminal->insertData(".");
 			break;
 		case HP_BT_UP:
 		case HP_BT_PLUGIN_UP:
