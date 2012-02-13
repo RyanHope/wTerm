@@ -112,7 +112,7 @@ enyo.kind({
 				{caption: "New Terminal", onclick: "newTerm"},
 				{caption: "Preferences", onclick: "openPrefs"},
 				{caption: "Setup", onclick: "openSetup"},
-				{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
+				//{name: 'vkbToggle', caption: this.getVKBMenuText(), onclick: 'toggleVKB'},
 				{caption: "Paste", onclick: "doPaste"},
 				{caption: "About", onclick: "openAbout"}
 			]
@@ -176,9 +176,13 @@ enyo.kind({
 				components: [
 					{kind: 'CustomButton', layoutKind: 'HFlexLayout', className: 'menutext', onclick: 'showAppMenu', components: [
 						{content: 'Menu'},
-						{className: 'img'}
+						{className: 'arrowUp'}
 					]},
-					{name: "termTitle", flex: 1, className: "title", content: 'wTerm'}
+					{name: "termTitle", flex: 1, className: "title", content: 'wTerm'},
+					{kind: 'CustomButton', layoutKind: 'HFlexLayout', className: 'menutext', onclick: 'toggleVKB', components: [
+						{name: 'vkbButtonTxt', content: this.getVKBMenuText()},
+						{name: 'vkbButtonImg', className: this.getVKBMenuClass()}
+					]},
 				]
 			}]
 		})
@@ -262,11 +266,17 @@ enyo.kind({
 	},
 
 	getVKBMenuText: function() {
-		return this._showVKB ? 'Hide Virtual Keyboard' : 'Show Virtual Keyboard'
+		return this._showVKB ? 'Hide VKB' : 'Show VKB'
+	},
+	
+	getVKBMenuClass: function() {
+		return this._showVKB ? 'arrowDown' : 'arrowUp'
 	},
 
 	setVKBMenu: function() {
-		this.$.vkbToggle.setCaption(this.getVKBMenuText())
+		//this.$.vkbToggle.setCaption(this.getVKBMenuText())
+		this.$.vkbButtonTxt.setContent(this.getVKBMenuText())
+		this.$.vkbButtonImg.setClassName(this.getVKBMenuClass())
 	},
 
 	toggleVKB: function() {

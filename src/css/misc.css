@@ -37,14 +37,21 @@
 	padding-left: 4px;
 	padding-right: 4px;
 }
-.termToolbar .img {
-	background-image:url('menu_arrow.png');
+.termToolbar .arrowDown {
+	background-image:url('menu_arrow_down.png');
+	width: 28px;
+	height: 28px;
+	padding-right: 4px;
+}
+.termToolbar .arrowUp {
+	background-image:url('menu_arrow_up.png');
 	width: 28px;
 	height: 28px;
 	padding-right: 4px;
 }
 .termToolbar .title {
 	border-left: groove;
+	border-right: groove;
 	border-width: 1px;
 	vertical-align: middle;
 	text-align: center;
