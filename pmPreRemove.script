@@ -12,7 +12,7 @@ APPDIR=${APPS}/usr/palm/applications/${APPID}
 
 sed -i -e "/${APPID}/d" /var/palm/data/jailusers
 
-rm -rf /etc/profile.d/${APPID}
+rm -rf "/etc/profile.d/*${APPID}*"
 
 sed -i -e '/^wterm:/d' /etc/passwd
 sed -i -e '/^wterm:/d' /etc/group

@@ -27,8 +27,9 @@ OLDSCHOOL=0
 [ $MAJOR = 1 ] && OLDSCHOOL=1
 [ $MAJOR = 2 -a $MINOR -lt 2 ] && OLDSCHOOL=1
 
+rm -rf /etc/profile.d/*${APPID}*
 mkdir -p /etc/profile.d
-echo "PATH=\${PATH}:${APPDIR}/bin" > /etc/profile.d/${APPID}
+cp ${APPDIR}/50_${APPID} /etc/profile.d/
 
 JAILCONF="${APPDIR}/jail.conf"
 
