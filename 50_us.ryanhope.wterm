@@ -1,11 +1,22 @@
+TERM=xterm
+
 if [[ `id -u` == 0 ]] ; then
 	PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
 else
 	PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\] '
 fi
 
-PS1='\033]0;\u@\h:\w\007'"$PS1"
-
-TERM=xterm
+if [ -n "${BASH_VERSION}" ] ; then
+	case ${TERM} in
+		xterm*|rxvt*|Eterm|aterm|kterm|gnome*|interix)
+			PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME%%.*}:${PWD/$HOME/~}\007"'
+			;;
+		screen)
+			PROMPT_COMMAND='echo -ne "\033_${USER}@${HOSTNAME%%.*}:${PWD/$HOME/~}\033\\"'
+			;;
+	esac
+else
+	PS1='\033]0;\u@\h:\w\007'"$PS1"
+fi
 
 PATH=/media/cryptofs/apps/usr/palm/applications/us.ryanhope.wterm/bin:${PATH}
