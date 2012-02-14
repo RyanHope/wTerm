@@ -1,4 +1,6 @@
-TERM=xterm
+if [ -n "${WTERM_VERSION}" ] ; then
+	TERM=xterm
+fi
 
 if [[ `id -u` == 0 ]] ; then
 	PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '

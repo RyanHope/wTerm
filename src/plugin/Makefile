@@ -1,6 +1,6 @@
 include ../../Makefile.inc
 
-CXXFLAGS    := $(MARCH_TUNE) -I. -I$(ROOT)/include -I$(ROOT)/include/SDL
+CXXFLAGS    := $(MARCH_TUNE) -I. -I$(ROOT)/include -I$(ROOT)/include/SDL -DVERSION=\"$(shell git describe --tags --always)\"
 LDFLAGS     := -L$(ROOT)/lib -Wl,--allow-shlib-undefined -lpdl -lSDL -lSDL_ttf -lSDL_image -lGLESv2 -lpthread -lrt
 
 OBJECTS     := sdl/sdlfontgl.o sdl/sdlcore.o sdl/sdlcore_events.o sdl/sdlgeneric.o sdl/wterm.o sdl/webos.o \

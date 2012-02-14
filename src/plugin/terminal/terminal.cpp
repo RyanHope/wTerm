@@ -364,7 +364,10 @@ void Terminal::spawn()
 
 	char *newPath = 0;
 	asprintf(&newPath, "%s:/opt/bin:%s/bin", getenv("PATH"), path);
+	clearenv();
 	setenv("PATH", newPath, 1);
+	setenv("TERM", "xterm", 1);
+	setenv("WTERM_VERSION", VERSION, 1);
 	if (newPath) free(newPath);
 
 	if (execvp(((char **)argv)[0], ((char **)argv)) < 0)
