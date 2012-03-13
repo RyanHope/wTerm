@@ -39,7 +39,7 @@ inline bool operator>(const timespec &a, const timespec &b) {
 	return (b < a);
 }
 inline bool operator>=(const timespec &a, const timespec &b) {
-	return (b >= a);
+	return (b <= a);
 }
 
 namespace SDL {
